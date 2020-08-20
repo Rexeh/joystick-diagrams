@@ -1,18 +1,17 @@
 from xml.dom import minidom
 import array as arr
-import PyPDF2
-from PyPDF2 import PdfFileWriter, PdfFileReader
-import docx
-from zipfile import ZipFile 
 import fileinput
-import shutil
 import os
 from svglib.svglib import svg2rlg
-from reportlab.graphics import renderPDF, renderPM
 import webbrowser
+from shutil import copyfile
 
-export = 0
+export = 1
 debug = 1
+
+filePath = "./templates/FullSize_1.svg"
+chrome_path="C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(chrome_path))
 
 # parse an xml file by name
 mydoc = minidom.parse('./samples/Virpil_DCS.xml')
@@ -24,31 +23,26 @@ gameDevices = mydoc.getElementsByTagName('device')
 if debug:
     print("Number of Devices: " + str(gameDevices.length))
 
-## Search for Particular Device / NOT IMPLEMENTED TO FILTER
-deviceName = "VPC Throttle MT-50 CM2"
-
-profileName = "A10" #IF USING PROFILES, BASE NEEDS TO BE MERGED
-
 # DEVICE NAME - Many in file FOREACH
-
 for device in gameDevices:
-    print(device.getAttribute('name'))
 
-## CHECK EXISTS > TEMPLATE
-    modes = device.getElementsByTagName('mode')
-# DEVICE MODE - MANY IN FILE
-
+    ## DEVICE NAME
+    selectedDevice = device.getAttribute('name')
+    
     if debug:
-        print("Modes Found")
+        print("-----------------------------------------------------------------")
+        print(selectedDevice)
 
-# DEVICE MODE NAME OPTIONAL
+## CHECK MODES AVAILABLE
+    modes = device.getElementsByTagName('mode')
+
+# DEVICE MODES
     for mode in modes:
-        mode.getAttribute('name')
+
+        selectedMode = mode.getAttribute('name')
 
         if debug:
             print("Profile: " + mode.getAttribute('name'))
-
-            print("-----------------------------------------------------------------")
 
 # SPECIFIC TO SELECTED MODE
         buttons = mode.getElementsByTagName('button')
@@ -60,22 +54,22 @@ for device in gameDevices:
                 else:   
                     if debug:
                         print("Button: " + str(val.getAttribute('id')) + " Not Mapped")  
+        print("-----------------------------------------------------------------")
 
 # EDIT TEMPLATE
 
-if export:
-    with fileinput.FileInput("./FullSize_1.svg", inplace=True, backup='.bak') as file:
-        for line in file:
-            print(line.replace("ThisIsATest", "BUTTON MAPPING - GREMLIN"), end='')
+        newPath = "./temp/" + selectedDevice + "_" + selectedMode + ".svg"
+        copyfile("./templates/FullSize_1.svg", newPath)
 
-    print(webbrowser._browsers)
+        print(newPath)
 
-    chart_path = "FullSize_1.svg"
+        if export:
+            with fileinput.FileInput(newPath, inplace=True) as file:
+                for line in file:
+                    print(line.replace("BUTTONVALUE", str(selectedDevice)), end='')
 
-    urL='https://www.google.com'
-    chrome_path="C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-    webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(chrome_path))
-    webbrowser.get('chrome').open_new_tab(chart_path)
+            chart_path = newPath
+            webbrowser.get('chrome').open_new_tab(newPath)
 
 # OUTPUT FOR PRINT
 
