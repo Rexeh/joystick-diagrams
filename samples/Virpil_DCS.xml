@@ -1,0 +1,1293 @@
+﻿<?xml version="1.0" ?>
+<profile version="9">
+    <devices>
+        <device device-guid="{01DE0A30-B49F-11EA-8002-444553540000}" label="" name="VPC Throttle MT-50 CM2" type="joystick">
+            <mode inherit="Base" name="A10">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="Pinkie Center" id="5">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="42"/>
+                                <key extended="False" scan-code="25"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Pinkie Forward" id="6">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="56"/>
+                                <key extended="False" scan-code="25"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Pinkie Aft" id="7">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="29"/>
+                                <key extended="False" scan-code="25"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="8"/>
+                <button description="MIC Down" id="9">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="False" scan-code="74"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Mic Forward" id="10">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="False" scan-code="78"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Mic Up" id="11">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="42"/>
+                                <key extended="False" scan-code="78"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Mic AFT" id="12">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="42"/>
+                                <key extended="False" scan-code="74"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="Autopilot Engage" id="21">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="16"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="22"/>
+                <button description="Coolie Hat Down" id="23">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="36"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Coolie Hat Left" id="24">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="35"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Coolie Hat Up" id="25">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="22"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Coolie Hat Right" id="26">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="37"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="AP Altitude/Heading Hold" id="27">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="4"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="28"/>
+                <button description="AP Path Hold" id="29">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="3"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="30"/>
+                <button description="AP Bank Hold" id="31">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="5"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="32"/>
+                <button description="" id="33"/>
+                <button description="Guns Arm ON" id="34">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="6" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Targetting Pod ON" id="35">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="5" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Master Arm ON" id="36">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="3" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Laser Arm ON" id="37">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="1" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="38"/>
+                <button description="" id="39"/>
+                <button description="" id="40"/>
+                <button description="" id="41"/>
+                <button description="" id="42"/>
+                <button description="" id="43"/>
+                <button description="Gear Up" id="44">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="29"/>
+                                <key extended="False" scan-code="34"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Gear Down" id="45">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="42"/>
+                                <key extended="False" scan-code="34"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Flaps Up" id="46">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="42"/>
+                                <key extended="False" scan-code="33"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Flaps Down" id="47">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="33"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="48"/>
+                <button description="" id="49"/>
+                <button description="NVG ON" id="50">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="35"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="NVG Down" id="51">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="35"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="NVG Up" id="52">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="35"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="53"/>
+                <button description="" id="54"/>
+                <button description="" id="55"/>
+                <button description="" id="56"/>
+                <button description="" id="57"/>
+                <button description="" id="58"/>
+                <button description="" id="59"/>
+                <button description="" id="60"/>
+                <button description="Guns Arm SAFE" id="61">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="7" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Targetting Pod OFF" id="62"/>
+                <button description="Master Arm SAFE" id="63">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="4" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Laser Arm SAFE" id="64">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="2" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+            </mode>
+            <mode name="Base">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="" id="6"/>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="" id="21"/>
+                <button description="" id="22"/>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+                <button description="" id="29"/>
+                <button description="" id="30"/>
+                <button description="" id="31"/>
+                <button description="" id="32"/>
+                <button description="" id="33"/>
+                <button description="" id="34"/>
+                <button description="" id="35"/>
+                <button description="" id="36"/>
+                <button description="" id="37"/>
+                <button description="" id="38"/>
+                <button description="" id="39"/>
+                <button description="" id="40"/>
+                <button description="" id="41"/>
+                <button description="" id="42"/>
+                <button description="" id="43"/>
+                <button description="" id="44"/>
+                <button description="" id="45"/>
+                <button description="" id="46"/>
+                <button description="" id="47"/>
+                <button description="" id="48"/>
+                <button description="" id="49"/>
+                <button description="" id="50"/>
+                <button description="" id="51"/>
+                <button description="" id="52"/>
+                <button description="" id="53"/>
+                <button description="" id="54"/>
+                <button description="" id="55"/>
+                <button description="A10 Mode" id="56">
+                    <container type="basic">
+                        <action-set>
+                            <switch-mode name="A10"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="F18 Mode" id="57">
+                    <container type="basic">
+                        <action-set>
+                            <switch-mode name="FA18"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="KA50 Mode" id="58">
+                    <container type="basic">
+                        <action-set>
+                            <switch-mode name="KA50"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="59"/>
+                <button description="" id="60"/>
+                <button description="" id="61"/>
+                <button description="" id="62"/>
+                <button description="" id="63"/>
+                <button description="" id="64"/>
+            </mode>
+            <mode inherit="Base" name="FA18"/>
+            <mode inherit="Base" name="KA50">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <button description="HUD Mode" id="1">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="9"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="HUD Brightness Down" id="2">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="35"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Hud Brightness Up" id="3">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="35"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="4"/>
+                <button description="HMD ON" id="5"/>
+                <button description="HMD Brightness Down" id="6"/>
+                <button description="HMD Brightness Up" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="Uncage SHKVAL, designate target" id="13">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="24"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="TV Frame Up" id="14">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="27"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="TV Frame Down" id="15">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="26"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Reset Targetting" id="16">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="14"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="TV Narrow" id="17">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="13"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="18"/>
+                <button description="TV Wide" id="19">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="12"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="20"/>
+                <button description="Lock Target" id="21">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="28"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="22"/>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+                <button description="" id="29"/>
+                <button description="" id="30"/>
+                <button description="" id="31"/>
+                <button description="" id="32"/>
+                <button description="" id="33"/>
+                <button description="" id="34"/>
+                <button description="" id="35"/>
+                <button description="" id="36"/>
+                <button description="" id="37"/>
+                <button description="Gear Toggle" id="38"/>
+                <button description="Turn on Target" id="39">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="16"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="40"/>
+                <button description="" id="41"/>
+                <button description="" id="42"/>
+                <button description="Light landing search On/Retraction/Off" id="43">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="38"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="44"/>
+                <button description="" id="45"/>
+                <button description="" id="46"/>
+                <button description="" id="47"/>
+                <button description="" id="48"/>
+                <button description="" id="49"/>
+                <button description="" id="50"/>
+                <button description="IT-23 brightness Down" id="51">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="False" scan-code="26"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="IT-23 brightness Up" id="52">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="False" scan-code="27"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="53"/>
+                <button description="IT-23 contrast Down" id="54">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="26"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="IT-23 contrast Up" id="55">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="27"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="56"/>
+                <button description="" id="57"/>
+                <button description="" id="58"/>
+                <button description="" id="59"/>
+                <button description="" id="60"/>
+                <button description="" id="61"/>
+                <button description="" id="62"/>
+                <button description="" id="63"/>
+                <button description="" id="64"/>
+            </mode>
+        </device>
+        <device device-guid="{03F2F260-B49D-11EA-8001-444553540000}" label="" name="VPC Stick MT-50CM" type="joystick">
+            <mode inherit="Base" name="A10">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="Speedbrake" id="3"/>
+                <button description="Trim Up" id="1">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="False" scan-code="52"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Trim Right" id="2">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="False" scan-code="53"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Trim Down" id="3">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="False" scan-code="39"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Trim Left" id="4">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="False" scan-code="51"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="GUN Pac" id="5">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="25"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Guns Guns Guns" id="6">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="57"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Reset Trim" id="7">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="29"/>
+                                <key extended="False" scan-code="20"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Weapon Release" id="8">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="False" scan-code="57"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="9"/>
+                <button description="TMS Up" id="10">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="29"/>
+                                <key extended="True" scan-code="72"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="TMS Right" id="11">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="29"/>
+                                <key extended="True" scan-code="77"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="TMS Down" id="12">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="29"/>
+                                <key extended="True" scan-code="80"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="TMS Left" id="13">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="29"/>
+                                <key extended="True" scan-code="75"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="China Hat AFT" id="14">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="46"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Master Mode" id="15">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="50"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="DMS UP" id="16">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="71"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="DMS Right" id="17">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="81"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="DMS Down" id="18">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="79"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="DMS Left" id="19">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="83"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="China hat forward" id="20">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="47"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Boat Center" id="21">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="True" scan-code="80"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Boat Forward" id="22">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="True" scan-code="77"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Boat Backwards" id="23">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="True" scan-code="75"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="24"/>
+                <button description="ECM ON" id="25">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="12"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="CMS Forward" id="26">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="8"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="CMS Right" id="27">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="11"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="CMS Backward" id="28">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="9"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="CMS Left" id="29">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="10"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="NWS" id="30">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="82"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Speedbrake Retract" id="31"/>
+                <button description="" id="32"/>
+                <button description="Speedbrake Out" id="33"/>
+                <hat description="" id="1"/>
+            </mode>
+            <mode name="Base">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="" id="6"/>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="" id="21"/>
+                <button description="" id="22"/>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+                <button description="" id="29"/>
+                <button description="" id="30"/>
+                <button description="" id="31"/>
+                <button description="" id="32"/>
+                <button description="" id="33"/>
+                <hat description="" id="1"/>
+            </mode>
+            <mode inherit="Base" name="FA18"/>
+            <mode inherit="Base" name="KA50">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="Gun Fire" id="6">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="57"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="" id="21"/>
+                <button description="Guns Select" id="22">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="46"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+                <button description="" id="29"/>
+                <button description="Hover On/Off" id="30">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="56"/>
+                                <key extended="False" scan-code="20"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="31"/>
+                <button description="" id="32"/>
+                <button description="" id="33"/>
+            </mode>
+        </device>
+        <device device-guid="{6735F780-A996-11EA-8002-444553540000}" label="" name="MFG Crosswind V2" type="joystick">
+            <mode inherit="Base" name="A10">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="6"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+            </mode>
+            <mode name="Base">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="6"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+            </mode>
+            <mode inherit="Base" name="FA18"/>
+            <mode inherit="Base" name="KA50">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="6"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+            </mode>
+        </device>
+        <device device-guid="{6F1D2B61-D5A0-11CF-BFC7-444553540000}" label="" name="keyboard" type="keyboard">
+            <mode inherit="Base" name="A10"/>
+            <mode name="Base"/>
+            <mode inherit="Base" name="FA18"/>
+            <mode inherit="Base" name="KA50"/>
+        </device>
+        <device device-guid="{87620BF0-7E73-11EA-8008-444553540000}" label="" name="X52 H.O.T.A.S." type="joystick">
+            <mode inherit="Base" name="A10">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <axis description="" id="7"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="" id="6"/>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="" id="21"/>
+                <button description="" id="22"/>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+                <button description="" id="29"/>
+                <button description="" id="30"/>
+                <button description="" id="31"/>
+                <button description="" id="32"/>
+                <button description="" id="33"/>
+                <button description="" id="34"/>
+                <hat description="" id="1"/>
+            </mode>
+            <mode name="Base"/>
+            <mode inherit="Base" name="FA18"/>
+            <mode inherit="Base" name="KA50"/>
+        </device>
+        <device device-guid="{9F076A10-A8BD-11EA-8001-444553540000}" label="" name="F16 MFD 2" type="joystick">
+            <mode name="A10">
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="" id="6"/>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="" id="21"/>
+                <button description="" id="22"/>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+            </mode>
+        </device>
+        <device device-guid="{B7B78980-A117-11EA-8001-444553540000}" label="" name="F16 MFD 1" type="joystick">
+            <mode name="A10">
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="" id="6"/>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="" id="21"/>
+                <button description="" id="22"/>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+            </mode>
+        </device>
+    </devices>
+    <vjoy-devices>
+        <vjoy-device device-guid="{578ECC80-A8D8-11EA-8003-444553540000}" label="" name="vJoy Device" type="vjoy">
+            <mode name="A10">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <axis description="" id="7"/>
+                <axis description="" id="8"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="" id="6"/>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="" id="21"/>
+                <button description="" id="22"/>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+                <button description="" id="29"/>
+                <button description="" id="30"/>
+                <button description="" id="31"/>
+                <button description="" id="32"/>
+            </mode>
+            <mode name="Base">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <axis description="" id="7"/>
+                <axis description="" id="8"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="" id="6"/>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="" id="21"/>
+                <button description="" id="22"/>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+                <button description="" id="29"/>
+                <button description="" id="30"/>
+                <button description="" id="31"/>
+                <button description="" id="32"/>
+            </mode>
+            <mode name="Default">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <axis description="" id="7"/>
+                <axis description="" id="8"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="" id="6"/>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+            </mode>
+            <mode name="KA50">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <axis description="" id="7"/>
+                <axis description="" id="8"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="" id="6"/>
+                <button description="" id="7"/>
+                <button description="" id="8"/>
+                <button description="" id="9"/>
+                <button description="" id="10"/>
+                <button description="" id="11"/>
+                <button description="" id="12"/>
+                <button description="" id="13"/>
+                <button description="" id="14"/>
+                <button description="" id="15"/>
+                <button description="" id="16"/>
+                <button description="" id="17"/>
+                <button description="" id="18"/>
+                <button description="" id="19"/>
+                <button description="" id="20"/>
+                <button description="" id="21"/>
+                <button description="" id="22"/>
+                <button description="" id="23"/>
+                <button description="" id="24"/>
+                <button description="" id="25"/>
+                <button description="" id="26"/>
+                <button description="" id="27"/>
+                <button description="" id="28"/>
+                <button description="" id="29"/>
+                <button description="" id="30"/>
+                <button description="" id="31"/>
+                <button description="" id="32"/>
+            </mode>
+        </vjoy-device>
+    </vjoy-devices>
+    <settings>
+        <default-delay>0.05</default-delay>
+    </settings>
+    <plugins/>
+</profile>
