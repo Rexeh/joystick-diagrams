@@ -1,6 +1,6 @@
 # Joystick Gremlin - Diagrams
 
-This is an initial release - Please raise bugs/feature requests to help me improve it
+This is an initial release - Please raise bugs/feature requests to help me improve it. Please ensure you have [b]backup[b] of your config, this should not modify if but I also take no responsibility if you lose all your binds!
 
 ## What is this tool for?
 
