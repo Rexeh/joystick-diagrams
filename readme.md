@@ -12,9 +12,40 @@ The default built in export functionality in Joystick Gremlin is quite basic, an
 
 ## What's not supported
 - Importing of base templates into button profile exports (TBC)
+- Support for other programs/games
 - Want a feature? Raise an issue
 
-
 ## Installation
-TBC
+- No install required, direct execution via Python
+
+"py main.py"
+
+## Usage
+
+- Program will try match Device Names, with available files in /templates
+- If it finds a match, it'll export the bindings for this device, and any modes you have configured
+- If you have web browser enabled, they'll automatically open in your browser
+- Files will be stored in /diagrams when export has been completed. You can open these in a web browser, and print to PDF/printer from there
+
+## Adding Templates
+There are many joysticks out there, and a template needs to be provided for them in /Templates.
+
+This is very easy to do, for free online
+
+1. Go to an SVG compliant editor (http://draw.io/)
+2. Create a joystick profile by importing a joystick image, and creating labels
+3. Call the label BUTTON_X, where X is the actual physical button on your stick
+4. Export template as SVG
+5. Place this in /Templates with the relevant device name seen by windows
+
+Now on execution of the program, you should have your binds automatically added to the app.
+
+# Limitations
+- If your binding overlaps/wraps on export against your design, adjust your SVG image. The program will not automatically change your design to fit content
+- Will not output to PDF, do this via your browser
+- Only supports current Joystick Gremlin
+
+
+## Requirements
+Requires Python 3.7
 
