@@ -3,13 +3,16 @@
 This is an initial release - Please raise bugs/feature requests to help me improve it
 
 ## What is this tool for?
-The default built in export functionality in Joystick Gremlin is quite basic, and not particularly helpful as you just seen "button 1" and so forth. This tool will allow you to
 
-- Export your buttons to a PDF
+Learning simulators is a daunting task, with lots of buttons to remember. If only there was some easy way to print out what my bindings are... onto a pretty picture of my stick!
+
+Now there is.
+
+- Export your joystick/throttle/custom HID buttons to a PDF
 - Overlay your buttons onto an actual Joystick profile/picture
 
 ## What's supported?
-- Custom SVG templates can be built to suit your joystick
+- Custom SVG templates can be built to suit your joystick, throttle, custom HID device
 - Support for multiple profiles in Joystick Gremlin
 
 ## What's not supported
