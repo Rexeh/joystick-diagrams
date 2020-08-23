@@ -16,7 +16,7 @@ Now there is.
 - Support for multiple profiles in Joystick Gremlin
 
 ## What's not supported
-- Importing of base templates into button profile exports (TBC)
+- Importing/inheriance of base templates into button profile exports (In progress)
 - Support for other programs/games
 - Want a feature? Raise an issue
 
