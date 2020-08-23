@@ -1,6 +1,6 @@
 # Joystick Gremlin - Diagrams
 
-This is an initial release - Please raise bugs/feature requests to help me improve it. Please ensure you have [b]backup[b] of your config, this should not modify if but I also take no responsibility if you lose all your binds!
+This is an initial release - Please raise bugs/feature requests to help me improve it.
 
 ## What is this tool for?
 
@@ -27,6 +27,9 @@ Now there is.
 
 ## Usage
 
+Please ensure you have **backup of your config**, this should not modify if but I also take no responsibility if you lose all your binds!
+
+- Edit Config.py to point to your Joystick Gremlin config file you want to map
 - Program will try match Device Names, with available files in /templates
 - If it finds a match, it'll export the bindings for this device, and any modes you have configured
 - If you have web browser enabled, they'll automatically open in your browser
