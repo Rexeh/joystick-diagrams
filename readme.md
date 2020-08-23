@@ -1,5 +1,7 @@
 # Joystick Gremlin - Diagrams
 
+This is an initial release - Please raise bugs/feature requests to help me improve it
+
 ## What is this tool for?
 The default built in export functionality in Joystick Gremlin is quite basic, and not particularly helpful as you just seen "button 1" and so forth. This tool will allow you to
 
@@ -44,6 +46,7 @@ Now on execution of the program, you should have your binds automatically added 
 - If your binding overlaps/wraps on export against your design, adjust your SVG image. The program will not automatically change your design to fit content
 - Will not output to PDF, do this via your browser
 - Only supports current Joystick Gremlin
+- Highly configurable joysticks/throttles (I.e. Virpil) may need template customisation. As button 1 etc may differ from someone elses button 1
 
 
 ## Requirements
