@@ -56,6 +56,7 @@ Now on execution of the program, you should have your binds automatically added 
 - Will not output to PDF, do this via your browser
 - Only supports current Joystick Gremlin
 - Highly configurable joysticks/throttles (I.e. Virpil) may need template customisation. As button 1 etc may differ from someone elses button 1
+- Right now not tested with POV 8 way hats, if you're using these and have issues please get in touch and maybe share your config (if they're seen as individual buttons it'll probably work)
 
 
 
