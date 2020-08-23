@@ -21,6 +21,9 @@ Now there is.
 - Want a feature? Raise an issue
 
 ## Installation
+
+### Prerequisites
+Requires Python 3.7
 - No install required, direct execution via Python
 
 "py main.py"
@@ -55,6 +58,4 @@ Now on execution of the program, you should have your binds automatically added 
 - Highly configurable joysticks/throttles (I.e. Virpil) may need template customisation. As button 1 etc may differ from someone elses button 1
 
 
-## Requirements
-Requires Python 3.7
 
