@@ -1,2 +1,5 @@
 temp/
-diagrams/
+diagrams/*.svg
+__pycache__/
+adaptors/__pycache__/
+functions/__pycache__/

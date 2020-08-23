@@ -1,0 +1,19 @@
+deviceArray = {
+
+    'Device_1': {
+        'KA50' : {
+            'Buttons': {
+                'BUTTON_1': 'Description',
+                'BUTTON_2': 'Description 2',
+                'BUTTON_3': 'Description 3',
+            }
+        },
+
+        'A10' : {
+            'Buttons': {
+                'BUTTON_2': 'Description 2'
+            }
+        }
+    }
+
+}
