@@ -1,32 +1,20 @@
 import pprint
-import config
+import os
 from os import path
 import webbrowser
 from shutil import copyfile
 import re
+import config
 
 pp = pprint.PrettyPrinter(indent=4)
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
 
-def updateDeviceArray(deviceArray, device, mode, buttons):
-    
+def updateDeviceArray(deviceArray, device, mode, buttons):    
     data = {"Buttons": buttons, "Axis": ""}
-    if config.debug:
-        print("STARTING ARRAY IN HELPER")
-        pp.pprint(deviceArray)
-
     if device in deviceArray:
-        if config.debug:
-            print("DEVICE FOUND IN ARRAY")
-            print(deviceArray[device])
-
         if mode in deviceArray[device]:
-            if config.debug:
-                print("MODE FOR DEVICE FOUND IN ARRAY")
             deviceArray[device][mode].update(data)
         else:
-            if config.debug:
-                print("ADD MODE FOR DEVICE FOUND IN ARRAY")
             deviceArray[device].update({
                     mode:   data
                         })
@@ -37,40 +25,65 @@ def updateDeviceArray(deviceArray, device, mode, buttons):
                             }
         })
 
-    if config.debug:
-        print("EXITING ARRAY IN HELPER")
-        pp.pprint(deviceArray)
+def createTemp():
+    os.makedirs('./temp/')
 
+def getTempPath(device, mode):
+    tempPath = "./temp/" + device + "_" + mode + ".svg"
+    
+    if not os.path.exists('./temp/'):
+        createTemp()
+
+    return tempPath
+
+def findTemplate(device, temp):
+    if path.exists("./templates/" + device + ".svg"):
+        copyfile("./templates/" + device + ".svg", temp)
+        return True
+    else:
+        return False
+
+def saveDiagram(device, mode, stream):
+    outputPath = "./diagrams/" + device + "_" + mode + ".svg"
+    outputfile = open(outputPath, "w")
+    outputfile.write(stream)
+    return outputPath
+
+def strReplaceSVG(devicelist,device,mode,stream):
+    SVG_Input = stream
+    for b, v in devicelist[device][mode]['Buttons'].items():
+        regexSearch = "\\b" + b + "\\b"
+        SVG_Input = re.sub(regexSearch, v, SVG_Input)
+    return SVG_Input
 
 def exportDevice(devicelist, device, mode):
-    tempPath = "./temp/" + device + "_" + mode + ".svg"
+    tempPath = getTempPath(device,mode)
 
-    if path.exists("./templates/" + device + ".svg"):
-        copyfile("./templates/" + device + ".svg", tempPath)
-        
+    if findTemplate(device,tempPath):
         if config.export:
-
             with open(tempPath,'r') as file:
                 SVG_Input = file.read()
-
-            for b, v in devicelist[device][mode]['Buttons'].items():
-                regexSearch = "\\b" + b + "\\b"
-                SVG_Input = re.sub(regexSearch, v, SVG_Input)
-
+            SVG_Input = strReplaceSVG(devicelist,device,mode,SVG_Input)
             title = "Profile Name: " + mode
             SVG_Input = re.sub("\\bTEMPLATE_NAME\\b", title, SVG_Input)
-
-            outputPath = "./diagrams/" + device + "_" + mode + ".svg"
-            outputfile = open(outputPath, "w")
-            outputfile.write(SVG_Input)
-        
+            outputPath = saveDiagram(device,mode,SVG_Input)
             if config.openinbrowser:
                 webbrowser.get('chrome').open_new_tab(outputPath)
+    else:
+        log("No template found for: ", device,3)
 
-def log(text,item):
+def log(text,item,level=2):
+
+    ##LOG LEVEL
+    # 1 Debug
+    # 2 Info
+
     if(config.debug):
-        print(text)
-        pp.pprint(item)
+        if config.debugLevel == 2 and level == 1:
+            pass
+        else:
+            print(text)
+            pp.pprint(item)
 
 #TODO
 # # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth

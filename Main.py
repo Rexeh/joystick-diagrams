@@ -1,4 +1,4 @@
-import adaptors.joystick_gremlin as adaptor
+import adaptors.gremlin as gremlin
 import config
 import functions.helper as helper
 
@@ -8,9 +8,9 @@ import functions.helper as helper
 # Add more templates? Warthog? Virpil Sticks
 # Release?
 #
+gremlin = gremlin.Gremlin(config.gremlinconfig)
 
-gremlinconfig = adaptor.Gremlin('./samples/Virpil_DCS.xml')
-devices = gremlinconfig.getDevices()
+devices = gremlin.parse()
 
 for joystick in devices:
     for mode in devices[joystick]:

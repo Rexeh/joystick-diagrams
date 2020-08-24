@@ -3,3 +3,4 @@ diagrams/*.svg
 __pycache__/
 adaptors/__pycache__/
 functions/__pycache__/
+*.code-workspace
