@@ -46,6 +46,12 @@ Please ensure you have **backup of your config**, this should not modify if but 
 - If you have web browser enabled, they'll automatically open in your browser
 - Files will be stored in /diagrams when export has been completed. You can open these in a web browser, and print to PDF/printer from there
 
+# Templates
+By default, the following devices are supported.
+
+## Virpil (Thanks to MartinCo for physical button maps)
+
+
 ## Adding Templates
 There are many joysticks out there, and a template needs to be provided for them in /Templates.
 
