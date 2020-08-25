@@ -58,5 +58,9 @@ Now on execution of the program, you should have your binds automatically added 
 - Highly configurable joysticks/throttles (I.e. Virpil) may need template customisation. As button 1 etc may differ from someone elses button 1
 - Right now not tested with POV 8 way hats, if you're using these and have issues please get in touch and maybe share your config (if they're seen as individual buttons it'll probably work)
 
+# Support
+I plan to expand this out and continue on this journey. I'd appreciate any donations for time saved and to help me continue to support this program.
+
+[Donate via Paypal](https://www.paypal.com/biz/fund?id=XGLYM9Z283CYA)
 
 
