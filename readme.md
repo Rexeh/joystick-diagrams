@@ -13,16 +13,16 @@ Now there is.
 
 ## What's supported?
 
-## Joystick Gremlin
+### Joystick Gremlin
 - Custom SVG templates can be built to suit your joystick, throttle, custom HID device
 - Support for multiple profiles in Joystick Gremlin
 
 ## What's not supported
 
-## Joystick Gremlin
+### Joystick Gremlin
 - Importing/inheriance of base templates into button profile exports (In progress)
 
-## Support for other programs/games
+### Support for other programs/games
 - DCS World
 - IL2
 - Etc
