@@ -22,7 +22,7 @@ Now there is.
 ### Joystick Gremlin
 - Importing/inheriance of base templates into button profile exports (In progress)
 
-### Support for other programs/games
+### Support for other programs/games (On the roadmap)
 - DCS World
 - IL2
 - Etc
