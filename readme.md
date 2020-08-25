@@ -1,4 +1,4 @@
-# Joystick Gremlin - Diagrams
+# Joystick Visualiser - Turn your binds into diagrams
 
 This is an initial release - Please raise bugs/feature requests to help me improve it.
 
