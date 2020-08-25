@@ -23,7 +23,10 @@ Now there is.
 - Importing/inheriance of base templates into button profile exports (In progress)
 
 ## Support for other programs/games
-- I plan to tackle other programs, most notably DCS and any other suggestions from the community
+- DCS World
+- IL2
+- Etc
+- Please suggest games you'd think this would be useful for
 
 ## Installation
 
