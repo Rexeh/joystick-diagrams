@@ -12,13 +12,18 @@ Now there is.
 - Overlay your buttons onto an actual Joystick profile/picture
 
 ## What's supported?
+
+## Joystick Gremlin
 - Custom SVG templates can be built to suit your joystick, throttle, custom HID device
 - Support for multiple profiles in Joystick Gremlin
 
 ## What's not supported
+
+## Joystick Gremlin
 - Importing/inheriance of base templates into button profile exports (In progress)
-- Support for other programs/games
-- Want a feature? Raise an issue
+
+## Support for other programs/games
+- I plan to tackle other programs, most notably DCS and any other suggestions from the community
 
 ## Installation
 
@@ -53,7 +58,7 @@ Now on execution of the program, you should have your binds automatically added 
 
 # Limitations
 - If your binding overlaps/wraps on export against your design, adjust your SVG image. The program will not automatically change your design to fit content
-- Will not output to PDF, do this via your browser (open SVG from /diagrams in Chrome/Edge)
+- Will not output to PDF, do this via your browser (open SVG from /diagrams in Chrome/Edge). I may add this later, but transparency and so forth causes problems.
 - Only supports Joystick Gremlin currently
 - Highly configurable joysticks/throttles (I.e. Virpil) may need template customisation. As button 1 etc may differ from someone elses button 1
 - Right now not tested with POV 8 way hats, if you're using these and have issues please get in touch and maybe share your config (if they're seen as individual buttons it'll probably work)
