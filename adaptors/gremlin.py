@@ -22,13 +22,12 @@ class Gremlin:
         self.buttonArray = None
         self.formattedButtons = None
         
-    def parse(self):
+    def createDictionary(self):
         self.formattedButtons = {}
         self.devices = self.getDevices()
         helper.log("Number of Devices: ",str(self.devices.length))
         self.formattedButtons = {}
         for self.device in self.devices:
-            ## DEVICE NAME
             self.currentdevice = self.getSingleDevice()
             self.modes = self.getDeviceModes()
             helper.log("All Modes: ",self.modes)

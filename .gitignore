@@ -4,3 +4,8 @@ __pycache__/
 adaptors/__pycache__/
 functions/__pycache__/
 *.code-workspace
+.vscode/
+old.txt
+log.txt
+/build/
+/dist/

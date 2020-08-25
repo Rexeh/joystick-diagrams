@@ -8,6 +8,7 @@ import config
 
 pp = pprint.PrettyPrinter(indent=4)
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
+tempDirectory = './temp/'
 
 def updateDeviceArray(deviceArray, device, mode, buttons):    
     data = {"Buttons": buttons, "Axis": ""}
@@ -26,12 +27,12 @@ def updateDeviceArray(deviceArray, device, mode, buttons):
         })
 
 def createTemp():
-    os.makedirs('./temp/')
+    os.makedirs(tempDirectory)
 
 def getTempPath(device, mode):
-    tempPath = "./temp/" + device + "_" + mode + ".svg"
+    tempPath = tempDirectory + device + "_" + mode + ".svg"
     
-    if not os.path.exists('./temp/'):
+    if not os.path.exists(tempDirectory):
         createTemp()
 
     return tempPath
@@ -84,6 +85,7 @@ def log(text,item,level=2):
         else:
             print(text)
             pp.pprint(item)
+            print("----------------------------------------------------------------")
 
 #TODO
 # # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
