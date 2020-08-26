@@ -51,15 +51,11 @@ Please ensure you have **backup of your config**, this should not modify if but 
 # Templates
 Please see ./tenplates/readme.md
 
-
 ## Limitations
 - If your binding overlaps/wraps on export against your design, adjust your SVG image. The program will not automatically change your design to fit content
-- Will not output to PDF, do this via your browser (open SVG from /diagrams in Chrome/Edge). I may add this later, but transparency and so forth causes problems.
-- Only supports Joystick Gremlin currently
 - Highly configurable joysticks/throttles (I.e. Virpil) may need template customisation. As button 1 etc may differ from someone elses button 1
-- Right now not tested with POV 8 way hats, if you're using these and have issues please get in touch and maybe share your config (if they're seen as individual buttons it'll probably work)
 
-## Support
+## Support / Beer fund
 I plan to expand this out and continue on this journey. I'd appreciate any donations for time saved and to help me continue to support this program.
 
 [Donate via Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url)
