@@ -75,6 +75,6 @@ Now on execution of the program, you should have your binds automatically added 
 ## Support
 I plan to expand this out and continue on this journey. I'd appreciate any donations for time saved and to help me continue to support this program.
 
-[Donate via Paypal](https://www.paypal.com/biz/fund?id=XGLYM9Z283CYA)
+[Donate via Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url)
 
 
