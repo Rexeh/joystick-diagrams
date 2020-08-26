@@ -8,7 +8,7 @@ Learning simulators is a daunting task, with lots of buttons to remember. If onl
 
 Now there is. 
 
-- Export your joystick/throttle/custom HID buttons to a PDF
+- Export your joystick/throttle/custom HID buttons to a SVG, and print with your browser
 - Overlay your buttons onto an actual Joystick profile/picture
 
 ## What's supported?
@@ -49,23 +49,8 @@ Please ensure you have **backup of your config**, this should not modify if but 
 - Files will be stored in /diagrams when export has been completed. You can open these in a web browser, and print to PDF/printer from there
 
 # Templates
-By default, the following devices are supported.
+Please see ./tenplates/readme.md
 
-## Virpil (Thanks to MartinCo for physical button maps)
-
-
-## Adding Templates
-There are many joysticks out there, and a template needs to be provided for them in /Templates.
-
-This is very easy to do, for free online
-
-1. Go to an SVG compliant editor (http://draw.io/)
-2. Create a joystick profile by importing a joystick image, and creating labels
-3. Call the label BUTTON_X, where X is the actual physical button on your stick
-4. Export template as SVG
-5. Place this in /Templates with the relevant device name seen by windows
-
-Now on execution of the program, you should have your binds automatically added to the app.
 
 ## Limitations
 - If your binding overlaps/wraps on export against your design, adjust your SVG image. The program will not automatically change your design to fit content
