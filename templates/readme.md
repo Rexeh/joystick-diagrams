@@ -18,7 +18,18 @@ Define templates in SVG. Name of template should match your Joystick Gremlin dev
 - Warthog Throttle
 
 ## Missing your stick?
-If you have created a template, happy to include it back in the repository (might make some edits to standardise it)
 
-- Open CustomTemplate.SVG in Draw.io to see what it does and use as a basis
-- Save and Rename CustomTemplate.SVG to Your-Device-Name.svg and see how it works
+### Adding Templates
+There are many joysticks out there, and a template needs to be provided for them in /Templates.
+
+This is very easy to do, for free online
+
+1. Go to an SVG compliant editor (http://draw.io/) and open CustomTemplate.SVG
+2. Create a joystick profile by importing a joystick image, and creating labels
+3. Call the label BUTTON_X, where X is the actual physical button on your stick
+4. Export template as SVG
+5. Place this in /Templates with the relevant device name seen by windows
+
+Now on execution of the program, you should have your binds automatically added to the app.
+
+If you have created a template, happy to include it back in the repository (might make some edits to standardise it)
