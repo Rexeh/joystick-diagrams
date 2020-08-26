@@ -6,7 +6,7 @@ This is an initial release - Please raise bugs/feature requests to help me impro
 
 Learning simulators is a daunting task, with lots of buttons to remember. If only there was some easy way to print out what my bindings are... onto a pretty picture of my stick!
 
-Now there is.
+Now there is. 
 
 - Export your joystick/throttle/custom HID buttons to a PDF
 - Overlay your buttons onto an actual Joystick profile/picture
@@ -20,7 +20,9 @@ Now there is.
 ## What's not supported
 
 ### Joystick Gremlin
+Please get in touch with me if these are of importance to you to use the software
 - Importing/inheriance of base templates into button profile exports (In progress)
+- POV hats (In POV mode) - If your POV is configured for button outputs, then it will work
 
 ### Support for other programs/games (On the roadmap)
 - DCS World
