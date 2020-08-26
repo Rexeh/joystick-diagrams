@@ -48,8 +48,8 @@ Please ensure you have **backup of your config**, this should not modify if but 
 - If you have web browser enabled, they'll automatically open in your browser
 - Files will be stored in /diagrams when export has been completed. You can open these in a web browser, and print to PDF/printer from there
 
-# Templates
-Please see ./tenplates/readme.md
+# Templates/Supported Devices
+[Please read](templates/readme.md)
 
 ## Limitations
 - If your binding overlaps/wraps on export against your design, adjust your SVG image. The program will not automatically change your design to fit content
