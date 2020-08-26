@@ -5,6 +5,7 @@ Define templates in SVG. Name of template should match your Joystick Gremlin dev
 # Default Templates
 
 ## Virpil
+** Thanks to MartinCo for help with the default logical buttons! **
 - Virpil MT50-CM2 Stick
 - Virpil MT50-CM2 Throttle
 - Virpil Constellation Alpha-R
