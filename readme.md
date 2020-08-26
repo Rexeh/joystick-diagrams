@@ -20,7 +20,9 @@ Now there is.
 ## What's not supported
 
 ### Joystick Gremlin
+Please get in touch with me if these are of importance to you to use the software
 - Importing/inheriance of base templates into button profile exports (In progress)
+- POV hats (In POV mode) - If your POV is configured for button outputs, then it will work
 
 ### Support for other programs/games (On the roadmap)
 - DCS World
