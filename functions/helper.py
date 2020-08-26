@@ -8,7 +8,10 @@ import config
 
 pp = pprint.PrettyPrinter(indent=4)
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
-tempDirectory = './temp/'
+tempFilesDirectory = './temp/'
+diagramFilesDirectory = './diagrams/'
+templateFilesDirectory = './templates/'
+fileSpacer = "_"
 
 def updateDeviceArray(deviceArray, device, mode, buttons):    
     data = {"Buttons": buttons, "Axis": ""}
@@ -26,66 +29,70 @@ def updateDeviceArray(deviceArray, device, mode, buttons):
                             }
         })
 
-def createTemp():
-    os.makedirs(tempDirectory)
+def createDirectory(directory):
+    if not os.path.exists(directory):
+        return os.makedirs(directory)
+    else:
+        log("Failed to create directory", directory, 1)
+        return False
 
 def getTempPath(device, mode):
-    tempPath = tempDirectory + device + "_" + mode + ".svg"
-    
-    if not os.path.exists(tempDirectory):
-        createTemp()
+    temporaryTemplateFile = tempFilesDirectory + device + "_" + mode + ".svg"
+    if not os.path.exists(tempFilesDirectory):
+        createDirectory(tempFilesDirectory)
+    return temporaryTemplateFile
 
-    return tempPath
-
-def findTemplate(device, temp):
-    if path.exists("./templates/" + device + ".svg"):
-        copyfile("./templates/" + device + ".svg", temp)
+def findTemplate(device, templatePath):
+    if path.exists(templateFilesDirectory + device + ".svg"):
+        copyfile(templateFilesDirectory + device + ".svg", templatePath)
         return True
     else:
         return False
 
 def saveDiagram(device, mode, stream):
-    outputPath = "./diagrams/" + device + "_" + mode + ".svg"
+    outputPath = diagramFilesDirectory + device + "_" + mode + ".svg"
+    if not os.path.exists(diagramFilesDirectory):
+        createDirectory(diagramFilesDirectory)
     outputfile = open(outputPath, "w")
     outputfile.write(stream)
     return outputPath
 
-def strReplaceSVG(devicelist,device,mode,stream):
-    SVG_Input = stream
+def strReplaceSVG(devicelist,device,mode,svg):
     for b, v in devicelist[device][mode]['Buttons'].items():
         regexSearch = "\\b" + b + "\\b"
-        SVG_Input = re.sub(regexSearch, v, SVG_Input)
-    return SVG_Input
+        svg = re.sub(regexSearch, v, svg)
+    return svg
+
+def addTemplateNameToSVG(title,svg):
+    svg = re.sub("\\bTEMPLATE_NAME\\b", title, svg)
+    return svg
 
 def exportDevice(devicelist, device, mode):
-    tempPath = getTempPath(device,mode)
-
-    if findTemplate(device,tempPath):
+    temporaryTemplateFile = getTempPath(device,mode)
+    if findTemplate(device,temporaryTemplateFile):
         if config.export:
-            with open(tempPath,'r') as file:
-                SVG_Input = file.read()
-            SVG_Input = strReplaceSVG(devicelist,device,mode,SVG_Input)
+            with open(temporaryTemplateFile,'r') as file:
+                svg = file.read()
+            svg = strReplaceSVG(devicelist,device,mode,svg)
             title = "Profile Name: " + mode
-            SVG_Input = re.sub("\\bTEMPLATE_NAME\\b", title, SVG_Input)
-            outputPath = saveDiagram(device,mode,SVG_Input)
+            svg = re.sub("\\bTEMPLATE_NAME\\b", title, svg)
+            outputPath = saveDiagram(device,mode,svg)
             if config.openinbrowser:
                 webbrowser.get('chrome').open_new_tab(outputPath)
     else:
         log("No template found for: ", device,3)
 
-def log(text,item,level=2):
-
-    ##LOG LEVEL
-    # 1 Debug
-    # 2 Info
-
-    if(config.debug):
-        if config.debugLevel == 2 and level == 1:
-            pass
-        else:
-            print(text)
-            pp.pprint(item)
-            print("----------------------------------------------------------------")
+def log(text,item,level=1):
+    #TODO - Tidy this thing up, output to proper file
+    if(config.debugLevel==3 and level == 3):
+        print(text)
+        pp.pprint(item)
+    if(config.debugLevel==2 and level == 3 or 2):
+        print(text)
+        pp.pprint(item)
+    else:
+        print(text)
+        pp.pprint(item)
 
 #TODO
 # # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth

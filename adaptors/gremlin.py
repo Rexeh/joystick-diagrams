@@ -1,7 +1,5 @@
 from xml.dom import minidom
-import config
 import functions.helper as helper
-import pprint
 
 class Gremlin:
 ## Adaptor for Joystick Gremlin
