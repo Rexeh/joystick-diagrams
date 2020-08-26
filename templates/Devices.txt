@@ -1,4 +1,0 @@
-HOTAS Warthog Throttle
-HOTAS Warthog Joystick
-
-https://devicehunt.com/view/type/usb/vendor/06A3#search-results-table

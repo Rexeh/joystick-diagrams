@@ -69,44 +69,4 @@ class Gremlin:
         return self.buttonArray
 
     def getDeviceCount(self):
-        return (self.file.getElementsByTagName('device').length)
-    # def getInheritedMode(self,  modes, inherited):
-    #     for mode in modes:
-    #         if mode.getAttribute('name') == inherited:
-    #             return mode
-    #         else:
-    #             print("No Inherited Mode Found")
-
-    # def getDevicesNew(self):
-    #     pp = pprint.PrettyPrinter(indent=4)
-    #     devices = self.file.getElementsByTagName('device')
-
-    #     helper.log("Number of Devices: ",str(devices.length))
-
-    #     arr = {}
-    #     i = 0
-    #     for device in devices:
-    #         i = i+1  
-    #         ## DEVICE NAME
-    #         selectedDevice = device.getAttribute('name')
-    #         modes = device.getElementsByTagName('mode')
-            
-    #         helper.log("All Modes: ",modes)
-
-    #         for mode in modes:
-    #             buttonArr = {}
-    #             selectedMode = mode.getAttribute('name')
-    #             inheritedMode = mode.getAttribute('inherit')
-                
-    #             helper.log("Selected Mode: ",selectedMode)
-    #             helper.log("Selected Mode has Ineritance from: ",inheritedMode)
-    #             helper.log("Profile: ",mode.getAttribute('name'))
-
-    #             buttons = mode.getElementsByTagName('button')
-
-    #             if inheritedMode != "":
-    #                 inheritedData = self.getInheritedMode(modes, inheritedMode)
-    #                 inheritedButtons = inheritedData.getElementsByTagName('button')
-
-    #         if i == 2:
-    #             break
+        return self.file.getElementsByTagName('device').length

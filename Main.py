@@ -3,9 +3,6 @@ import config
 import functions.helper as helper
 
 #TODO
-# Add tests
-# Build EXE?
-# Add more templates? Warthog? Virpil Sticks
 # Release?
 #
 gremlin = gremlin.Gremlin(config.gremlinconfig)

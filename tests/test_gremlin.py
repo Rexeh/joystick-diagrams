@@ -82,6 +82,7 @@ class TestGremlin(unittest.TestCase):
     def test_number_devices(self):
         self.assertEqual(2,self.file.getDeviceCount())
 
+    # Not a unit test, revisit later if needed
     def test_device_object(self):
         self.maxDiff = None
         self.assertEqual(self.expectedFileObject, self.file.createDictionary())
