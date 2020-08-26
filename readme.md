@@ -1,4 +1,4 @@
-# Joystick Gremlin - Diagrams
+# Joystick Visualiser - Turn your binds into diagrams
 
 This is an initial release - Please raise bugs/feature requests to help me improve it.
 
@@ -12,13 +12,21 @@ Now there is.
 - Overlay your buttons onto an actual Joystick profile/picture
 
 ## What's supported?
+
+### Joystick Gremlin
 - Custom SVG templates can be built to suit your joystick, throttle, custom HID device
 - Support for multiple profiles in Joystick Gremlin
 
 ## What's not supported
+
+### Joystick Gremlin
 - Importing/inheriance of base templates into button profile exports (In progress)
-- Support for other programs/games
-- Want a feature? Raise an issue
+
+### Support for other programs/games (On the roadmap)
+- DCS World
+- IL2
+- Etc
+- Please suggest games you'd think this would be useful for
 
 ## Installation
 
@@ -38,6 +46,12 @@ Please ensure you have **backup of your config**, this should not modify if but 
 - If you have web browser enabled, they'll automatically open in your browser
 - Files will be stored in /diagrams when export has been completed. You can open these in a web browser, and print to PDF/printer from there
 
+# Templates
+By default, the following devices are supported.
+
+## Virpil (Thanks to MartinCo for physical button maps)
+
+
 ## Adding Templates
 There are many joysticks out there, and a template needs to be provided for them in /Templates.
 
@@ -51,12 +65,16 @@ This is very easy to do, for free online
 
 Now on execution of the program, you should have your binds automatically added to the app.
 
-# Limitations
+## Limitations
 - If your binding overlaps/wraps on export against your design, adjust your SVG image. The program will not automatically change your design to fit content
-- Will not output to PDF, do this via your browser (open SVG from /diagrams in Chrome/Edge)
+- Will not output to PDF, do this via your browser (open SVG from /diagrams in Chrome/Edge). I may add this later, but transparency and so forth causes problems.
 - Only supports Joystick Gremlin currently
 - Highly configurable joysticks/throttles (I.e. Virpil) may need template customisation. As button 1 etc may differ from someone elses button 1
 - Right now not tested with POV 8 way hats, if you're using these and have issues please get in touch and maybe share your config (if they're seen as individual buttons it'll probably work)
 
+## Support
+I plan to expand this out and continue on this journey. I'd appreciate any donations for time saved and to help me continue to support this program.
+
+[Donate via Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url)
 
 
