@@ -46,7 +46,7 @@ Please ensure you have **backup of your config**, this should not modify if but 
 # Templates/Supported Devices
 [Please read](templates/readme.md)
 
-## Support / Beer fund
+# Support / Beer fund
 I plan to expand this out and continue on this journey. I'd appreciate any donations for time saved and to help me continue to support this program.
 
 [Donate via Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url)
