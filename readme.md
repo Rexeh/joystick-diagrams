@@ -1,9 +1,7 @@
 # Joystick Diagrams - Visualise your binds
-
 This is an initial release - Please raise bugs/feature requests to help me improve it.
 
 ## What is this tool for?
-
 Learning simulators is a daunting task, with lots of buttons to remember. If only there was some easy way to print out what my bindings are... onto a pretty picture of my stick!
 
 Now there is. 
@@ -31,29 +29,22 @@ Please get in touch with me if these are of importance to you to use the softwar
 - Please suggest games you'd think this would be useful for
 
 ## Installation
+- None required, use the supplied binary in latest release. Run joystick-diagram.exe.
 
-### Prerequisites
-Requires Python 3.7
-- No install required, direct execution via Python
-
-"py main.py"
+### From Source
+Want to run from source? You'll need Python 3.7+
 
 ## Usage
-
 Please ensure you have **backup of your config**, this should not modify if but I also take no responsibility if you lose all your binds!
 
-- Edit Config.py to point to your Joystick Gremlin config file you want to map
-- Program will try match Device Names, with available files in /templates
+- Edit Config.cfg to setup the config line under [GREMLIN]
+- Run joystick-diagram.exe
 - If it finds a match, it'll export the bindings for this device, and any modes you have configured
 - If you have web browser enabled, they'll automatically open in your browser
 - Files will be stored in /diagrams when export has been completed. You can open these in a web browser, and print to PDF/printer from there
 
 # Templates/Supported Devices
 [Please read](templates/readme.md)
-
-## Limitations
-- If your binding overlaps/wraps on export against your design, adjust your SVG image. The program will not automatically change your design to fit content
-- Highly configurable joysticks/throttles (I.e. Virpil) may need template customisation. As button 1 etc may differ from someone elses button 1
 
 ## Support / Beer fund
 I plan to expand this out and continue on this journey. I'd appreciate any donations for time saved and to help me continue to support this program.

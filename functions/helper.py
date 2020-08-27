@@ -5,6 +5,7 @@ import webbrowser
 from shutil import copyfile
 import re
 import config
+import version
 
 pp = pprint.PrettyPrinter(indent=4)
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
@@ -60,7 +61,7 @@ def saveDiagram(device, mode, stream):
 def strReplaceSVG(devicelist,device,mode,svg):
     for b, v in devicelist[device][mode]['Buttons'].items():
         regexSearch = "\\b" + b + "\\b"
-        svg = re.sub(regexSearch, v, svg)
+        svg = re.sub(regexSearch, v, svg, flags=re.IGNORECASE)
     return svg
 
 def addTemplateNameToSVG(title,svg):
@@ -84,15 +85,19 @@ def exportDevice(devicelist, device, mode):
 
 def log(text,item,level=1):
     #TODO - Tidy this thing up, output to proper file
-    if(config.debugLevel==3 and level == 3):
-        print(text)
-        pp.pprint(item)
-    if(config.debugLevel==2 and level == 3 or 2):
-        print(text)
-        pp.pprint(item)
-    else:
-        print(text)
-        pp.pprint(item)
+    if config.debug == 1:
+        if(config.debugLevel==3 and level == 3):
+            print(text)
+            pp.pprint(item)
+        if(config.debugLevel==2 and level == 3 or 2):
+            print(text)
+            pp.pprint(item)
+        else:
+            print(text)
+            pp.pprint(item)
+
+def getVersion():
+    return "Version: " + version.VERSION
 
 #TODO
 # # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth

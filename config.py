@@ -1,14 +1,19 @@
+import configparser as ConfigParser
+from pathlib import Path
+
+Config = ConfigParser.ConfigParser()
+Config.read('config.cfg')
 
 #Paths
-gremlinconfig = './samples/Virpil_DCS.xml' #Your Joystick Gremlin config file. Edit this to your path
+gremlinconfig = Config.get('GREMLIN', 'config')
 
 # Write logs
-debug = 1
-debugLevel = 3
+debug = Config.getboolean('DEFAULT', 'EnableLogging')
+debugLevel = 2
 
 # Export out SVG files - for development only (leave as = 1)
 export = 1
 
 ## Program can automatically open in browser as it creates, specify below if you want this. Only supports Chrome right now.
-openinbrowser = 1
-chrome_path="C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+openinbrowser = Config.getboolean('BROWSER', 'OpenTemplatesInBrowser')
+chrome_path=Config.get('BROWSER', 'ChromePath')
