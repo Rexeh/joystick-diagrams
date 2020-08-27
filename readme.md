@@ -29,10 +29,18 @@ Please get in touch with me if these are of importance to you to use the softwar
 - Please suggest games you'd think this would be useful for
 
 ## Installation
-- None required, use the supplied binary in latest release. Run joystick-diagram.exe.
+None required, use the supplied binary in latest release.
+
+1. Edit config.cfg
+2. Run joystick-diagram.exe
 
 ### From Source
 Want to run from source? You'll need Python 3.7+
+
+## Bugs
+This is an initial release, all of the templates are new and there may be configuration differnces to work out.
+
+I'm expecting issues with the Virpil templates, as don't have the logical buttons available to me.
 
 ## Usage
 Please ensure you have **backup of your config**, this should not modify if but I also take no responsibility if you lose all your binds!
