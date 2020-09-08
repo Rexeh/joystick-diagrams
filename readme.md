@@ -2,9 +2,7 @@
 This is an initial release - Please raise bugs/feature requests to help me improve it.
 
 ## What is this tool for?
-Learning simulators is a daunting task, with lots of buttons to remember. If only there was some easy way to print out what my bindings are... onto a pretty picture of my stick!
-
-Now there is. 
+Learning simulators is a daunting task, with lots of buttons to remember. I built this tool for myself, and then thought others might also enjoy it, automating what is a time consuming task!
 
 - Export your joystick/throttle/custom HID buttons to a SVG, and print with your browser
 - Overlay your buttons onto an actual Joystick profile/picture
