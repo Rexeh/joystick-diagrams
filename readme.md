@@ -1,11 +1,11 @@
 # Joystick Diagrams - Visualise your binds
-This is an initial release - Please raise bugs/feature requests to help me improve it.
 
 ## What is this tool for?
-Learning simulators is a daunting task, with lots of buttons to remember. I built this tool for myself, and then thought others might also enjoy it, automating what is a time consuming task!
+Learning flight simulators is a daunting task, with lots of buttons to remember. I built this tool for myself, and then thought others might also enjoy it, automating what is a time consuming task!
 
 - Export your joystick/throttle/custom HID buttons to a SVG, and print with your browser
 - Overlay your buttons onto an actual Joystick profile/picture
+- Learn your joystick setup easier and be a better pilot!
 
 ## What's supported?
 
@@ -20,11 +20,8 @@ Please get in touch with me if these are of importance to you to use the softwar
 - Importing/inheriance of base templates into button profile exports (In progress)
 - POV hats (In POV mode) - If your POV is configured for button outputs, then it will work
 
-### Support for other programs/games (On the roadmap)
-- DCS World
-- IL2
-- Etc
-- Please suggest games you'd think this would be useful for
+### Support for other programs/games (yet)
+I'm currently working on DCS World - if you have a game you think will benefit from this, let me know and I might add it.
 
 ## Installation
 None required, use the supplied binary in latest release.
