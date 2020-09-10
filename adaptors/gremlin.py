@@ -30,12 +30,13 @@ class Gremlin:
             self.modes = self.getDeviceModes()
             helper.log("All Modes: ",self.modes)
             for self.mode in self.modes:
+                # Does this mode Inherit?
+                self.currentInherit = self.hasInheritance()
                 self.buttonArray = {}
                 self.currentMode = self.getSingleMode()
-                #inheritedMode = self.mode.getAttribute('inherit')
+     
                 helper.log("Selected Mode: ",self.currentMode)
-                #helper.log("Selected Mode has Ineritance from: ",inheritedMode)
-
+                
                 self.buttons = self.getModeButtons()
                 self.extractButtons()
                 helper.updateDeviceArray(self.formattedButtons ,self.currentdevice,self.currentMode,self.buttonArray)
@@ -53,10 +54,26 @@ class Gremlin:
     def getSingleDevice(self):
         return self.device.getAttribute('name')
 
+    def getInheritedMode(self):
+        pass
+
     def getSingleMode(self):
         return self.mode.getAttribute('name')
 
+    def hasInheritance(self):
+        inherit = self.mode.getAttribute('inherit')
+        
+        print(inherit)
+        if inherit != '':
+            return inherit
+        else:
+            return False 
+
+    def inheritedModes(self):
+        return self.mode.getAttribute('name')
+
     def extractButtons(self):
+
         for i in self.buttons:
             if i.getAttribute('description') != "":
                 self.buttonArray.update ({
