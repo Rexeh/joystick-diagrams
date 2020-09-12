@@ -13,10 +13,9 @@ Learning flight simulators is a daunting task, with lots of buttons to remember.
 - Custom SVG templates can be built to suit your joystick, throttle, custom HID device
 - Support for multiple profiles in Joystick Gremlin
 
-## What's not supported
+## What's not supported (yet)
 
 ### Joystick Gremlin
-Please get in touch with me if these are of importance to you to use the software
 - Importing/inheriance of base templates into button profile exports (In progress)
 - POV hats (In POV mode) - If your POV is configured for button outputs, then it will work
 
@@ -26,22 +25,22 @@ I'm currently working on DCS World - if you have a game you think will benefit f
 ## Installation
 None required, use the supplied binary in latest release.
 
-1. Edit config.cfg
-2. Run joystick-diagram.exe
+Run joystick-diagram.exe
 
 ### From Source
-Want to run from source? You'll need Python 3.7+
+Want to run from source? You'll need Python 3.8+
 
 ## Bugs
-This is an initial release, all of the templates are new and there may be configuration differnces to work out.
+This is an initial release, all of the templates are new and there may be configuration differences to work out.
 
 I'm expecting issues with the Virpil templates, as don't have the logical buttons available to me.
 
 ## Usage
 Please ensure you have **backup of your config**, this should not modify if but I also take no responsibility if you lose all your binds!
 
-- Edit Config.cfg to setup the config line under [GREMLIN]
 - Run joystick-diagram.exe
+- Select your Joystick Gremlin profile XML
+- Hit Export
 - If it finds a match, it'll export the bindings for this device, and any modes you have configured
 - If you have web browser enabled, they'll automatically open in your browser
 - Files will be stored in /diagrams when export has been completed. You can open these in a web browser, and print to PDF/printer from there
