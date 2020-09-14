@@ -88,13 +88,13 @@ class Gremlin:
         return self.mode.getAttribute('name')
 
     def hasInheritance(self):
-        inherit = self.mode.getAttribute('inherit')    
+        inherit = self.mode.getAttribute('inherit')
         if inherit != '':
             if self.usingInheritance != True:
                 self.usingInheritance = True
             return inherit
         else:
-            return False 
+            return False
 
     def inheritedModes(self):
         return self.mode.getAttribute('name')

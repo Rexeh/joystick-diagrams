@@ -6,6 +6,14 @@ from shutil import copyfile
 import re
 import config
 import version
+import logging
+
+logger = logging.getLogger('jv')
+hdlr = logging.FileHandler('./logs/jv.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr)
+logger.setLevel(logging.INFO)
 
 pp = pprint.PrettyPrinter(indent=4)
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
@@ -14,8 +22,12 @@ diagramFilesDirectory = './diagrams/'
 templateFilesDirectory = './templates/'
 fileSpacer = "_"
 
-def updateDeviceArray(deviceArray, device, mode, buttons):    
-    data = {"Buttons": buttons, "Axis": ""}
+def updateDeviceArray(deviceArray, device, mode, inherit, buttons):
+    data = {
+        "Buttons": buttons,
+        "Axis": "",
+        "Inherit": inherit}
+
     if device in deviceArray:
         if mode in deviceArray[device]:
             deviceArray[device][mode].update(data)
@@ -30,11 +42,12 @@ def updateDeviceArray(deviceArray, device, mode, buttons):
                             }
         })
 
+
 def createDirectory(directory):
     if not os.path.exists(directory):
         return os.makedirs(directory)
     else:
-        log("Failed to create directory", directory, 1)
+        log("Failed to create directory: {}".format(directory))
         return False
 
 def getTempPath(device, mode):
@@ -80,21 +93,16 @@ def exportDevice(devicelist, device, mode):
             outputPath = saveDiagram(device,mode,svg)
             if config.openinbrowser:
                 webbrowser.get('chrome').open_new_tab(outputPath)
+        return (True, device)
     else:
-        log("No template found for: ", device,3)
+        return (False, device)
+        log("No template found for: {}".format(device))
 
-def log(text,item,level=1):
-    #TODO - Tidy this thing up, output to proper file
-    if config.debug == 1:
-        if(config.debugLevel==3 and level == 3):
-            print(text)
-            pp.pprint(item)
-        if(config.debugLevel==2 and level == 3 or 2):
-            print(text)
-            pp.pprint(item)
-        else:
-            print(text)
-            pp.pprint(item)
+def log(text):
+    if config.debug:
+        print(text)
+        logger.error(text)
+        
 
 def getVersion():
     return "Version: " + version.VERSION
