@@ -9,10 +9,12 @@ from tkinter import Frame
 from tkinter.filedialog import askopenfilename
 import subprocess
 from tkinter import ttk
+import os
+import logging
 
 root = tk.Tk()
 text = tk.Text(root)
-root.wm_minsize(800,600)
+root.wm_minsize(600,400)
 root.title("Joystick Visualiser - github.com/Rexeh/joystick-diagrams")
 root.iconbitmap('./logo.ico')
 root.config(bg="white")
@@ -44,9 +46,41 @@ def exportGremlin():
     
     devices = parsedConfig.createDictionary()
 
+    global runState
+    runState = []
+
     for joystick in devices:
         for mode in devices[joystick]:
-            helper.exportDevice(devices, joystick, mode)
+            success = helper.exportDevice(devices, joystick, mode)
+
+            # Log failures
+            if success[0] == False and success[1] not in runState:
+                helper.log("Device: {} does not have a valid template".format(success[1]))
+                runState.append(success[1])
+            
+    if(len(runState)>0):
+        errorText = "The following devices did not have matching templates in /templates"
+        for item in runState:
+            errorText = errorText+'\n'+item
+        message(errorText)
+
+def message(msg):
+    """Generate a pop-up window for special messages."""
+    popup = tk.Tk()
+    popup.title("Information")
+    w = 400     # popup window width
+    h = 200     # popup window height
+    sw = root.winfo_screenwidth()
+    sh = root.winfo_screenheight()
+    x = (sw - w)/2
+    y = (sh - h)/2
+    popup.geometry('%dx%d+%d+%d' % (w, h, x, y))
+    m = msg
+    m += '\n'
+    w = tk.Label(popup, text=m, width=120, height=10)
+    w.pack()
+    b = tk.Button(popup, text="OK", command=popup.destroy, width=10)
+    b.pack()
 
 def clicked():
     selected_item_label.configure(text=nlist.get("active"))
@@ -64,12 +98,14 @@ def chooseFile():
                 )
     global selectedFile
     selectedFile = tk.Label(jg_tab, text=file,font=buttonFont)
-    selectedFile.grid(row=1, column=2)
+    selectedFile.grid(row=2, column=0)
+    step_2_button.config(state="active")
 
 
 def openDiagramsDirectory():
-    subprocess.Popen('explorer "./diagrams"') ## DOESNT WORK YET
-
+    path = os.path.dirname(__file__) + '\diagrams'
+    FILEBROWSER_PATH = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
+    subprocess.run([FILEBROWSER_PATH, path])
 
 tabControl = ttk.Notebook(root, padding=15)
 
@@ -95,12 +131,12 @@ bottomFrame.pack()
 #Remove DCS panel for now
 tabControl.hide(1)
 
-version = tk.Label(bottomFrame, text="Version: ALPHA",font=largeFont, anchor="e", compound = "left", state="disabled", bg=app_background)
-info = tk.Label(bottomFrame, text="This is an early version, please report bugs and I will fix them!", anchor="w" ,font=largeFont,compound = "left", state="disabled", bg="white")
+version = tk.Label(bottomFrame, text="Version: ALPHA",font=buttonFont, anchor="e", compound = "left", bg=app_background)
+info = tk.Label(bottomFrame, text="This is an early version, please report bugs and I will fix them!", anchor="w" ,font=buttonFont,compound = "left", state="disabled", bg="white")
 gremlinLogo = tk.Button(topFrame, text="Support us on GitHub", image=photo, bg="white",anchor="e",padx=(15), font=buttonFont,command=openLink,compound = "left", width=160)
 bugLogo = tk.Button(topFrame, text="Got a Bug? Feature?", image=bug,bg="white",anchor="e", padx=(15), font=buttonFont, command=openBugs,compound = "left", width=160)
 
-step_1_info = tk.Label(jg_tab, text="Step 1: Select your Gremlin .XML File",font=largeFont, compound = "left", state="disabled",bg="white", pady=20)
+step_1_info = tk.Label(jg_tab, text="Step 1: Select your Gremlin .XML File",anchor="w",font=largeFont, compound = "left", state="disabled",bg="white", pady=20)
 chooseFile = tk.Button(jg_tab, text="Choose Gremlin File",font=buttonFont, command=chooseFile,bg="white")
 
 ## LISTBOX TEST
@@ -110,16 +146,76 @@ items = [1,2,3,4,5]
 for i in items:
     nlist.insert(i, ("File_name_{}.xml").format(i))
 
-selected_item_button = tk.Button(dcs_tab, text="What is it?",bg="white",anchor="w", padx=(15), font=buttonFont, command=clicked,compound = "left")
-selected_item_label = tk.Label(dcs_tab, text="Selected file",font=largeFont, state="disabled",bg="white")
+selected_item_button = tk.Button(
+                dcs_tab,
+                text="What is it?",
+                bg="white",
+                anchor="w",
+                padx=(15),
+                font=buttonFont,
+                command=clicked,
+                compound = "left"
+                )
+
+selected_item_label = tk.Label(
+                dcs_tab, text="Selected file",
+                font=largeFont,
+                state="disabled",
+                bg="white"
+                )
 
 ### END
-step_2_info = tk.Label(jg_tab, text="Step 2: Run Export",font=largeFont, state="disabled",bg="white",compound = "left",pady=20)
-step_2_button = tk.Button(jg_tab, text="Export profiles",bg="white",anchor="w", padx=(15), font=buttonFont, command=exportGremlin,compound = "left")
-step_2_secondary = tk.Label(jg_tab, text="This will export all found Joystick Gremlin profiles for all devices.",compound = "left",font=buttonFont,bg="white")
+step_2_info = tk.Label(
+                jg_tab,
+                text="Step 2: Run Export",
+                font=largeFont,
+                state="disabled",
+                bg="white",
+                compound = "left",
+                pady=20,
+                anchor="w"
+                )
 
-step_3_info = tk.Label(jg_tab, text="Step 3: View Diagrams",font=largeFont, compound = "left", state="disabled", bg="white", pady=20)
-step_3_button = tk.Button(jg_tab, text="Open diagrams folder",bg="white",anchor="w", padx=(15), font=buttonFont, command=openDiagramsDirectory,compound = "left")
+step_2_button = tk.Button(
+                jg_tab,
+                text="Export profiles",
+                bg="white",
+                anchor="w",
+                padx=(15),
+                font=buttonFont,
+                command=exportGremlin,
+                compound = "left",
+                state="disabled"
+                )
+
+step_2_secondary = tk.Label(
+                jg_tab,
+                text="This will export all found Joystick Gremlin profiles for all devices.",
+                compound = "left",
+                font=buttonFont,
+                bg="white"
+                )
+
+step_3_info = tk.Label(
+                jg_tab,
+                text="Step 3: View Diagrams",
+                font=largeFont,
+                compound = "left",
+                state="disabled",
+                bg="white",
+                pady=20
+                )
+
+step_3_button = tk.Button(
+                jg_tab,
+                text="Open diagrams folder",
+                bg="white",
+                anchor="w",
+                padx=(15),
+                font=buttonFont,
+                command=openDiagramsDirectory,
+                compound = "left"
+                )
 
 nlist.pack()
 selected_item_button.pack()
@@ -129,38 +225,18 @@ selected_item_label.pack()
 gremlinLogo.grid(row=0, column=3)
 bugLogo.grid(row=0, column=2)
 
-step_1_info.grid(row=1, column=0)
+step_1_info.grid(row=1, column=0, sticky="W")
 chooseFile.grid(row=1, column=1)
 
-step_2_info.grid(row=2, column=0)
+step_2_info.grid(row=2, column=0, sticky="W")
 step_2_button.grid(row=2, column=1)
 step_2_secondary.grid(row=3, column=0)
 
-step_3_info.grid(row=4, column=0)
+step_3_info.grid(row=4, column=0, sticky="W")
 step_3_button.grid(row=4, column=1)
 
-version.grid(row=5,column=3)
+version.grid(row=5,column=3, sticky="E")
 info.grid(row=5,column=1)
 
+helper.log(helper.getVersion())
 root.mainloop()
-
-print(helper.getVersion())
-
-if config.gremlinconfig == "":
-    print("Please edit config.cfg to specify your Joystick Gremlin config .XML file location")
-    input("Press enter to exit")
-else:
-    pass
-    #gremlin = gremlin.Gremlin(config.gremlinconfig)
-
-    #devices = gremlin.createDictionary()
-
-    #for joystick in devices:
-    #    for mode in devices[joystick]:
-    #        helper.exportDevice(devices, joystick, mode)
-
-print("----------------FINISHED-------------------")
-print("View your outputted files in /diagrams and open them in a web browser to print.")
-print("-------------------------------------------")
-
-input("Press enter to exit")

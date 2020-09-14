@@ -19,28 +19,58 @@ class Gremlin:
         self.buttons = None
         self.buttonArray = None
         self.formattedButtons = None
-        
+        self.inheritModes = {}
+        self.usingInheritance = False
+
     def createDictionary(self):
         self.formattedButtons = {}
         self.devices = self.getDevices()
-        helper.log("Number of Devices: ",str(self.devices.length))
+        helper.log("Number of Devices: {}".format(str(self.devices.length)))
         self.formattedButtons = {}
+
         for self.device in self.devices:
             self.currentdevice = self.getSingleDevice()
             self.modes = self.getDeviceModes()
-            helper.log("All Modes: ",self.modes)
+            helper.log("All Modes: {}".format(self.modes))
             for self.mode in self.modes:
-                # Does this mode Inherit?
                 self.currentInherit = self.hasInheritance()
                 self.buttonArray = {}
                 self.currentMode = self.getSingleMode()
-     
-                helper.log("Selected Mode: ",self.currentMode)
-                
+                helper.log("Selected Mode: {}".format(self.currentMode))
                 self.buttons = self.getModeButtons()
                 self.extractButtons()
-                helper.updateDeviceArray(self.formattedButtons ,self.currentdevice,self.currentMode,self.buttonArray)
-        return self.formattedButtons
+                helper.updateDeviceArray(
+                                    self.formattedButtons,
+                                    self.currentdevice,
+                                    self.currentMode,
+                                    self.currentInherit,
+                                    self.buttonArray
+                                    )
+        if self.usingInheritance:
+            self.inheritProfiles()
+            return self.formattedButtons
+        else:
+            return self.formattedButtons
+
+    def inheritProfiles(self):
+        for item in self.formattedButtons:
+            for profile in self.formattedButtons[item]:
+                if self.formattedButtons[item][profile]['Inherit']:
+                    helper.log("{} Profile has inheritance in mode {}".format(item,profile))
+                    helper.log("Profile inherits from {}".format(self.formattedButtons[item][profile]['Inherit']))
+                    inherit = self.formattedButtons[item][profile]['Inherit']
+                    inheritConfig = self.formattedButtons[item][inherit]
+                    helper.log("Inherited Profile Contains {}".format(inheritConfig))
+                    helper.log("Starting Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']))
+                    for button, desc in inheritConfig['Buttons'].items():
+                        checkButton = button in self.formattedButtons[item][profile]['Buttons']
+                        if checkButton == False:
+                            self.formattedButtons[item][profile]['Buttons'].update({
+                                                        button:desc
+                                                        })
+                        elif self.formattedButtons[item][profile]['Buttons'][button] == self.no_bind_text:
+                                self.formattedButtons[item][profile]['Buttons'][button] = desc
+                    helper.log("Ending Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']))
 
     def getDevices(self):
         return self.file.getElementsByTagName('device')
@@ -54,17 +84,14 @@ class Gremlin:
     def getSingleDevice(self):
         return self.device.getAttribute('name')
 
-    def getInheritedMode(self):
-        pass
-
     def getSingleMode(self):
         return self.mode.getAttribute('name')
 
     def hasInheritance(self):
-        inherit = self.mode.getAttribute('inherit')
-        
-        print(inherit)
+        inherit = self.mode.getAttribute('inherit')    
         if inherit != '':
+            if self.usingInheritance != True:
+                self.usingInheritance = True
             return inherit
         else:
             return False 
@@ -73,7 +100,6 @@ class Gremlin:
         return self.mode.getAttribute('name')
 
     def extractButtons(self):
-
         for i in self.buttons:
             if i.getAttribute('description') != "":
                 self.buttonArray.update ({

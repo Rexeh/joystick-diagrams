@@ -4,12 +4,8 @@ from pathlib import Path
 Config = ConfigParser.ConfigParser()
 Config.read('config.cfg')
 
-#Paths
-gremlinconfig = Config.get('GREMLIN', 'config')
-
 # Write logs
 debug = Config.getboolean('DEFAULT', 'EnableLogging')
-debugLevel = 2
 
 # Export out SVG files - for development only (leave as = 1)
 export = 1
