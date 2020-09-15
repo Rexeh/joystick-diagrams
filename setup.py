@@ -1,20 +1,36 @@
 from setuptools import setup, find_packages
 import pathlib
+from cx_Freeze import setup, Executable
+import sys
+
+## Import SRC
+sys.path.insert(0,'./src')
 
 here = pathlib.Path(__file__).parent.resolve()
-
+base = None
 long_description = (here / 'README.md').read_text(encoding='utf-8')
 
+if sys.platform == "win32":
+    base = "Win32GUI"
+
+files = {"include_files": [
+                        "./images",
+                        "./templates",
+                        "./config.cfg",
+                       ],
+                       }
+
 setup(
-    name='Gremlin Diagrams',
-    version='0.1.0',
+    name='Joystick Diagrams',
+    version='1.0.0',
     description='Automatically create diagrams for your throttles, joysticks and custom HID devices',
     long_description=long_description, 
     long_description_content_type='text/markdown',
-    url='https://github.com/Rexeh/joystick-gremlin-diagram', 
+    url='https://github.com/Rexeh/joystick-diagrams', 
     author='Robert Cox',
     keywords='joystick, HID, diagrams, joystick gremlin',
 
+    #scripts = ['./src/joystick-diagram.py'],
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
     #
@@ -24,7 +40,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(where='src'),  # Required
+    packages=find_packages(),  # Required
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -66,32 +82,12 @@ setup(
     # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
     data_files=[('my_data', ['data/data_file'])],  # Optional
 
-    # To provide executable scripts, use entry points in preference to the
-    # "scripts" keyword. Entry points provide cross-platform support and allow
-    # `pip` to create the appropriate form of executable for the target
-    # platform.
-    #
-    # For example, the following would provide a command called `sample` which
-    # executes the function `main` from this package when invoked:
-    entry_points={  # Optional
-        'console_scripts': [
-            'sample=sample:main',
-        ],
+    project_urls={  # Optional
+        'Bug Reports': 'https://github.com/Rexeh/joystick-diagrams/issues',
+        'Funding': 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url',
+        'Source': 'https://github.com/Rexeh/joystick-diagrams/src',
     },
 
-    # List additional URLs that are relevant to your project as a dict.
-    #
-    # This field corresponds to the "Project-URL" metadata fields:
-    # https://packaging.python.org/specifications/core-metadata/#project-url-multiple-use
-    #
-    # Examples listed include a pattern for specifying where the package tracks
-    # issues, where the source is hosted, where to say thanks to the package
-    # maintainers, and where to support the project financially. The key is
-    # what's used to render the link text on PyPI.
-    project_urls={  # Optional
-        'Bug Reports': 'https://github.com/pypa/sampleproject/issues',
-        'Funding': 'https://donate.pypi.org',
-        'Say Thanks!': 'http://saythanks.io/to/example',
-        'Source': 'https://github.com/pypa/sampleproject/',
-    },
+    options={'build_exe': files},
+    executables = [Executable("./src/joystick-diagram.py", base = base, icon = './images/logo.ico')]
 )

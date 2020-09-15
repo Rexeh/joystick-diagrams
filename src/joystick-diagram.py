@@ -16,7 +16,7 @@ root = tk.Tk()
 text = tk.Text(root)
 root.wm_minsize(600,400)
 root.title("Joystick Visualiser - github.com/Rexeh/joystick-diagrams")
-root.iconbitmap('./logo.ico')
+root.iconbitmap('./images/logo.ico')
 root.config(bg="white")
 app_background = "white"
 # Font Setting
@@ -43,7 +43,7 @@ bug = ImageTk.PhotoImage(bugIcon)
 
 def exportGremlin():
     parsedConfig = gremlin.Gremlin(selectedFile.cget('text'))
-    
+
     devices = parsedConfig.createDictionary()
 
     global runState
@@ -52,34 +52,34 @@ def exportGremlin():
     for joystick in devices:
         for mode in devices[joystick]:
             success = helper.exportDevice(devices, joystick, mode)
-
+            helper.log(success, 'debug')
             # Log failures
             if success[0] == False and success[1] not in runState:
-                helper.log("Device: {} does not have a valid template".format(success[1]))
-                runState.append(success[1])
-            
+                helper.log("Device: {} does not have a valid template".format(success[1]), 'debug')
+                runState.append(success[1])           
     if(len(runState)>0):
-        errorText = "The following devices did not have matching templates in /templates"
+        errorText = "The following devices did not have matching templates in /templates. \n\n Device names must match the template name exactly.\n"
         for item in runState:
             errorText = errorText+'\n'+item
+        errorText = errorText+'\n\n'+"No diagrams have been created for the above"
         message(errorText)
+        helper.log(errorText, 'warning')
 
 def message(msg):
-    """Generate a pop-up window for special messages."""
     popup = tk.Tk()
     popup.title("Information")
     w = 400     # popup window width
     h = 200     # popup window height
-    sw = root.winfo_screenwidth()
-    sh = root.winfo_screenheight()
+    sw = popup.winfo_screenwidth()
+    sh = popup.winfo_screenheight()
     x = (sw - w)/2
     y = (sh - h)/2
     popup.geometry('%dx%d+%d+%d' % (w, h, x, y))
     m = msg
     m += '\n'
-    w = tk.Label(popup, text=m, width=120, height=10)
-    w.pack()
-    b = tk.Button(popup, text="OK", command=popup.destroy, width=10)
+    w = tk.Label(popup, text=m, width=120, height=10, pady=15)
+    w.pack(side="top")
+    b = tk.Button(popup, text="OK", command=popup.destroy, width=10, padx=10)
     b.pack()
 
 def clicked():
@@ -103,7 +103,8 @@ def chooseFile():
 
 
 def openDiagramsDirectory():
-    path = os.path.dirname(__file__) + '\diagrams'
+    path = os.path.dirname(__file__) + '/diagrams'
+    helper.log(path)
     FILEBROWSER_PATH = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
     subprocess.run([FILEBROWSER_PATH, path])
 
@@ -130,6 +131,7 @@ bottomFrame.pack()
 
 #Remove DCS panel for now
 tabControl.hide(1)
+tabControl.hide(2)
 
 version = tk.Label(bottomFrame, text="Version: ALPHA",font=buttonFont, anchor="e", compound = "left", bg=app_background)
 info = tk.Label(bottomFrame, text="This is an early version, please report bugs and I will fix them!", anchor="w" ,font=buttonFont,compound = "left", state="disabled", bg="white")
@@ -238,5 +240,5 @@ step_3_button.grid(row=4, column=1)
 version.grid(row=5,column=3, sticky="E")
 info.grid(row=5,column=1)
 
-helper.log(helper.getVersion())
+helper.log(helper.getVersion(),'warning')
 root.mainloop()

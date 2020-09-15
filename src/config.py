@@ -6,6 +6,7 @@ Config.read('./config.cfg')
 
 # Write logs
 debug = Config.getboolean('DEFAULT', 'EnableLogging')
+debugLevel = Config.getint('DEFAULT', 'LogLevel')
 
 # Export out SVG files - for development only (leave as = 1)
 export = 1

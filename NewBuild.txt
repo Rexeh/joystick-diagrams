@@ -1,0 +1,3 @@
+cxfreeze .\joystick-diagram.py --target-dir dist --include-files='C:\Users\RCox\Documents\GitHub\joystick-diagrams\logo.ico','C:\Users\RCox\Documents\GitHub\joystick-diagrams\images/','C:\Users\RCox\Documents\GitHub\joystick-diagrams\templates/' --icon='C:\Users\RCox\Documents\GitHub\joystick-diagrams\logo.ico' --base='Win32GUI'
+
+

@@ -25,7 +25,7 @@ class Gremlin:
     def createDictionary(self):
         self.formattedButtons = {}
         self.devices = self.getDevices()
-        helper.log("Number of Devices: {}".format(str(self.devices.length)))
+        helper.log("Number of Devices: {}".format(str(self.devices.length)), 'debug')
         self.formattedButtons = {}
 
         for self.device in self.devices:
@@ -36,7 +36,7 @@ class Gremlin:
                 self.currentInherit = self.hasInheritance()
                 self.buttonArray = {}
                 self.currentMode = self.getSingleMode()
-                helper.log("Selected Mode: {}".format(self.currentMode))
+                helper.log("Selected Mode: {}".format(self.currentMode), 'debug')
                 self.buttons = self.getModeButtons()
                 self.extractButtons()
                 helper.updateDeviceArray(
@@ -56,12 +56,12 @@ class Gremlin:
         for item in self.formattedButtons:
             for profile in self.formattedButtons[item]:
                 if self.formattedButtons[item][profile]['Inherit']:
-                    helper.log("{} Profile has inheritance in mode {}".format(item,profile))
-                    helper.log("Profile inherits from {}".format(self.formattedButtons[item][profile]['Inherit']))
+                    helper.log("{} Profile has inheritance in mode {}".format(item,profile), 'debug')
+                    helper.log("Profile inherits from {}".format(self.formattedButtons[item][profile]['Inherit']), 'debug')
                     inherit = self.formattedButtons[item][profile]['Inherit']
                     inheritConfig = self.formattedButtons[item][inherit]
-                    helper.log("Inherited Profile Contains {}".format(inheritConfig))
-                    helper.log("Starting Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']))
+                    helper.log("Inherited Profile Contains {}".format(inheritConfig), 'debug')
+                    helper.log("Starting Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']), 'debug')
                     for button, desc in inheritConfig['Buttons'].items():
                         checkButton = button in self.formattedButtons[item][profile]['Buttons']
                         if checkButton == False:
@@ -70,7 +70,7 @@ class Gremlin:
                                                         })
                         elif self.formattedButtons[item][profile]['Buttons'][button] == self.no_bind_text:
                                 self.formattedButtons[item][profile]['Buttons'][button] = desc
-                    helper.log("Ending Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']))
+                    helper.log("Ending Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']), 'debug')
 
     def getDevices(self):
         return self.file.getElementsByTagName('device')

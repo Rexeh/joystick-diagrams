@@ -7,20 +7,24 @@ import config
 import version
 import logging
 
-
-logger = logging.getLogger('jv')
 # Logging Init
 logDir = './logs/'
-logFile = 'jv.log'
-
-def configureLogger():
-    if not os.path.exists(logDir):
-        createDirectory(logDir)
-    hdlr = logging.FileHandler(logDir + logFile)
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    hdlr.setFormatter(formatter)
-    logger.addHandler(hdlr)
-    logger.setLevel(logging.INFO)
+logFile = 'jv.log'   
+logger = logging.getLogger('jv')
+if not os.path.exists(logDir):
+    createDirectory(logDir)
+hdlr = logging.FileHandler(logDir + logFile)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr)
+if config.debugLevel == 1:
+    logger.setLevel(logging.WARNING)
+elif config.debugLevel == 2:
+    logger.setLevel(logging.ERROR)
+elif config.debugLevel == 3:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.WARNING)
 
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
 tempFilesDirectory = './temp/'
@@ -53,7 +57,7 @@ def createDirectory(directory):
     if not os.path.exists(directory):
         return os.makedirs(directory)
     else:
-        log("Failed to create directory: {}".format(directory))
+        log("Failed to create directory: {}".format(directory), 'error')
         return False
 
 def getTempPath(device, mode):
@@ -101,17 +105,21 @@ def exportDevice(devicelist, device, mode):
                 webbrowser.get('chrome').open_new_tab(outputPath)
         return (True, device)
     else:
+        log("No template found for: {}".format(device), 'debug')
         return (False, device)
-        log("No template found for: {}".format(device))
-
-def log(text):
-
-    if isinstance(logger,object):
-        configureLogger()
-
+        
+def log(text, level='info'):
+    #Accepted Levels
+    # info, warning, error
     if config.debug:
-        print(text)
-        logger.error(text)
+        if level == 'info':
+            logger.info(text)
+        elif level == 'warning':
+            logger.warning(text)
+        elif level == 'error':
+            logger.error(text)
+        else:
+            logger.debug(text)
         
 
 def getVersion():
