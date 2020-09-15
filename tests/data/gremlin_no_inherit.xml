@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" ?>
+<profile version="9">
+    <devices>
+        <device device-guid="{01DE0A30-B49F-11EA-8002-444553540000}" label="" name="VPC Throttle MT-50 CM2" type="joystick">
+            <mode name="A10">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="Pinkie Center" id="5">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="42"/>
+                                <key extended="False" scan-code="25"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Pinkie Forward" id="6">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="56"/>
+                                <key extended="False" scan-code="25"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Pinkie Aft" id="7">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="29"/>
+                                <key extended="False" scan-code="25"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+            </mode>
+            <mode name="FA18"/>
+            <mode name="KA50">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <axis description="" id="4"/>
+                <axis description="" id="5"/>
+                <axis description="" id="6"/>
+                <button description="HUD Mode" id="1">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="9"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="HUD Brightness Down" id="2">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="56"/>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="35"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="IT-23 contrast Up" id="55">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="True" scan-code="54"/>
+                                <key extended="False" scan-code="27"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="56"/>
+                <button description="" id="57"/>
+            </mode>
+        </device>
+        <device device-guid="{03F2F260-B49D-11EA-8001-444553540000}" label="" name="VPC Stick MT-50CM" type="joystick">
+            <mode name="A10">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="Speedbrake" id="3"/>
+                <button description="Trim Up" id="1">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="False" scan-code="52"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="Trim Right" id="2">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="True" scan-code="29"/>
+                                <key extended="False" scan-code="53"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+                <hat description="" id="1"/>
+            </mode>
+           
+            <mode name="FA18"/>
+            <mode name="KA50">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <button description="" id="1"/>
+                <button description="" id="2"/>
+                <button description="" id="3"/>
+                <button description="" id="4"/>
+                <button description="" id="5"/>
+                <button description="Gun Fire" id="6">
+                    <container type="basic">
+                        <action-set>
+                            <map-to-keyboard>
+                                <key extended="False" scan-code="57"/>
+                            </map-to-keyboard>
+                        </action-set>
+                    </container>
+                </button>
+            </mode>
+        </device>
+    </devices>
+    <settings>
+        <default-delay>0.05</default-delay>
+    </settings>
+    <plugins/>
+</profile>

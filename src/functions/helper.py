@@ -1,4 +1,3 @@
-import pprint
 import os
 from os import path
 import webbrowser
@@ -8,14 +7,21 @@ import config
 import version
 import logging
 
-logger = logging.getLogger('jv')
-hdlr = logging.FileHandler('./logs/jv.log')
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-hdlr.setFormatter(formatter)
-logger.addHandler(hdlr)
-logger.setLevel(logging.INFO)
 
-pp = pprint.PrettyPrinter(indent=4)
+logger = logging.getLogger('jv')
+# Logging Init
+logDir = './logs/'
+logFile = 'jv.log'
+
+def configureLogger():
+    if not os.path.exists(logDir):
+        createDirectory(logDir)
+    hdlr = logging.FileHandler(logDir + logFile)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
+    logger.setLevel(logging.INFO)
+
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
 tempFilesDirectory = './temp/'
 diagramFilesDirectory = './diagrams/'
@@ -99,6 +105,10 @@ def exportDevice(devicelist, device, mode):
         log("No template found for: {}".format(device))
 
 def log(text):
+
+    if isinstance(logger,object):
+        configureLogger()
+
     if config.debug:
         print(text)
         logger.error(text)

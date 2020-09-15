@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" ?>
+<profile version="9">
+    <devices>
+    </devices>
+    <settings>
+        <default-delay>0.05</default-delay>
+    </settings>
+    <plugins/>
+</profile>

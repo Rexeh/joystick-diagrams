@@ -11,7 +11,7 @@
 #print("String is: " + str(stringCompare))
 
 import unittest
-import functions.helper as helper
+import src.functions.helper as helper
 
 class TestHelperFunctions(unittest.TestCase):
 

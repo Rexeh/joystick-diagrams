@@ -9,8 +9,8 @@
                 <axis description="" id="4"/>
                 <axis description="" id="5"/>
                 <axis description="" id="6"/>
-                <button description="" id="1"/>
-                <button description="" id="2"/>
+                <button description="Button 1 - No Replace" id="1"/>
+                <button description="" id="2"/> <!-- Expected Inherit replace -->
                 <button description="" id="3"/>
                 <button description="" id="4"/>
                 <button description="Pinkie Center" id="5">
@@ -51,6 +51,14 @@
                 <axis description="" id="4"/>
                 <axis description="" id="5"/>
                 <axis description="" id="6"/>
+                <button description="Base No Replace" id="1">
+                    <container type="basic">
+                    </container>
+                </button>
+                <button description="Base Replacement" id="2">
+                    <container type="basic">
+                    </container>
+                </button>
                 <button description="A10 Mode" id="56">
                     <container type="basic">
                         <action-set>
@@ -74,14 +82,14 @@
                 </button>
             </mode>
             <mode inherit="Base" name="FA18"/>
-            <mode inherit="Base" name="KA50">
+            <mode name="KA50">
                 <axis description="" id="1"/>
                 <axis description="" id="2"/>
                 <axis description="" id="3"/>
                 <axis description="" id="4"/>
                 <axis description="" id="5"/>
                 <axis description="" id="6"/>
-                <button description="HUD Mode" id="1">
+                <button description="KA50 Button 1" id="1">
                     <container type="basic">
                         <action-set>
                             <map-to-keyboard>
@@ -91,7 +99,7 @@
                         </action-set>
                     </container>
                 </button>
-                <button description="HUD Brightness Down" id="2">
+                <button description="KA50 Button 2" id="2">
                     <container type="basic">
                         <action-set>
                             <map-to-keyboard>
@@ -102,7 +110,7 @@
                         </action-set>
                     </container>
                 </button>
-                <button description="IT-23 contrast Up" id="55">
+                <button description="KA50 Button 55" id="55">
                     <container type="basic">
                         <action-set>
                             <map-to-keyboard>
@@ -118,7 +126,7 @@
             </mode>
         </device>
         <device device-guid="{03F2F260-B49D-11EA-8001-444553540000}" label="" name="VPC Stick MT-50CM" type="joystick">
-            <mode inherit="Base" name="A10">
+            <mode name="A10">
                 <axis description="" id="1"/>
                 <axis description="" id="2"/>
                 <axis description="Speedbrake" id="3"/>

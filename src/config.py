@@ -2,7 +2,7 @@ import configparser as ConfigParser
 from pathlib import Path
 
 Config = ConfigParser.ConfigParser()
-Config.read('config.cfg')
+Config.read('./config.cfg')
 
 # Write logs
 debug = Config.getboolean('DEFAULT', 'EnableLogging')
