@@ -2,6 +2,9 @@
 
 ![Build Status](https://travis-ci.com/Rexeh/joystick-diagrams.svg?branch=master) [![codecov](https://codecov.io/gh/Rexeh/joystick-diagrams/branch/master/graph/badge.svg)](https://codecov.io/gh/Rexeh/joystick-diagrams)
 
+## Current Release (1.0.0)
+[Download](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.0.0/joystick-diagram-1-0-0.zip)
+
 ## What is this tool for?
 Learning flight simulators is a daunting task, with lots of buttons to remember. I built this tool for myself, and then thought others might also enjoy it, automating what is a time consuming task!
 
