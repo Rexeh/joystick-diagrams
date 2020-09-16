@@ -1,20 +1,20 @@
 # Templates
-
 Define templates in SVG. Name of template should match your Joystick Gremlin device name.
 
 # Default Templates
 
 ## Virpil
-**Thanks to MartinCo for help with the default logical buttons!**
+These are iniital releases, and may require tweaking. Virpil are highly customisable and as such "Button_1" for one person may be "Button_2" for another
+
+**Thanks to MartinCo for help with the templates**
 - Virpil MT50-CM2 Stick
 - Virpil MT50-CM2 Throttle
 - Virpil Constellation Alpha-R
-- Virpil Constellation Alpha-L
 - Virpil Constellation Delta
-- Virpil WarBRD Grip
 - Virpil MT50 Throttle V2
 
 ## Thrustmaster
+These should work out of the box with no customisation needed
 - Warthog HOTAS
 - Warthog Throttle
 
@@ -29,8 +29,6 @@ This is very easy to do, for free online
 2. Create a joystick profile by importing a joystick image, and creating labels
 3. Call the label BUTTON_X, where X is the actual physical button on your stick
 4. Export template as SVG
-5. Place this in /Templates with the relevant device name seen by windows
+5. Place this in /Templates with the exact device name seen by windows
 
-Now on execution of the program, you should have your binds automatically added to the app.
-
-If you have created a template, happy to include it back in the repository (might make some edits to standardise it)
+If you have created a template, happy to include it back in the repository.

@@ -9,16 +9,18 @@ Learning flight simulators is a daunting task, with lots of buttons to remember.
 
 ## What's supported?
 
-### Joystick Gremlin
+### General
 - Custom SVG templates can be built to suit your joystick, throttle, custom HID device
+
+### Joystick Gremlin
 - Importing/inheriance of base templates into button profile exports
 - Support for multiple profiles in Joystick Gremlin
 
-## What's not supported (yet)
+### What's not supported (yet)
 - POV hats (In POV mode)
 - AXIS support
 
-### Support for other programs/games (yet)
+### Support for other games
 I'm currently working on DCS World - if you have a game you think will benefit from this, let me know and I might add it.
 
 ## Installation
@@ -42,8 +44,8 @@ I'm expecting issues with the Virpil templates, as don't have the logical button
 - If it finds a match, it'll export the bindings for this device, and any modes you have configured
 - Files will be stored in /diagrams when export has been completed. You can open these in a web browser, and print to PDF/printer from there
 
-# Templates/Supported Devices
-[Please read](templates/readme.md)
+# Templates/Supported Joysticks
+[Please read the about templates here](templates/readme.md)
 
 # Support / Beer fund
 
