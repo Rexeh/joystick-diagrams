@@ -3,10 +3,11 @@ python:
   - "3.8"
 
 before_install:
-  - pip install cx-freeze
+  - "pip install -U pip"
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
   
 install:
+  - pip install cx-freeze
   - pip install -e .
 
 # command to run tests
