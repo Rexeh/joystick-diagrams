@@ -3,13 +3,16 @@ python:
   - "3.8"
 
 before_install:
-  - "pip install -U pip"
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)/src"
   
 install:
   - pip install cx-freeze
+  - pip install pytest-cov
   - pip install -e .
 
 # command to run tests
 script:
-  - pytest
+  - pytest --cov=joystick-digrams tests/
+
+after_success:
+  - bash < (curl -s https://codecov.io/bash)
