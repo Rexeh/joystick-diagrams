@@ -4,7 +4,7 @@ python:
 
 before_install:
   - pip install cx-freeze
-  - "python setup.py install"
+  - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
   
 install:
   - pip install -e .
