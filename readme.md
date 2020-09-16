@@ -7,6 +7,8 @@ Learning flight simulators is a daunting task, with lots of buttons to remember.
 - Overlay your buttons onto an actual Joystick profile/picture
 - Learn your joystick setup easier and be a better pilot!
 
+![Image of exported profile](https://i.imgur.com/8RWBuNM.png)
+
 ## What's supported?
 
 ### General
