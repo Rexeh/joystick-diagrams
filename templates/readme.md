@@ -10,7 +10,6 @@ These are iniital releases, and may require tweaking. Virpil are highly customis
 - Virpil MT50-CM2 Stick
 - Virpil MT50-CM2 Throttle
 - Virpil Constellation Alpha-R
-- Virpil Constellation Delta
 - Virpil MT50 Throttle V2
 
 ## Thrustmaster
