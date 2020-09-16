@@ -9,3 +9,4 @@ src/functions/__pycache__/
 /build/
 /dist/
 /logs/*.log
+.env

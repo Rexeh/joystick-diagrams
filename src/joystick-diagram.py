@@ -15,6 +15,7 @@ import logging
 root = tk.Tk()
 text = tk.Text(root)
 root.wm_minsize(600,400)
+root.wm_maxsize(600,400)
 root.title("Joystick Visualiser - github.com/Rexeh/joystick-diagrams")
 root.iconbitmap('./images/logo.ico')
 root.config(bg="white")
@@ -42,7 +43,7 @@ bug = ImageTk.PhotoImage(bugIcon)
 # Functions
 
 def exportGremlin():
-    parsedConfig = gremlin.Gremlin(selectedFile.cget('text'))
+    parsedConfig = gremlin.Gremlin(selectedFile)
 
     devices = parsedConfig.createDictionary()
 
@@ -97,14 +98,15 @@ def chooseFile():
                 filetypes=[("Gremlin Config Files" , '*.xml')]
                 )
     global selectedFile
-    selectedFile = tk.Label(jg_tab, text=file,font=buttonFont)
-    selectedFile.grid(row=2, column=0)
+    selectedFile = file
+    step_2_secondary.config(text=file)
+    #selectedFile.grid(row=3, column=0)
     step_2_button.config(state="active")
 
-
 def openDiagramsDirectory():
-    path = os.path.dirname(__file__) + '/diagrams'
-    helper.log(path)
+    helper.log(os.getcwd(), 'error')
+    path = os.path.join(os.getcwd(), 'diagrams' )
+    helper.log(path, 'error')
     FILEBROWSER_PATH = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
     subprocess.run([FILEBROWSER_PATH, path])
 
@@ -138,7 +140,7 @@ info = tk.Label(bottomFrame, text="This is an early version, please report bugs 
 gremlinLogo = tk.Button(topFrame, text="Support us on GitHub", image=photo, bg="white",anchor="e",padx=(15), font=buttonFont,command=openLink,compound = "left", width=160)
 bugLogo = tk.Button(topFrame, text="Got a Bug? Feature?", image=bug,bg="white",anchor="e", padx=(15), font=buttonFont, command=openBugs,compound = "left", width=160)
 
-step_1_info = tk.Label(jg_tab, text="Step 1: Select your Gremlin .XML File",anchor="w",font=largeFont, compound = "left", state="disabled",bg="white", pady=20)
+step_1_info = tk.Label(jg_tab, text="Step 1: Select your Gremlin .XML File",anchor="e",font=largeFont, compound = "left", state="disabled",bg="white", pady=20)
 chooseFile = tk.Button(jg_tab, text="Choose Gremlin File",font=buttonFont, command=chooseFile,bg="white")
 
 ## LISTBOX TEST
@@ -166,7 +168,6 @@ selected_item_label = tk.Label(
                 bg="white"
                 )
 
-### END
 step_2_info = tk.Label(
                 jg_tab,
                 text="Step 2: Run Export",
@@ -182,7 +183,7 @@ step_2_button = tk.Button(
                 jg_tab,
                 text="Export profiles",
                 bg="white",
-                anchor="w",
+                anchor="e",
                 padx=(15),
                 font=buttonFont,
                 command=exportGremlin,
@@ -208,11 +209,19 @@ step_3_info = tk.Label(
                 pady=20
                 )
 
+step_3_secondary = tk.Label(
+                jg_tab,
+                text="View your exported diagrams in the Diagrams folder",
+                font=buttonFont,
+                compound = "left",
+                bg="white",
+                )
+
 step_3_button = tk.Button(
                 jg_tab,
                 text="Open diagrams folder",
                 bg="white",
-                anchor="w",
+                anchor="e",
                 padx=(15),
                 font=buttonFont,
                 command=openDiagramsDirectory,
@@ -222,7 +231,6 @@ step_3_button = tk.Button(
 nlist.pack()
 selected_item_button.pack()
 selected_item_label.pack()
-
 
 gremlinLogo.grid(row=0, column=3)
 bugLogo.grid(row=0, column=2)
@@ -235,7 +243,8 @@ step_2_button.grid(row=2, column=1)
 step_2_secondary.grid(row=3, column=0)
 
 step_3_info.grid(row=4, column=0, sticky="W")
-step_3_button.grid(row=4, column=1)
+step_3_button.grid(row=4, column=1, sticky="W")
+step_3_secondary.grid(row=5, column=0, sticky="W")
 
 version.grid(row=5,column=3, sticky="E")
 info.grid(row=5,column=1)

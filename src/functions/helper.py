@@ -11,21 +11,6 @@ import logging
 logDir = './logs/'
 logFile = 'jv.log'   
 logger = logging.getLogger('jv')
-if not os.path.exists(logDir):
-    createDirectory(logDir)
-hdlr = logging.FileHandler(logDir + logFile)
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-hdlr.setFormatter(formatter)
-logger.addHandler(hdlr)
-if config.debugLevel == 1:
-    logger.setLevel(logging.WARNING)
-elif config.debugLevel == 2:
-    logger.setLevel(logging.ERROR)
-elif config.debugLevel == 3:
-    logger.setLevel(logging.DEBUG)
-else:
-    logger.setLevel(logging.WARNING)
-
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
 tempFilesDirectory = './temp/'
 diagramFilesDirectory = './diagrams/'
@@ -51,7 +36,6 @@ def updateDeviceArray(deviceArray, device, mode, inherit, buttons):
                 mode:   data
                             }
         })
-
 
 def createDirectory(directory):
     if not os.path.exists(directory):
@@ -125,25 +109,17 @@ def log(text, level='info'):
 def getVersion():
     return "Version: " + version.VERSION
 
-#TODO
-# # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
-
-# def nested_update(d, u):
-#     for k, v in u.items():
-#         if isinstance(v, collections.abc.Mapping):
-#             d[k] = nested_update(d.get(k, {}), v)
-#         else:
-#             d[k] = v
-#     return d
-
-# def updateDeviceArray(deviceArray, device, mode, buttons):
-#     data = {
-#         device: {
-#             mode: {
-#               "Buttons": buttons,
-#               "Axis": ""
-#             }
-#         }
-#     }
-
-#     nested_update(deviceArray, data)
+if not os.path.exists(logDir):
+    createDirectory(logDir)
+hdlr = logging.FileHandler(logDir + logFile)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr)
+if config.debugLevel == 1:
+    logger.setLevel(logging.WARNING)
+elif config.debugLevel == 2:
+    logger.setLevel(logging.ERROR)
+elif config.debugLevel == 3:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.WARNING)
