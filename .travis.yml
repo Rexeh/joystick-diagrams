@@ -3,7 +3,8 @@ python:
   - "3.7"
   - "3.8"
 
-install: pip install -e .
+install: 
+  - pip install -e .
 
 # command to run tests
 script:
