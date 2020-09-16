@@ -20,7 +20,7 @@ These should work out of the box with no customisation needed
 
 ## Missing your stick?
 
-### Adding Templates
+### Adding/Modifying Templates
 There are many joysticks out there, and a template needs to be provided for them in /Templates.
 
 This is very easy to do, for free online
