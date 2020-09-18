@@ -31,11 +31,6 @@ def t_STRING(t):
     t.value = t.value[1:-1]
     return t
 
-def t_BACKSLASH(t):
-    r"\"[\/]+\""
-    t.value = t.value[1:-1]
-    return t
-
 def t_TRUE(t):
     r'(true)'
     t.value = True
@@ -72,9 +67,8 @@ def p_key_expression(t):
     t[0] = t[2]
 
 def p_value_expression(t):
-    """ dvalue : key EQUALS BACKSLASH
+    """ dvalue : key EQUALS STRING
     | key EQUALS boolean
-    | key EQUALS STRING
     | key EQUALS DOUBLE_VAL
     | key EQUALS NUMBER
     | key EQUALS dict """
@@ -154,7 +148,7 @@ class DCS_World:
  
         print("Input File: {}".format(file))
 
-        tokens = ('LCURLY', 'RCURLY', 'STRING', 'NUMBER', 'LBRACE', 'RBRACE', 'COMMA', 'EQUALS', 'TRUE', 'FALSE', 'DOUBLE_VAL', 'BACKSLASH')
+        tokens = ('LCURLY', 'RCURLY', 'STRING', 'NUMBER', 'LBRACE', 'RBRACE', 'COMMA', 'EQUALS', 'TRUE', 'FALSE', 'DOUBLE_VAL')
 
         # Build the lexer
         lexer = lex.lex()
