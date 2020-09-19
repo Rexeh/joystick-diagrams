@@ -8,12 +8,11 @@ before_install:
 install:
   - pip install cx-freeze
   - pip install pytest-cov
-  - pip install pytest-pylint
   - pip install -e .
 
 # command to run tests
 script:
-  - pytest --pylint --cov=src tests/
+  - pytest --cov=src tests/
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -v
