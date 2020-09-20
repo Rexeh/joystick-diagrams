@@ -123,7 +123,7 @@ class DCSWorld_Parser:
                         buttonArray
                         )
         return self.finalDic
-    #test
+        
     def parseFile(self):
         tokens = ('LCURLY', 'RCURLY', 'STRING', 'NUMBER', 'LBRACE', 'RBRACE', 'COMMA', 'EQUALS', 'TRUE', 'FALSE', 'DOUBLE_VAL')
 
