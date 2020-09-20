@@ -1,34 +1,54 @@
 import unittest
 import adaptors.joystick_gremlin as gremlin
 
-class TestGremlin_No_Inherit(unittest.TestCase):
+class TestGremlin_Mixed(unittest.TestCase):
 
-    no_inherit_expected = {   
+    inherit_no_inherit_expected = {   
         'VPC Throttle MT-50 CM2': {
         'A10' : {
             'Axis' : '',
             'Buttons': {
-                'BUTTON_1': 'NO BIND',
-                'BUTTON_2': 'NO BIND',
+                'BUTTON_1': 'Button 1 - No Replace',
+                'BUTTON_2': 'Base Replacement',
                 'BUTTON_3': 'NO BIND',
                 'BUTTON_4': 'NO BIND',
                 'BUTTON_5': 'Pinkie Center',
                 'BUTTON_6': 'Pinkie Forward',
                 'BUTTON_7': 'Pinkie Aft',
+                'BUTTON_56': 'A10 Mode',
+                'BUTTON_57': 'F18 Mode',
+                'BUTTON_58': 'KA50 Mode',
+            },
+            'Inherit' : 'Base'
+        },
+        'Base' : {
+            'Axis' : '',
+            'Buttons': {
+                'BUTTON_1' : 'Base No Replace',
+                'BUTTON_2' : 'Base Replacement',
+                'BUTTON_56': 'A10 Mode',
+                'BUTTON_57': 'F18 Mode',
+                'BUTTON_58': 'KA50 Mode'
             },
             'Inherit' : False
         },
         'FA18' : {
             'Axis' : '',
-            'Buttons': {},
-            'Inherit' : False
+            'Buttons': {
+                'BUTTON_1' : 'Base No Replace',
+                'BUTTON_2' : 'Base Replacement',
+                'BUTTON_56': 'A10 Mode',
+                'BUTTON_57': 'F18 Mode',
+                'BUTTON_58': 'KA50 Mode'
+            },
+            'Inherit' : 'Base'
         },
         'KA50' : {
             'Axis' : '',
             'Buttons': {
-                'BUTTON_1' : 'HUD Mode',
-                'BUTTON_2' : 'HUD Brightness Down',
-                'BUTTON_55' : 'IT-23 contrast Up',
+                'BUTTON_1' : 'KA50 Button 1',
+                'BUTTON_2' : 'KA50 Button 2',
+                'BUTTON_55' : 'KA50 Button 55',
                 'BUTTON_56' : 'NO BIND',
                 'BUTTON_57' : 'NO BIND'
             },
@@ -44,10 +64,23 @@ class TestGremlin_No_Inherit(unittest.TestCase):
             },
             'Inherit' : False
         },
+
+        'Base' : {
+            'Axis' : '',
+            'Buttons': {
+                'BUTTON_1': 'NO BIND',
+                'BUTTON_2': 'NO BIND'
+            },
+            'Inherit' : False
+        },
+
         'FA18' : {
             'Axis' : '',
-            'Buttons': {},
-            'Inherit' : False
+            'Buttons': {
+                'BUTTON_1': 'NO BIND',
+                'BUTTON_2': 'NO BIND'
+            },
+            'Inherit' : 'Base'
         },
 
         'KA50' : {
@@ -60,13 +93,13 @@ class TestGremlin_No_Inherit(unittest.TestCase):
                 'BUTTON_5': 'NO BIND',
                 'BUTTON_6': 'Gun Fire'
             },
-            'Inherit' : False
+            'Inherit' : 'Base'
         },  
         }
     }
 
     def setUp(self):
-        self.file = gremlin.JoystickGremlin("./tests/data/gremlin_no_inherit.xml")
+        self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_inherit_no_inherit.xml")
 
     def test_number_devices(self):
         self.assertEqual(2,self.file.getDeviceCount())
@@ -75,7 +108,7 @@ class TestGremlin_No_Inherit(unittest.TestCase):
     def test_device_object(self):
         self.maxDiff = None
         self.parsedFile = self.file.createDictionary()
-        self.assertEqual(self.no_inherit_expected,self.parsedFile )
+        self.assertEqual(self.inherit_no_inherit_expected,self.parsedFile )
 
 if __name__ == '__main__':
     unittest.main()

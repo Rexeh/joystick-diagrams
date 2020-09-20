@@ -202,10 +202,18 @@ class DCSWorld_Parser:
             print("Syntax error at '%s'" % t.value)
 
         # Build the lexer
-        lexer = lex.lex()
+        ## TODO: Consider env vars to run optimize=1 in deployed version
+        lexer = lex.lex(
+            debug=False,
+            optimize=0,
+            lextab='dcs_world_lex'
+            )
 
         # Build the parser
-        parser = yacc.yacc()
+        parser = yacc.yacc(
+            debug=False,
+            tabmodule='dcs_world_parse'
+            )
 
         # Parse the data
         data = parser.parse(self.file)

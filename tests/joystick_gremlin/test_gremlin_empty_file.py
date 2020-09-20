@@ -7,7 +7,7 @@ class TestGremlin_No_Devices(unittest.TestCase):
     }
 
     def setUp(self):
-        self.file = gremlin.JoystickGremlin("./tests/data/gremlin_no_devices.xml")
+        self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_no_devices.xml")
 
     def test_number_devices(self):
         self.assertEqual(0,self.file.getDeviceCount())
