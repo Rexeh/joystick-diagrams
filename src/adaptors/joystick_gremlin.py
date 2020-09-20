@@ -1,9 +1,7 @@
 from xml.dom import minidom
 import functions.helper as helper
 
-class Gremlin:
-## Adaptor for Joystick Gremlin
-
+class JoystickGremlin:
     no_bind_text = "NO BIND"
 
     def __init__(self,filepath):
@@ -15,6 +13,7 @@ class Gremlin:
         self.device = None
         self.currentdevice = None
         self.currentMode = None
+        self.currentInherit = None
         self.inherit = None
         self.buttons = None
         self.buttonArray = None
@@ -69,7 +68,7 @@ class Gremlin:
                                                         button:desc
                                                         })
                         elif self.formattedButtons[item][profile]['Buttons'][button] == self.no_bind_text:
-                                self.formattedButtons[item][profile]['Buttons'][button] = desc
+                            self.formattedButtons[item][profile]['Buttons'][button] = desc
                     helper.log("Ending Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']), 'debug')
 
     def getDevices(self):

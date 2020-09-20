@@ -1,154 +1,205 @@
-from xml.dom import minidom
+'''DCS World Lua Config Parser for use with Joystick Diagrams'''
 import functions.helper as helper
 import os
 import ply.lex as lex
 import ply.yacc as yacc
-import json
-import pprint
 from pathlib import Path
+import pprint
 
 dirSift = '_easy'
 inherit = 'Default'
-t_LCURLY = r"\{"
-t_RCURLY = r"\}"
-t_LBRACE = r"\["
-t_RBRACE = r"\]"
-t_COMMA = r"\,"
-t_EQUALS = r"\="
 
-def t_DOUBLE_VAL(t):
-    r"(\+|\-)?[0-9]+\.[0-9]+"
-    t.value = float(t.value)
-    return t
-
-def t_NUMBER(t):
-    r"[0-9]+"
-    t.value = int(t.value)
-    return t
-
-def t_STRING(t):
-    r"\"[\w|\/|\(|\)|\-|\:|\+|\s]+\""
-    t.value = t.value[1:-1]
-    return t
-
-def t_TRUE(t):
-    r'(true)'
-    t.value = True
-    return t
-
-def t_FALSE(t):
-    r'(false)'
-    t.value = False
-    return t
-
-t_ignore = " \t\n"
-
-def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
-
-# Parsing rules
-
-def p_dict(t):
-    """dict : LCURLY dvalues RCURLY"""
-    t[0] = t[2]
-
-def p_dvalues(t):
-    """dvalues : dvalue
-            | dvalue COMMA
-            | dvalue COMMA dvalues"""
-    t[0] = t[1]
-    if len(t) == 4:
-        t[0].update(t[3])
-        
-def p_key_expression(t):
-    """key : LBRACE NUMBER RBRACE
-        | LBRACE STRING RBRACE"""
-    t[0] = t[2]
-
-def p_value_expression(t):
-    """ dvalue : key EQUALS STRING
-    | key EQUALS boolean
-    | key EQUALS DOUBLE_VAL
-    | key EQUALS NUMBER
-    | key EQUALS dict """
-    t[0] = {t[1]: t[3]}
-
-def p_boolean(p):
-    ''' boolean : TRUE
-                | FALSE
-    '''
-    p[0] = p[1]
-
-def p_error(t):
-    print("Syntax error at '%s'" % t.value)
 
 # JOY_BTNX = BUTTON
 # JOY_Z/Y/X = AXIS
 
-# ["added"] = {
-# 				[1] = {
-# 					["filter"] = {
-# 						["curvature"] = {
-# 							[1] = 0,
-# 						},
-# 						["deadzone"] = 0,
-# 						["invert"] = true,
-# 						["saturationX"] = 1,
-# 						["saturationY"] = 1,
-# 						["slider"] = false,
-# 					},
-# 					["key"] = "JOY_RX",
+class DCSWorld_Parser:
 
-class DCS_World:
-
-    BaseDirectory = './tests/data/DCS_World/input'
-    JoystickListing = {}
-    SeekDirectories = 'joystick'
-
-    ## Get Input Directory
-    DCS_Profiles = os.listdir(BaseDirectory)
-    ## Remove _EASY directories
-    Filtered_Profiles = list(filter(lambda x: False if dirSift in x else True, DCS_Profiles))
-
-    print(Filtered_Profiles)
-
-    CurrentProfileDirectory = os.path.join(BaseDirectory, Filtered_Profiles[7],SeekDirectories)
-
-    # Try get Joystick Directory
-    try:
-        Profile_Devices = os.listdir(os.path.join(BaseDirectory, Filtered_Profiles[7],SeekDirectories))
-    except:
-        print("Error Profile does not have joystick directory")
-
-    ## IF PRFILE DEVICE IS A DIRECTORY
-        # HANDLE ERROR
-        
-    ## ASSUMING DIR FOUND - Process the Device Names
-    print("Number of devices for Profile: {}".format(len(Profile_Devices)))
-    for profile in Profile_Devices:
-        JoystickListing.update({
-            profile[:-48] : profile
-        })
+    BaseDirectory = './tests/data/DCS_World'
     
-    ## For Each Device, Go Parse the Stuff
-    print(JoystickListing)
+    SeekDirectories = 'joystick'
+    finalDic = {}
 
-    for joystick_name, joystick_file in JoystickListing.items():
-        print(joystick_name)
-        print(joystick_file)
-        try:
-            file = Path(os.path.join(CurrentProfileDirectory, joystick_file)).read_text()
-        except Exception as error:
-            print("File not found: {}".format(error))
+    # EASY MODE PROFILE FILTER
+    remove_easy_modes = True
+    easy_mode = '_easy'
 
-        #Fix this later hack to get parser working
-        file = file.replace('local diff = ', '')
-        file = file.replace('return diff', '')
+    def __init__(self, path):
+        self.path = path
+        self.base_directory = self.__validateBaseDirectory()
+        self.valid_profiles = self.__validateProfiles()
+        self.joystick_listing = {}
+    
+    def __validateBaseDirectory(self):
+        '''validate the base directory structure, make sure there are files.'''
+        #TODO Maybe switch to ScanDir?
+        if 'Config' in os.listdir(self.path):
+            try:
+                return os.listdir(os.path.join(self.path, 'config', 'input'))
+            except FileNotFoundError:
+                raise FileNotFoundError("DCS: No input directory found")
+        else:
+            raise FileNotFoundError("DCS: No Config Folder found in DCS Folder.")
  
-        print("Input File: {}".format(file))
+    def __validateProfiles(self):
+        '''
+        Validate Profiles Routine
+        '''
+        if len(self.base_directory)>0:
+            if self.remove_easy_modes:
+                self.base_directory= list(filter(lambda x: False if self.easy_mode in x else True, self.base_directory))
+            valid_items = []
+            for item in self.base_directory:
+                valid = self.__validateProfile(item)
+                if valid:
+                    valid_items.append(item)
+                else:
+                    helper.log("DCS: Profile {} has no joystick directory files".format(item))
+        else:
+            raise FileExistsError("DCS: No profiles exist in Input directory!")
 
+        return valid_items
+
+    def __validateProfile(self, item):
+        '''
+        Validate Inidividual Profile
+        Return Valid Profile
+        '''
+        #TODO add additional checking for rogue dirs/no files etc
+        if 'joystick' in os.listdir(os.path.join(self.path, 'config', 'input', item)):
+            return os.listdir(os.path.join(self.path, 'config', 'input', item, 'joystick'))
+        else:
+            return False
+
+    def getValidatedProfiles(self):
+        ''' Expose Valid Profiles only to UI '''
+        return self.valid_profiles
+
+    def processProfiles(self):
+        assert len(self.valid_profiles) != 0, "DCS: There are no valid profiles to process"
+        for profile in self.valid_profiles:
+            self.fq_path = os.path.join(self.path,'config', 'input', profile,'joystick')
+            self.profile_devices = os.listdir(os.path.join(self.fq_path))
+            for item in self.profile_devices:
+                self.joystick_listing.update({
+                    item[:-48] : item
+                })
+            for joystick_device, joystick_file in self.joystick_listing.items():
+                print(joystick_device)
+                try:
+                    self.file = Path(os.path.join(self.fq_path, joystick_file)).read_text()
+                    self.file = self.file.replace('local diff = ', '') ## CLEAN UP
+                    self.file = self.file.replace('return diff', '') ## CLEAN UP
+                except FileNotFoundError:
+                    print("File not found")
+
+                data = self.parseFile()
+                
+                writeVal = False
+                buttonArray = {}
+
+                if 'keyDiffs' in data.keys():
+                    for value in data['keyDiffs'].values():
+
+                        for item, attribute in value.items():
+
+                            if item=='name':
+                                name = attribute
+                            if item=='added':
+                                button = attribute[1]['key']
+                                writeVal = True
+                        
+                        if writeVal:
+                            buttonArray.update({
+                                button : name
+                            })
+                            writeVal = False
+
+                    helper.updateDeviceArray(
+                        self.finalDic,
+                        joystick_device,
+                        profile,
+                        False,
+                        buttonArray
+                        )
+        return self.finalDic
+
+    def parseFile(self):
         tokens = ('LCURLY', 'RCURLY', 'STRING', 'NUMBER', 'LBRACE', 'RBRACE', 'COMMA', 'EQUALS', 'TRUE', 'FALSE', 'DOUBLE_VAL')
+
+        t_LCURLY = r"\{"
+        t_RCURLY = r"\}"
+        t_LBRACE = r"\["
+        t_RBRACE = r"\]"
+        t_COMMA = r"\,"
+        t_EQUALS = r"\="
+
+        def t_DOUBLE_VAL(t):
+            r"(\+|\-)?[0-9]+\.[0-9]+"
+            t.value = float(t.value)
+            return t
+
+        def t_NUMBER(t):
+            r"[0-9]+"
+            t.value = int(t.value)
+            return t
+
+        def t_STRING(t):
+            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\s]+\""
+            t.value = t.value[1:-1]
+            return t
+
+        def t_TRUE(t):
+            r'(true)'
+            t.value = True
+            return t
+
+        def t_FALSE(t):
+            r'(false)'
+            t.value = False
+            return t
+
+        t_ignore = " \t\n"
+
+        def t_error(t):
+            print("Illegal character '%s'" % t.value[0])
+            t.lexer.skip(1)
+
+        # Parsing rules
+
+        def p_dict(t):
+            """dict : LCURLY dvalues RCURLY"""
+            t[0] = t[2]
+
+        def p_dvalues(t):
+            """dvalues : dvalue
+                    | dvalue COMMA
+                    | dvalue COMMA dvalues"""
+            t[0] = t[1]
+            if len(t) == 4:
+                t[0].update(t[3])
+                
+        def p_key_expression(t):
+            """key : LBRACE NUMBER RBRACE
+                | LBRACE STRING RBRACE"""
+            t[0] = t[2]
+
+        def p_value_expression(t):
+            """ dvalue : key EQUALS STRING
+            | key EQUALS boolean
+            | key EQUALS DOUBLE_VAL
+            | key EQUALS NUMBER
+            | key EQUALS dict """
+            t[0] = {t[1]: t[3]}
+
+        def p_boolean(p):
+            ''' boolean : TRUE
+                        | FALSE
+            '''
+            p[0] = p[1]
+
+        def p_error(t):
+            print("Syntax error at '%s'" % t.value)
 
         # Build the lexer
         lexer = lex.lex()
@@ -157,14 +208,6 @@ class DCS_World:
         parser = yacc.yacc()
 
         # Parse the data
-        data = parser.parse(file)
+        data = parser.parse(self.file)
 
-        print(data)
-
-        # pp.pprint(data['keyDiffs'])
-
-        # for i in data['keyDiffs'].values():
-        # 	print (i['name'])
-        # 	if 'added' in i:
-        # 		print (i['added'][1]['key'])
-
+        return data

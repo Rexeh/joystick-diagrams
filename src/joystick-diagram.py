@@ -1,5 +1,4 @@
 import adaptors.gremlin as gremlin
-import config
 import functions.helper as helper
 import tkinter as tk
 import webbrowser
@@ -10,7 +9,6 @@ from tkinter.filedialog import askopenfilename
 import subprocess
 from tkinter import ttk
 import os
-import logging
 
 root = tk.Tk()
 text = tk.Text(root)
