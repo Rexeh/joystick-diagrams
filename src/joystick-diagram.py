@@ -1,4 +1,5 @@
-import adaptors.gremlin as gremlin
+import adaptors.joystick_gremlin as gremlin
+import adaptors.dcs_world as dcs_world
 import functions.helper as helper
 import tkinter as tk
 import webbrowser
@@ -9,6 +10,7 @@ from tkinter.filedialog import askopenfilename
 import subprocess
 from tkinter import ttk
 import os
+import pprint
 
 root = tk.Tk()
 text = tk.Text(root)
@@ -38,19 +40,17 @@ bugIcon = bugIcon.resize((20,20), Image.ANTIALIAS)
 photo = ImageTk.PhotoImage(githubIcon)
 bug = ImageTk.PhotoImage(bugIcon)
 
+pp = pprint.PrettyPrinter()
+
 # Functions
 
-def exportGremlin():
-    parsedConfig = gremlin.Gremlin(selectedFile)
-
-    devices = parsedConfig.createDictionary()
-
+def export_parsed_config(devices, parser_type):
     global runState
     runState = []
 
     for joystick in devices:
         for mode in devices[joystick]:
-            success = helper.exportDevice(devices, joystick, mode)
+            success = helper.exportDevice(parser_type, devices, joystick, mode)
             helper.log(success, 'debug')
             # Log failures
             if success[0] == False and success[1] not in runState:
@@ -63,6 +63,11 @@ def exportGremlin():
         errorText = errorText+'\n\n'+"No diagrams have been created for the above"
         message(errorText)
         helper.log(errorText, 'warning')
+
+def exportGremlin():
+    parsedConfig = gremlin.JoystickGremlin(selectedFile)
+    devices = parsedConfig.createDictionary()
+    export_parsed_config(devices, 'JG')
 
 def message(msg):
     popup = tk.Tk()
@@ -82,7 +87,8 @@ def message(msg):
     b.pack()
 
 def clicked():
-    selected_item_label.configure(text=nlist.get("active"))
+    pass
+    #selected_item_label.configure(text=nlist.get("active"))
 
 def openLink():
     webbrowser.open('https://github.com/Rexeh/joystick-diagrams')
@@ -100,6 +106,18 @@ def chooseFile():
     step_2_secondary.config(text=file)
     #selectedFile.grid(row=3, column=0)
     step_2_button.config(state="active")
+
+def chooseDCSFolder():
+    file = tk.filedialog.askdirectory()
+    global selected_dcs_folder
+    selected_dcs_folder = file
+
+    global dcs_parser
+    dcs_parser = dcs_world.DCSWorld_Parser(file)
+
+def exportDCS():
+    data = dcs_parser.processProfiles()
+    export_parsed_config(data, 'DCS')
 
 def openDiagramsDirectory():
     helper.log(os.getcwd(), 'error')
@@ -130,23 +148,88 @@ separator.pack()
 bottomFrame.pack()
 
 #Remove DCS panel for now
-tabControl.hide(1)
 tabControl.hide(2)
 
-version = tk.Label(bottomFrame, text="Version: ALPHA",font=buttonFont, anchor="e", compound = "left", bg=app_background)
+# GENERAL UI
+
+version = tk.Label(bottomFrame, text=helper.getVersion(),font=buttonFont, anchor="e", compound = "left", bg=app_background)
 info = tk.Label(bottomFrame, text="This is an early version, please report bugs and I will fix them!", anchor="w" ,font=buttonFont,compound = "left", state="disabled", bg="white")
 gremlinLogo = tk.Button(topFrame, text="Support us on GitHub", image=photo, bg="white",anchor="e",padx=(15), font=buttonFont,command=openLink,compound = "left", width=160)
 bugLogo = tk.Button(topFrame, text="Got a Bug? Feature?", image=bug,bg="white",anchor="e", padx=(15), font=buttonFont, command=openBugs,compound = "left", width=160)
 
+gremlinLogo.grid(row=0, column=3)
+bugLogo.grid(row=0, column=2)
+version.grid(row=5,column=3, sticky="E")
+info.grid(row=5,column=1)
+
+# JOYSTICK GREMLIN UI ELEMENTS
 step_1_info = tk.Label(jg_tab, text="Step 1: Select your Gremlin .XML File",anchor="e",font=largeFont, compound = "left", state="disabled",bg="white", pady=20)
 chooseFile = tk.Button(jg_tab, text="Choose Gremlin File",font=buttonFont, command=chooseFile,bg="white")
+step_2_info = tk.Label(
+                jg_tab,
+                text="Step 2: Run Export",
+                font=largeFont,
+                state="disabled",
+                bg="white",
+                compound = "left",
+                pady=20,
+                anchor="w"
+                )
+step_2_button = tk.Button(
+                jg_tab,
+                text="Export profiles",
+                bg="white",
+                anchor="e",
+                padx=(15),
+                font=buttonFont,
+                command=exportGremlin,
+                compound = "left",
+                state="disabled"
+                )
+step_2_secondary = tk.Label(
+                jg_tab,
+                text="This will export all found Joystick Gremlin profiles for all devices.",
+                compound = "left",
+                font=buttonFont,
+                bg="white"
+                )
+step_3_info = tk.Label(
+                jg_tab,
+                text="Step 3: View Diagrams",
+                font=largeFont,
+                compound = "left",
+                state="disabled",
+                bg="white",
+                pady=20
+                )
+step_3_secondary = tk.Label(
+                jg_tab,
+                text="View your exported diagrams in the Diagrams folder",
+                font=buttonFont,
+                compound = "left",
+                bg="white",
+                )
+step_3_button = tk.Button(
+                jg_tab,
+                text="Open diagrams folder",
+                bg="white",
+                anchor="e",
+                padx=(15),
+                font=buttonFont,
+                command=openDiagramsDirectory,
+                compound = "left"
+                )
 
-## LISTBOX TEST
-nlist = tk.Listbox(dcs_tab, selectmode='MULTIPLE', selectbackground="white", font=buttonFont)
+# DCS WORLD UI ELEMENTS
 
-items = [1,2,3,4,5]
-for i in items:
-    nlist.insert(i, ("File_name_{}.xml").format(i))
+dcs_world_file_select_button = tk.Button(dcs_tab, text="Choose DCS Saved Games Directory",font=buttonFont, command=chooseDCSFolder,bg="white")
+dcs_world_file_export_button = tk.Button(dcs_tab, text="Export Profiles",font=buttonFont, command=exportDCS,bg="white")
+
+#nlist = tk.Listbox(dcs_tab, selectmode='MULTIPLE', selectbackground="white", font=buttonFont)
+
+#items = [1,2,3,4,5]
+#for i in items:
+#    nlist.insert(i, ("File_name_{}.xml").format(i))
 
 selected_item_button = tk.Button(
                 dcs_tab,
@@ -166,72 +249,13 @@ selected_item_label = tk.Label(
                 bg="white"
                 )
 
-step_2_info = tk.Label(
-                jg_tab,
-                text="Step 2: Run Export",
-                font=largeFont,
-                state="disabled",
-                bg="white",
-                compound = "left",
-                pady=20,
-                anchor="w"
-                )
 
-step_2_button = tk.Button(
-                jg_tab,
-                text="Export profiles",
-                bg="white",
-                anchor="e",
-                padx=(15),
-                font=buttonFont,
-                command=exportGremlin,
-                compound = "left",
-                state="disabled"
-                )
 
-step_2_secondary = tk.Label(
-                jg_tab,
-                text="This will export all found Joystick Gremlin profiles for all devices.",
-                compound = "left",
-                font=buttonFont,
-                bg="white"
-                )
-
-step_3_info = tk.Label(
-                jg_tab,
-                text="Step 3: View Diagrams",
-                font=largeFont,
-                compound = "left",
-                state="disabled",
-                bg="white",
-                pady=20
-                )
-
-step_3_secondary = tk.Label(
-                jg_tab,
-                text="View your exported diagrams in the Diagrams folder",
-                font=buttonFont,
-                compound = "left",
-                bg="white",
-                )
-
-step_3_button = tk.Button(
-                jg_tab,
-                text="Open diagrams folder",
-                bg="white",
-                anchor="e",
-                padx=(15),
-                font=buttonFont,
-                command=openDiagramsDirectory,
-                compound = "left"
-                )
-
-nlist.pack()
+#nlist.pack()
+dcs_world_file_select_button.pack()
+dcs_world_file_export_button.pack()
 selected_item_button.pack()
 selected_item_label.pack()
-
-gremlinLogo.grid(row=0, column=3)
-bugLogo.grid(row=0, column=2)
 
 step_1_info.grid(row=1, column=0, sticky="W")
 chooseFile.grid(row=1, column=1)
@@ -244,8 +268,7 @@ step_3_info.grid(row=4, column=0, sticky="W")
 step_3_button.grid(row=4, column=1, sticky="W")
 step_3_secondary.grid(row=5, column=0, sticky="W")
 
-version.grid(row=5,column=3, sticky="E")
-info.grid(row=5,column=1)
+
 
 helper.log(helper.getVersion(),'warning')
 root.mainloop()

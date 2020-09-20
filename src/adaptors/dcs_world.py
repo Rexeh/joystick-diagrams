@@ -5,6 +5,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 from pathlib import Path
 import pprint
+import re
 
 dirSift = '_easy'
 inherit = 'Default'
@@ -75,6 +76,12 @@ class DCSWorld_Parser:
         ''' Expose Valid Profiles only to UI '''
         return self.valid_profiles
 
+    def convert_button_format(self, button):
+        ''' Convert DCS Buttons to match expected "BUTTON_X" format '''
+        new = button.split('_')[1]
+        rep = new.replace("BTN", "BUTTON_")
+        return rep
+
     def processProfiles(self):
         assert len(self.valid_profiles) != 0, "DCS: There are no valid profiles to process"
         for profile in self.valid_profiles:
@@ -87,16 +94,22 @@ class DCSWorld_Parser:
             for joystick_device, joystick_file in self.joystick_listing.items():
                 print(joystick_device)
                 try:
-                    self.file = Path(os.path.join(self.fq_path, joystick_file)).read_text()
-                    self.file = self.file.replace('local diff = ', '') ## CLEAN UP
-                    self.file = self.file.replace('return diff', '') ## CLEAN UP
+                    if os.path.isdir(os.path.join(self.fq_path, joystick_file)):
+                        break
+                    else:
+                        self.file = Path(os.path.join(self.fq_path, joystick_file)).read_text(encoding="utf-8")
+                        self.file = self.file.replace('local diff = ', '') ## CLEAN UP
+                        self.file = self.file.replace('return diff', '') ## CLEAN UP
                 except FileNotFoundError:
                     print("File not found")
 
+                print ("Profile is {}".format(profile))
+                print ("Device is {}".format(joystick_device))
                 data = self.parseFile()
                 
                 writeVal = False
                 buttonArray = {}
+
 
                 if 'keyDiffs' in data.keys():
                     for value in data['keyDiffs'].values():
@@ -106,7 +119,7 @@ class DCSWorld_Parser:
                             if item=='name':
                                 name = attribute
                             if item=='added':
-                                button = attribute[1]['key']
+                                button = self.convert_button_format(attribute[1]['key'])
                                 writeVal = True
                         
                         if writeVal:
@@ -123,7 +136,7 @@ class DCSWorld_Parser:
                         buttonArray
                         )
         return self.finalDic
-        
+
     def parseFile(self):
         tokens = ('LCURLY', 'RCURLY', 'STRING', 'NUMBER', 'LBRACE', 'RBRACE', 'COMMA', 'EQUALS', 'TRUE', 'FALSE', 'DOUBLE_VAL')
 
@@ -145,7 +158,7 @@ class DCSWorld_Parser:
             return t
 
         def t_STRING(t):
-            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\s]+\""
+            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\s]+\""
             t.value = t.value[1:-1]
             return t
 
@@ -206,7 +219,8 @@ class DCSWorld_Parser:
         lexer = lex.lex(
             debug=False,
             optimize=0,
-            lextab='dcs_world_lex'
+            lextab='dcs_world_lex',
+            reflags=re.UNICODE | re.VERBOSE
             )
 
         # Build the parser
@@ -216,6 +230,9 @@ class DCSWorld_Parser:
             )
 
         # Parse the data
-        data = parser.parse(self.file)
+        try:
+            data = parser.parse(self.file)
+        except Exception as error:
+            print(data)
 
         return data
