@@ -7,17 +7,17 @@ class TestDCS_Paths(unittest.TestCase):
 
     def test_no_config_path(self):
         with self.assertRaises(Exception) as context:
-            dcs.DCSWorld_Parser('./tests/data/dcs_world/Invalid_DCS_World_No_Config')
+            dcs.DCSWorld_Parser('./tests/data/dcs_world/invalid_dcs_world_no_config')
         self.assertTrue('DCS: No Config Folder found in DCS Folder' in str(context.exception))
 
     def test_no_joystick_directory(self):
         with self.assertRaises(Exception) as context:
-            dcs.DCSWorld_Parser('./tests/data/dcs_world/Invalid_DCS_World_No_Input')
+            dcs.DCSWorld_Parser('./tests/data/dcs_world/invalid_dcs_world_no_input')
         self.assertTrue('DCS: No input directory found' in str(context.exception))
 
     def test_no_files_in_directory(self):
         with self.assertRaises(Exception) as context:
-            dcs.DCSWorld_Parser('./tests/data/dcs_world/Invalid_DCS_World_No_Profiles')
+            dcs.DCSWorld_Parser('./tests/data/dcs_world/invalid_dcs_world_no_profiles')
         self.assertTrue('DCS: No profiles exist in Input directory!' in str(context.exception))
 if __name__ == '__main__':
     unittest.main()

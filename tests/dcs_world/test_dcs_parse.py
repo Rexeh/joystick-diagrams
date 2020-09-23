@@ -5,7 +5,7 @@ import pprint
 class TestDCS_Parse_Test(unittest.TestCase):
 
     def setUp(self):
-        self.dcs_instance = dcs.DCSWorld_Parser('./tests/data/dcs_world/Valid_DCS_World_Directory')
+        self.dcs_instance = dcs.DCSWorld_Parser('./tests/data/dcs_world/valid_dcs_world_directory')
 
     def test_no_profiles_selected_no_easy(self):
         '''Test default no selection, with easy modes disabled (excluded)'''
