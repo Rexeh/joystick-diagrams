@@ -1,36 +1,24 @@
 '''DCS World Lua Config Parser for use with Joystick Diagrams'''
-import functions.helper as helper
 import os
+import re
+from pathlib import Path
 import ply.lex as lex
 import ply.yacc as yacc
-from pathlib import Path
-import pprint
-import re
+import functions.helper as helper
+import adaptors.joystick_diagram_interface as jdi
 
-dirSift = '_easy'
-inherit = 'Default'
+class DCSWorld_Parser(jdi.JDinterface):
 
-
-# JOY_BTNX = BUTTON
-# JOY_Z/Y/X = AXIS
-
-class DCSWorld_Parser:
-
-    BaseDirectory = './tests/data/DCS_World'
-    
-    SeekDirectories = 'joystick'
-    finalDic = {}
-
-    # EASY MODE PROFILE FILTER
-    remove_easy_modes = True
-    easy_mode = '_easy'
-
-    def __init__(self, path):
+    def __init__(self, path, easy_modes=True):
+        jdi.JDinterface.__init__(self)
         self.path = path
+        self.remove_easy_modes = easy_modes
+        self.easy_mode = '_easy'
         self.base_directory = self.__validateBaseDirectory()
         self.valid_profiles = self.__validateProfiles()
         self.joystick_listing = {}
-    
+        self.finalDic = {}
+
     def __validateBaseDirectory(self):
         '''validate the base directory structure, make sure there are files.'''
         #TODO Maybe switch to ScanDir?
@@ -82,8 +70,10 @@ class DCSWorld_Parser:
         rep = new.replace("BTN", "BUTTON_")
         return rep
 
-    def processProfiles(self):
+    def processProfiles(self, profile_list=[]):
         assert len(self.valid_profiles) != 0, "DCS: There are no valid profiles to process"
+        if len(profile_list)>0:
+            self.valid_profiles = profile_list
         for profile in self.valid_profiles:
             self.fq_path = os.path.join(self.path,'config', 'input', profile,'joystick')
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
@@ -109,7 +99,6 @@ class DCSWorld_Parser:
                 
                 writeVal = False
                 buttonArray = {}
-
 
                 if 'keyDiffs' in data.keys():
                     for value in data['keyDiffs'].values():

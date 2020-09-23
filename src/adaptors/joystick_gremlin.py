@@ -1,12 +1,14 @@
+'''Joystick Gremlin (Version ~13) XML Parser for use with Joystick Diagrams'''
 from xml.dom import minidom
 import functions.helper as helper
+import adaptors.joystick_diagram_interface as jdi
 
-class JoystickGremlin:
-    no_bind_text = "NO BIND"
+class JoystickGremlin(jdi.JDinterface):
 
     def __init__(self,filepath):
     ## TRY FIND PATH
-        self.file = minidom.parse(filepath)
+        jdi.JDinterface.__init__(self)
+        self.file = minidom.parse(filepath) ## Remove from instantiation > Make testable function with error handling (FolloW DCS_World Pattern)
         self.modes = None
         self.mode = None
         self.devices = None
