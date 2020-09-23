@@ -22,8 +22,10 @@ class DCSWorld_Parser(jdi.JDinterface):
     def __validateBaseDirectory(self):
         '''validate the base directory structure, make sure there are files.'''
         #TODO Maybe switch to ScanDir?
+        print(os.listdir(self.path))
         if 'Config' in os.listdir(self.path):
             try:
+                print(os.listdir(os.path.join(self.path, 'config', 'input')))
                 return os.listdir(os.path.join(self.path, 'config', 'input'))
             except FileNotFoundError:
                 raise FileNotFoundError("DCS: No input directory found")
