@@ -13,7 +13,7 @@ class DCSWorld_Parser(jdi.JDinterface):
         jdi.JDinterface.__init__(self)
         self.path = path
         self.remove_easy_modes = easy_modes
-        self.easy_mode = '_easy'
+        self.__easy_mode = '_easy'
         self.base_directory = self.__validateBaseDirectory()
         self.valid_profiles = self.__validateProfiles()
         self.joystick_listing = {}
@@ -35,8 +35,6 @@ class DCSWorld_Parser(jdi.JDinterface):
         Validate Profiles Routine
         '''
         if len(self.base_directory)>0:
-            if self.remove_easy_modes:
-                self.base_directory= list(filter(lambda x: False if self.easy_mode in x else True, self.base_directory))
             valid_items = []
             for item in self.base_directory:
                 valid = self.__validateProfile(item)
@@ -62,7 +60,10 @@ class DCSWorld_Parser(jdi.JDinterface):
 
     def getValidatedProfiles(self):
         ''' Expose Valid Profiles only to UI '''
-        return self.valid_profiles
+        if self.remove_easy_modes:
+                return list(filter(lambda x: False if self.__easy_mode in x else True, self.valid_profiles))
+        else:
+            return self.valid_profiles
 
     def convert_button_format(self, button):
         ''' Convert DCS Buttons to match expected "BUTTON_X" format '''
@@ -71,10 +72,15 @@ class DCSWorld_Parser(jdi.JDinterface):
         return rep
 
     def processProfiles(self, profile_list=[]):
-        assert len(self.valid_profiles) != 0, "DCS: There are no valid profiles to process"
         if len(profile_list)>0:
-            self.valid_profiles = profile_list
-        for profile in self.valid_profiles:
+            self.profiles_to_process = profile_list
+        else:
+            self.profiles_to_process = self.getValidatedProfiles()
+            print(self.profiles_to_process)
+        assert len(self.profiles_to_process) != 0, "DCS: There are no valid profiles to process"
+        if len(profile_list)>0:
+            self.profiles_to_process = profile_list
+        for profile in self.profiles_to_process:
             self.fq_path = os.path.join(self.path,'config', 'input', profile,'joystick')
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
             for item in self.profile_devices:
@@ -82,7 +88,6 @@ class DCSWorld_Parser(jdi.JDinterface):
                     item[:-48] : item
                 })
             for joystick_device, joystick_file in self.joystick_listing.items():
-                print(joystick_device)
                 try:
                     if os.path.isdir(os.path.join(self.fq_path, joystick_file)):
                         break
@@ -91,11 +96,11 @@ class DCSWorld_Parser(jdi.JDinterface):
                         self.file = self.file.replace('local diff = ', '') ## CLEAN UP
                         self.file = self.file.replace('return diff', '') ## CLEAN UP
                 except FileNotFoundError:
-                    print("File not found")
+                    raise FileExistsError("DCS: File {} no longer found - It has been moved/deleted from directory".format(joystick_file))
 
-                print ("Profile is {}".format(profile))
-                print ("Device is {}".format(joystick_device))
                 data = self.parseFile()
+
+          
                 
                 writeVal = False
                 buttonArray = {}
@@ -124,6 +129,8 @@ class DCSWorld_Parser(jdi.JDinterface):
                         False,
                         buttonArray
                         )
+        
+        print(self.finalDic)
         return self.finalDic
 
     def parseFile(self):

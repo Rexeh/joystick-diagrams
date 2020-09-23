@@ -372,8 +372,14 @@ class Ui_MainWindow(object):
         self.jg_profile_list = QtWidgets.QListWidget(self.jg_tab)
         self.jg_profile_list.setEnabled(True)
         self.jg_profile_list.setGeometry(QtCore.QRect(20, 171, 256, 171))
-        self.jg_profile_list.setStyleSheet("color:white\n"
-"")
+        self.jg_profile_list.setStyleSheet("QListView::item {\n"
+"color: white\n"
+"}\n"
+"\n"
+"QListView::item:selected {\n"
+"background: blue;\n"
+"color: white\n"
+"}")
         self.jg_profile_list.setAlternatingRowColors(False)
         self.jg_profile_list.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.jg_profile_list.setObjectName("jg_profile_list")
@@ -406,7 +412,7 @@ class Ui_MainWindow(object):
         self.jg_option_inherit_checkbox.setChecked(True)
         self.jg_option_inherit_checkbox.setObjectName("jg_option_inherit_checkbox")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("icon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("images/3rd_party/jg.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.parser_selector.addTab(self.jg_tab, icon1, "")
         self.dcs_tab = QtWidgets.QWidget()
         self.dcs_tab.setObjectName("dcs_tab")
@@ -442,7 +448,7 @@ class Ui_MainWindow(object):
         self.dcs_profiles_list.addItem(item)
         self.label_7 = QtWidgets.QLabel(self.dcs_tab)
         self.label_7.setEnabled(True)
-        self.label_7.setGeometry(QtCore.QRect(20, 150, 241, 16))
+        self.label_7.setGeometry(QtCore.QRect(20, 130, 241, 16))
         self.label_7.setStyleSheet("color:white")
         self.label_7.setObjectName("label_7")
         self.dcs_easy_mode_checkbox = QtWidgets.QCheckBox(self.dcs_tab)
@@ -450,8 +456,13 @@ class Ui_MainWindow(object):
         self.dcs_easy_mode_checkbox.setStyleSheet("color: white")
         self.dcs_easy_mode_checkbox.setChecked(True)
         self.dcs_easy_mode_checkbox.setObjectName("dcs_easy_mode_checkbox")
+        self.dcs_selected_directory_label = QtWidgets.QLabel(self.dcs_tab)
+        self.dcs_selected_directory_label.setGeometry(QtCore.QRect(20, 150, 261, 20))
+        self.dcs_selected_directory_label.setStyleSheet("font-size: 11px;\n"
+"color:white;")
+        self.dcs_selected_directory_label.setObjectName("dcs_selected_directory_label")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("DCS-1.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap("images/3rd_party/dcs.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.parser_selector.addTab(self.dcs_tab, icon2, "")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
@@ -491,6 +502,7 @@ class Ui_MainWindow(object):
         self.application_information_textbrowser.setObjectName("application_information_textbrowser")
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
         self.label_8.setGeometry(QtCore.QRect(10, 580, 31, 16))
+        self.label_8.setStyleSheet("color: white;")
         self.label_8.setObjectName("label_8")
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
         self.label_9.setGeometry(QtCore.QRect(20, 43, 141, 30))
@@ -510,7 +522,7 @@ class Ui_MainWindow(object):
         self.actionVersion_Info.setObjectName("actionVersion_Info")
 
         self.retranslateUi(MainWindow)
-        self.parser_selector.setCurrentIndex(0)
+        self.parser_selector.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -552,6 +564,7 @@ class Ui_MainWindow(object):
         self.dcs_profiles_list.setSortingEnabled(__sortingEnabled)
         self.label_7.setText(_translate("MainWindow", "Available DCS Profiles"))
         self.dcs_easy_mode_checkbox.setText(_translate("MainWindow", "Exclude \"Easy\" Mode Profiles"))
+        self.dcs_selected_directory_label.setText(_translate("MainWindow", "c:test"))
         self.parser_selector.setTabText(self.parser_selector.indexOf(self.dcs_tab), _translate("MainWindow", "DCS World"))
         self.label_2.setText(_translate("MainWindow", "Do you have a game you want to see included?"))
         self.parser_selector.setTabText(self.parser_selector.indexOf(self.tab), _translate("MainWindow", "+"))
