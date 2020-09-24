@@ -1,7 +1,7 @@
 language: python
 python:
   - "3.8"
-
+sudo: required
 addons:
   apt:
     packages:
@@ -9,6 +9,11 @@ addons:
     - libxkbcommon-x11-0
 services: xvfb
 dist: xenial  
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y xvfb herbstluftwm
+  
 install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)/src"
   - pip install pytest-xvfb
@@ -17,8 +22,14 @@ install:
   - pip install pytest-cov
   - pip install pyqt5
   - pip install pytest-qt
+  - "export DISPLAY=:99.0"
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX +render -noreset"
+  - sleep 3
   - pip install -e .
 
+before_script:
+  - "herbstluftwm &"
+  - sleep 1
 # command to run tests
 script:
   - pytest --cov=src tests/
