@@ -9,7 +9,7 @@ install:
   - pip install cx-freeze
   - pip install ply
   - pip install pytest-cov
-  = pip install pytest-qt
+  - pip install pytest-qt
   - pip install -e .
 
 # command to run tests
