@@ -7,7 +7,8 @@ addons:
     packages:
     - x11-utils
     - libxkbcommon-x11-0
-  
+services: xvfb
+dist: xenial  
 install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)/src"
   - pip install cx-freeze
