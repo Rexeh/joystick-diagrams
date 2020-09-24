@@ -83,7 +83,7 @@ class DCSWorld_Parser(jdi.JDinterface):
         if len(profile_list)>0:
             self.profiles_to_process = profile_list
         for profile in self.profiles_to_process:
-            self.fq_path = os.path.join(self.path,'config', 'input', profile,'joystick')
+            self.fq_path = os.path.join(self.path,'Config', 'Input', profile,'joystick')
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
             for item in self.profile_devices:
                 self.joystick_listing.update({
