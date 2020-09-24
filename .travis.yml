@@ -9,6 +9,7 @@ install:
   - pip install cx-freeze
   - pip install ply
   - pip install pytest-cov
+  - pip install pyqt5
   - pip install pytest-qt
   - pip install -e .
 
