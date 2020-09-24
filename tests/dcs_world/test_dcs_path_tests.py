@@ -2,6 +2,9 @@ import unittest
 import adaptors.dcs_world as dcs
 import os
 import pytest
+import tempfile
+import shutil
+
 class TestDCS_Paths(unittest.TestCase):
 
     def setUp(self):
@@ -18,6 +21,9 @@ class TestDCS_Paths(unittest.TestCase):
         self.assertTrue('DCS: No input directory found' in str(context.exception))
 
     def test_no_files_in_directory(self):
+        
+        if os.path.exists('./tests/data/dcs_world/dynamic_folder_creation'):
+            shutil.rmtree('./tests/data/dcs_world/dynamic_folder_creation')
 
         os.mkdir('./tests/data/dcs_world/dynamic_folder_creation')
         os.mkdir('./tests/data/dcs_world/dynamic_folder_creation/Config')

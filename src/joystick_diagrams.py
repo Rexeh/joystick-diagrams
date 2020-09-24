@@ -5,11 +5,13 @@ from Ui import Ui_MainWindow
 import adaptors.dcs_world as dcs
 import adaptors.joystick_gremlin as jg
 import functions.helper as helper
+import version
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
+        self.setVersion()
         # Clean up GUI Defaults
         self.dcs_profiles_list.clear()
         self.jg_profile_list.clear()
@@ -24,6 +26,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # JG UI Setup
         self.jg_select_profile_button.clicked.connect(self.set_jg_file)
 
+    def setVersion(self):
+        version_text = version.VERSION
+        self.setWindowTitle("Joystick Diagrams - V" + version_text)
+
     def easy_mode_checkbox_action(self):
         if self.dcs_parser_instance:
             self.dcs_parser_instance.remove_easy_modes = self.dcs_easy_mode_checkbox.isChecked()
@@ -37,6 +43,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def set_dcs_directory(self):
         self.dcs_directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Select DCS Saved Games Directory",os.path.expanduser("~"))
+        if self.dcs_directory:
+            self.load_dcs_directory()
+        else:
+            pass
+
+    def load_dcs_directory(self):
         try:
             self.dcs_profiles_list.clear()
             self.dcs_parser_instance = dcs.DCSWorld_Parser(self.dcs_directory,easy_modes=self.dcs_easy_mode_checkbox.isChecked())
@@ -130,7 +142,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 - Add tests
 '''
 
-app = QtWidgets.QApplication(sys.argv)
-window = MainWindow()
-window.show()
-app.exec()
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec()

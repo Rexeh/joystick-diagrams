@@ -11,7 +11,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):# pragma: no cover
+class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(874, 652)
@@ -522,7 +522,7 @@ class Ui_MainWindow(object):# pragma: no cover
         self.actionVersion_Info.setObjectName("actionVersion_Info")
 
         self.retranslateUi(MainWindow)
-        self.parser_selector.setCurrentIndex(1)
+        self.parser_selector.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

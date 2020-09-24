@@ -39,5 +39,5 @@ setup(
     },
 
     options={'build_exe': files},
-    executables = [Executable("./src/joystick-diagram.py", base = base, icon = './images/logo.ico')]
+    executables = [Executable("./src/joystick_diagrams.py", base = base, icon = './images/logo.ico')]
 )
