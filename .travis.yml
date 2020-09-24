@@ -26,7 +26,7 @@ before_script:
   - sleep 2
 
 script:
-  - QT_DEBUG_PLUGINS=1 python -m pytest --cov=src tests/
+  - QT_DEBUG_PLUGINS=1 python -m pytest -sv --cov=src tests/
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -v
