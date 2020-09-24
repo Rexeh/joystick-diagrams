@@ -8,7 +8,7 @@ addons:
     - x11-utils
     - libxkbcommon-x11-0
 services: xvfb
-  
+
 install:
   - sudo apt-get update
   - sudo apt-get install -y xvfb herbstluftwm
@@ -28,7 +28,7 @@ before_script:
   - sleep 2
 
 script:
-  - pytest --cov=src tests/
+  - QT_DEBUG_PLUGINS=1 pytest --cov=src tests/
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -v
