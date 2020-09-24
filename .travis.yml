@@ -16,7 +16,6 @@ before_install:
   
 install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)/src"
-  - pip install pytest-xvfb
   - pip install cx-freeze
   - pip install ply
   - pip install pytest-cov
