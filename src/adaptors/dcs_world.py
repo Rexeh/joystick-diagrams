@@ -25,8 +25,8 @@ class DCSWorld_Parser(jdi.JDinterface):
         print(os.listdir(self.path))
         if 'Config' in os.listdir(self.path):
             try:
-                print(os.listdir(os.path.join(self.path, 'config', 'input')))
-                return os.listdir(os.path.join(self.path, 'config', 'input'))
+                print(os.listdir(os.path.join(self.path, 'Config', 'Input')))
+                return os.listdir(os.path.join(self.path, 'Config', 'Input'))
             except FileNotFoundError:
                 raise FileNotFoundError("DCS: No input directory found")
         else:
@@ -55,8 +55,8 @@ class DCSWorld_Parser(jdi.JDinterface):
         Return Valid Profile
         '''
         #TODO add additional checking for rogue dirs/no files etc
-        if 'joystick' in os.listdir(os.path.join(self.path, 'config', 'input', item)):
-            return os.listdir(os.path.join(self.path, 'config', 'input', item, 'joystick'))
+        if 'joystick' in os.listdir(os.path.join(self.path, 'Config', 'Input', item)):
+            return os.listdir(os.path.join(self.path, 'Config', 'Input', item, 'joystick'))
         else:
             return False
 
