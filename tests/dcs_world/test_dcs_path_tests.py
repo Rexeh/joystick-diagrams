@@ -1,5 +1,7 @@
 import unittest
 import adaptors.dcs_world as dcs
+import os
+import pytest
 class TestDCS_Paths(unittest.TestCase):
 
     def setUp(self):
@@ -16,8 +18,14 @@ class TestDCS_Paths(unittest.TestCase):
         self.assertTrue('DCS: No input directory found' in str(context.exception))
 
     def test_no_files_in_directory(self):
+
+        os.mkdir('./tests/data/dcs_world/dynamic_folder_creation')
+        os.mkdir('./tests/data/dcs_world/dynamic_folder_creation/Config')
+        os.mkdir('./tests/data/dcs_world/dynamic_folder_creation/Config/Input')
+
         with self.assertRaises(Exception) as context:
-            dcs.DCSWorld_Parser('./tests/data/dcs_world/invalid_dcs_world_no_profiles')
+            dcs.DCSWorld_Parser('./tests/data/dcs_world/dynamic_folder_creation')
         self.assertTrue('DCS: No profiles exist in Input directory!' in str(context.exception))
+
 if __name__ == '__main__':
     unittest.main()
