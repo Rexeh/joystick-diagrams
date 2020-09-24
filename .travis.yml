@@ -8,6 +8,9 @@ addons:
     - libxkbcommon-x11-0
 services: xvfb
 
+virtualenv:
+  system_site_packages: true
+
 install:
   - sudo apt-get update
   - sudo apt-get install -y xvfb herbstluftwm
