@@ -24,7 +24,6 @@ install:
   - pip install pytest-cov
   - pip install pyqt5
   - pip install pytest-qt
-  - pip install pytest-xvfb
   - pip install -e .
   
 script:
