@@ -19,9 +19,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # DCS UI Setup
         self.dcs_selected_directory_label.setText('')
         self.dcs_parser_instance = None
+        self.jg_parser_instance = None
         self.dcs_easy_mode_checkbox.stateChanged.connect(self.easy_mode_checkbox_action)
         self.dcs_directory_select_button.clicked.connect(self.set_dcs_directory)
         self.export_button.clicked.connect(self.export_profiles)
+        self.parser_selector.currentChanged.connect(self.change_export_button)
+        self.change_export_button()
 
         # JG UI Setup
         self.jg_select_profile_button.clicked.connect(self.set_jg_file)
@@ -29,6 +32,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def setVersion(self):
         version_text = version.VERSION
         self.setWindowTitle("Joystick Diagrams - V" + version_text)
+
+    def change_export_button(self):
+        if self.parser_selector.currentIndex() == 0:
+            if self.jg_parser_instance:
+                self.export_button.setEnabled(1)
+            else:
+                self.export_button.setDisabled(1)
+        elif self.parser_selector.currentIndex() == 1:
+            if self.dcs_parser_instance:
+                self.export_button.setEnabled(1)
+            else:
+                self.export_button.setDisabled(1)
+        else:
+            self.export_button.setDisabled(1)
 
     def easy_mode_checkbox_action(self):
         if self.dcs_parser_instance:
@@ -55,6 +72,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.print_to_info('Succesfully loaded DCS profiles')
             self.dcs_directory_select_button.setStyleSheet('background: green; color: white;')
             self.dcs_selected_directory_label.setText('in {}'.format(self.dcs_directory))
+            self.export_button.setEnabled(1)
         except Exception as error:
             self.print_to_info(error.args[0])
         else:
@@ -66,7 +84,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print(self.jg_file)
         try:
             self.jg_parser_instance = jg.JoystickGremlin(self.jg_file)
-            print(self.jg_parser_instance)
+            self.jg_devices = self.jg_parser_instance.get_device_names()
+            self.jg_modes = self.jg_parser_instance.get_modes()
+
+            self.jg_profile_list.clear()
+            self.jg_profile_list.addItems(self.jg_modes)
+            self.export_button.setEnabled(1)
+         
         except:
             print("Ooops")
         else:
@@ -133,12 +157,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 # TO DO
 - DONE Hook up Joystick Gremlin
 - DONE Make % thing work
+- DONE Disable/Enable Export control
+
+- Add tests for JG interface
+- Add tests for button disable
 
 - Make JG Filters choosable
 - Fix strings in the output file to remove unsafe chars
+
 - Hook up logs button?
 - Hook up Settings? What's really going in here... DEBUG? Export to Browser?
-- Add tests
+
 '''
 
 if __name__ == '__main__':
