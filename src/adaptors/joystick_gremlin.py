@@ -40,38 +40,16 @@ class JoystickGremlin(jdi.JDinterface):
                 helper.log("Selected Mode: {}".format(self.currentMode), 'debug')
                 self.buttons = self.getModeButtons()
                 self.extractButtons()
-                helper.updateDeviceArray(
-                                    self.formattedButtons,
-                                    self.currentdevice,
+                self.updateJoystickDictionary(self.currentdevice,
                                     self.currentMode,
                                     self.currentInherit,
                                     self.buttonArray
                                     )
         if self.usingInheritance:
-            self.inheritProfiles()
-            return self.formattedButtons
+            self.inheritJoystickDictionary()
+            return self.joystick_dictionary
         else:
-            return self.formattedButtons
-
-    def inheritProfiles(self):
-        for item in self.formattedButtons:
-            for profile in self.formattedButtons[item]:
-                if self.formattedButtons[item][profile]['Inherit']:
-                    helper.log("{} Profile has inheritance in mode {}".format(item,profile), 'debug')
-                    helper.log("Profile inherits from {}".format(self.formattedButtons[item][profile]['Inherit']), 'debug')
-                    inherit = self.formattedButtons[item][profile]['Inherit']
-                    inheritConfig = self.formattedButtons[item][inherit]
-                    helper.log("Inherited Profile Contains {}".format(inheritConfig), 'debug')
-                    helper.log("Starting Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']), 'debug')
-                    for button, desc in inheritConfig['Buttons'].items():
-                        checkButton = button in self.formattedButtons[item][profile]['Buttons']
-                        if checkButton == False:
-                            self.formattedButtons[item][profile]['Buttons'].update({
-                                                        button:desc
-                                                        })
-                        elif self.formattedButtons[item][profile]['Buttons'][button] == self.no_bind_text:
-                            self.formattedButtons[item][profile]['Buttons'][button] = desc
-                    helper.log("Ending Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']), 'debug')
+            return self.joystick_dictionary
 
     def getDevices(self):
         return self.file.getElementsByTagName('device')

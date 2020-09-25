@@ -76,7 +76,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
  
         if self.parser_selector.currentIndex() == 0: ## JOYSTICK GREMLIN
             data = self.jg_parser_instance.createDictionary()
-
             runState = []
             self.export_progress_bar.setValue(0)
             joycount = len(data)

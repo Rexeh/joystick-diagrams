@@ -78,17 +78,21 @@ class DCSWorld_Parser(jdi.JDinterface):
             self.profiles_to_process = profile_list
         else:
             self.profiles_to_process = self.getValidatedProfiles()
-            print(self.profiles_to_process)
+            print("Processing profiles: {}".format(self.profiles_to_process))
         assert len(self.profiles_to_process) != 0, "DCS: There are no valid profiles to process"
-        if len(profile_list)>0:
-            self.profiles_to_process = profile_list
         for profile in self.profiles_to_process:
+            print("Profile = {}".format(profile))
             self.fq_path = os.path.join(self.path,'Config', 'Input', profile,'joystick')
+            print("Directory = {}".format(self.fq_path))
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
+            print("Device List = {}".format(self.profile_devices))
+            print("Current Joystick Listing = {}".format(self.joystick_listing))
+            self.joystick_listing = {}
             for item in self.profile_devices:
                 self.joystick_listing.update({
                     item[:-48] : item
                 })
+            print("New Joystick Listing = {}".format(self.joystick_listing))
             for joystick_device, joystick_file in self.joystick_listing.items():
                 try:
                     if os.path.isdir(os.path.join(self.fq_path, joystick_file)):
@@ -101,9 +105,6 @@ class DCSWorld_Parser(jdi.JDinterface):
                     raise FileExistsError("DCS: File {} no longer found - It has been moved/deleted from directory".format(joystick_file))
 
                 data = self.parseFile()
-
-          
-                
                 writeVal = False
                 buttonArray = {}
 
@@ -124,16 +125,10 @@ class DCSWorld_Parser(jdi.JDinterface):
                             })
                             writeVal = False
 
-                    helper.updateDeviceArray(
-                        self.finalDic,
-                        joystick_device,
-                        profile,
-                        False,
-                        buttonArray
-                        )
+                    self.updateJoystickDictionary(joystick_device,profile, False, buttonArray)
         
-        print(self.finalDic)
-        return self.finalDic
+        print(self.joystick_dictionary)
+        return self.joystick_dictionary
 
     def parseFile(self):
         tokens = ('LCURLY', 'RCURLY', 'STRING', 'NUMBER', 'LBRACE', 'RBRACE', 'COMMA', 'EQUALS', 'TRUE', 'FALSE', 'DOUBLE_VAL')

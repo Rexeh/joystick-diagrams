@@ -17,26 +17,6 @@ diagramFilesDirectory = './diagrams/'
 templateFilesDirectory = './templates/'
 fileSpacer = "_"
 
-def updateDeviceArray(deviceArray, device, mode, inherit, buttons):
-    data = {
-        "Buttons": buttons,
-        "Axis": "",
-        "Inherit": inherit}
-
-    if device in deviceArray:
-        if mode in deviceArray[device]:
-            deviceArray[device][mode].update(data)
-        else:
-            deviceArray[device].update({
-                    mode:   data
-                        })
-    else:
-        deviceArray.update({
-            device : {
-                mode:   data
-                            }
-        })
-
 def createDirectory(directory):
     if not os.path.exists(directory):
         return os.makedirs(directory)
