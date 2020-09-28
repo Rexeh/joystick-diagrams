@@ -6,6 +6,7 @@ import re
 import config
 import version
 import logging
+import html
 
 # Logging Init
 logDir = './logs/'
@@ -48,7 +49,7 @@ def saveDiagram(parser_type, device, mode, stream):
 def strReplaceSVG(devicelist,device,mode,svg):
     for b, v in devicelist[device][mode]['Buttons'].items():
         regexSearch = "\\b" + b + "\\b"
-        svg = re.sub(regexSearch, v, svg, flags=re.IGNORECASE)
+        svg = re.sub(regexSearch, html.escape(v), svg, flags=re.IGNORECASE)
     return svg
 
 def addTemplateNameToSVG(title,svg):

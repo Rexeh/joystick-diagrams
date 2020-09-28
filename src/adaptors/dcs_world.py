@@ -131,6 +131,7 @@ class DCSWorld_Parser(jdi.JDinterface):
         return self.joystick_dictionary
 
     def parseFile(self):
+        # pylint: disable=unused-variable
         tokens = ('LCURLY', 'RCURLY', 'STRING', 'NUMBER', 'LBRACE', 'RBRACE', 'COMMA', 'EQUALS', 'TRUE', 'FALSE', 'DOUBLE_VAL')
 
         t_LCURLY = r"\{"

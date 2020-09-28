@@ -86,7 +86,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("Error Loading JG File")
         else:
             pass
-        
+
     def load_jg_file(self):
         try:
             self.jg_parser_instance = jg.JoystickGremlin(self.jg_file)
@@ -105,26 +105,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ## CLEAN UP CODE DRY
         if self.parser_selector.currentIndex() == 0: ## JOYSTICK GREMLIN
             data = self.jg_parser_instance.createDictionary()
-            runState = []
-            self.export_progress_bar.setValue(0)
-            joycount = len(data)
-            for joystick in data:
-                for mode in data[joystick]:
-                    success = helper.exportDevice('JG', data, joystick, mode)
-                    helper.log(success, 'debug')
-                    # Log failures
-                    if success[0] == False and success[1] not in runState:
-                        helper.log("Device: {} does not have a valid template".format(success[1]), 'debug')
-                        runState.append(success[1])
-                self.export_progress_bar.setValue(self.export_progress_bar.value() + int(100/joycount))
-            if(len(runState)>0):
-                errorText = "The following devices did not have matching templates in /templates. \n\n Device names must match the template name exactly.\n"
-                for item in runState:
-                    errorText = errorText+'\n'+item
-                errorText = errorText+'\n\n'+"No diagrams have been created for the above"
-                helper.log(errorText, 'warning')
-                self.print_to_info(errorText)
-
+            self.export_to_svg(data, 'JG')
         elif self.parser_selector.currentIndex() == 1:  ## DCS
             selected_profiles = self.dcs_profiles_list.selectedItems()
             if len(selected_profiles)>0:
@@ -132,44 +113,47 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for item in selected_profiles:
                     profiles.append(item.text())
                 self.print_to_info("Exporting the following profile(s): {}".format(profiles))
-                data = self.dcs_parser_instance.processProfiles(profiles)  
+                data = self.dcs_parser_instance.processProfiles(profiles)
             else:
                 data = self.dcs_parser_instance.processProfiles()
-
-            runState = []
-            self.export_progress_bar.setValue(0)
-            joycount = len(data)
-            for joystick in data:
-                for mode in data[joystick]:
-                    success = helper.exportDevice('DCS', data, joystick, mode)
-                    helper.log(success, 'debug')
-                    # Log failures
-                    if success[0] == False and success[1] not in runState:
-                        helper.log("Device: {} does not have a valid template".format(success[1]), 'debug')
-                        runState.append(success[1])
-                self.export_progress_bar.setValue(self.export_progress_bar.value() + int(100/joycount))
-            if(len(runState)>0):
-                errorText = "The following devices did not have matching templates in /templates. \n\n Device names must match the template name exactly.\n"
-                for item in runState:
-                    errorText = errorText+'\n'+item
-                errorText = errorText+'\n\n'+"No diagrams have been created for the above"
-                helper.log(errorText, 'warning')
-                self.print_to_info(errorText)
+            self.export_to_svg(data, 'DCS')
         else:
             pass # no other tabs have functionality right now
 
+    def export_to_svg(self, data,parser_type):
+
+        self.export_progress_bar.setValue(0)
+        data = data
+        type = parser_type
+        joycount = len(data)
+        run_state = []
+
+        for joystick in data:
+            for mode in data[joystick]:
+                success = helper.exportDevice(type, data, joystick, mode)
+                helper.log(success, 'debug')
+                # Log failures
+                if success[0] == False and success[1] not in run_state:
+                    helper.log("Device: {} does not have a valid template".format(success[1]), 'debug')
+                    run_state.append(success[1])
+            self.export_progress_bar.setValue(self.export_progress_bar.value() + int(100/joycount))
+        if(len(run_state)>0):
+            errorText = "The following devices did not have matching templates in /templates. \n\n Device names must match the template name exactly.\n"
+            for item in run_state:
+                errorText = errorText+'\n'+item
+            errorText = errorText+'\n\n'+"No diagrams have been created for the above"
+            helper.log(errorText, 'warning')
+            self.print_to_info(errorText)
 '''
 # TO DO
 - DONE Hook up Joystick Gremlin
 - DONE Make % thing work
 - DONE Disable/Enable Export control
+- DONE tests for JG interface
+- DONE Fix strings in the output file to remove unsafe chars
 
-- Add tests for JG interface
 - Add tests for button disable
-
 - Make JG Filters choosable
-- Fix strings in the output file to remove unsafe chars
-
 - Hook up logs button?
 - Hook up Settings? What's really going in here... DEBUG? Export to Browser?
 
