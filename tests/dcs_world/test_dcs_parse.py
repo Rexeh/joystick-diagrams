@@ -20,7 +20,7 @@ class TestDCS_Parse_Test(unittest.TestCase):
                             },
                             'Axis': '',
                             'Inherit': False
-                            }, 
+                            },
                         'CoolPlane-B': {
                             'Buttons': {
                                 'BUTTON_15': 'Thrust Reverser On/Off',
@@ -29,7 +29,7 @@ class TestDCS_Parse_Test(unittest.TestCase):
                                 'Axis': '',
                                 'Inherit': False
                                 }
-                            }, 
+                            },
                     'Joystick - HOTAS Warthog': {
                         'CoolPlane-B': {
                             'Buttons': {
@@ -54,10 +54,10 @@ class TestDCS_Parse_Test(unittest.TestCase):
         self.dcs_instance.remove_easy_modes = False
         data = self.dcs_instance.processProfiles()
         self.assertEqual(data,expected)
-    
+
     def test_single_profile_selected(self):
         profiles = self.dcs_instance.getValidatedProfiles()
-        
+
         expected = {
         'Throttle - HOTAS Warthog': {
             'CoolPlane-A': {
@@ -67,7 +67,7 @@ class TestDCS_Parse_Test(unittest.TestCase):
                 },
                 'Axis': '',
                 'Inherit': False
-                }, 
+                },
                 }
             }
 
@@ -79,7 +79,7 @@ class TestDCS_Parse_Test(unittest.TestCase):
 
     def test_double_profile_selected(self):
         profiles = self.dcs_instance.getValidatedProfiles()
-        
+
         expected = {
                     'Throttle - HOTAS Warthog': {
                         'CoolPlane-A': {
@@ -89,7 +89,7 @@ class TestDCS_Parse_Test(unittest.TestCase):
                             },
                             'Axis': '',
                             'Inherit': False
-                            }, 
+                            },
                         'CoolPlane-B': {
                             'Buttons': {
                                 'BUTTON_15': 'Thrust Reverser On/Off',
@@ -98,7 +98,7 @@ class TestDCS_Parse_Test(unittest.TestCase):
                                 'Axis': '',
                                 'Inherit': False
                                 }
-                            }, 
+                            },
                     'Joystick - HOTAS Warthog': {
                         'CoolPlane-B': {
                             'Buttons': {
@@ -113,7 +113,6 @@ class TestDCS_Parse_Test(unittest.TestCase):
 
         data = self.dcs_instance.processProfiles([profiles[0],profiles[1]])
         self.assertEqual(data, expected)
-          
     def test_no_profiles_parsed(self):
         pass
 

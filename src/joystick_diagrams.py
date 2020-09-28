@@ -102,9 +102,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             pass
 
     def export_profiles(self):
-        ## CLEAN UP CODE DRY
         if self.parser_selector.currentIndex() == 0: ## JOYSTICK GREMLIN
-            data = self.jg_parser_instance.createDictionary()
+            selected_profiles = self.jg_profile_list.selectedItems()
+            if len(selected_profiles)>0:
+                profiles = []
+                for item in selected_profiles:
+                    profiles.append(item.text())
+                self.print_to_info("Exporting the following profile(s): {}".format(profiles))
+                data = self.jg_parser_instance.createDictionary(profiles)
+                print(data)
+            else:
+                data = self.jg_parser_instance.createDictionary()
+                print(data)
             self.export_to_svg(data, 'JG')
         elif self.parser_selector.currentIndex() == 1:  ## DCS
             selected_profiles = self.dcs_profiles_list.selectedItems()
@@ -129,6 +138,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         run_state = []
 
         for joystick in data:
+            print(joystick)
             for mode in data[joystick]:
                 success = helper.exportDevice(type, data, joystick, mode)
                 helper.log(success, 'debug')

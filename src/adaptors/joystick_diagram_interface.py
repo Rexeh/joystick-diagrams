@@ -1,11 +1,12 @@
-'''Interface for Joystick Diagrams'''
+import functions.helper as helper
+
 class JDinterface:
 
     def __init__(self):
         self.no_bind_text = "NO BIND"
         self.joystick_dictionary = {}
 
-    def updateJoystickDictionary(self, device, mode, inherit, buttons):
+    def update_joystick_dictionary(self, device, mode, inherit, buttons):
         data = {
             "Buttons": buttons,
             "Axis": "",
@@ -25,27 +26,22 @@ class JDinterface:
                                 }
             })
 
-    def inheritJoystickDictionary(self):
+    def inherit_joystick_dictionary(self):
         for item in self.joystick_dictionary:
             for profile in self.joystick_dictionary[item]:
                 if self.joystick_dictionary[item][profile]['Inherit']:
-                    #helper.log("{} Profile has inheritance in mode {}".format(item,profile), 'debug')
-                    #helper.log("Profile inherits from {}".format(self.joystick_dictionary[item][profile]['Inherit']), 'debug')
+                    helper.log("{} Profile has inheritance in mode {}".format(item,profile), 'debug')
+                    helper.log("Profile inherits from {}".format(self.joystick_dictionary[item][profile]['Inherit']), 'debug')
                     inherit = self.joystick_dictionary[item][profile]['Inherit']
-                    inheritConfig = self.joystick_dictionary[item][inherit]
-                    #helper.log("Inherited Profile Contains {}".format(inheritConfig), 'debug')
-                    #helper.log("Starting Profile Contains {}".format(self.joystick_dictionary[item][profile]['Buttons']), 'debug')
-                    for button, desc in inheritConfig['Buttons'].items():
-                        checkButton = button in self.joystick_dictionary[item][profile]['Buttons']
-                        if checkButton == False:
+                    inherited_profile = self.joystick_dictionary[item][inherit]
+                    helper.log("Inherited Profile Contains {}".format(inherited_profile), 'debug')
+                    helper.log("Starting Profile Contains {}".format(self.joystick_dictionary[item][profile]['Buttons']), 'debug')
+                    for button, desc in inherited_profile['Buttons'].items():
+                        check_button = button in self.joystick_dictionary[item][profile]['Buttons']
+                        if not check_button:
                             self.joystick_dictionary[item][profile]['Buttons'].update({
                                                         button:desc
                                                         })
                         elif self.joystick_dictionary[item][profile]['Buttons'][button] == self.no_bind_text:
                             self.joystick_dictionary[item][profile]['Buttons'][button] = desc
-                    #helper.log("Ending Profile Contains {}".format(self.joystick_dictionary[item][profile]['Buttons']), 'debug')
-    ## COMMON METHODS
-
-    # SANETISE
-    # Create Button Array
-    
+                    helper.log("Ending Profile Contains {}".format(self.joystick_dictionary[item][profile]['Buttons']), 'debug')

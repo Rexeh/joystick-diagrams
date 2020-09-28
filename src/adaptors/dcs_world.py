@@ -17,7 +17,6 @@ class DCSWorld_Parser(jdi.JDinterface):
         self.base_directory = self.__validateBaseDirectory()
         self.valid_profiles = self.__validateProfiles()
         self.joystick_listing = {}
-        self.finalDic = {}
 
     def __validateBaseDirectory(self):
         '''validate the base directory structure, make sure there are files.'''
@@ -125,7 +124,7 @@ class DCSWorld_Parser(jdi.JDinterface):
                             })
                             writeVal = False
 
-                    self.updateJoystickDictionary(joystick_device,profile, False, buttonArray)
+                    self.update_joystick_dictionary(joystick_device,profile, False, buttonArray)
         
         print(self.joystick_dictionary)
         return self.joystick_dictionary

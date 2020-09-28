@@ -12,7 +12,7 @@ class JoystickGremlin(jdi.JDinterface):
         
         # New Attributes
         self.device_names = self.get_device_names()
-
+        self.profiles = []
         self.modes = None
         self.mode = None
         self.devices = None
@@ -32,7 +32,6 @@ class JoystickGremlin(jdi.JDinterface):
 
         for item in self.devices:
             deviceItems.append(item.getAttribute('name'))
-
         return deviceItems
 
     def get_modes(self):
@@ -44,14 +43,13 @@ class JoystickGremlin(jdi.JDinterface):
         for mode in modes:
             mode_name = mode.getAttribute('name')
             profile_modes.append(mode_name)
-
         return profile_modes
-
 
     def parse_xml_file(self, xml_file):
         return minidom.parse(xml_file)
 
-    def createDictionary(self):
+    def createDictionary(self, profiles=[]):
+        self.profiles = profiles
         self.devices = self.getDevices()
         helper.log("Number of Devices: {}".format(str(self.devices.length)), 'debug')
 
@@ -66,16 +64,26 @@ class JoystickGremlin(jdi.JDinterface):
                 helper.log("Selected Mode: {}".format(self.currentMode), 'debug')
                 self.buttons = self.getModeButtons()
                 self.extractButtons()
-                self.updateJoystickDictionary(self.currentdevice,
+                self.update_joystick_dictionary(self.currentdevice,
                                     self.currentMode,
                                     self.currentInherit,
                                     self.buttonArray
                                     )
         if self.usingInheritance:
-            self.inheritJoystickDictionary()
+            self.inherit_joystick_dictionary()
+            self.filter_dictionary()
             return self.joystick_dictionary
         else:
+            self.filter_dictionary()
             return self.joystick_dictionary
+
+    def filter_dictionary(self):
+        if len(self.profiles)>0:
+            for key,value in self.joystick_dictionary.items():
+                for item in value.copy():
+                    if not item in self.profiles:
+                        self.joystick_dictionary[key].pop(item,None)
+        return self.joystick_dictionary
 
     def getDevices(self):
         return self.file.getElementsByTagName('device')
