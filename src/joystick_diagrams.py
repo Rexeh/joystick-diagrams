@@ -69,7 +69,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.dcs_profiles_list.clear()
             self.dcs_parser_instance = dcs.DCSWorld_Parser(self.dcs_directory,easy_modes=self.dcs_easy_mode_checkbox.isChecked())
             self.print_to_info('Succesfully loaded DCS profiles')
-            self.dcs_directory_select_button.setStyleSheet('background: green; color: white;')
+            self.dcs_directory_select_button.setStyleSheet('background: #007acc; color: white;')
             self.dcs_selected_directory_label.setText('in {}'.format(self.dcs_directory))
             self.export_button.setEnabled(1)
         except Exception as error:
@@ -92,7 +92,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.jg_parser_instance = jg.JoystickGremlin(self.jg_file)
             self.jg_devices = self.jg_parser_instance.get_device_names()
             self.jg_modes = self.jg_parser_instance.get_modes()
-
+            self.jg_select_profile_button.setStyleSheet('background: #007acc; color: white;')
             self.jg_profile_list.clear()
             self.jg_profile_list.addItems(self.jg_modes)
             self.export_button.setEnabled(1)
@@ -110,10 +110,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     profiles.append(item.text())
                 self.print_to_info("Exporting the following profile(s): {}".format(profiles))
                 data = self.jg_parser_instance.createDictionary(profiles)
-                print(data)
             else:
                 data = self.jg_parser_instance.createDictionary()
-                print(data)
             self.export_to_svg(data, 'JG')
         elif self.parser_selector.currentIndex() == 1:  ## DCS
             selected_profiles = self.dcs_profiles_list.selectedItems()
@@ -154,20 +152,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             errorText = errorText+'\n\n'+"No diagrams have been created for the above"
             helper.log(errorText, 'warning')
             self.print_to_info(errorText)
-'''
-# TO DO
-- DONE Hook up Joystick Gremlin
-- DONE Make % thing work
-- DONE Disable/Enable Export control
-- DONE tests for JG interface
-- DONE Fix strings in the output file to remove unsafe chars
-
-- Add tests for button disable
-- Make JG Filters choosable
-- Hook up logs button?
-- Hook up Settings? What's really going in here... DEBUG? Export to Browser?
-
-'''
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

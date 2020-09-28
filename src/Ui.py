@@ -371,13 +371,13 @@ class Ui_MainWindow(object):
         self.jg_tab.setObjectName("jg_tab")
         self.jg_profile_list = QtWidgets.QListWidget(self.jg_tab)
         self.jg_profile_list.setEnabled(True)
-        self.jg_profile_list.setGeometry(QtCore.QRect(20, 171, 256, 171))
+        self.jg_profile_list.setGeometry(QtCore.QRect(20, 171, 351, 211))
         self.jg_profile_list.setStyleSheet("QListView::item {\n"
 "color: white\n"
 "}\n"
 "\n"
 "QListView::item:selected {\n"
-"background: blue;\n"
+"background: #007acc;\n"
 "color: white\n"
 "}")
         self.jg_profile_list.setAlternatingRowColors(False)
@@ -407,10 +407,15 @@ class Ui_MainWindow(object):
         self.label.setStyleSheet("color:white")
         self.label.setObjectName("label")
         self.jg_option_inherit_checkbox = QtWidgets.QCheckBox(self.jg_tab)
-        self.jg_option_inherit_checkbox.setGeometry(QtCore.QRect(410, 60, 421, 20))
+        self.jg_option_inherit_checkbox.setGeometry(QtCore.QRect(390, 160, 331, 16))
         self.jg_option_inherit_checkbox.setStyleSheet("color: white")
         self.jg_option_inherit_checkbox.setChecked(True)
         self.jg_option_inherit_checkbox.setObjectName("jg_option_inherit_checkbox")
+        self.label_11 = QtWidgets.QLabel(self.jg_tab)
+        self.label_11.setEnabled(True)
+        self.label_11.setGeometry(QtCore.QRect(390, 130, 441, 20))
+        self.label_11.setStyleSheet("color:white")
+        self.label_11.setObjectName("label_11")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap("images/3rd_party/jg.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.parser_selector.addTab(self.jg_tab, icon1, "")
@@ -432,8 +437,15 @@ class Ui_MainWindow(object):
         self.dcs_saved_games_label.setObjectName("dcs_saved_games_label")
         self.dcs_profiles_list = QtWidgets.QListWidget(self.dcs_tab)
         self.dcs_profiles_list.setEnabled(True)
-        self.dcs_profiles_list.setGeometry(QtCore.QRect(20, 180, 331, 201))
-        self.dcs_profiles_list.setStyleSheet("color: white")
+        self.dcs_profiles_list.setGeometry(QtCore.QRect(20, 180, 351, 201))
+        self.dcs_profiles_list.setStyleSheet("QListView::item {\n"
+"color: white\n"
+"}\n"
+"\n"
+"QListView::item:selected {\n"
+"background: #007acc;\n"
+"color: white\n"
+"}")
         self.dcs_profiles_list.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.dcs_profiles_list.setObjectName("dcs_profiles_list")
         item = QtWidgets.QListWidgetItem()
@@ -452,7 +464,7 @@ class Ui_MainWindow(object):
         self.label_7.setStyleSheet("color:white")
         self.label_7.setObjectName("label_7")
         self.dcs_easy_mode_checkbox = QtWidgets.QCheckBox(self.dcs_tab)
-        self.dcs_easy_mode_checkbox.setGeometry(QtCore.QRect(480, 80, 351, 20))
+        self.dcs_easy_mode_checkbox.setGeometry(QtCore.QRect(390, 160, 351, 20))
         self.dcs_easy_mode_checkbox.setStyleSheet("color: white")
         self.dcs_easy_mode_checkbox.setChecked(True)
         self.dcs_easy_mode_checkbox.setObjectName("dcs_easy_mode_checkbox")
@@ -461,6 +473,11 @@ class Ui_MainWindow(object):
         self.dcs_selected_directory_label.setStyleSheet("font-size: 11px;\n"
 "color:white;")
         self.dcs_selected_directory_label.setObjectName("dcs_selected_directory_label")
+        self.label_10 = QtWidgets.QLabel(self.dcs_tab)
+        self.label_10.setEnabled(True)
+        self.label_10.setGeometry(QtCore.QRect(390, 130, 441, 20))
+        self.label_10.setStyleSheet("color:white")
+        self.label_10.setObjectName("label_10")
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap("images/3rd_party/dcs.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.parser_selector.addTab(self.dcs_tab, icon2, "")
@@ -480,18 +497,19 @@ class Ui_MainWindow(object):
         self.title_label.setObjectName("title_label")
         self.export_button = QtWidgets.QPushButton(self.centralwidget)
         self.export_button.setGeometry(QtCore.QRect(570, 550, 291, 41))
-        self.export_button.setStyleSheet("colour: rgb(255, 255, 255);\n"
-"font: 75 16pt \"MS Shell Dlg 2\";\n"
-"QAbstractButton: {\n"
-"font-color:white\n"
-"};\n"
-"QPushButton { color: red; background-color: white };\n"
-"background-color: white;\n"
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setItalic(False)
+        font.setWeight(75)
+        self.export_button.setFont(font)
+        self.export_button.setStyleSheet("QPushButton { color: white; font-weight: bold; background-color: #007acc };\n"
+"background-color: #007acc;\n"
 "\n"
 "QAbstractButton::text {\n"
 "color=white;\n"
 "}")
-        self.export_button.setIcon(icon)
         self.export_button.setCheckable(False)
         self.export_button.setChecked(False)
         self.export_button.setFlat(False)
@@ -509,9 +527,11 @@ class Ui_MainWindow(object):
         self.label_9.setStyleSheet("color: white;")
         self.label_9.setObjectName("label_9")
         self.settings_button = QtWidgets.QPushButton(self.centralwidget)
+        self.settings_button.setEnabled(False)
         self.settings_button.setGeometry(QtCore.QRect(620, 20, 121, 23))
         self.settings_button.setObjectName("settings_button")
         self.logs_button = QtWidgets.QPushButton(self.centralwidget)
+        self.logs_button.setEnabled(False)
         self.logs_button.setGeometry(QtCore.QRect(620, 50, 121, 23))
         self.logs_button.setObjectName("logs_button")
         MainWindow.setCentralWidget(self.centralwidget)
@@ -545,6 +565,7 @@ class Ui_MainWindow(object):
         self.jg_select_profile_button.setText(_translate("MainWindow", "Select your profile file"))
         self.label.setText(_translate("MainWindow", "Select your .XML profile "))
         self.jg_option_inherit_checkbox.setText(_translate("MainWindow", "Inherit Joystick Binds from Parents"))
+        self.label_11.setText(_translate("MainWindow", "Settings"))
         self.parser_selector.setTabText(self.parser_selector.indexOf(self.jg_tab), _translate("MainWindow", "Joystick Gremlin"))
         self.dcs_world_label.setText(_translate("MainWindow", "DCS World Directory"))
         self.dcs_directory_select_button.setText(_translate("MainWindow", "Select your installation"))
@@ -565,6 +586,7 @@ class Ui_MainWindow(object):
         self.label_7.setText(_translate("MainWindow", "Available DCS Profiles"))
         self.dcs_easy_mode_checkbox.setText(_translate("MainWindow", "Exclude \"Easy\" Mode Profiles"))
         self.dcs_selected_directory_label.setText(_translate("MainWindow", "c:test"))
+        self.label_10.setText(_translate("MainWindow", "Settings"))
         self.parser_selector.setTabText(self.parser_selector.indexOf(self.dcs_tab), _translate("MainWindow", "DCS World"))
         self.label_2.setText(_translate("MainWindow", "Do you have a game you want to see included?"))
         self.parser_selector.setTabText(self.parser_selector.indexOf(self.tab), _translate("MainWindow", "+"))

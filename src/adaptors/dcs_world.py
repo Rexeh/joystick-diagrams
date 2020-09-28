@@ -20,11 +20,8 @@ class DCSWorld_Parser(jdi.JDinterface):
 
     def __validateBaseDirectory(self):
         '''validate the base directory structure, make sure there are files.'''
-        #TODO Maybe switch to ScanDir?
-        print(os.listdir(self.path))
         if 'Config' in os.listdir(self.path):
             try:
-                print(os.listdir(os.path.join(self.path, 'Config', 'Input')))
                 return os.listdir(os.path.join(self.path, 'Config', 'Input'))
             except FileNotFoundError:
                 raise FileNotFoundError("DCS: No input directory found")
@@ -77,21 +74,16 @@ class DCSWorld_Parser(jdi.JDinterface):
             self.profiles_to_process = profile_list
         else:
             self.profiles_to_process = self.getValidatedProfiles()
-            print("Processing profiles: {}".format(self.profiles_to_process))
+
         assert len(self.profiles_to_process) != 0, "DCS: There are no valid profiles to process"
         for profile in self.profiles_to_process:
-            print("Profile = {}".format(profile))
             self.fq_path = os.path.join(self.path,'Config', 'Input', profile,'joystick')
-            print("Directory = {}".format(self.fq_path))
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
-            print("Device List = {}".format(self.profile_devices))
-            print("Current Joystick Listing = {}".format(self.joystick_listing))
             self.joystick_listing = {}
             for item in self.profile_devices:
                 self.joystick_listing.update({
                     item[:-48] : item
                 })
-            print("New Joystick Listing = {}".format(self.joystick_listing))
             for joystick_device, joystick_file in self.joystick_listing.items():
                 try:
                     if os.path.isdir(os.path.join(self.fq_path, joystick_file)):
