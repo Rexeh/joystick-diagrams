@@ -6,6 +6,8 @@ import ply.lex as lex
 import ply.yacc as yacc
 import functions.helper as helper
 import adaptors.joystick_diagram_interface as jdi
+import adaptors.dcs_world_lex # Do not remove - PLY production requirement
+import adaptors.dcs_world_parse # Do not remove - PLY production requirement
 
 class DCSWorld_Parser(jdi.JDinterface):
 
@@ -203,7 +205,7 @@ class DCSWorld_Parser(jdi.JDinterface):
         ## TODO: Consider env vars to run optimize=1 in deployed version
         lexer = lex.lex(
             debug=False,
-            optimize=0,
+            optimize=1,
             lextab='dcs_world_lex',
             reflags=re.UNICODE | re.VERBOSE
             )
@@ -211,6 +213,7 @@ class DCSWorld_Parser(jdi.JDinterface):
         # Build the parser
         parser = yacc.yacc(
             debug=False,
+            optimize=1,
             tabmodule='dcs_world_parse'
             )
 
@@ -218,6 +221,5 @@ class DCSWorld_Parser(jdi.JDinterface):
         try:
             data = parser.parse(self.file)
         except Exception as error:
-            print(data)
-
+            print(error)
         return data

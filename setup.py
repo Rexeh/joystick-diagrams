@@ -13,12 +13,23 @@ long_description = (here / 'readme.md').read_text(encoding='utf-8')
 if sys.platform == "win32":
     base = "Win32GUI"
 
-files = {"include_files": [
+
+build_options = {
+                "include_files": [
                         "./images",
                         "./templates",
                         "./config.cfg",
+                        "./readme.md",
                        ],
-                       }
+                "excludes": [
+                    "tkinter",
+                    "test",
+                    "http",
+                    "email",
+                    "distutils"
+                            ],
+                   "optimize": 2,
+                }
 
 setup(
     name='Joystick Diagrams',
@@ -38,6 +49,6 @@ setup(
         'Source': 'https://github.com/Rexeh/joystick-diagrams/src',
     },
 
-    options={'build_exe': files},
+    options={'build_exe': build_options},
     executables = [Executable("./src/joystick_diagrams.py", base = base, icon = './images/logo.ico')]
 )
