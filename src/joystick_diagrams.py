@@ -56,7 +56,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def print_to_info(self, error):
         self.application_information_textbrowser.append(error)
         self.application_information_textbrowser.verticalScrollBar().setValue(self.application_information_textbrowser.verticalScrollBar().maximum())
-        #     scrollbar.setValue(scrollbar.maximum())
 
     def set_dcs_directory(self):
         self.dcs_directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Select DCS Saved Games Directory",os.path.expanduser("~"))
@@ -81,7 +80,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def set_jg_file(self):
         self.jg_file = QtWidgets.QFileDialog.getOpenFileName(self,"Select Joystick Gremlin Config file",None,"Gremlin XMl Files (*.xml)")[0]
-        print(self.jg_file)
+        try:
+            self.load_jg_file()
+        except:
+            print("Error Loading JG File")
+        else:
+            pass
+        
+    def load_jg_file(self):
         try:
             self.jg_parser_instance = jg.JoystickGremlin(self.jg_file)
             self.jg_devices = self.jg_parser_instance.get_device_names()
@@ -90,14 +96,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.jg_profile_list.clear()
             self.jg_profile_list.addItems(self.jg_modes)
             self.export_button.setEnabled(1)
-         
         except:
-            print("Ooops")
+            print("Ooops problem with JG file")
         else:
             pass
 
     def export_profiles(self):
- 
+        ## CLEAN UP CODE DRY
         if self.parser_selector.currentIndex() == 0: ## JOYSTICK GREMLIN
             data = self.jg_parser_instance.createDictionary()
             runState = []
