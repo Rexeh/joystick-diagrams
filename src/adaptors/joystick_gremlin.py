@@ -1,32 +1,57 @@
+'''Joystick Gremlin (Version ~13) XML Parser for use with Joystick Diagrams'''
 from xml.dom import minidom
 import functions.helper as helper
+import adaptors.joystick_diagram_interface as jdi
 
-class Gremlin:
-## Adaptor for Joystick Gremlin
-
-    no_bind_text = "NO BIND"
+class JoystickGremlin(jdi.JDinterface):
 
     def __init__(self,filepath):
     ## TRY FIND PATH
-        self.file = minidom.parse(filepath)
+        jdi.JDinterface.__init__(self)
+        self.file = self.parse_xml_file(filepath) ## Remove from instantiation > Make testable function with error handling (FolloW DCS_World Pattern)
+        
+        # New Attributes
+        self.device_names = self.get_device_names()
+        self.profiles = []
         self.modes = None
         self.mode = None
         self.devices = None
         self.device = None
         self.currentdevice = None
         self.currentMode = None
+        self.currentInherit = None
         self.inherit = None
         self.buttons = None
         self.buttonArray = None
-        self.formattedButtons = None
         self.inheritModes = {}
         self.usingInheritance = False
 
-    def createDictionary(self):
-        self.formattedButtons = {}
+    def get_device_names(self):
+        self.devices = self.getDevices()
+        deviceItems = []
+
+        for item in self.devices:
+            deviceItems.append(item.getAttribute('name'))
+        return deviceItems
+
+    def get_modes(self):
+        self.devices = self.getDevices()
+        profile_modes = []
+
+        item = self.devices[0] # All Modes common across JG
+        modes = item.getElementsByTagName('mode')
+        for mode in modes:
+            mode_name = mode.getAttribute('name')
+            profile_modes.append(mode_name)
+        return profile_modes
+
+    def parse_xml_file(self, xml_file):
+        return minidom.parse(xml_file)
+
+    def createDictionary(self, profiles=[]):
+        self.profiles = profiles
         self.devices = self.getDevices()
         helper.log("Number of Devices: {}".format(str(self.devices.length)), 'debug')
-        self.formattedButtons = {}
 
         for self.device in self.devices:
             self.currentdevice = self.getSingleDevice()
@@ -39,38 +64,26 @@ class Gremlin:
                 helper.log("Selected Mode: {}".format(self.currentMode), 'debug')
                 self.buttons = self.getModeButtons()
                 self.extractButtons()
-                helper.updateDeviceArray(
-                                    self.formattedButtons,
-                                    self.currentdevice,
+                self.update_joystick_dictionary(self.currentdevice,
                                     self.currentMode,
                                     self.currentInherit,
                                     self.buttonArray
                                     )
         if self.usingInheritance:
-            self.inheritProfiles()
-            return self.formattedButtons
+            self.inherit_joystick_dictionary()
+            self.filter_dictionary()
+            return self.joystick_dictionary
         else:
-            return self.formattedButtons
+            self.filter_dictionary()
+            return self.joystick_dictionary
 
-    def inheritProfiles(self):
-        for item in self.formattedButtons:
-            for profile in self.formattedButtons[item]:
-                if self.formattedButtons[item][profile]['Inherit']:
-                    helper.log("{} Profile has inheritance in mode {}".format(item,profile), 'debug')
-                    helper.log("Profile inherits from {}".format(self.formattedButtons[item][profile]['Inherit']), 'debug')
-                    inherit = self.formattedButtons[item][profile]['Inherit']
-                    inheritConfig = self.formattedButtons[item][inherit]
-                    helper.log("Inherited Profile Contains {}".format(inheritConfig), 'debug')
-                    helper.log("Starting Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']), 'debug')
-                    for button, desc in inheritConfig['Buttons'].items():
-                        checkButton = button in self.formattedButtons[item][profile]['Buttons']
-                        if checkButton == False:
-                            self.formattedButtons[item][profile]['Buttons'].update({
-                                                        button:desc
-                                                        })
-                        elif self.formattedButtons[item][profile]['Buttons'][button] == self.no_bind_text:
-                                self.formattedButtons[item][profile]['Buttons'][button] = desc
-                    helper.log("Ending Profile Contains {}".format(self.formattedButtons[item][profile]['Buttons']), 'debug')
+    def filter_dictionary(self):
+        if len(self.profiles)>0:
+            for key,value in self.joystick_dictionary.items():
+                for item in value.copy():
+                    if not item in self.profiles:
+                        self.joystick_dictionary[key].pop(item,None)
+        return self.joystick_dictionary
 
     def getDevices(self):
         return self.file.getElementsByTagName('device')

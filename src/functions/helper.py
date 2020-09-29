@@ -6,6 +6,7 @@ import re
 import config
 import version
 import logging
+import html
 
 # Logging Init
 logDir = './logs/'
@@ -16,26 +17,6 @@ tempFilesDirectory = './temp/'
 diagramFilesDirectory = './diagrams/'
 templateFilesDirectory = './templates/'
 fileSpacer = "_"
-
-def updateDeviceArray(deviceArray, device, mode, inherit, buttons):
-    data = {
-        "Buttons": buttons,
-        "Axis": "",
-        "Inherit": inherit}
-
-    if device in deviceArray:
-        if mode in deviceArray[device]:
-            deviceArray[device][mode].update(data)
-        else:
-            deviceArray[device].update({
-                    mode:   data
-                        })
-    else:
-        deviceArray.update({
-            device : {
-                mode:   data
-                            }
-        })
 
 def createDirectory(directory):
     if not os.path.exists(directory):
@@ -57,8 +38,8 @@ def findTemplate(device, templatePath):
     else:
         return False
 
-def saveDiagram(device, mode, stream):
-    outputPath = diagramFilesDirectory + device + "_" + mode + ".svg"
+def saveDiagram(parser_type, device, mode, stream):
+    outputPath = diagramFilesDirectory + parser_type + "_" + device + "_" + mode + ".svg"
     if not os.path.exists(diagramFilesDirectory):
         createDirectory(diagramFilesDirectory)
     outputfile = open(outputPath, "w")
@@ -68,14 +49,14 @@ def saveDiagram(device, mode, stream):
 def strReplaceSVG(devicelist,device,mode,svg):
     for b, v in devicelist[device][mode]['Buttons'].items():
         regexSearch = "\\b" + b + "\\b"
-        svg = re.sub(regexSearch, v, svg, flags=re.IGNORECASE)
+        svg = re.sub(regexSearch, html.escape(v), svg, flags=re.IGNORECASE)
     return svg
 
 def addTemplateNameToSVG(title,svg):
     svg = re.sub("\\bTEMPLATE_NAME\\b", title, svg)
     return svg
 
-def exportDevice(devicelist, device, mode):
+def exportDevice(parser_type, devicelist, device, mode):
     temporaryTemplateFile = getTempPath(device,mode)
     if findTemplate(device,temporaryTemplateFile):
         if config.export:
@@ -84,7 +65,7 @@ def exportDevice(devicelist, device, mode):
             svg = strReplaceSVG(devicelist,device,mode,svg)
             title = "Profile Name: " + mode
             svg = re.sub("\\bTEMPLATE_NAME\\b", title, svg)
-            outputPath = saveDiagram(device,mode,svg)
+            outputPath = saveDiagram(parser_type, device,mode,svg)
             if config.openinbrowser:
                 webbrowser.get('chrome').open_new_tab(outputPath)
         return (True, device)

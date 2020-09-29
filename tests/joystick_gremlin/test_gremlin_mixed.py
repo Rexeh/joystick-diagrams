@@ -1,5 +1,5 @@
 import unittest
-import adaptors.gremlin as gremlin
+import adaptors.joystick_gremlin as gremlin
 
 class TestGremlin_Mixed(unittest.TestCase):
 
@@ -99,7 +99,7 @@ class TestGremlin_Mixed(unittest.TestCase):
     }
 
     def setUp(self):
-        self.file = gremlin.Gremlin("./tests/data/gremlin_inherit_no_inherit.xml")
+        self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_inherit_no_inherit.xml")
 
     def test_number_devices(self):
         self.assertEqual(2,self.file.getDeviceCount())
