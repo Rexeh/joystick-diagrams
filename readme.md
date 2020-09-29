@@ -10,7 +10,7 @@
 - Select Joystick Gremlin profiles
 - New UI
 
-[Download - Joystick Diagrams (V1.1.0)]()
+[Download - Joystick Diagrams (V1.1.0)](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.1.0/joystick_diagrams_1_1_0.zip)
 
 ## What is this tool for?
 Learning flight simulators is a daunting task, with lots of buttons to remember. I built this tool for myself, and then thought others might also enjoy it, automating what is a time consuming task!
