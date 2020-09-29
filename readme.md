@@ -19,21 +19,24 @@ Learning flight simulators is a daunting task, with lots of buttons to remember.
 - Overlay your buttons onto an actual Joystick profile/picture
 - Learn your joystick setup easier and be a better pilot!
 
-## What's supported?
+## What it's do?
 
 ### General
 - Custom SVG templates can be built to suit your joystick, throttle, custom HID device
+- Diagram style only limited by your design skills! :)
 
 ### Joystick Gremlin
 - Importing/inheriance of base templates into button profile exports
 - Support for multiple profiles in Joystick Gremlin
 
 ### DCS World
-- Export any of your plane/helicopter configurations
+- Export any of your plane/helicopter configurations to diagram
+- Select which profiles you want to export
 
-### What's not supported (yet)
-- POV hats (In POV mode)
-- AXIS support
+## What's it not do?
+- Output POV hats (In POV mode)
+- Output AXIS binds
+- Make toast
 
 ### Support for other games
 Have a game you want support added for? Get in touch, send me configs and I'll take a look
@@ -46,6 +49,8 @@ Want to run from source? You'll need Python 3.8+
 Use setup.py to get up and running
 
 # Templates/Supported Joysticks
+Currently a limited number of sticks supported out of the box, but you can make custom ones!
+
 [Please read the about templates here](templates/readme.md)
 
 # Bugs
@@ -57,7 +62,7 @@ This is still an early release, if you find any bugs, or think you have a slight
 If you have any issues/questions, pop along to discord - https://discord.gg/JC5QFMB
 
 ## Beer
-I plan to expand this out and continue on this journey. I'd appreciate any donations for time saved and to help me continue to support this program.
+I plan to expand this out and continue on this journey. If you like the tool, maybe buy me a beer.
 [Donate via Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url)
 
 

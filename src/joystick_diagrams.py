@@ -136,7 +136,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         run_state = []
 
         for joystick in data:
-            print(joystick)
             for mode in data[joystick]:
                 success = helper.exportDevice(type, data, joystick, mode)
                 helper.log(success, 'debug')
