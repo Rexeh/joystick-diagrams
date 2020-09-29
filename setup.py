@@ -13,7 +13,6 @@ long_description = (here / 'readme.md').read_text(encoding='utf-8')
 if sys.platform == "win32":
     base = "Win32GUI"
 
-
 build_options = {
                 "include_files": [
                         "./images",
