@@ -119,8 +119,6 @@ class DCSWorld_Parser(jdi.JDinterface):
                             writeVal = False
 
                     self.update_joystick_dictionary(joystick_device,profile, False, buttonArray)
-        
-        print(self.joystick_dictionary)
         return self.joystick_dictionary
 
     def parseFile(self):

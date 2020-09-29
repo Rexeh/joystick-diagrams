@@ -1,9 +1,16 @@
-# Joystick Diagrams - Visualise your binds
+# Joystick Diagrams - Visualise your binds ![Build Status](https://travis-ci.com/Rexeh/joystick-diagrams.svg?branch=master) [![codecov](https://codecov.io/gh/Rexeh/joystick-diagrams/branch/master/graph/badge.svg)](https://codecov.io/gh/Rexeh/joystick-diagrams)
 
-![Build Status](https://travis-ci.com/Rexeh/joystick-diagrams.svg?branch=master) [![codecov](https://codecov.io/gh/Rexeh/joystick-diagrams/branch/master/graph/badge.svg)](https://codecov.io/gh/Rexeh/joystick-diagrams)
+![](https://s3-eu-west-1.amazonaws.com/joystick-diagram.com/Joystick-Diagram-info.png)
 
-## Current Release (1.0.0)
-[Download](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.0.0/joystick-diagram-1-0-0.zip)
+## Current Release (1.1.0) - 29/09/2020
+
+### What's new?
+
+- DCS World Support
+- Select Joystick Gremlin profiles
+- New UI
+
+[Download - Joystick Diagrams (V1.1.0)](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.0.0/joystick-diagram-1-0-0.zip)
 
 ## What is this tool for?
 Learning flight simulators is a daunting task, with lots of buttons to remember. I built this tool for myself, and then thought others might also enjoy it, automating what is a time consuming task!
@@ -11,8 +18,6 @@ Learning flight simulators is a daunting task, with lots of buttons to remember.
 - Export your joystick/throttle/custom HID buttons to a SVG, and print with your browser
 - Overlay your buttons onto an actual Joystick profile/picture
 - Learn your joystick setup easier and be a better pilot!
-
-![Image of exported profile](https://i.imgur.com/8RWBuNM.png)
 
 ## What's supported?
 
@@ -23,36 +28,28 @@ Learning flight simulators is a daunting task, with lots of buttons to remember.
 - Importing/inheriance of base templates into button profile exports
 - Support for multiple profiles in Joystick Gremlin
 
+### DCS World
+- Export any of your plane/helicopter configurations
+
 ### What's not supported (yet)
 - POV hats (In POV mode)
 - AXIS support
 
 ### Support for other games
-I'm currently working on DCS World - if you have a game you think will benefit from this, let me know and I might add it.
+Have a game you want support added for? Get in touch, send me configs and I'll take a look
 
 ## Installation
-None required, use the supplied binary in latest release.
-
-Run joystick-diagram.exe
+None required, extract the latest .zip, and run joystick-diagrams.exe
 
 ### From Source
 Want to run from source? You'll need Python 3.8+
 Use setup.py to get up and running
 
-## Bugs
-This is an initial release, all of the templates are new and there may be configuration differences to work out.
-
-I'm expecting issues with the Virpil templates, as don't have the logical buttons available to me.
-
-## Usage
-- Run joystick-diagram.exe
-- Select your Joystick Gremlin profile XML
-- Hit Export
-- If it finds a match, it'll export the bindings for this device, and any modes you have configured
-- Files will be stored in /diagrams when export has been completed. You can open these in a web browser, and print to PDF/printer from there
-
 # Templates/Supported Joysticks
 [Please read the about templates here](templates/readme.md)
+
+# Bugs
+This is still an early release, if you find any bugs, or think you have a slightly different configuration that I might not support let me know!
 
 # Support / Beer fund
 
