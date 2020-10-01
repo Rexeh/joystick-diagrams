@@ -11,8 +11,12 @@ These are iniital releases, and may require tweaking. Virpil are highly customis
 - Virpil MT50-CM2 Throttle
 - Virpil Constellation Alpha-R
 
+## VKB Sim
+Kindly supplied by JusticeMKIII 
+- Gladiator NXT L
+- Gladiator NXT R
+
 ## Thrustmaster
-These should work out of the box with no customisation needed
 - Warthog HOTAS
 - Warthog Throttle
 
