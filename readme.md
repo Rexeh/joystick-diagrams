@@ -1,5 +1,7 @@
 # Joystick Diagrams - Visualise your binds ![Build Status](https://travis-ci.com/Rexeh/joystick-diagrams.svg?branch=master) [![codecov](https://codecov.io/gh/Rexeh/joystick-diagrams/branch/master/graph/badge.svg)](https://codecov.io/gh/Rexeh/joystick-diagrams)
 
+![Joystick Diagrams](https://s3-eu-west-1.amazonaws.com/joystick-diagram.com/Joystick-Diagram-info.png)
+
 ## Current Release (1.1.0) - 29/09/2020
 
 ### What's new?
