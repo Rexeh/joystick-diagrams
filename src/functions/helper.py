@@ -13,6 +13,13 @@ logDir = './logs/'
 logFile = 'jv.log'   
 logger = logging.getLogger('jv')
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
+
+def createDirectory(directory):
+    if not os.path.exists(directory):
+        return os.makedirs(directory)
+    else:
+        log("Failed to create directory: {}".format(directory), 'error')
+        return False
         
 def log(text, level='info'):
     #Accepted Levels
