@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, uic, QtGui
 from Ui import Ui_MainWindow
 import adaptors.dcs_world as dcs
 import adaptors.joystick_gremlin as jg
+import classes.export as export
 import functions.helper as helper
 import version
 
@@ -130,30 +131,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def export_to_svg(self, data,parser_type):
 
         self.export_progress_bar.setValue(0)
-        data = data
-        type = parser_type
-        joycount = len(data)
-        run_state = []
+        exporter = export.Export(data,parser_type)
 
-        for joystick in data:
-            for mode in data[joystick]:
-                success = helper.exportDevice(type, data, joystick, mode)
-                helper.log(success, 'debug')
-                # Log failures
-                if success[0] == False and success[1] not in run_state:
-                    helper.log("Device: {} does not have a valid template".format(success[1]), 'debug')
-                    run_state.append(success[1])
-            self.export_progress_bar.setValue(self.export_progress_bar.value() + int(100/joycount))
-        if(len(run_state)>0):
-            errorText = "The following devices did not have matching templates in /templates. \n\n Device names must match the template name exactly.\n"
-            for item in run_state:
-                errorText = errorText+'\n'+item
-            errorText = errorText+'\n\n'+"No diagrams have been created for the above"
-            helper.log(errorText, 'warning')
-            self.print_to_info(errorText)
+        success = exporter.export_config()
+        self.export_progress_bar.setValue(100)
+        helper.log(success, 'debug')
+        # Log failures
+        
+        # if(len(run_state)>0):
+        #     errorText = "The following devices did not have matching templates in /templates. \n\n Device names must match the template name exactly.\n"
+        #     for item in run_state:
+        #         errorText = errorText+'\n'+item
+        #     errorText = errorText+'\n\n'+"No diagrams have been created for the above"
+        #     helper.log(errorText, 'warning')
+        #     self.print_to_info(errorText)
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    app.exec()
+
+    try:
+        app = QtWidgets.QApplication(sys.argv)
+        window = MainWindow()
+        window.show()
+        app.exec()
+    except Exception as error:
+        helper.log(error, "error")
+        raise
