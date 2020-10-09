@@ -32,7 +32,7 @@ There are many joysticks out there, and a template needs to be provided for them
 
 This is very easy to do, for free online
 
-1. Go to an SVG compliant editor (http://draw.io/) and open CustomTemplate.SVG
+1. Go to an SVG compliant editor (http://draw.io/) and open Custom/BaseTemplate_X.SVG
 2. Create a joystick profile by importing a joystick image, and creating labels
 3. Call the label BUTTON_X, where X is the actual physical button on your stick
 4. Export template as SVG
