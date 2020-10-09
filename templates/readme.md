@@ -20,6 +20,11 @@ Kindly supplied by JusticeMKIII
 - Warthog HOTAS
 - Warthog Throttle
 
+## CH Products
+Thanks to Alexjager for supplying all the button maps
+- CH Fighterstick
+- CH Pro Throttle
+
 ## Missing your stick?
 
 ### Adding/Modifying Templates
