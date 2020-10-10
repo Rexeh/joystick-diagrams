@@ -46,6 +46,7 @@ class TestExport_Template(unittest.TestCase):
         files = os.listdir(self.template.name)
         print(files)
         self.exporter.export_config()
+        print(self.template.name)
         print(os.listdir(self.template.name))
         self.assertEqual(len(os.listdir(self.template.name)), 2)
         

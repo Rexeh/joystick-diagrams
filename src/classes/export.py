@@ -63,7 +63,7 @@ class Export:
             raise
 
     def replace_unused_strings(self, template):
-        regex_search = "\\bButton_\d+\\b"
+        regex_search = "\\bButton_\\d+\\b"
         matches = re.findall(regex_search, template, flags=re.IGNORECASE)
         matches = list(dict.fromkeys(matches))
         for i in matches:
