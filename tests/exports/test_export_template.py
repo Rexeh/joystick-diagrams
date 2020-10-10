@@ -45,7 +45,12 @@ class TestExport_Template(unittest.TestCase):
     def test_files_exported(self):
         self.exporter.export_config()
         self.assertEqual(len(os.listdir(self.template.name)), 2)
-        
+
+    def test_files_exported_no_directory(self):
+        self.exporter.export_directory =  self.template.name + '/new/'
+        self.exporter.export_config()
+        self.assertEqual(len(os.listdir(self.template.name + '/new/')), 2)
+
     def test_unused_strings_replaced(self):
         data = self.exporter.replace_unused_strings("<Item>BUTTON_26</Item>Some Text - Some more Text BUTTON_87")
         self.assertEqual(data,"<Item>No Bind</Item>Some Text - Some more Text No Bind")
