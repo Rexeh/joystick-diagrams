@@ -40,7 +40,7 @@ class TestExport_Template(unittest.TestCase):
     def setUp(self):
         self.exporter = export.Export(self.data)
         self.template = tempfile.TemporaryDirectory()
-        self.exporter.export_directory = self.template.name + '\\'
+        self.exporter.export_directory = self.template.name + '/'
 
     def test_files_exported(self):
         files = os.listdir(self.template.name)
