@@ -43,11 +43,7 @@ class TestExport_Template(unittest.TestCase):
         self.exporter.export_directory = self.template.name + '/'
 
     def test_files_exported(self):
-        files = os.listdir(self.template.name)
-        print(files)
         self.exporter.export_config()
-        print(self.template.name)
-        print(os.listdir(self.template.name))
         self.assertEqual(len(os.listdir(self.template.name)), 2)
         
     def test_unused_strings_replaced(self):
