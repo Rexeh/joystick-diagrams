@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 import html
 import functions.helper as helper
+from PyQt5 import QtWidgets, uic, QtGui
 
 class Export:
 
@@ -17,19 +18,37 @@ class Export:
         self.executor = parser_id
         self.error_bucket = []
 
-    def export_config(self):
+    def export_config(self, progress_bar=None):
+
+        joystick_count = len(self.joystick_listing)
+
+        if isinstance(progress_bar, QtWidgets.QProgressBar):
+            progress_bar.setValue(0)
+            progress_increment = 100/joystick_count
+
         for joystick in self.joystick_listing:
             base_template = self.get_template(joystick)
             if base_template:
+                progress_increment_modes = len(self.joystick_listing[joystick])
                 for mode in self.joystick_listing[joystick]:
                     write_template = base_template
                     completed_template = self.replace_template_strings(joystick, mode, write_template)
                     completed_template = self.replace_unused_strings(completed_template)
                     completed_template = self.brand_template(mode, completed_template)
                     self.save_template(joystick,mode,completed_template)
+                    progress_bar.setValue(progress_bar.value() + (progress_increment/progress_increment_modes))
             else:
                 self.error_bucket.append("No Template for: {}".format(joystick))
+
+            if isinstance(progress_bar, QtWidgets.QProgressBar):
+                progress_bar.setValue(progress_bar.value() + progress_increment)
+
+        if isinstance(progress_bar, QtWidgets.QProgressBar):
+            progress_bar.setValue(100)
         return self.error_bucket
+
+    def update_progress(self):
+        pass
 
     def create_directory(self,directory):
         if not os.path.exists(directory):

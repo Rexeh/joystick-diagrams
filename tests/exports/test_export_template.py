@@ -64,8 +64,8 @@ class TestExport_Template(unittest.TestCase):
         self.assertEqual(data,"<Item>OVERRIDE</Item>Some Text - Some more Text OVERRIDE")
 
     def test_string_replacement(self):
-        data = self.exporter.replace_template_strings("VPC Throttle MT-50 CM2","A10","<XML><BUTTON_1><BUTTON_5><BUTTON_56><BUTTON_58>")
-        self.assertEqual(data,"<XML><Button 1 - No Replace><Pinkie Center><A10 Mode><KA50 Mode>")
+        data = self.exporter.replace_template_strings("VPC Throttle MT-50 CM2","A10","<XML><BUTTON_1><BUTTON_5><BUTTON_56><BUTTON_56><BUTTON_58>")
+        self.assertEqual(data,"<XML><Button 1 - No Replace><Pinkie Center><A10 Mode><A10 Mode><KA50 Mode>")
 
     def test_string_replacement_no_bind(self):
         self.exporter.no_bind_text = "OVERRIDE"
