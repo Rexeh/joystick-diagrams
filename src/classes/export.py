@@ -36,7 +36,8 @@ class Export:
                     completed_template = self.replace_unused_strings(completed_template)
                     completed_template = self.brand_template(mode, completed_template)
                     self.save_template(joystick,mode,completed_template)
-                    progress_bar.setValue(progress_bar.value() + (progress_increment/progress_increment_modes))
+                    if isinstance(progress_bar, QtWidgets.QProgressBar):
+                        progress_bar.setValue(progress_bar.value() + (progress_increment/progress_increment_modes))
             else:
                 self.error_bucket.append("No Template for: {}".format(joystick))
 

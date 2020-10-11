@@ -33,17 +33,23 @@ def test_dcs_file_load_failure_config(qtbot):
     window.show()
     qtbot.addWidget(window)
     window.dcs_directory = './tests/data/dcs_world/invalid_dcs_world_no_config'
-    window.load_dcs_directory()
-    assert window.application_information_textbrowser.toPlainText() == 'DCS: No Config Folder found in DCS Folder.'
+    try:
+        window.load_dcs_directory()
+    except Exception as e:
+        assert e.args[0] == 'DCS: No Config Folder found in DCS Folder.'
 
 def test_dcs_file_load_failure_input(qtbot):
     window = joystick_diagrams.MainWindow()
     window.show()
     qtbot.addWidget(window)
     window.dcs_directory = './tests/data/dcs_world/invalid_dcs_world_no_input'
-    window.load_dcs_directory()
-    assert window.application_information_textbrowser.toPlainText() == 'DCS: No input directory found'
-
+    
+    try:
+        window.load_dcs_directory()
+    except Exception as e:
+        assert e.args[0] == 'DCS: No input directory found'
+        
+    
 def test_jg_file_load(qtbot):
     window = joystick_diagrams.MainWindow()
     window.show()
