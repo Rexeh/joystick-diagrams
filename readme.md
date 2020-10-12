@@ -2,7 +2,7 @@
 
 ![Joystick Diagrams](https://s3-eu-west-1.amazonaws.com/joystick-diagram.com/Joystick-Diagram-info.png#2)
 
-## Current Release (1.2.0) - 29/09/2020
+## Current Release (1.2.0) - 12/10/2020
 
 ### What's new?
 
