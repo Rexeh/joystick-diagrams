@@ -87,38 +87,34 @@ class DCSWorld_Parser(jdi.JDinterface):
                     item[:-48] : item
                 })
             for joystick_device, joystick_file in self.joystick_listing.items():
-                try:
-                    if os.path.isdir(os.path.join(self.fq_path, joystick_file)):
-                        break
-                    else:
+                
+                if os.path.isdir(os.path.join(self.fq_path, joystick_file)):
+                        print("Skipping as Folder")
+                else:
+                    try:
                         self.file = Path(os.path.join(self.fq_path, joystick_file)).read_text(encoding="utf-8")
                         self.file = self.file.replace('local diff = ', '') ## CLEAN UP
                         self.file = self.file.replace('return diff', '') ## CLEAN UP
-                except FileNotFoundError:
-                    raise FileExistsError("DCS: File {} no longer found - It has been moved/deleted from directory".format(joystick_file))
-
-                data = self.parseFile()
-                writeVal = False
-                buttonArray = {}
-
-                if 'keyDiffs' in data.keys():
-                    for value in data['keyDiffs'].values():
-
-                        for item, attribute in value.items():
-
-                            if item=='name':
-                                name = attribute
-                            if item=='added':
-                                button = self.convert_button_format(attribute[1]['key'])
-                                writeVal = True
-                        
-                        if writeVal:
-                            buttonArray.update({
-                                button : name
-                            })
-                            writeVal = False
-
-                    self.update_joystick_dictionary(joystick_device,profile, False, buttonArray)
+                    except FileNotFoundError:
+                        raise FileExistsError("DCS: File {} no longer found - It has been moved/deleted from directory".format(joystick_file))
+                    else:
+                        data = self.parseFile()
+                        writeVal = False
+                        buttonArray = {}
+                        if 'keyDiffs' in data.keys():
+                            for value in data['keyDiffs'].values():
+                                for item, attribute in value.items():
+                                    if item=='name':
+                                        name = attribute
+                                    if item=='added':
+                                        button = self.convert_button_format(attribute[1]['key'])
+                                        writeVal = True
+                                if writeVal:
+                                    buttonArray.update({
+                                        button : name
+                                    })
+                                    writeVal = False
+                            self.update_joystick_dictionary(joystick_device,profile, False, buttonArray)
         return self.joystick_dictionary
 
     def parseFile(self):
