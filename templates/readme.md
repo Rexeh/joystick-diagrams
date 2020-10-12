@@ -11,6 +11,8 @@ These are iniital releases, and may require tweaking. Virpil are highly customis
 - Virpil MT50-CM2 Throttle
 - Virpil Constellation Alpha-R
 - Virpil Button Box #1
+- Virpil VFX
+- Virpil WarBRD
 
 ## VKB Sim
 Kindly supplied by JusticeMKIII 
@@ -20,6 +22,8 @@ Kindly supplied by JusticeMKIII
 ## Thrustmaster
 - Warthog HOTAS
 - Warthog Throttle
+- T.16000M Stick
+- TWCS Throttle
 
 ## CH Products
 Thanks to Alexjager for supplying all the button maps

@@ -32,6 +32,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def setVersion(self):
         version_text = version.VERSION
+        self.label_9.setText(version_text)
         self.setWindowTitle("Joystick Diagrams - V" + version_text)
 
     def change_export_button(self):
