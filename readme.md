@@ -2,15 +2,15 @@
 
 ![Joystick Diagrams](https://s3-eu-west-1.amazonaws.com/joystick-diagram.com/Joystick-Diagram-info.png#2)
 
-## Current Release (1.1.0) - 29/09/2020
+## Current Release (1.2.0) - 29/09/2020
 
 ### What's new?
 
-- DCS World Support
-- Select Joystick Gremlin profiles
-- New UI
+- New templates added for various sticks/throttles
+- Bug fixes with UTF-8 characters
+- Unused binds now cleaned up on diagrams
 
-[Download - Joystick Diagrams (V1.1.0)](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.1.0/joystick_diagrams_1_1_0.zip)
+[Download - Joystick Diagrams (V1.2.0)](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.2.0/joystick_diagrams_1_2_0.zip)
 
 ## What is this tool for?
 Learning flight simulators is a daunting task, with lots of buttons to remember. I built this tool for myself, and then thought others might also enjoy it, automating what is a time consuming task!
@@ -34,8 +34,8 @@ Learning flight simulators is a daunting task, with lots of buttons to remember.
 - Select which profiles you want to export
 
 ## What's it not do?
-- Output POV hats (In POV mode)
-- Output AXIS binds
+- Output POV hats (Coming V1.3)
+- Output AXIS binds (Coming V1.3)
 - Make toast
 
 ### Support for other games
@@ -49,7 +49,7 @@ Want to run from source? You'll need Python 3.8+
 Use setup.py to get up and running
 
 # Templates/Supported Joysticks
-Currently a limited number of sticks supported out of the box, but you can make custom ones!
+It comes with a set of templates for popular sticks/throttles, but you're also able to create your own with ease!
 
 [Please read the about templates here](templates/readme.md)
 
