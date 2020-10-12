@@ -10,6 +10,8 @@
 - Bug fixes with UTF-8 characters
 - Unused binds now cleaned up on diagrams
 
+[Release Notes - V1.2.0](https://github.com/Rexeh/joystick-diagrams/releases/tag/V1.2.0)
+
 [Download - Joystick Diagrams (V1.2.0)](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.2.0/joystick_diagrams_1_2_0.zip)
 
 ## What is this tool for?
