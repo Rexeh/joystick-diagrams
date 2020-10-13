@@ -8,7 +8,7 @@ class JoystickGremlin(jdi.JDinterface):
     def __init__(self,filepath):
     ## TRY FIND PATH
         jdi.JDinterface.__init__(self)
-        self.file = self.parse_xml_file(filepath) ## Remove from instantiation > Make testable function with error handling (FolloW DCS_World Pattern)
+        self.file = self.parse_xml_file(filepath)
         
         # New Attributes
         self.device_names = self.get_device_names()
@@ -46,6 +46,7 @@ class JoystickGremlin(jdi.JDinterface):
         return profile_modes
 
     def parse_xml_file(self, xml_file):
+        ## Improve loading of file, checks for validity etc
         return minidom.parse(xml_file)
 
     def createDictionary(self, profiles=[]):

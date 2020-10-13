@@ -1,5 +1,5 @@
 # Templates
-Define templates in SVG. Name of template should match your Joystick Gremlin device name.
+A lot of the templates included with Joystick Diagrams are brand new, created by myself for the tool. Some have kindly been supplied by the community!
 
 # Default Templates
 
@@ -10,11 +10,29 @@ These are iniital releases, and may require tweaking. Virpil are highly customis
 - Virpil MT50-CM2 Stick
 - Virpil MT50-CM2 Throttle
 - Virpil Constellation Alpha-R
+- Virpil Button Box #1
+- Virpil VFX
+- Virpil WarBRD
+
+## VKB Sim
+Kindly supplied by JusticeMKIII 
+- Gladiator NXT L
+- Gladiator NXT R
 
 ## Thrustmaster
-These should work out of the box with no customisation needed
 - Warthog HOTAS
 - Warthog Throttle
+- T.16000M Stick
+- TWCS Throttle
+
+## CH Products
+Thanks to Alexjager for supplying all the button maps
+- CH Fighterstick
+- CH Pro Throttle
+
+## Saitek
+- X56 Throttle
+- X56 Stick
 
 ## Missing your stick?
 
@@ -23,7 +41,7 @@ There are many joysticks out there, and a template needs to be provided for them
 
 This is very easy to do, for free online
 
-1. Go to an SVG compliant editor (http://draw.io/) and open CustomTemplate.SVG
+1. Go to an SVG compliant editor (http://draw.io/) and open Custom/BaseTemplate_X.SVG
 2. Create a joystick profile by importing a joystick image, and creating labels
 3. Call the label BUTTON_X, where X is the actual physical button on your stick
 4. Export template as SVG

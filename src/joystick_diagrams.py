@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, uic, QtGui
 from Ui import Ui_MainWindow
 import adaptors.dcs_world as dcs
 import adaptors.joystick_gremlin as jg
+import classes.export as export
 import functions.helper as helper
 import version
 
@@ -31,6 +32,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def setVersion(self):
         version_text = version.VERSION
+        self.label_9.setText(version_text)
         self.setWindowTitle("Joystick Diagrams - V" + version_text)
 
     def change_export_button(self):
@@ -53,53 +55,72 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.dcs_profiles_list.clear()
             self.dcs_profiles_list.addItems(self.dcs_parser_instance.getValidatedProfiles())
 
+    def clear_info(self):
+        self.application_information_textbrowser.clear()
+
+    def enable_profile_load_button(self, button):
+        button.setStyleSheet('background: #007acc; color: white;')
+
+    def disable_profile_load_button(self, button):
+        button.setStyleSheet('color:white; border: 1px solid white;')
+        
     def print_to_info(self, error):
         self.application_information_textbrowser.append(error)
         self.application_information_textbrowser.verticalScrollBar().setValue(self.application_information_textbrowser.verticalScrollBar().maximum())
 
     def set_dcs_directory(self):
         self.dcs_directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Select DCS Saved Games Directory",os.path.expanduser("~"))
+        
         if self.dcs_directory:
-            self.load_dcs_directory()
+            try:
+                self.load_dcs_directory()
+            except Exception as e:
+                self.print_to_info("Error: {}".format(e))
         else:
-            pass
+            self.print_to_info("No DCS Directory Selected")
 
     def load_dcs_directory(self):
         try:
             self.dcs_profiles_list.clear()
             self.dcs_parser_instance = dcs.DCSWorld_Parser(self.dcs_directory,easy_modes=self.dcs_easy_mode_checkbox.isChecked())
             self.print_to_info('Succesfully loaded DCS profiles')
-            self.dcs_directory_select_button.setStyleSheet('background: #007acc; color: white;')
+            self.enable_profile_load_button(self.dcs_directory_select_button)
             self.dcs_selected_directory_label.setText('in {}'.format(self.dcs_directory))
             self.export_button.setEnabled(1)
         except Exception as error:
-            self.print_to_info(error.args[0])
+            self.disable_profile_load_button(self.dcs_directory_select_button)
+            self.export_button.setEnabled(0)
+            self.dcs_selected_directory_label.setText('')
+            raise
         else:
             self.dcs_profiles_list.clear()
             self.dcs_profiles_list.addItems(self.dcs_parser_instance.getValidatedProfiles())
 
     def set_jg_file(self):
         self.jg_file = QtWidgets.QFileDialog.getOpenFileName(self,"Select Joystick Gremlin Config file",None,"Gremlin XMl Files (*.xml)")[0]
-        try:
-            self.load_jg_file()
-        except:
-            print("Error Loading JG File")
+        
+        if self.jg_file:
+            try:
+                self.load_jg_file()
+            except Exception as e:
+                self.print_to_info("Error Loading File: {}".format(e))
         else:
-            pass
+            self.print_to_info("No File Selected")
 
     def load_jg_file(self):
         try:
             self.jg_parser_instance = jg.JoystickGremlin(self.jg_file)
             self.jg_devices = self.jg_parser_instance.get_device_names()
             self.jg_modes = self.jg_parser_instance.get_modes()
-            self.jg_select_profile_button.setStyleSheet('background: #007acc; color: white;')
+            self.enable_profile_load_button(self.jg_select_profile_button)
             self.jg_profile_list.clear()
             self.jg_profile_list.addItems(self.jg_modes)
             self.export_button.setEnabled(1)
-        except:
-            print("Ooops problem with JG file")
-        else:
-            pass
+        except Exception as e:
+            self.disable_profile_load_button(self.jg_select_profile_button)
+            self.jg_profile_list.clear()
+            self.export_button.setEnabled(0)
+            raise
 
     def export_profiles(self):
         if self.parser_selector.currentIndex() == 0: ## JOYSTICK GREMLIN
@@ -130,30 +151,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def export_to_svg(self, data,parser_type):
 
         self.export_progress_bar.setValue(0)
-        data = data
-        type = parser_type
-        joycount = len(data)
-        run_state = []
-
-        for joystick in data:
-            for mode in data[joystick]:
-                success = helper.exportDevice(type, data, joystick, mode)
-                helper.log(success, 'debug')
-                # Log failures
-                if success[0] == False and success[1] not in run_state:
-                    helper.log("Device: {} does not have a valid template".format(success[1]), 'debug')
-                    run_state.append(success[1])
-            self.export_progress_bar.setValue(self.export_progress_bar.value() + int(100/joycount))
-        if(len(run_state)>0):
-            errorText = "The following devices did not have matching templates in /templates. \n\n Device names must match the template name exactly.\n"
-            for item in run_state:
-                errorText = errorText+'\n'+item
-            errorText = errorText+'\n\n'+"No diagrams have been created for the above"
-            helper.log(errorText, 'warning')
-            self.print_to_info(errorText)
+        self.clear_info()
+        self.print_to_info("Export Started")
+        exporter = export.Export(data,parser_type)
+        success = exporter.export_config(self.export_progress_bar)
+        for item in success:
+            self.print_to_info(item)
+        self.print_to_info("Export Finished")
+        helper.log(success, 'info')
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    app.exec()
+
+    try:
+        app = QtWidgets.QApplication(sys.argv)
+        window = MainWindow()
+        window.show()
+        app.exec()
+    except Exception as error:
+        helper.log(error, "error")
+        raise
