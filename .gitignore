@@ -15,3 +15,5 @@ diagrams/*.svg
 play*.py
 tests/__pycache__/test_helpers.cpython-38-pytest-6.0.2.pyc
 untitled.ui
+.idea
+venv

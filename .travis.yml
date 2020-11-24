@@ -24,6 +24,8 @@ install:
   - pip install pytest-cov
   - pip install pyqt5
   - pip install pytest-qt
+  - pip install pygame
+  - pip install lxml
   - pip install -e .
   
 script:

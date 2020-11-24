@@ -1,16 +1,24 @@
 import sys
 import os
-from PyQt5 import QtWidgets, uic, QtGui
-from Ui import Ui_MainWindow
+import pygame
+from PyQt5 import QtWidgets
+from Ui import Ui_MainWindow as UiMainWindow
 import adaptors.dcs_world as dcs
 import adaptors.joystick_gremlin as jg
 import classes.export as export
 import functions.helper as helper
 import version
+from classes.visualizer import VisualizerWindow
 
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+
+class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+        self.jg_devices = []
+        self.jg_modes = []
+        self.jg_file = None
+        self.dcs_directory = None
+
         self.setupUi(self)
         self.setVersion()
         # Clean up GUI Defaults
@@ -63,14 +71,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def disable_profile_load_button(self, button):
         button.setStyleSheet('color:white; border: 1px solid white;')
-        
+
     def print_to_info(self, error):
         self.application_information_textbrowser.append(error)
         self.application_information_textbrowser.verticalScrollBar().setValue(self.application_information_textbrowser.verticalScrollBar().maximum())
 
     def set_dcs_directory(self):
         self.dcs_directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Select DCS Saved Games Directory",os.path.expanduser("~"))
-        
+
         if self.dcs_directory:
             try:
                 self.load_dcs_directory()
@@ -98,7 +106,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def set_jg_file(self):
         self.jg_file = QtWidgets.QFileDialog.getOpenFileName(self,"Select Joystick Gremlin Config file",None,"Gremlin XMl Files (*.xml)")[0]
-        
+
         if self.jg_file:
             try:
                 self.load_jg_file()
@@ -163,10 +171,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 if __name__ == '__main__':
 
     try:
+        pygame.init()
+
         app = QtWidgets.QApplication(sys.argv)
         window = MainWindow()
         window.show()
+
+        visualizerWindow = VisualizerWindow()
+        visualizerWindow.show()
+
         app.exec()
     except Exception as error:
-        helper.log(error, "error")
+        helper.log(str(error), "error")
         raise
+    pygame.quit()
