@@ -1,8 +1,8 @@
 from pathlib import Path
-from typing import Union, Any
+from typing import Union, Dict
 from lxml import etree
 
-Bindings = dict[str, str]
+Bindings = Dict[str, str]
 
 
 # TODO: templater should use xml id attributes
