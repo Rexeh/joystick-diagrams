@@ -9,7 +9,7 @@ class JDinterface:
     def update_joystick_dictionary(self, device, mode, inherit, buttons):
         data = {
             "Buttons": buttons,
-            "Axis": "",
+            "Axis": '',
             "Inherit": inherit}
 
         if device in self.joystick_dictionary:

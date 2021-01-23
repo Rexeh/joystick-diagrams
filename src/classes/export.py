@@ -64,6 +64,9 @@ class Export:
             return False
 
     def get_template(self, joystick):
+
+        joystick = joystick.strip()
+
         if path.exists(self.templates_directory + joystick + ".svg"):
             data = Path(os.path.join(self.templates_directory, joystick + ".svg")).read_text(encoding="utf-8")
             return data
@@ -71,7 +74,7 @@ class Export:
             return False
 
     def save_template(self, joystick, mode, template):
-        output_path = self.export_directory + self.executor + "_" + joystick + "_" + mode + ".svg"
+        output_path = self.export_directory + self.executor + "_" + joystick.strip() + "_" + mode + ".svg"
         if not os.path.exists(self.export_directory):
             self.create_directory(self.export_directory)
         try:
