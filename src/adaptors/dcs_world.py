@@ -53,7 +53,8 @@ class DCSWorld_Parser(jdi.JDinterface):
         Return Valid Profile
         '''
         #TODO add additional checking for rogue dirs/no files etc
-        if 'joystick' in os.listdir(os.path.join(self.path, 'Config', 'Input', item)):
+        
+        if os.path.isdir(os.path.join(self.path, 'Config', 'Input', item)) and 'joystick' in os.listdir(os.path.join(self.path, 'Config', 'Input', item)):
             return os.listdir(os.path.join(self.path, 'Config', 'Input', item, 'joystick'))
         else:
             return False
