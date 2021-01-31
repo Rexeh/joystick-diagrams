@@ -2,15 +2,13 @@
 
 ![Joystick Diagrams](https://s3-eu-west-1.amazonaws.com/joystick-diagram.com/Joystick-Diagram-info.png#2)
 
-## Current Release (1.2.0) - 12/10/2020
+## Current Release (1.2.1) - 23/01/2020
 
 ### What's new?
 
-- New templates added for various sticks/throttles
-- Bug fixes with UTF-8 characters
-- Unused binds now cleaned up on diagrams
+- Hotfix to DCS folder structure crashing app
 
-[Release Notes - V1.2.0](https://github.com/Rexeh/joystick-diagrams/releases/tag/V1.2.0)
+[Release Notes - V1.2.1](https://github.com/Rexeh/joystick-diagrams/releases/tag/V1.2.1)
 
 [Download - Joystick Diagrams (V1.2.0)](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.2.0/joystick_diagrams_1_2_0.zip)
 
