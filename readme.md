@@ -1,18 +1,16 @@
-# Joystick Diagrams - Visualise your binds ![Build Status](https://travis-ci.com/Rexeh/joystick-diagrams.svg?branch=master) [![codecov](https://codecov.io/gh/Rexeh/joystick-diagrams/branch/master/graph/badge.svg)](https://codecov.io/gh/Rexeh/joystick-diagrams)
+# Joystick Diagrams - Visualise your binds ![Build Status](https://travis-ci.com/Rexeh/joystick-diagrams.svg?branch=master) [![codecov](https://codecov.io/gh/Rexeh/joystick-diagrams/branch/master/graph/badge.svg)](https://codecov.io/gh/Rexeh/joystick-diagrams) ![Discord](https://img.shields.io/discord/733253732355276800?label=Discord)
 
 ![Joystick Diagrams](https://s3-eu-west-1.amazonaws.com/joystick-diagram.com/Joystick-Diagram-info.png#2)
 
-## Current Release (1.2.0) - 12/10/2020
+## Current Release (1.2.1) - 23/01/2020
 
 ### What's new?
 
-- New templates added for various sticks/throttles
-- Bug fixes with UTF-8 characters
-- Unused binds now cleaned up on diagrams
+- Hotfix to DCS folder structure crashing app
 
-[Release Notes - V1.2.0](https://github.com/Rexeh/joystick-diagrams/releases/tag/V1.2.0)
+[Release Notes - V1.2.1](https://github.com/Rexeh/joystick-diagrams/releases/tag/V1.2.1)
 
-[Download - Joystick Diagrams (V1.2.0)](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.2.0/joystick_diagrams_1_2_0.zip)
+[Download - Joystick Diagrams (V1.2.1)](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.2.1/joystick_diagrams_1_2_1.zip)
 
 ## What is this tool for?
 Learning flight simulators is a daunting task, with lots of buttons to remember. I built this tool for myself, and then thought others might also enjoy it, automating what is a time consuming task!
