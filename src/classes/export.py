@@ -1,10 +1,12 @@
 from os import path
 import os
 from pathlib import Path
+import config
 import re
 import html
 import functions.helper as helper
 from PyQt5 import QtWidgets, uic, QtGui
+
 
 class Export:
 
@@ -14,7 +16,7 @@ class Export:
         self.file_name_divider = "_"
         self.joystick_listing = joystick_listing
         self.export_progress = None
-        self.no_bind_text = custom_no_bind
+        self.no_bind_text = config.noBindText
         self.executor = parser_id
         self.error_bucket = []
 
@@ -39,7 +41,7 @@ class Export:
                     if isinstance(progress_bar, QtWidgets.QProgressBar):
                         progress_bar.setValue(progress_bar.value() + (progress_increment/progress_increment_modes))
             else:
-                self.error_bucket.append("No Template for: {}".format(joystick))
+                self.error_bucket.append("No Template file found for: {}".format(joystick))
 
             if isinstance(progress_bar, QtWidgets.QProgressBar):
                 progress_bar.setValue(progress_bar.value() + progress_increment)

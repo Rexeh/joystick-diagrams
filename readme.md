@@ -2,15 +2,16 @@
 
 ![Joystick Diagrams](https://s3-eu-west-1.amazonaws.com/joystick-diagram.com/Joystick-Diagram-info.png#2)
 
-## Current Release (1.2.1) - 23/01/2020
+## Current Release (1.3) - XX/XX/XXXX
 
 ### What's new?
 
-- Hotfix to DCS folder structure crashing app
+- DCS now supports POV hats and AXIS
+- Joystick Gremlin now supports POV hats
+- Fix for T.1600M stick
 
-[Release Notes - V1.2.1](https://github.com/Rexeh/joystick-diagrams/releases/tag/V1.2.1)
-
-[Download - Joystick Diagrams (V1.2.1)](https://github.com/Rexeh/joystick-diagrams/releases/download/V1.2.1/joystick_diagrams_1_2_1.zip)
+[Release Notes - V1.3](TBC)
+[Download - Joystick Diagrams (V1.3)](TBC)
 
 ## What is this tool for?
 Learning flight simulators is a daunting task, with lots of buttons to remember. I built this tool for myself, and then thought others might also enjoy it, automating what is a time consuming task!
@@ -33,10 +34,6 @@ Learning flight simulators is a daunting task, with lots of buttons to remember.
 - Export any of your plane/helicopter configurations to diagram
 - Select which profiles you want to export
 
-## What's it not do?
-- Output POV hats (Coming V1.3)
-- Output AXIS binds (Coming V1.3)
-- Make toast
 
 ### Support for other games
 Have a game you want support added for? Get in touch, send me configs and I'll take a look

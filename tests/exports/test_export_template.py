@@ -81,6 +81,10 @@ class TestExport_Template(unittest.TestCase):
         data = self.exporter.get_template("VPC Throttle MT-50 CM2")
         self.assertGreater(data, "")
 
+    def test_get_template_white_space_success(self):
+        data = self.exporter.get_template(" VPC Throttle MT-50 CM2  ")
+        self.assertGreater(data, "")
+
     def test_get_template_failure(self):
         data = self.exporter.get_template("Not a Template")
         self.assertEqual(data, False)

@@ -36,7 +36,6 @@ class JoystickGremlin(jdi.JDinterface):
         8 : 'UL'
     }
 
-
     def get_device_names(self):
         self.devices = self.getDevices()
         deviceItems = []
