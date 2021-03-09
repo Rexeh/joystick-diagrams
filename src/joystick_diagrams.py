@@ -1,7 +1,7 @@
 import sys
 import os
 from PyQt5 import QtWidgets, uic, QtGui, QtCore
-from UI import Ui_MainWindow
+from ui import Ui_MainWindow
 import adaptors.dcs_world as dcs
 import adaptors.joystick_gremlin as jg
 import classes.export as export
