@@ -27,8 +27,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.export_button.clicked.connect(self.export_profiles)
         self.parser_selector.currentChanged.connect(self.change_export_button)
         self.change_export_button()
-        self.donate_button.setText("Donate")
         self.donate_button.clicked.connect(lambda: QtGui.QDesktopServices.openUrl(QtCore.QUrl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url')))
+        self.discord_button.clicked.connect(lambda: QtGui.QDesktopServices.openUrl(QtCore.QUrl('https://discord.gg/G8nRUS2')))
 
         # JG UI Setup
         self.jg_select_profile_button.clicked.connect(self.set_jg_file)
