@@ -142,21 +142,20 @@ class JoystickGremlin(jdi.JDinterface):
 
     def extractHats(self):
 
-        ## TODO Tests
         for i in self.hats:
             hat_id = i.getAttribute('id')
-            print("Hat ID: {}".format(hat_id))
+            helper.log("Hat ID: {}".format(hat_id), 'debug')
 
             if i.getAttribute('description'):
                 hat_description = i.getAttribute('description')
-                print("Hat has description: {}".format(hat_description))
+                helper.log("Hat has description: {}".format(hat_description), 'debug')
             else:
                 hat_description = ''
 
             hat_containers = i.getElementsByTagName('container')
 
             if(hat_containers):
-                print("Has containers: {}".format(hat_containers.length))
+                helper.log("Has containers: {}".format(hat_containers.length), 'debug')
 
                 for c in hat_containers:
                     
@@ -164,7 +163,7 @@ class JoystickGremlin(jdi.JDinterface):
                     hat_count = hat_positions.length
                     increment = 8/hat_count
                     pos = 1
-                    print("We have {} hat positions".format(hat_count))
+                    helper.log("We have {} hat positions".format(hat_count), 'debug')
 
                     for hp in hat_positions:
 
@@ -173,7 +172,8 @@ class JoystickGremlin(jdi.JDinterface):
                             hat_direction_description = hp.getElementsByTagName('description')[0].getAttribute('description')
                         else:
                             hat_direction_description = hat_description
-                        print(self.position_map[pos])
+
+                        helper.log("POV Position: {}".format(self.position_map[pos]), 'debug')
 
                         self.buttonArray.update ({
                         'POV_{ID}_{DIR}'.format(
@@ -183,6 +183,9 @@ class JoystickGremlin(jdi.JDinterface):
                         })
 
                         pos = pos + increment
+            else:
+                helper.log("No container found for hat: {}".format(hat_id), 'error')
+
 
         
     

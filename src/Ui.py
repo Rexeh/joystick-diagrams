@@ -185,6 +185,7 @@ class Ui_MainWindow(object):
         font.setItalic(False)
         font.setWeight(9)
         self.version_label.setFont(font)
+        self.version_label.setFocusPolicy(QtCore.Qt.NoFocus)
         self.version_label.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.version_label.setText("")
         self.version_label.setPixmap(QtGui.QPixmap("images/logo.png"))
@@ -331,7 +332,7 @@ class Ui_MainWindow(object):
         self.parser_selector.setPalette(palette)
         self.parser_selector.setAutoFillBackground(False)
         self.parser_selector.setStyleSheet("QWidget {\n"
-"background: #1e1e1e;\n"
+"background: #1e1e1e\n"
 "}\n"
 "\n"
 "QTabWidget::pane { /* The tab widget frame */\n"
@@ -487,6 +488,11 @@ class Ui_MainWindow(object):
         self.label_2.setGeometry(QtCore.QRect(20, 30, 821, 41))
         self.label_2.setStyleSheet("color:white;")
         self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.tab)
+        self.label_3.setGeometry(QtCore.QRect(20, 110, 821, 41))
+        self.label_3.setStyleSheet("color:white;")
+        self.label_3.setOpenExternalLinks(True)
+        self.label_3.setObjectName("label_3")
         self.parser_selector.addTab(self.tab, "")
         self.title_label = QtWidgets.QLabel(self.centralwidget)
         self.title_label.setGeometry(QtCore.QRect(20, 10, 221, 41))
@@ -526,14 +532,14 @@ class Ui_MainWindow(object):
         self.label_9.setGeometry(QtCore.QRect(20, 43, 141, 30))
         self.label_9.setStyleSheet("color: white;")
         self.label_9.setObjectName("label_9")
-        self.settings_button = QtWidgets.QPushButton(self.centralwidget)
-        self.settings_button.setEnabled(False)
-        self.settings_button.setGeometry(QtCore.QRect(620, 20, 121, 23))
-        self.settings_button.setObjectName("settings_button")
-        self.logs_button = QtWidgets.QPushButton(self.centralwidget)
-        self.logs_button.setEnabled(False)
-        self.logs_button.setGeometry(QtCore.QRect(620, 50, 121, 23))
-        self.logs_button.setObjectName("logs_button")
+        self.donate_button = QtWidgets.QPushButton(self.centralwidget)
+        self.donate_button.setEnabled(True)
+        self.donate_button.setGeometry(QtCore.QRect(650, 40, 121, 31))
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("images/donate.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.donate_button.setIcon(icon3)
+        self.donate_button.setIconSize(QtCore.QSize(20, 20))
+        self.donate_button.setObjectName("donate_button")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -588,7 +594,8 @@ class Ui_MainWindow(object):
         self.dcs_selected_directory_label.setText(_translate("MainWindow", "c:test"))
         self.label_10.setText(_translate("MainWindow", "Settings"))
         self.parser_selector.setTabText(self.parser_selector.indexOf(self.dcs_tab), _translate("MainWindow", "DCS World"))
-        self.label_2.setText(_translate("MainWindow", "Do you have a game you want to see included?"))
+        self.label_2.setText(_translate("MainWindow", "Do you have a game/tool you want to see included?"))
+        self.label_3.setText(_translate("MainWindow", "<html><head/><body><p>Raise an issue on Github - <a href=\"https://github.com/Rexeh/joystick-diagrams\"><span style=\" text-decoration: underline; color:#0000ff;\">https://github.com/Rexeh/joystick-diagrams</span></a></p></body></html>"))
         self.parser_selector.setTabText(self.parser_selector.indexOf(self.tab), _translate("MainWindow", "+"))
         self.title_label.setText(_translate("MainWindow", "Joystick Diagrams"))
         self.export_button.setText(_translate("MainWindow", "Export Joystick Profiles"))
@@ -597,9 +604,8 @@ class Ui_MainWindow(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><title>Testsd</title><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Arial\'; font-size:12pt; font-weight:72; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">WELCOME bruv, joysticks innit</span></p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">If you\'re seeing this something has gone wrong</span></p></body></html>"))
         self.label_8.setText(_translate("MainWindow", "Info"))
         self.label_9.setText(_translate("MainWindow", "1.1.0"))
-        self.settings_button.setText(_translate("MainWindow", "Settings"))
-        self.logs_button.setText(_translate("MainWindow", "Logs"))
+        self.donate_button.setText(_translate("MainWindow", "Donate"))
         self.actionVersion_Info.setText(_translate("MainWindow", "Version.Info"))

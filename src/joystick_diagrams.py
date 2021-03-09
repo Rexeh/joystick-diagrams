@@ -1,12 +1,13 @@
 import sys
 import os
-from PyQt5 import QtWidgets, uic, QtGui
-from Ui import Ui_MainWindow
+from PyQt5 import QtWidgets, uic, QtGui, QtCore
+from UI import Ui_MainWindow
 import adaptors.dcs_world as dcs
 import adaptors.joystick_gremlin as jg
 import classes.export as export
 import functions.helper as helper
 import version
+import config
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
@@ -26,6 +27,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.export_button.clicked.connect(self.export_profiles)
         self.parser_selector.currentChanged.connect(self.change_export_button)
         self.change_export_button()
+        self.donate_button.setText("Donate")
+        self.donate_button.clicked.connect(lambda: QtGui.QDesktopServices.openUrl(QtCore.QUrl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url')))
 
         # JG UI Setup
         self.jg_select_profile_button.clicked.connect(self.set_jg_file)
@@ -70,7 +73,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def set_dcs_directory(self):
         self.dcs_directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Select DCS Saved Games Directory",os.path.expanduser("~/Saved Games/DCS"))
-        
+
         if self.dcs_directory:
             try:
                 self.load_dcs_directory()
