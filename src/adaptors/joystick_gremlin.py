@@ -25,6 +25,17 @@ class JoystickGremlin(jdi.JDinterface):
         self.buttonArray = None
         self.inheritModes = {}
         self.usingInheritance = False
+        self. position_map = {
+        1 : 'U',
+        2 : 'UR',
+        3 : 'R',
+        4 : 'DR',
+        5 : 'D',
+        6 : 'DL',
+        7 : 'L',
+        8 : 'UL'
+    }
+
 
     def get_device_names(self):
         self.devices = self.getDevices()
@@ -64,7 +75,9 @@ class JoystickGremlin(jdi.JDinterface):
                 self.currentMode = self.getSingleMode()
                 helper.log("Selected Mode: {}".format(self.currentMode), 'debug')
                 self.buttons = self.getModeButtons()
+                self.hats = self.getModeHats()
                 self.extractButtons()
+                self.extractHats()
                 self.update_joystick_dictionary(self.currentdevice,
                                     self.currentMode,
                                     self.currentInherit,
@@ -91,6 +104,9 @@ class JoystickGremlin(jdi.JDinterface):
 
     def getModeButtons(self):
         return self.mode.getElementsByTagName('button')
+
+    def getModeHats(self):
+        return self.mode.getElementsByTagName('hat')
 
     def getDeviceModes(self):
         return self.device.getElementsByTagName('mode')
@@ -124,6 +140,53 @@ class JoystickGremlin(jdi.JDinterface):
                 "BUTTON_" + str(i.getAttribute('id')): self.no_bind_text
                 })
         return self.buttonArray
+
+    def extractHats(self):
+
+        ## TODO Tests
+        for i in self.hats:
+            hat_id = i.getAttribute('id')
+            print("Hat ID: {}".format(hat_id))
+
+            if i.getAttribute('description'):
+                hat_description = i.getAttribute('description')
+                print("Hat has description: {}".format(hat_description))
+            else:
+                hat_description = ''
+
+            hat_containers = i.getElementsByTagName('container')
+
+            if(hat_containers):
+                print("Has containers: {}".format(hat_containers.length))
+
+                for c in hat_containers:
+                    
+                    hat_positions = c.getElementsByTagName('action-set')
+                    hat_count = hat_positions.length
+                    increment = 8/hat_count
+                    pos = 1
+                    print("We have {} hat positions".format(hat_count))
+
+                    for hp in hat_positions:
+
+                        if hp.getElementsByTagName('description'):
+                            # Ignore more than 1 description. always use first
+                            hat_direction_description = hp.getElementsByTagName('description')[0].getAttribute('description')
+                        else:
+                            hat_direction_description = hat_description
+                        print(self.position_map[pos])
+
+                        self.buttonArray.update ({
+                        'POV_{ID}_{DIR}'.format(
+                            ID=i.getAttribute('id'),
+                            DIR=self.position_map[pos]
+                            ):str(hat_direction_description)
+                        })
+
+                        pos = pos + increment
+
+        
+    
 
     def getDeviceCount(self):
         return self.file.getElementsByTagName('device').length

@@ -69,7 +69,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.application_information_textbrowser.verticalScrollBar().setValue(self.application_information_textbrowser.verticalScrollBar().maximum())
 
     def set_dcs_directory(self):
-        self.dcs_directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Select DCS Saved Games Directory",os.path.expanduser("~"))
+        self.dcs_directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Select DCS Saved Games Directory",os.path.expanduser("~/Saved Games/DCS"))
         
         if self.dcs_directory:
             try:
@@ -144,6 +144,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 data = self.dcs_parser_instance.processProfiles(profiles)
             else:
                 data = self.dcs_parser_instance.processProfiles()
+                print(data)
             self.export_to_svg(data, 'DCS')
         else:
             pass # no other tabs have functionality right now

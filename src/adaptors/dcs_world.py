@@ -6,9 +6,8 @@ import ply.lex as lex
 import ply.yacc as yacc
 import functions.helper as helper
 import adaptors.joystick_diagram_interface as jdi
-import adaptors.dcs_world_lex # Do not remove - PLY production requirement
-import adaptors.dcs_world_parse # Do not remove - PLY production requirement
-import pprint as pp
+import adaptors.dcs_world_lex # pylint: disable=unused-import
+import adaptors.dcs_world_parse # pylint: disable=unused-import
 
 class DCSWorld_Parser(jdi.JDinterface):
 
@@ -63,7 +62,7 @@ class DCSWorld_Parser(jdi.JDinterface):
     def getValidatedProfiles(self):
         ''' Expose Valid Profiles only to UI '''
         if self.remove_easy_modes:
-                return list(filter(lambda x: False if self.__easy_mode in x else True, self.valid_profiles))
+            return list(filter(lambda x: False if self.__easy_mode in x else True, self.valid_profiles))
         else:
             return self.valid_profiles
 
