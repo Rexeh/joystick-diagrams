@@ -147,7 +147,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 data = self.dcs_parser_instance.processProfiles(profiles)
             else:
                 data = self.dcs_parser_instance.processProfiles()
-                print(data)
             self.export_to_svg(data, 'DCS')
         else:
             pass # no other tabs have functionality right now
@@ -172,5 +171,4 @@ if __name__ == '__main__':
         window.show()
         app.exec()
     except Exception as error:
-        helper.log(error, "error")
-        raise
+        helper.log(error, "error", True)

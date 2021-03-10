@@ -24,6 +24,9 @@ class Export:
 
         joystick_count = len(self.joystick_listing)
 
+        helper.log('Export Started with {} joysticks'.format(joystick_count), 'debug')
+        helper.log('Export Data: {}'.format(self.joystick_listing), 'debug')
+
         if isinstance(progress_bar, QtWidgets.QProgressBar):
             progress_bar.setValue(0)
             progress_increment = 100/joystick_count

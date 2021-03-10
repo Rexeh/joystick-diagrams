@@ -248,5 +248,6 @@ class DCSWorld_Parser(jdi.JDinterface):
         try:
             data = parser.parse(self.file)
         except Exception as error:
-            print(error)
+            helper.log(error, "error")
+            raise ("DCS Parser Exception")
         return data
