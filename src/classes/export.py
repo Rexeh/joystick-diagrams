@@ -1,10 +1,12 @@
 from os import path
 import os
 from pathlib import Path
+import config
 import re
 import html
 import functions.helper as helper
 from PyQt5 import QtWidgets, uic, QtGui
+
 
 class Export:
 
@@ -14,13 +16,16 @@ class Export:
         self.file_name_divider = "_"
         self.joystick_listing = joystick_listing
         self.export_progress = None
-        self.no_bind_text = custom_no_bind
+        self.no_bind_text = config.noBindText
         self.executor = parser_id
         self.error_bucket = []
 
     def export_config(self, progress_bar=None):
 
         joystick_count = len(self.joystick_listing)
+
+        helper.log('Export Started with {} joysticks'.format(joystick_count), 'debug')
+        helper.log('Export Data: {}'.format(self.joystick_listing), 'debug')
 
         if isinstance(progress_bar, QtWidgets.QProgressBar):
             progress_bar.setValue(0)
@@ -39,7 +44,7 @@ class Export:
                     if isinstance(progress_bar, QtWidgets.QProgressBar):
                         progress_bar.setValue(progress_bar.value() + (progress_increment/progress_increment_modes))
             else:
-                self.error_bucket.append("No Template for: {}".format(joystick))
+                self.error_bucket.append("No Template file found for: {}".format(joystick))
 
             if isinstance(progress_bar, QtWidgets.QProgressBar):
                 progress_bar.setValue(progress_bar.value() + progress_increment)
@@ -64,6 +69,9 @@ class Export:
             return False
 
     def get_template(self, joystick):
+
+        joystick = joystick.strip()
+
         if path.exists(self.templates_directory + joystick + ".svg"):
             data = Path(os.path.join(self.templates_directory, joystick + ".svg")).read_text(encoding="utf-8")
             return data
@@ -71,7 +79,7 @@ class Export:
             return False
 
     def save_template(self, joystick, mode, template):
-        output_path = self.export_directory + self.executor + "_" + joystick + "_" + mode + ".svg"
+        output_path = self.export_directory + self.executor + "_" + joystick.strip() + "_" + mode + ".svg"
         if not os.path.exists(self.export_directory):
             self.create_directory(self.export_directory)
         try:

@@ -46,7 +46,7 @@ class TestExport_Template(unittest.TestCase):
     def test_files_exported(self):
         self.exporter.export_config()
         self.assertEqual(len(self.exporter.error_bucket), 1)
-        self.assertEqual(self.exporter.error_bucket[0], "No Template for: Other Device No Template")
+        self.assertEqual(self.exporter.error_bucket[0], "No Template file found for: Other Device No Template")
         self.assertEqual(len(os.listdir(self.template.name)), 2)
         
     def test_files_exported_no_directory(self):
@@ -79,6 +79,10 @@ class TestExport_Template(unittest.TestCase):
 
     def test_get_template_success(self):
         data = self.exporter.get_template("VPC Throttle MT-50 CM2")
+        self.assertGreater(data, "")
+
+    def test_get_template_white_space_success(self):
+        data = self.exporter.get_template(" VPC Throttle MT-50 CM2  ")
         self.assertGreater(data, "")
 
     def test_get_template_failure(self):
