@@ -3,7 +3,7 @@
 ![Joystick Diagrams](https://s3-eu-west-1.amazonaws.com/joystick-diagram.com/Joystick-Diagram-info.png#2)
 
 # Official Website
-http://joystick-diagram.com/
+http://joystick-diagrams.com/
 
 Please use the website for documentation and information
 
