@@ -10,7 +10,7 @@ import html
 
 # Logging Init
 logDir = './logs/'
-logFile = 'jv.log'   
+logFile = 'jv.log'
 logger = logging.getLogger('jv')
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
 
@@ -21,18 +21,18 @@ def createDirectory(directory):
         log("Failed to create directory: {}".format(directory), 'error')
         return False
         
-def log(text, level='info'):
+def log(text, level='info', exec_s=False):
     #Accepted Levels
     # info, warning, error
     if config.debug:
         if level == 'info':
-            logger.info(text)
+            logger.info(text, exc_info=False)
         elif level == 'warning':
-            logger.warning(text)
+            logger.warning(text, exc_info=False)
         elif level == 'error':
-            logger.error(text)
+            logger.error(text, exc_info=True)
         else:
-            logger.debug(text)
+            logger.debug(text, exc_info=True)
         
 
 def getVersion():

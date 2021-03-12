@@ -6,8 +6,8 @@ import ply.lex as lex
 import ply.yacc as yacc
 import functions.helper as helper
 import adaptors.joystick_diagram_interface as jdi
-import adaptors.dcs_world_lex # Do not remove - PLY production requirement
-import adaptors.dcs_world_parse # Do not remove - PLY production requirement
+import adaptors.dcs_world_lex # pylint: disable=unused-import
+import adaptors.dcs_world_parse # pylint: disable=unused-import
 
 class DCSWorld_Parser(jdi.JDinterface):
 
@@ -53,7 +53,8 @@ class DCSWorld_Parser(jdi.JDinterface):
         Return Valid Profile
         '''
         #TODO add additional checking for rogue dirs/no files etc
-        if 'joystick' in os.listdir(os.path.join(self.path, 'Config', 'Input', item)):
+        
+        if os.path.isdir(os.path.join(self.path, 'Config', 'Input', item)) and 'joystick' in os.listdir(os.path.join(self.path, 'Config', 'Input', item)):
             return os.listdir(os.path.join(self.path, 'Config', 'Input', item, 'joystick'))
         else:
             return False
@@ -61,15 +62,26 @@ class DCSWorld_Parser(jdi.JDinterface):
     def getValidatedProfiles(self):
         ''' Expose Valid Profiles only to UI '''
         if self.remove_easy_modes:
-                return list(filter(lambda x: False if self.__easy_mode in x else True, self.valid_profiles))
+            return list(filter(lambda x: False if self.__easy_mode in x else True, self.valid_profiles))
         else:
             return self.valid_profiles
 
     def convert_button_format(self, button):
         ''' Convert DCS Buttons to match expected "BUTTON_X" format '''
-        new = button.split('_')[1]
-        rep = new.replace("BTN", "BUTTON_")
-        return rep
+        split = button.split('_')
+
+        if len(split) == 2:
+            if split[1][0:3] == "BTN":
+                return split[1].replace("BTN","BUTTON_")
+            elif split[1].isalpha():
+                return "AXIS_{}".format(split[1])
+            elif split[1][0:6] == "SLIDER":
+                return "AXIS_SLIDER_{}".format(split[1][6:])
+            else:
+                return split[1]
+
+        elif len(split) == 4:
+            return "{button}_{pov}_{dir}".format(button = split[1].replace("BTN","POV"), pov = split[2][3], dir = split[3])
 
     def processProfiles(self, profile_list=[]):
         if len(profile_list)>0:
@@ -98,24 +110,45 @@ class DCSWorld_Parser(jdi.JDinterface):
                     except FileNotFoundError:
                         raise FileExistsError("DCS: File {} no longer found - It has been moved/deleted from directory".format(joystick_file))
                     else:
-                        data = self.parseFile()
-                        writeVal = False
-                        buttonArray = {}
-                        if 'keyDiffs' in data.keys():
-                            for value in data['keyDiffs'].values():
-                                for item, attribute in value.items():
-                                    if item=='name':
-                                        name = attribute
-                                    if item=='added':
-                                        button = self.convert_button_format(attribute[1]['key'])
-                                        writeVal = True
-                                if writeVal:
-                                    buttonArray.update({
-                                        button : name
-                                    })
-                                    writeVal = False
-                            self.update_joystick_dictionary(joystick_device,profile, False, buttonArray)
+                        dictionary_2 = self.parseFile()
+  
+                        button_map = self.create_joystick_map(dictionary_2)
+
+                        self.update_joystick_dictionary(joystick_device,profile, False, button_map)
         return self.joystick_dictionary
+
+    def create_joystick_map(self, data):
+        writeVal = False
+        buttonArray = {}
+
+        if 'keyDiffs' in data.keys():
+            for value in data['keyDiffs'].values():
+                for item, attribute in value.items():
+                    if item=='name':
+                        name = attribute
+                    if item=='added':
+                        button = self.convert_button_format(attribute[1]['key'])
+                        writeVal = True
+                if writeVal:
+                    buttonArray.update({
+                            button : name
+                    })
+                    writeVal = False
+
+        if 'axisDiffs' in data.keys():
+            for value in data['axisDiffs'].values():
+                for item, attribute in value.items():
+                    if item=='name':
+                        name = attribute
+                    if item in ['added', 'changed']:
+                        axis = self.convert_button_format(attribute[1]['key'])
+                        writeVal = True
+                if writeVal:
+                    buttonArray.update({
+                            axis : name
+                    })
+                    writeVal = False
+        return buttonArray
 
     def parseFile(self):
         # pylint: disable=unused-variable
@@ -215,5 +248,6 @@ class DCSWorld_Parser(jdi.JDinterface):
         try:
             data = parser.parse(self.file)
         except Exception as error:
-            print(error)
+            helper.log(error, "error")
+            raise ("DCS Parser Exception")
         return data
