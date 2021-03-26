@@ -1,6 +1,6 @@
 # Joystick Diagrams - Visualise your binds ![Build Status](https://travis-ci.com/Rexeh/joystick-diagrams.svg?branch=master) [![codecov](https://codecov.io/gh/Rexeh/joystick-diagrams/branch/master/graph/badge.svg)](https://codecov.io/gh/Rexeh/joystick-diagrams) ![Discord](https://img.shields.io/discord/733253732355276800?label=Discord)
 
-![Joystick Diagrams](https://s3-eu-west-1.amazonaws.com/joystick-diagram.com/Joystick-Diagram-info.png#2)
+![Joystick Diagrams](https://joystick-diagrams.com/img/main-hero.png)
 
 # Official Website
 http://joystick-diagrams.com/
