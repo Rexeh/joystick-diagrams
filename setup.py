@@ -32,17 +32,18 @@ build_options = {
 
 setup(
     name='Joystick Diagrams',
-    version='1.2.1',
+    version='1.4',
     description='Automatically create diagrams for your throttles, joysticks and custom HID devices',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/Rexeh/joystick-diagrams',
     author='Robert Cox',
-    keywords='joystick, HID, diagrams, joystick gremlin',
+    keywords='joystick, HID, diagrams, joystick gremlin, dcs world',
     packages=find_packages(),
     python_requires='>=3.8, <4',
     install_requires=['pillow'],
     project_urls={
+        'Documentation' : 'https://joystick-diagrams.com/',
         'Bug Reports': 'https://github.com/Rexeh/joystick-diagrams/issues',
         'Funding': 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url',
         'Source': 'https://github.com/Rexeh/joystick-diagrams/src',
