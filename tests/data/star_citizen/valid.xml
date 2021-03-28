@@ -1,0 +1,80 @@
+<ActionMaps version="1" optionsVersion="2" rebindVersion="2" profileName="Test_JD">
+ <CustomisationUIHeader label="Test_JD" description="" image="">
+  <devices>
+   <keyboard instance="1"/>
+   <mouse instance="1"/>
+   <joystick instance="1"/>
+   <joystick instance="2"/>
+  </devices>
+  <categories>
+   <category label="@ui_CCSpaceFlight"/>
+   <category label="@ui_CGLightControllerDesc"/>
+   <category label="@ui_CCFPS"/>
+   <category label="@ui_CCVehicle"/>
+   <category label="@ui_CGUIGeneral"/>
+   <category label="@ui_CGOpticalTracking"/>
+   <category label="@ui_CGInteraction"/>
+  </categories>
+ </CustomisationUIHeader>
+ <deviceoptions name=" VKB-Sim Space Gunfighter  {0126231D-0000-0000-0000-504944564944}">
+  <option input="y" deadzone="0.0297"/>
+  <option input="z" deadzone="0.0297"/>
+ </deviceoptions>
+ <deviceoptions name=" VKB-Sim Space Gunfighter L  {0127231D-0000-0000-0000-504944564944}">
+  <option input="y" deadzone="0.0297"/>
+  <option input="roty" deadzone="0.0198"/>
+ </deviceoptions>
+ <options type="keyboard" instance="1" Product="UberKeyboard {6F1D2B61-D5A0-11CF-BFC7-444553540000}">
+  <fps_view_pitch invert="0"/>
+  <turret_aim_yaw exponent="1.4"/>
+  <turret_vj_mode_yaw exponent="1.4"/>
+  <turret_relative_mode_yaw exponent="1.4"/>
+  <mgv_view_pitch invert="1"/>
+  <mgv_view_yaw invert="1"/>
+ </options>
+ <options type="joystick" instance="1" Product=" VKB-Sim Space Gunfighter L  {0127231D-0000-0000-0000-504944564944}">
+  <flight_move_strafe_vertical exponent="2"/>
+  <flight_move_strafe_lateral invert="1"/>
+  <flight_move_strafe_longitudinal invert="1" exponent="1.8000001"/>
+ </options>
+ <options type="joystick" instance="2" Product=" VKB-Sim Space Gunfighter  {0126231D-0000-0000-0000-504944564944}"/>
+ <modifiers />
+ <actionmap name="group_1">
+  <action name="v_close_all_doors">
+   <rebind input="kb1_lalt+k" activationMode="double_tap"/>
+   <rebind input="js2_button1"/>
+  </action>
+  <action name="v_open_all_doors">
+   <rebind input="kb1_lalt+k"/>
+   <rebind input="js2_button2"/>
+  </action>
+  <action name="v_toggle_all_doorlocks">
+   <rebind input="js2_ "/>
+  </action>
+  <action name="v_unlock_all_doors">
+   <rebind input="kb1_lalt+l" activationMode="double_tap"/>
+   <rebind input="js2_button3"/>
+  </action>
+ </actionmap>
+ <actionmap name="group_2">
+  <action name="v_view_cycle_fwd">
+   <rebind input="js1_button1"/>
+  </action>
+  <action name="v_view_dynamic_zoom_abs_toggle">
+   <rebind input="js1_button2"/>
+  </action>
+  <action name="v_view_look_behind">
+   <rebind input="kb1_lalt+period"/>
+   <rebind input="js2_button4"/>
+  </action>
+  <action name="v_view_pitch">
+   <rebind input="js1_roty"/>
+  </action>
+  <action name="v_view_yaw">
+   <rebind input="js1_rotx"/>
+  </action>
+  <action name="v_view_yaw_left">
+   <rebind input="js2_ "/>
+  </action>
+ </actionmap>
+</ActionMaps>

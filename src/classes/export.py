@@ -69,9 +69,7 @@ class Export:
             return False
 
     def get_template(self, joystick):
-
         joystick = joystick.strip()
-
         if path.exists(self.templates_directory + joystick + ".svg"):
             data = Path(os.path.join(self.templates_directory, joystick + ".svg")).read_text(encoding="utf-8")
             return data

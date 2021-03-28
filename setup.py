@@ -50,5 +50,5 @@ setup(
     },
 
     options={'build_exe': build_options},
-    executables = [Executable("./src/joystick_diagrams.py", base = base, icon = './images/logo.ico')]
+    executables = [Executable("./src/joystick_diagrams.py", base = base, icon = './images/logo.ico', copyright='Robert Cox - joystick-diagrams.com')]
 )
