@@ -25,7 +25,8 @@ build_options = {
                     "test",
                     "http",
                     "email",
-                    "distutils"
+                    "distutils",
+                    "ssl"
                             ],
                    "optimize": 2,
                 }
@@ -48,7 +49,6 @@ setup(
         'Funding': 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url',
         'Source': 'https://github.com/Rexeh/joystick-diagrams/src',
     },
-
     options={'build_exe': build_options},
     executables = [Executable("./src/joystick_diagrams.py", base = base, icon = './images/logo.ico', copyright='Robert Cox - joystick-diagrams.com')]
 )

@@ -36,6 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.jg_select_profile_button.clicked.connect(self.set_jg_file)
 
         # SC UI Setup
+        self.sc_file = None
         self.sc_parser_instance = None
         self.sc_select_button.clicked.connect(self.set_sc_file)
 
@@ -113,13 +114,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def set_sc_file(self):
         self.clear_info()
         self.sc_file = QtWidgets.QFileDialog.getOpenFileName(self,"Select Star Citizen Config file",None,"XMl Files (*.xml)")[0]
-
         if self.sc_file:
-            try:
-                self.load_sc_file()
-                self.print_to_info('Succesfully loaded Star Citizen profile')
-            except Exception as e:
-                self.print_to_info("Error Loading File: {}".format(e))
+            self.load_sc_file()
         else:
             self.print_to_info("No File Selected")
 
@@ -128,10 +124,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.sc_parser_instance = sc.StarshipCitizen(self.sc_file)
             self.enable_profile_load_button(self.sc_select_button)
             self.export_button.setEnabled(1)
+            self.print_to_info('Succesfully loaded Star Citizen profile')
         except Exception as e:
             self.disable_profile_load_button(self.sc_select_button)
             self.export_button.setEnabled(0)
-            raise
+            self.sc_file = None
+            self.print_to_info("Error Loading File: {}".format(e))
 
     def set_jg_file(self):
         self.jg_file = QtWidgets.QFileDialog.getOpenFileName(self,"Select Joystick Gremlin Config file",None,"Gremlin XMl Files (*.xml)")[0]
