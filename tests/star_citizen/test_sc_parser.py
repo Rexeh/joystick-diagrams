@@ -68,8 +68,8 @@ class TestSCParserCases(unittest.TestCase):
 
     def test_parser(self):
         expected = {
-            'VKB-Sim Space Gunfighter': {'Default': {'Axis': '', 'Buttons': {'BUTTON_1': 'V close all doors', 'BUTTON_2': 'V open all doors', 'BUTTON_3': 'V unlock all doors', 'BUTTON_4': 'V view look behind'}, 'Inherit': False} } ,
-            'VKB-Sim Space Gunfighter L': {'Default': {'Axis': '', 'Buttons': {'BUTTON_1': 'V view cycle fwd', 'BUTTON_2': 'V view dynamic zoom abs toggle'}, 'Inherit': False }}
+            'VKB-Sim Space Gunfighter': {'Default': {'Axis': '', 'Buttons': {'BUTTON_1': 'Close all doors', 'BUTTON_2': 'Open all doors', 'BUTTON_3': 'Unlock all doors', 'BUTTON_4': 'View look behind'}, 'Inherit': False} } ,
+            'VKB-Sim Space Gunfighter L': {'Default': {'Axis': '', 'Buttons': {'BUTTON_1': 'View cycle fwd', 'BUTTON_2': 'View dynamic zoom abs toggle'}, 'Inherit': False }}
          }
 
         data = self.file.parse()

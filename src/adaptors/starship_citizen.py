@@ -118,7 +118,7 @@ class StarshipCitizen(jdi.JDinterface):
         if len(name) == 1:
             return name[0].capitalize()
         else:
-            return (" ".join(name)).capitalize()
+            return (" ".join(name[1:])).capitalize()
 
 
     def build_button_map(self, device,button, name):
