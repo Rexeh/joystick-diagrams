@@ -155,7 +155,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.disable_profile_load_button(self.jg_select_profile_button)
             self.jg_profile_list.clear()
             self.export_button.setEnabled(0)
-            raise
+            raise Exception(e)
 
     def export_profiles(self):
         if self.parser_selector.currentIndex() == 0: ## JOYSTICK GREMLIN

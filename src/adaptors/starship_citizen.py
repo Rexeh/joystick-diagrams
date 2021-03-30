@@ -27,8 +27,8 @@ class StarshipCitizen(jdi.JDinterface):
                 data = Path(self.file_path).read_text(encoding="utf-8")
                 try:
                     self.__validate_file(data)
-                except Exception:
-                    raise Exception("File is not a valid Starcraft Citizen XML")
+                except Exception as e:
+                    raise Exception(e) from e
                 else:
                     return data
             else:
