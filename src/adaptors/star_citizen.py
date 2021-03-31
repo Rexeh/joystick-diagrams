@@ -1,11 +1,11 @@
-'''Starship Citizen XML Parser for use with Joystick Diagrams'''
+'''Star Citizen XML Parser for use with Joystick Diagrams'''
 import os
 from pathlib import Path
 from xml.dom import minidom
 import functions.helper as helper
 import adaptors.joystick_diagram_interface as jdi
 
-class StarshipCitizen(jdi.JDinterface):
+class StarCitizen(jdi.JDinterface):
 
     def __init__(self, file_path):
         jdi.JDinterface.__init__(self)
@@ -28,7 +28,7 @@ class StarshipCitizen(jdi.JDinterface):
                 try:
                     self.__validate_file(data)
                 except Exception:
-                    raise Exception("File is not a valid Starcraft Citizen XML")
+                    raise Exception("File is not a valid Star Citizen XML")
                 else:
                     return data
             else:
@@ -41,7 +41,7 @@ class StarshipCitizen(jdi.JDinterface):
         try:
             parsed_xml = minidom.parseString(data)
         except ValueError:
-            raise Exception("File is not a valid Starcraft Citizen XML")
+            raise Exception("File is not a valid Star Citizen XML")
         else:
             if (len(parsed_xml.getElementsByTagName('devices'))==1 and
                 len(parsed_xml.getElementsByTagName('options'))>0 and
@@ -100,7 +100,7 @@ class StarshipCitizen(jdi.JDinterface):
 
 
     def extract_device_information(self, option):
-        ''' Accepts parsed OPTION from Starship Citizen XML'''
+        ''' Accepts parsed OPTION from Star Citizen XML'''
         name = (option.getAttribute('Product')[0:(len(option.getAttribute('Product'))-38)]).strip()
         guid = option.getAttribute('Product')[-37:-2] #GUID Fixed
         return {
@@ -117,7 +117,7 @@ class StarshipCitizen(jdi.JDinterface):
 
 
     def add_device(self, option):
-        ''' Accepts parsed OPTION from Starship Citizen XML'''
+        ''' Accepts parsed OPTION from Star Citizen XML'''
         self.devices.update({
             self.device_id(option.getAttribute('type'),option.getAttribute('instance')) : self.extract_device_information(option)
         })

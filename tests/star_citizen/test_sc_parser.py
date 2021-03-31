@@ -1,10 +1,10 @@
 import unittest
-import adaptors.starship_citizen as sc
+import adaptors.star_citizen as sc
 
 class TestSCParserCases(unittest.TestCase):
 
     def setUp(self):
-        self.file = sc.StarshipCitizen("./tests/data/star_citizen/valid.xml")
+        self.file = sc.StarCitizen("./tests/data/star_citizen/valid.xml")
         self.file.devices = {
             'js1': {
                 'guid': '0000000',

@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets, uic, QtGui, QtCore
 from ui import Ui_MainWindow
 import adaptors.dcs_world as dcs
 import adaptors.joystick_gremlin as jg
-import adaptors.starship_citizen as sc
+import adaptors.star_citizen as sc
 import classes.export as export
 import functions.helper as helper
 import version
@@ -121,7 +121,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def load_sc_file(self):
         try:
-            self.sc_parser_instance = sc.StarshipCitizen(self.sc_file)
+            self.sc_parser_instance = sc.StarCitizen(self.sc_file)
             self.enable_profile_load_button(self.sc_select_button)
             self.export_button.setEnabled(1)
             self.print_to_info('Succesfully loaded Star Citizen profile')

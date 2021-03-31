@@ -76,4 +76,4 @@ def test_sc_file_load_failure(qtbot):
     assert window.application_information_textbrowser.toPlainText() == ''
     window.sc_file = './tests/data/star_citizen/invalid.xml'
     window.load_sc_file()
-    assert window.application_information_textbrowser.toPlainText() == 'Error Loading File: File is not a valid Starcraft Citizen XML'
+    assert window.application_information_textbrowser.toPlainText() == 'Error Loading File: File is not a valid Star Citizen XML'
