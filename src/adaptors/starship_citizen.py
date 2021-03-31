@@ -27,8 +27,8 @@ class StarshipCitizen(jdi.JDinterface):
                 data = Path(self.file_path).read_text(encoding="utf-8")
                 try:
                     self.__validate_file(data)
-                except Exception as e:
-                    raise Exception(e) from e
+                except Exception:
+                    raise Exception("File is not a valid Starcraft Citizen XML")
                 else:
                     return data
             else:
@@ -40,15 +40,15 @@ class StarshipCitizen(jdi.JDinterface):
     def __validate_file(self, data):
         try:
             parsed_xml = minidom.parseString(data)
-        except ValueError as e:
-            raise ValueError from e
+        except ValueError:
+            raise Exception("File is not a valid Starcraft Citizen XML")
         else:
             if (len(parsed_xml.getElementsByTagName('devices'))==1 and
                 len(parsed_xml.getElementsByTagName('options'))>0 and
                 len(parsed_xml.getElementsByTagName('actionmap'))>0):
                 return True
             else:
-                raise Exception("File is not a valid Starcraft Citizen XML")
+                raise Exception
 
     def parse_map(self, bind_map):
         segments = bind_map.split("_")
@@ -59,7 +59,7 @@ class StarshipCitizen(jdi.JDinterface):
         if device_object is None:
             c_map = None
             return (device_object,c_map)
-        if segments[1] == ' ':
+        if segments[1] == '':
             c_map = None
             return (device_object,c_map)
         elif segments[1][0:6] == 'button':
@@ -70,6 +70,18 @@ class StarshipCitizen(jdi.JDinterface):
             pov_id = segments[1][3:]
             pov_dir = self.convert_hat_format(segments[2])
             c_map = 'POV_{id}_{dir}'.format(id=pov_id,dir=pov_dir)
+            return (device_object,c_map)
+        elif segments[1][0] in ('x','y','z'):
+            axis = segments[1][0]
+            c_map = 'AXIS_{axis}'.format(axis=axis)
+            return (device_object,c_map)
+        elif segments[1][0:3] == 'rot':
+            axis = segments[1][3:]
+            c_map = 'AXIS_R{axis}'.format(axis=axis)
+            return (device_object,c_map)
+        elif segments[1][0:6] == 'slider':
+            slider_id = segments[1][6:]
+            c_map = 'AXIS_SLIDER_{id}'.format(id=slider_id )
             return (device_object,c_map)
         else:
             c_map = None

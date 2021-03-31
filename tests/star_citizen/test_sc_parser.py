@@ -62,6 +62,16 @@ class TestSCParserCases(unittest.TestCase):
         data = self.file.parse_map('js1_hat1_left')
         self.assertEqual(data, ({'guid': '0000000','name': 'Joystick'}, 'POV_1_L'))
 
+    def test_bind_parse_axis(self):
+        data = self.file.parse_map('js1_rotz')
+        self.assertEqual(data, ({'guid': '0000000','name': 'Joystick'}, 'AXIS_Rz'))
+
+        data = self.file.parse_map('js1_x')
+        self.assertEqual(data, ({'guid': '0000000','name': 'Joystick'}, 'AXIS_x'))
+
+        data = self.file.parse_map('js1_slider1')
+        self.assertEqual(data, ({'guid': '0000000','name': 'Joystick'}, 'AXIS_SLIDER_1'))
+
     def test_bind_no_device(self):
         data = self.file.parse_map('abc_hat1_up')
         self.assertEqual(data, (None, None))
@@ -69,7 +79,7 @@ class TestSCParserCases(unittest.TestCase):
     def test_parser(self):
         expected = {
             'VKB-Sim Space Gunfighter': {'Default': {'Axis': '', 'Buttons': {'BUTTON_1': 'Close all doors', 'BUTTON_2': 'Open all doors', 'BUTTON_3': 'Unlock all doors', 'BUTTON_4': 'View look behind'}, 'Inherit': False} } ,
-            'VKB-Sim Space Gunfighter L': {'Default': {'Axis': '', 'Buttons': {'BUTTON_1': 'View cycle fwd', 'BUTTON_2': 'View dynamic zoom abs toggle'}, 'Inherit': False }}
+            'VKB-Sim Space Gunfighter L': {'Default': {'Axis': '', 'Buttons': {'AXIS_Rx': 'View yaw', 'AXIS_Ry': 'View pitch', 'BUTTON_1': 'View cycle fwd', 'BUTTON_2': 'View dynamic zoom abs toggle'}, 'Inherit': False}}
          }
 
         data = self.file.parse()
