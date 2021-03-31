@@ -9,19 +9,19 @@ import logging
 import html
 
 # Logging Init
-logDir = './logs/'
-logFile = 'jv.log'
+LOG_DIR = './logs/'
+LOG_FILE = 'jv.log'
 logger = logging.getLogger('jv')
 webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(config.chrome_path))
 
-def createDirectory(directory):
+def create_directory(directory):
     if not os.path.exists(directory):
         return os.makedirs(directory)
     else:
         log("Failed to create directory: {}".format(directory), 'error')
         return False
-        
-def log(text, level='info', exec_s=False):
+
+def log(text, level='info', exc_info=False):
     #Accepted Levels
     # info, warning, error
     if config.debug:
@@ -33,14 +33,14 @@ def log(text, level='info', exec_s=False):
             logger.error(text, exc_info=True)
         else:
             logger.debug(text, exc_info=True)
-        
+     
 
 def getVersion():
     return "Version: " + version.VERSION
 
-if not os.path.exists(logDir):
-    createDirectory(logDir)
-hdlr = logging.FileHandler(logDir + logFile)
+if not os.path.exists(LOG_DIR):
+    create_directory(LOG_DIR)
+hdlr = logging.FileHandler(LOG_DIR + LOG_FILE)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)

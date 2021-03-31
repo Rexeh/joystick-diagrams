@@ -25,7 +25,7 @@ class JoystickGremlin(jdi.JDinterface):
         self.buttonArray = None
         self.inheritModes = {}
         self.usingInheritance = False
-        self. position_map = {
+        self.position_map = {
         1 : 'U',
         2 : 'UR',
         3 : 'R',

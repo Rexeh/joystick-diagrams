@@ -1,4 +1,5 @@
 from PyQt5 import QtCore
+import pytest
 import joystick_diagrams
 import version
 
@@ -59,3 +60,20 @@ def test_jg_file_load(qtbot):
     window.load_jg_file()
     assert window.jg_profile_list.count() == 4
  
+def test_sc_file_load_success(qtbot):
+    window = joystick_diagrams.MainWindow()
+    window.show()
+    qtbot.addWidget(window)
+    assert window.application_information_textbrowser.toPlainText() == ''
+    window.sc_file = './tests/data/star_citizen/valid.xml'
+    window.load_sc_file()
+    assert window.application_information_textbrowser.toPlainText() == 'Succesfully loaded Star Citizen profile'
+
+def test_sc_file_load_failure(qtbot):
+    window = joystick_diagrams.MainWindow()
+    window.show()
+    qtbot.addWidget(window)
+    assert window.application_information_textbrowser.toPlainText() == ''
+    window.sc_file = './tests/data/star_citizen/invalid.xml'
+    window.load_sc_file()
+    assert window.application_information_textbrowser.toPlainText() == 'Error Loading File: File is not a valid Starcraft Citizen XML'

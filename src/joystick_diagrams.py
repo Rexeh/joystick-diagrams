@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, uic, QtGui, QtCore
 from ui import Ui_MainWindow
 import adaptors.dcs_world as dcs
 import adaptors.joystick_gremlin as jg
+import adaptors.starship_citizen as sc
 import classes.export as export
 import functions.helper as helper
 import version
@@ -22,6 +23,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dcs_selected_directory_label.setText('')
         self.dcs_parser_instance = None
         self.jg_parser_instance = None
+
         self.dcs_easy_mode_checkbox.stateChanged.connect(self.easy_mode_checkbox_action)
         self.dcs_directory_select_button.clicked.connect(self.set_dcs_directory)
         self.export_button.clicked.connect(self.export_profiles)
@@ -32,6 +34,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # JG UI Setup
         self.jg_select_profile_button.clicked.connect(self.set_jg_file)
+
+        # SC UI Setup
+        self.sc_file = None
+        self.sc_parser_instance = None
+        self.sc_select_button.clicked.connect(self.set_sc_file)
 
     def setVersion(self):
         version_text = version.VERSION
@@ -49,6 +56,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.export_button.setEnabled(1)
             else:
                 self.export_button.setDisabled(1)
+        elif self.parser_selector.currentIndex() == 2:
+            if self.sc_parser_instance:
+                self.export_button.setEnabled(1)
+            else:
+                self.export_button.setDisabled(1)            
         else:
             self.export_button.setDisabled(1)
 
@@ -99,6 +111,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.dcs_profiles_list.clear()
             self.dcs_profiles_list.addItems(self.dcs_parser_instance.getValidatedProfiles())
 
+    def set_sc_file(self):
+        self.clear_info()
+        self.sc_file = QtWidgets.QFileDialog.getOpenFileName(self,"Select Star Citizen Config file",None,"XMl Files (*.xml)")[0]
+        if self.sc_file:
+            self.load_sc_file()
+        else:
+            self.print_to_info("No File Selected")
+
+    def load_sc_file(self):
+        try:
+            self.sc_parser_instance = sc.StarshipCitizen(self.sc_file)
+            self.enable_profile_load_button(self.sc_select_button)
+            self.export_button.setEnabled(1)
+            self.print_to_info('Succesfully loaded Star Citizen profile')
+        except Exception as e:
+            self.disable_profile_load_button(self.sc_select_button)
+            self.export_button.setEnabled(0)
+            self.sc_file = None
+            self.print_to_info("Error Loading File: {}".format(e))
+
     def set_jg_file(self):
         self.jg_file = QtWidgets.QFileDialog.getOpenFileName(self,"Select Joystick Gremlin Config file",None,"Gremlin XMl Files (*.xml)")[0]
         
@@ -123,7 +155,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.disable_profile_load_button(self.jg_select_profile_button)
             self.jg_profile_list.clear()
             self.export_button.setEnabled(0)
-            raise
+            raise Exception(e)
 
     def export_profiles(self):
         if self.parser_selector.currentIndex() == 0: ## JOYSTICK GREMLIN
@@ -148,6 +180,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 data = self.dcs_parser_instance.processProfiles()
             self.export_to_svg(data, 'DCS')
+        elif self.parser_selector.currentIndex() == 2:  ## SC
+            data = self.sc_parser_instance.parse()
+            self.export_to_svg(data, 'StarCitizen')
         else:
             pass # no other tabs have functionality right now
 
