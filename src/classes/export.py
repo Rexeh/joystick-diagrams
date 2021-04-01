@@ -37,9 +37,13 @@ class Export:
                 progress_increment_modes = len(self.joystick_listing[joystick])
                 for mode in self.joystick_listing[joystick]:
                     write_template = base_template
+                    print("Replacing Strings")
                     completed_template = self.replace_template_strings(joystick, mode, write_template)
+                    print("Replacing Unused String")
                     completed_template = self.replace_unused_strings(completed_template)
+                    print("Branding")
                     completed_template = self.brand_template(mode, completed_template)
+                    print("Saving: {}".format(joystick))
                     self.save_template(joystick,mode,completed_template)
                     if isinstance(progress_bar, QtWidgets.QProgressBar):
                         progress_bar.setValue(progress_bar.value() + (progress_increment/progress_increment_modes))
@@ -52,9 +56,6 @@ class Export:
         if isinstance(progress_bar, QtWidgets.QProgressBar):
             progress_bar.setValue(100)
         return self.error_bucket
-
-    def update_progress(self):
-        pass
 
     def create_directory(self,directory):
         if not os.path.exists(directory):
@@ -89,12 +90,13 @@ class Export:
             raise
 
     def replace_unused_strings(self, template):
-        regex_search = "\\bButton_\\d+\\b"
+        regex_search = "\\bButton_\\d+\\b|\\bPOV_\\d+_\\w+\\b"
         matches = re.findall(regex_search, template, flags=re.IGNORECASE)
         matches = list(dict.fromkeys(matches))
-        for i in matches:
-            search = "\\b" + i + "\\b"
-            template = re.sub(search, html.escape(self.no_bind_text), template, flags=re.IGNORECASE)
+        if matches:
+            for i in matches:
+                search = "\\b" + i + "\\b"
+                template = re.sub(search, html.escape(self.no_bind_text), template, flags=re.IGNORECASE)
         return template
 
     def replace_template_strings(self,device,mode, template):
