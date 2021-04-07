@@ -45,7 +45,7 @@ setup(
     packages=find_packages(),
     python_requires='>=3.8, <4',
     install_requires=[
-            'cx-freeze'
+            'cx-freeze',
             'pyqt5',
             'ply'
     ],
