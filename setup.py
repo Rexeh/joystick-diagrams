@@ -47,9 +47,7 @@ setup(
     install_requires=[
             'cx-freeze',
             'pyqt5',
-            'ply'
-    ],
-    tests_requires=[
+            'ply',
             'pytest',
             'pytest-qt',
             'pytest-cov'
