@@ -30,12 +30,12 @@ jobs:
         python -m pip install cx-freeze
         python -m pip install ply
         python -m pip install pyqt5
+        python -m pip install pywin32
     - name: Build Package
       run: |
         python setup.py build
-        ls ./
     - name: Upload  
       uses: actions/upload-artifact@v2
       with:
         name: py_package
-        path: ${{ github.workspace }}/build
+        path: ${{ github.workspace }}\build\exe.win-amd64-3.8
