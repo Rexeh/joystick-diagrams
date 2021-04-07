@@ -30,7 +30,7 @@ jobs:
         python -m pip install cx-freeze
         python -m pip install ply
         python -m pip install pyqt5
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if ( -f requirements.txt ); then pip install -r requirements.txt; fi
     - name: Build Package
       run: |
         python setup.py build
