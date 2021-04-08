@@ -1,5 +1,4 @@
 import configparser as ConfigParser
-from pathlib import Path
 
 Config = ConfigParser.ConfigParser()
 Config.read("./config.cfg")

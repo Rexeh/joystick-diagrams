@@ -5,7 +5,7 @@ import pprint
 
 class TestDCS_Parse_Test(unittest.TestCase):
     def setUp(self):
-        self.dcs_instance = dcs.DCSWorld_Parser(
+        self.dcs_instance = dcs.DCSWorldParser(
             "./tests/data/dcs_world/valid_dcs_world_directory"
         )
         self.maxDiff = None

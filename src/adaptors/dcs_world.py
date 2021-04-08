@@ -10,7 +10,7 @@ import adaptors.dcs_world_lex  # pylint: disable=unused-import
 import adaptors.dcs_world_parse  # pylint: disable=unused-import
 
 
-class DCSWorld_Parser(jdi.JDinterface):
+class DCSWorldParser(jdi.JDinterface):
     def __init__(self, path, easy_modes=True):
         jdi.JDinterface.__init__(self)
         self.path = path
@@ -137,7 +137,7 @@ class DCSWorld_Parser(jdi.JDinterface):
                             )
                         )
                     else:
-                        dictionary_2 = self.parseFile()
+                        dictionary_2 = self.parse_file()
 
                         button_map = self.create_joystick_map(dictionary_2)
 
@@ -147,8 +147,8 @@ class DCSWorld_Parser(jdi.JDinterface):
         return self.joystick_dictionary
 
     def create_joystick_map(self, data):
-        writeVal = False
-        buttonArray = {}
+        write_val = False
+        button_array = {}
 
         if "keyDiffs" in data.keys():
             for value in data["keyDiffs"].values():
@@ -157,10 +157,10 @@ class DCSWorld_Parser(jdi.JDinterface):
                         name = attribute
                     if item == "added":
                         button = self.convert_button_format(attribute[1]["key"])
-                        writeVal = True
-                if writeVal:
-                    buttonArray.update({button: name})
-                    writeVal = False
+                        write_val = True
+                if write_val:
+                    button_array.update({button: name})
+                    write_val = False
 
         if "axisDiffs" in data.keys():
             for value in data["axisDiffs"].values():
@@ -169,13 +169,13 @@ class DCSWorld_Parser(jdi.JDinterface):
                         name = attribute
                     if item in ["added", "changed"]:
                         axis = self.convert_button_format(attribute[1]["key"])
-                        writeVal = True
-                if writeVal:
-                    buttonArray.update({axis: name})
-                    writeVal = False
-        return buttonArray
+                        write_val = True
+                if write_val:
+                    button_array.update({axis: name})
+                    write_val = False
+        return button_array
 
-    def parseFile(self):
+    def parse_file(self):
         # pylint: disable=unused-variable
         tokens = (
             "LCURLY",
@@ -281,5 +281,5 @@ class DCSWorld_Parser(jdi.JDinterface):
             data = parser.parse(self.file)
         except Exception as error:
             helper.log(error, "error")
-            raise ("DCS Parser Exception")
+            raise "DCS Parser Exception"
         return data

@@ -17,14 +17,14 @@ class JoystickGremlin(jdi.JDinterface):
         self.mode = None
         self.devices = None
         self.device = None
-        self.currentdevice = None
-        self.currentMode = None
-        self.currentInherit = None
+        self.current_device = None
+        self.current_mode = None
+        self.current_inherit = None
         self.inherit = None
         self.buttons = None
-        self.buttonArray = None
-        self.inheritModes = {}
-        self.usingInheritance = False
+        self.button_array = None
+        self.inherit_modes = {}
+        self.using_inheritance = False
         self.position_map = {
             1: "U",
             2: "UR",
@@ -38,15 +38,15 @@ class JoystickGremlin(jdi.JDinterface):
         self.hats = None
 
     def get_device_names(self):
-        self.devices = self.getDevices()
-        deviceItems = []
+        self.devices = self.get_devices()
+        device_items = []
 
         for item in self.devices:
-            deviceItems.append(item.getAttribute("name"))
-        return deviceItems
+            device_items.append(item.getAttribute("name"))
+        return device_items
 
     def get_modes(self):
-        self.devices = self.getDevices()
+        self.devices = self.get_devices()
         profile_modes = []
 
         item = self.devices[0]  # All Modes common across JG
@@ -60,31 +60,31 @@ class JoystickGremlin(jdi.JDinterface):
         ## Improve loading of file, checks for validity etc
         return minidom.parse(xml_file)
 
-    def createDictionary(self, profiles=None):
+    def create_dictionary(self, profiles=None):
         self.profiles = profiles
-        self.devices = self.getDevices()
+        self.devices = self.get_devices()
         helper.log("Number of Devices: {}".format(str(self.devices.length)), "debug")
 
         for self.device in self.devices:
-            self.currentdevice = self.getSingleDevice()
-            self.modes = self.getDeviceModes()
+            self.current_device = self.get_single_device()
+            self.modes = self.get_device_modes()
             helper.log("All Modes: {}".format(self.modes))
             for self.mode in self.modes:
-                self.currentInherit = self.hasInheritance()
-                self.buttonArray = {}
-                self.currentMode = self.getSingleMode()
-                helper.log("Selected Mode: {}".format(self.currentMode), "debug")
-                self.buttons = self.getModeButtons()
-                self.hats = self.getModeHats()
-                self.extractButtons()
-                self.extractHats()
+                self.current_inherit = self.has_inheritance()
+                self.button_array = {}
+                self.current_mode = self.get_single_mode()
+                helper.log("Selected Mode: {}".format(self.current_mode), "debug")
+                self.buttons = self.get_mode_buttons()
+                self.hats = self.get_mode_hats()
+                self.extract_buttons()
+                self.extract_hats()
                 self.update_joystick_dictionary(
-                    self.currentdevice,
-                    self.currentMode,
-                    self.currentInherit,
-                    self.buttonArray,
+                    self.current_device,
+                    self.current_mode,
+                    self.current_inherit,
+                    self.button_array,
                 )
-        if self.usingInheritance:
+        if self.using_inheritance:
             self.inherit_joystick_dictionary()
             self.filter_dictionary()
             return self.joystick_dictionary
@@ -100,52 +100,52 @@ class JoystickGremlin(jdi.JDinterface):
                         self.joystick_dictionary[key].pop(item, None)
         return self.joystick_dictionary
 
-    def getDevices(self):
+    def get_devices(self):
         return self.file.getElementsByTagName("device")
 
-    def getModeButtons(self):
+    def get_mode_buttons(self):
         return self.mode.getElementsByTagName("button")
 
-    def getModeHats(self):
+    def get_mode_hats(self):
         return self.mode.getElementsByTagName("hat")
 
-    def getDeviceModes(self):
+    def get_device_modes(self):
         return self.device.getElementsByTagName("mode")
 
-    def getSingleDevice(self):
+    def get_single_device(self):
         return self.device.getAttribute("name")
 
-    def getSingleMode(self):
+    def get_single_mode(self):
         return self.mode.getAttribute("name")
 
-    def hasInheritance(self):
+    def has_inheritance(self):
         inherit = self.mode.getAttribute("inherit")
         if inherit != "":
-            if self.usingInheritance != True:
-                self.usingInheritance = True
+            if self.using_inheritance is not True:
+                self.using_inheritance = True
             return inherit
         else:
             return False
 
-    def inheritedModes(self):
+    def inherited_modes(self):
         return self.mode.getAttribute("name")
 
-    def extractButtons(self):
+    def extract_buttons(self):
         for i in self.buttons:
             if i.getAttribute("description") != "":
-                self.buttonArray.update(
+                self.button_array.update(
                     {
                         "BUTTON_"
                         + str(i.getAttribute("id")): str(i.getAttribute("description"))
                     }
                 )
             else:
-                self.buttonArray.update(
+                self.button_array.update(
                     {"BUTTON_" + str(i.getAttribute("id")): self.no_bind_text}
                 )
-        return self.buttonArray
+        return self.button_array
 
-    def extractHats(self):
+    def extract_hats(self):
 
         for i in self.hats:
             hat_id = i.getAttribute("id")
@@ -162,19 +162,19 @@ class JoystickGremlin(jdi.JDinterface):
             if hat_containers:
                 helper.log("Has containers: {}".format(hat_containers.length), "debug")
 
-                for c in hat_containers:
+                for container in hat_containers:
 
-                    hat_positions = c.getElementsByTagName("action-set")
+                    hat_positions = container.getElementsByTagName("action-set")
                     hat_count = hat_positions.length
                     increment = 8 / hat_count
                     pos = 1
                     helper.log("We have {} hat positions".format(hat_count), "debug")
 
-                    for hp in hat_positions:
+                    for position in hat_positions:
 
-                        if hp.getElementsByTagName("description"):
+                        if position.getElementsByTagName("description"):
                             # Ignore more than 1 description. always use first
-                            hat_direction_description = hp.getElementsByTagName(
+                            hat_direction_description = position.getElementsByTagName(
                                 "description"
                             )[0].getAttribute("description")
                         else:
@@ -184,7 +184,7 @@ class JoystickGremlin(jdi.JDinterface):
                             "POV Position: {}".format(self.position_map[pos]), "debug"
                         )
 
-                        self.buttonArray.update(
+                        self.button_array.update(
                             {
                                 "POV_{ID}_{DIR}".format(
                                     ID=i.getAttribute("id"), DIR=self.position_map[pos]
@@ -196,5 +196,5 @@ class JoystickGremlin(jdi.JDinterface):
             else:
                 helper.log("No container found for hat: {}".format(hat_id), "error")
 
-    def getDeviceCount(self):
+    def get_device_count(self):
         return self.file.getElementsByTagName("device").length

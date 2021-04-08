@@ -1,6 +1,6 @@
 import sys
 import os
-from PyQt5 import QtWidgets, uic, QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore
 from ui import Ui_MainWindow
 import adaptors.dcs_world as dcs
 import adaptors.joystick_gremlin as jg
@@ -8,14 +8,13 @@ import adaptors.star_citizen as sc
 import classes.export as export
 import functions.helper as helper
 import version
-import config
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
-        self.setVersion()
+        self.set_version()
         # Clean up GUI Defaults
         self.dcs_profiles_list.clear()
         self.jg_profile_list.clear()
@@ -24,7 +23,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dcs_selected_directory_label.setText("")
         self.dcs_parser_instance = None
         self.jg_parser_instance = None
-
+        self.dcs_directory = None
+        self.jg_file = None
+        self.jg_devices = None
+        self.jg_modes = None
         self.dcs_easy_mode_checkbox.stateChanged.connect(self.easy_mode_checkbox_action)
         self.dcs_directory_select_button.clicked.connect(self.set_dcs_directory)
         self.export_button.clicked.connect(self.export_profiles)
@@ -51,7 +53,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sc_parser_instance = None
         self.sc_select_button.clicked.connect(self.set_sc_file)
 
-    def setVersion(self):
+    def set_version(self):
         version_text = version.VERSION
         self.label_9.setText(version_text)
         self.setWindowTitle("Joystick Diagrams - V" + version_text)
@@ -94,8 +96,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def disable_profile_load_button(self, button):
         button.setStyleSheet("color:white; border: 1px solid white;")
 
-    def print_to_info(self, error):
-        self.application_information_textbrowser.append(error)
+    def print_to_info(self, error_text):
+        self.application_information_textbrowser.append(error_text)
         self.application_information_textbrowser.verticalScrollBar().setValue(
             self.application_information_textbrowser.verticalScrollBar().maximum()
         )
@@ -118,7 +120,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def load_dcs_directory(self):
         try:
             self.dcs_profiles_list.clear()
-            self.dcs_parser_instance = dcs.DCSWorld_Parser(
+            self.dcs_parser_instance = dcs.DCSWorldParser(
                 self.dcs_directory, easy_modes=self.dcs_easy_mode_checkbox.isChecked()
             )
             self.print_to_info("Succesfully loaded DCS profiles")
@@ -127,7 +129,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "in {}".format(self.dcs_directory)
             )
             self.export_button.setEnabled(1)
-        except Exception as error:
+        except Exception:
             self.disable_profile_load_button(self.dcs_directory_select_button)
             self.export_button.setEnabled(0)
             self.dcs_selected_directory_label.setText("")
@@ -201,9 +203,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.print_to_info(
                     "Exporting the following profile(s): {}".format(profiles)
                 )
-                data = self.jg_parser_instance.createDictionary(profiles)
+                data = self.jg_parser_instance.create_dictionary(profiles)
             else:
-                data = self.jg_parser_instance.createDictionary()
+                data = self.jg_parser_instance.create_dictionary()
             self.export_to_svg(data, "JG")
         elif self.parser_selector.currentIndex() == 1:  ## DCS
             selected_profiles = self.dcs_profiles_list.selectedItems()
