@@ -44,7 +44,7 @@ setup(
         "pytest",
         "pytest-qt",
         "pytest-cov",
-        "pre-commit",
+        "black" "pre-commit",
     ],
     project_urls={
         "Documentation": "https://joystick-diagrams.com/",
