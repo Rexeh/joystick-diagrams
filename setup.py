@@ -46,6 +46,7 @@ setup(
         "pytest-cov",
         "black",
         "pre-commit",
+        "coveralls",
     ],
     project_urls={
         "Documentation": "https://joystick-diagrams.com/",

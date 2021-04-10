@@ -27,4 +27,5 @@ script:
   - python -m pytest -sv --cov=src tests/
 
 after_success:
+  - coveralls
   - bash <(curl -s https://codecov.io/bash) -v
