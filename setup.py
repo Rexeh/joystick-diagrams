@@ -37,7 +37,15 @@ setup(
     keywords="joystick, HID, diagrams, joystick gremlin, dcs world",
     packages=find_packages(),
     python_requires=">=3.8, <4",
-    install_requires=["cx-freeze", "pyqt5", "ply", "pytest", "pytest-qt", "pytest-cov"],
+    install_requires=[
+        "cx-freeze",
+        "pyqt5",
+        "ply",
+        "pytest",
+        "pytest-qt",
+        "pytest-cov",
+        "pre-commit",
+    ],
     project_urls={
         "Documentation": "https://joystick-diagrams.com/",
         "Bug Reports": "https://github.com/Rexeh/joystick-diagrams/issues",
