@@ -23,6 +23,7 @@ install:
   - pip install -e .
   
 script:
+  - black --check *.py
   - python -m pytest -sv --cov=src tests/
 
 after_success:
