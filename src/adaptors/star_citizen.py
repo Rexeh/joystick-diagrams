@@ -38,8 +38,7 @@ class StarCitizen(jdi.JDinterface):
             raise Exception("File is not a valid Star Citizen XML")
         else:
             if (
-                len(parsed_xml.getElementsByTagName("devices")) == 1
-                and len(parsed_xml.getElementsByTagName("options")) > 0
+                len(parsed_xml.getElementsByTagName("options")) > 0
                 and len(parsed_xml.getElementsByTagName("actionmap")) > 0
             ):
                 return True
