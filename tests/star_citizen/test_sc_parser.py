@@ -95,7 +95,7 @@ class TestSCParserCases(unittest.TestCase):
                         "AXIS_Rx": "View yaw",
                         "AXIS_Ry": "View pitch",
                         "BUTTON_1": "View cycle fwd",
-                        "BUTTON_2": "View dynamic zoom abs toggle",
+                        "BUTTON_2": "View dynamic zoom abs",
                     },
                     "Inherit": False,
                 }
