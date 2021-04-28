@@ -121,7 +121,20 @@ class StarCitizen(jdi.JDinterface):
 
     def process_name(self, name):
         helper.log("Bind Name: {}".format(name), "debug")
+        # Force some Labels
+        if name == "v_increase_mining_throttle":
+            name = "v_mining_power_+"
+        if name == "v_decrease_mining_throttle":
+            name = "v_mining_power_-"
+        if name == "v_mining_throttle":
+            name = "v_mining_power"
+        # Split the String to Array
         name = name.split("_")
+        # Trim some word out to shorten Labels
+        if "ifcs" in name: 
+            name.remove("ifcs")
+        if "toggle" in name: 
+            name.remove("toggle")
         if len(name) == 1:
             return name[0].capitalize()
         else:
