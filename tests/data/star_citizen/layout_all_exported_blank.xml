@@ -1,0 +1,15 @@
+<ActionMaps version="1" optionsVersion="2" rebindVersion="2" profileName="exported">
+ <CustomisationUIHeader label="exported" description="exported" image="">
+  <devices>
+   <keyboard instance="1"/>
+   <mouse instance="1"/>
+   <joystick instance="1"/>
+   <joystick instance="2"/>
+  </devices>
+  <categories />
+ </CustomisationUIHeader>
+ <options type="keyboard" instance="1" Product="Keyboard {6F1D2B61-D5A0-11CF-BFC7-444553540000}"/>
+ <options type="joystick" instance="1" Product=" VKB-Sim Gladiator NXT L   {0201231D-0000-0000-0000-504944564944}"/>
+ <options type="joystick" instance="2" Product=" VKB-Sim Gladiator NXT R   {0200231D-0000-0000-0000-504944564944}"/>
+ <modifiers />
+</ActionMaps>
