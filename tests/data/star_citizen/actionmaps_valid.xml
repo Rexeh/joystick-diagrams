@@ -43,10 +43,12 @@
    </action>
    <action name="v_view_yaw_left">
     <rebind input="js2_ "/>
-   </action>
+   </action>  
+  </actionmap>
+  <actionmap name="spaceship_movement">
    <action name="v_ifcs_toggle_cruise_control">
     <rebind input="js1_button22"/>
-   </action>   
-  </actionmap>
+   </action>
+  </actionmap>  
  </ActionProfiles>
 </ActionMaps>
