@@ -38,9 +38,11 @@ class StarCitizen(jdi.JDinterface):
             raise Exception("File is not a valid Star Citizen XML")
         else:
             if (
-                len(parsed_xml.getElementsByTagName("devices")) == 1
-                and len(parsed_xml.getElementsByTagName("options")) > 0
-                and len(parsed_xml.getElementsByTagName("actionmap")) > 0
+                (
+                    len(parsed_xml.getElementsByTagName("ActionMaps")) == 1
+                    and len(parsed_xml.getElementsByTagName("options")) > 0
+                    and len(parsed_xml.getElementsByTagName("actionmap")) > 0
+                )
             ):
                 return True
             else:
@@ -121,7 +123,20 @@ class StarCitizen(jdi.JDinterface):
 
     def process_name(self, name):
         helper.log("Bind Name: {}".format(name), "debug")
+        # Force some Labels
+        if name == "v_increase_mining_throttle":
+            name = "v_mining_power_+"
+        if name == "v_decrease_mining_throttle":
+            name = "v_mining_power_-"
+        if name == "v_mining_throttle":
+            name = "v_mining_power"
+        # Split the String to Array
         name = name.split("_")
+        # Trim some word out to shorten Labels
+        if "ifcs" in name: 
+            name.remove("ifcs")
+        if "toggle" in name: 
+            name.remove("toggle")
         if len(name) == 1:
             return name[0].capitalize()
         else:

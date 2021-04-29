@@ -4,7 +4,7 @@ import adaptors.star_citizen as sc
 
 class TestSCParserCases(unittest.TestCase):
     def setUp(self):
-        self.file = sc.StarCitizen("./tests/data/star_citizen/valid.xml")
+        self.file = sc.StarCitizen("./tests/data/star_citizen/layout_all_exported_valid.xml")
         self.file.devices = {
             "js1": {"guid": "0000000", "name": "Joystick"},
             "kb1": {"guid": "1111111", "name": "Keyboard"},
@@ -76,7 +76,7 @@ class TestSCParserCases(unittest.TestCase):
 
     def test_parser(self):
         expected = {
-            "VKB-Sim Space Gunfighter": {
+            "VKB-Sim Gladiator NXT R": {
                 "Default": {
                     "Axis": "",
                     "Buttons": {
@@ -88,14 +88,15 @@ class TestSCParserCases(unittest.TestCase):
                     "Inherit": False,
                 }
             },
-            "VKB-Sim Space Gunfighter L": {
+            "VKB-Sim Gladiator NXT L": {
                 "Default": {
                     "Axis": "",
                     "Buttons": {
                         "AXIS_Rx": "View yaw",
                         "AXIS_Ry": "View pitch",
                         "BUTTON_1": "View cycle fwd",
-                        "BUTTON_2": "View dynamic zoom abs toggle",
+                        "BUTTON_2": "View dynamic zoom abs",
+                        "BUTTON_22": "Cruise control",
                     },
                     "Inherit": False,
                 }
@@ -103,6 +104,7 @@ class TestSCParserCases(unittest.TestCase):
         }
 
         data = self.file.parse()
+        self.maxDiff = None
         self.assertEqual(expected, data)
 
 
