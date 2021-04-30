@@ -154,10 +154,11 @@ class StarCitizen(jdi.JDinterface):
             "_ifcs" : "",
             "_toggle" : "",
             "_use_consumable" : "_use_",
-            "_weapon_countermeasure" : "_countermeasure",
+            "_weapon_countermeasure" : "",
             "_scanning_trigger_scan" : "_scan",
             "_qdrive" : "_quantum",
             "_attack": "_fire",
+            "_weapon" : "",
         }
         # Set Custom Labels
         if name in customLabels:
@@ -200,6 +201,10 @@ class StarCitizen(jdi.JDinterface):
                 "Bind Category: {}".format(self.process_name(i.getAttribute("name"))),
                 "debug",
             )
+            actionsMapBypass = {
+                "Fire 1",
+                "Fire 2"
+            }
             single_actions = i.getElementsByTagName("action")
             for action in single_actions:
                 name = self.process_name(action.getAttribute("name"))
@@ -211,7 +216,19 @@ class StarCitizen(jdi.JDinterface):
                     helper.log("Parsed Control: {}".format(button), "debug")
                     if button and button[1] is not None:
                         helper.log("Valid button, adding to map", "debug")
-                        self.build_button_map(button[0]["name"], button[1], name)
+                        # Check if the Device exist is already Mapped
+                        if (button[0]["name"] in self.button_array):
+                            # Check if the Button is already Mapped for this Device
+                            if (button[1] not in self.button_array[button[0]["name"]]):
+                                # Add Mapping
+                                self.build_button_map(button[0]["name"], button[1], name)
+                            else :
+                                # Check if the current Binding bypass existing one
+                                if (name in actionsMapBypass) :
+                                    self.build_button_map(button[0]["name"], button[1], name)
+                        else:
+                            # Add Mapping
+                            self.build_button_map(button[0]["name"], button[1], name)
                         helper.log("Button Map is now: {}".format(self.button_array))
                     else:
                         helper.log("Button not valid, skipping", "debug")
