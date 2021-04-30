@@ -123,20 +123,50 @@ class StarCitizen(jdi.JDinterface):
 
     def process_name(self, name):
         helper.log("Bind Name: {}".format(name), "debug")
-        # Force some Labels
-        if name == "v_increase_mining_throttle":
-            name = "v_mining_power_+"
-        if name == "v_decrease_mining_throttle":
-            name = "v_mining_power_-"
-        if name == "v_mining_throttle":
-            name = "v_mining_power"
+        # Force some Labels, this ideally need to be declared elsewhere or from an external file
+        customLabels = {
+            "v_increase_mining_throttle" : "v_mining_power_+",
+            "v_decrease_mining_throttle" : "v_mining_power_",
+            "v_mining_throttle" : "v_mining_power",
+            "v_dec_ping_focus_angle" : "v_ping_angle_-",
+            "v_inc_ping_focus_angle": "v_ping_angle_+", 
+            "v_weapon_launch_missile" : "v_launch_missile",
+            "v_weapon_countermeasure_decoy_launch_panic" : "v_weapon_countermeasure_decoy_launch_x5",
+            "v_scanning_trigger_scan" : "v_scan",
+            "v_toggle_qdrive_engagement" : "v_toggle_engage_quantum",
+            "v_attack1_group1" : "v_fire_1",
+            "v_attack1_group2" : "v_fire_2",
+            "v_target_lock_selected" : "v_target_lock",
+            "v_weapon_cycle_missile_back" : "v_cycle_missile_-",
+            "v_weapon_cycle_missile_fwd" : "v_cycle_missile_+",
+            "v_target_cycle_friendly_back" : "v_cycle_friendly_-",
+            "v_target_cycle_friendly_fwd" : "v_cycle_friendly_+",
+            "v_target_cycle_friendly_reset" : "v_reset_friendly",
+            "v_target_cycle_hostile_back" : "v_cycle_hostile_-",
+            "v_target_cycle_hostile_fwd" : "v_cycle_hostile_+",
+            "v_target_cycle_hostile_reset" : "v_reset_hostile",
+            "v_shield_raise_level_left" : "v_left_shield_+",
+            "v_shield_raise_level_right" : "v_right_shield_+",
+            "v_shield_raise_level_forward" : "v_forward_shield_+",
+            "v_shield_raise_level_back" : "v_back_shield_+",
+        }
+        replacedWords = {
+            "_ifcs" : "",
+            "_toggle" : "",
+            "_use_consumable" : "_use_",
+            "_weapon_countermeasure" : "countermeasure",
+            "scanning_trigger_scan" : "scan",
+            "qdrive" : "quantum",
+        }
+        # Set Custom Labels
+        if name in customLabels:
+            name = customLabels.get(name)
+        # Replace Partial String
+        for key in replacedWords:
+            if key in name:
+                name = name.replace(key, replacedWords.get(key))
         # Split the String to Array
         name = name.split("_")
-        # Trim some word out to shorten Labels
-        if "ifcs" in name: 
-            name.remove("ifcs")
-        if "toggle" in name: 
-            name.remove("toggle")
         if len(name) == 1:
             return name[0].capitalize()
         else:
