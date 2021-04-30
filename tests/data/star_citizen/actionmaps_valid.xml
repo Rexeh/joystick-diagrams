@@ -1,0 +1,54 @@
+<ActionMaps>
+ <ActionProfiles version="1" optionsVersion="2" rebindVersion="2" profileName="default">
+  <options type="keyboard" instance="1" Product="Keyboard {6F1D2B61-D5A0-11CF-BFC7-444553540000}"/>
+  <options type="gamepad" instance="1" Product="Controller (Gamepad)"/>
+  <options type="joystick" instance="1" Product=" VKB-Sim Gladiator NXT L   {0201231D-0000-0000-0000-504944564944}"/>
+  <options type="joystick" instance="2" Product=" VKB-Sim Gladiator NXT R   {0200231D-0000-0000-0000-504944564944}"/>
+  <options type="joystick" instance="3"/>
+  <options type="joystick" instance="4"/>
+  <modifiers />
+  <actionmap name="spaceship_general">
+   <action name="v_close_all_doors">
+    <rebind input="kb1_lalt+k" activationMode="double_tap" />
+    <rebind input="js2_button1" />
+   </action>
+   <action name="v_open_all_doors">
+    <rebind input="kb1_lalt+k" />
+    <rebind input="js2_button2" />
+   </action>
+   <action name="v_toggle_all_doorlocks">
+    <rebind input="js2_ " />
+   </action>
+   <action name="v_unlock_all_doors">
+    <rebind input="kb1_lalt+l" activationMode="double_tap" />
+    <rebind input="js2_button3" />
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_view">
+   <action name="v_view_cycle_fwd">
+    <rebind input="js1_button1"/>
+   </action>
+   <action name="v_view_dynamic_zoom_abs_toggle">
+    <rebind input="js1_button2"/>
+   </action>
+   <action name="v_view_look_behind">
+    <rebind input="kb1_lalt+period"/>
+    <rebind input="js2_button4"/>
+   </action>
+   <action name="v_view_pitch">
+    <rebind input="js1_roty"/>
+   </action>
+   <action name="v_view_yaw">
+    <rebind input="js1_rotx"/>
+   </action>
+   <action name="v_view_yaw_left">
+    <rebind input="js2_ "/>
+   </action>  
+  </actionmap>
+  <actionmap name="spaceship_movement">
+   <action name="v_ifcs_toggle_cruise_control">
+    <rebind input="js1_button22"/>
+   </action>
+  </actionmap>  
+ </ActionProfiles>
+</ActionMaps>
