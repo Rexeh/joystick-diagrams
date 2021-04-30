@@ -154,9 +154,10 @@ class StarCitizen(jdi.JDinterface):
             "_ifcs" : "",
             "_toggle" : "",
             "_use_consumable" : "_use_",
-            "_weapon_countermeasure" : "countermeasure",
-            "scanning_trigger_scan" : "scan",
-            "qdrive" : "quantum",
+            "_weapon_countermeasure" : "_countermeasure",
+            "_scanning_trigger_scan" : "_scan",
+            "_qdrive" : "_quantum",
+            "_attack": "_fire",
         }
         # Set Custom Labels
         if name in customLabels:
