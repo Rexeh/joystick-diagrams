@@ -82,8 +82,8 @@ class TestSCParserCases(unittest.TestCase):
                     "Buttons": {
                         "BUTTON_1": "Close all doors",
                         "BUTTON_2": "Open all doors",
-                        "BUTTON_3": "Unlock all doors",
-                        "BUTTON_4": "View look behind",
+                        "BUTTON_3": "Unlock doors",
+                        "BUTTON_4": "Look_behind",
                     },
                     "Inherit": False,
                 }
@@ -95,7 +95,7 @@ class TestSCParserCases(unittest.TestCase):
                         "AXIS_Rx": "View yaw",
                         "AXIS_Ry": "View pitch",
                         "BUTTON_1": "View cycle fwd",
-                        "BUTTON_2": "View dynamic zoom abs",
+                        "BUTTON_2": "View dyn zoom abs",
                         "BUTTON_22": "Cruise control",
                     },
                     "Inherit": False,

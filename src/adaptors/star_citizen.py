@@ -473,7 +473,7 @@ class StarCitizen(jdi.JDinterface):
             "zoom" : "z_zoom",
             "zoom_in" : "z_zoom_in",
             "zoom_in_out" : "z_zoom_+/-",
-            "zoom_out" : "z_zoom_out",       
+            "zoom_out" : "z_zoom_out",
         }
     def __load_file(self):
         if os.path.exists(self.file_path):
