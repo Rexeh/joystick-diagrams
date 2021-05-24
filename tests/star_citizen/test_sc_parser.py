@@ -83,7 +83,7 @@ class TestSCParserCases(unittest.TestCase):
                         "BUTTON_1": "Close all doors",
                         "BUTTON_2": "Open all doors",
                         "BUTTON_3": "Unlock doors",
-                        "BUTTON_4": "Look_behind",
+                        "BUTTON_4": "Look behind",
                     },
                     "Inherit": False,
                 }
