@@ -12,6 +12,7 @@ tests/*/__pycache__/
 .env
 temp/
 diagrams/*.svg
+diagrams/*.pdf
 play*.py
 tests/__pycache__/*.pyc
 *.ui

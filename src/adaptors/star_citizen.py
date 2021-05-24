@@ -15,7 +15,47 @@ class StarCitizen(jdi.JDinterface):
         self.hat = None
         self.devices = {}
         self.button_array = {}
-
+        self.actionsMapBypass = {
+                "Fire 1",
+                "Fire 2"
+            }
+        # Force some Labels, this ideally need to be declared elsewhere or from an external file
+        self.customLabels = {
+            "v_increase_mining_throttle" : "v_mining_power_+",
+            "v_decrease_mining_throttle" : "v_mining_power_",
+            "v_mining_throttle" : "v_mining_power",
+            "v_dec_ping_focus_angle" : "v_ping_angle_-",
+            "v_inc_ping_focus_angle": "v_ping_angle_+", 
+            "v_weapon_launch_missile" : "v_launch_missile",
+            "v_weapon_countermeasure_decoy_launch_panic" : "v_weapon_countermeasure_decoy_launch_x5",
+            "v_scanning_trigger_scan" : "v_scan",
+            "v_toggle_qdrive_engagement" : "v_toggle_engage_quantum",
+            "v_attack1_group1" : "v_fire_1",
+            "v_attack1_group2" : "v_fire_2",
+            "v_target_lock_selected" : "v_target_lock",
+            "v_weapon_cycle_missile_back" : "v_cycle_missile_-",
+            "v_weapon_cycle_missile_fwd" : "v_cycle_missile_+",
+            "v_target_cycle_friendly_back" : "v_cycle_friendly_-",
+            "v_target_cycle_friendly_fwd" : "v_cycle_friendly_+",
+            "v_target_cycle_friendly_reset" : "v_reset_friendly",
+            "v_target_cycle_hostile_back" : "v_cycle_hostile_-",
+            "v_target_cycle_hostile_fwd" : "v_cycle_hostile_+",
+            "v_target_cycle_hostile_reset" : "v_reset_hostile",
+            "v_shield_raise_level_left" : "v_left_shield_+",
+            "v_shield_raise_level_right" : "v_right_shield_+",
+            "v_shield_raise_level_forward" : "v_forward_shield_+",
+            "v_shield_raise_level_back" : "v_back_shield_+",
+        }
+        self.replacedWords = {
+            "_ifcs" : "",
+            "_toggle" : "",
+            "_use_consumable" : "_use_",
+            "_weapon_countermeasure" : "",
+            "_scanning_trigger_scan" : "_scan",
+            "_qdrive" : "_quantum",
+            "_attack": "_fire",
+            "_weapon" : "",
+        }
     def __load_file(self):
         if os.path.exists(self.file_path):
             if (os.path.splitext(self.file_path))[1] == ".xml":
@@ -123,50 +163,14 @@ class StarCitizen(jdi.JDinterface):
 
     def process_name(self, name):
         helper.log("Bind Name: {}".format(name), "debug")
-        # Force some Labels, this ideally need to be declared elsewhere or from an external file
-        customLabels = {
-            "v_increase_mining_throttle" : "v_mining_power_+",
-            "v_decrease_mining_throttle" : "v_mining_power_",
-            "v_mining_throttle" : "v_mining_power",
-            "v_dec_ping_focus_angle" : "v_ping_angle_-",
-            "v_inc_ping_focus_angle": "v_ping_angle_+", 
-            "v_weapon_launch_missile" : "v_launch_missile",
-            "v_weapon_countermeasure_decoy_launch_panic" : "v_weapon_countermeasure_decoy_launch_x5",
-            "v_scanning_trigger_scan" : "v_scan",
-            "v_toggle_qdrive_engagement" : "v_toggle_engage_quantum",
-            "v_attack1_group1" : "v_fire_1",
-            "v_attack1_group2" : "v_fire_2",
-            "v_target_lock_selected" : "v_target_lock",
-            "v_weapon_cycle_missile_back" : "v_cycle_missile_-",
-            "v_weapon_cycle_missile_fwd" : "v_cycle_missile_+",
-            "v_target_cycle_friendly_back" : "v_cycle_friendly_-",
-            "v_target_cycle_friendly_fwd" : "v_cycle_friendly_+",
-            "v_target_cycle_friendly_reset" : "v_reset_friendly",
-            "v_target_cycle_hostile_back" : "v_cycle_hostile_-",
-            "v_target_cycle_hostile_fwd" : "v_cycle_hostile_+",
-            "v_target_cycle_hostile_reset" : "v_reset_hostile",
-            "v_shield_raise_level_left" : "v_left_shield_+",
-            "v_shield_raise_level_right" : "v_right_shield_+",
-            "v_shield_raise_level_forward" : "v_forward_shield_+",
-            "v_shield_raise_level_back" : "v_back_shield_+",
-        }
-        replacedWords = {
-            "_ifcs" : "",
-            "_toggle" : "",
-            "_use_consumable" : "_use_",
-            "_weapon_countermeasure" : "",
-            "_scanning_trigger_scan" : "_scan",
-            "_qdrive" : "_quantum",
-            "_attack": "_fire",
-            "_weapon" : "",
-        }
+
         # Set Custom Labels
-        if name in customLabels:
-            name = customLabels.get(name)
+        if name in self.customLabels:
+            name = self.customLabels.get(name)
         # Replace Partial String
-        for key in replacedWords:
+        for key in self.replacedWords:
             if key in name:
-                name = name.replace(key, replacedWords.get(key))
+                name = name.replace(key, self.replacedWords.get(key))
         # Split the String to Array
         name = name.split("_")
         if len(name) == 1:
@@ -201,10 +205,6 @@ class StarCitizen(jdi.JDinterface):
                 "Bind Category: {}".format(self.process_name(i.getAttribute("name"))),
                 "debug",
             )
-            actionsMapBypass = {
-                "Fire 1",
-                "Fire 2"
-            }
             single_actions = i.getElementsByTagName("action")
             for action in single_actions:
                 name = self.process_name(action.getAttribute("name"))
@@ -224,7 +224,7 @@ class StarCitizen(jdi.JDinterface):
                                 self.build_button_map(button[0]["name"], button[1], name)
                             else :
                                 # Check if the current Binding bypass existing one
-                                if (name in actionsMapBypass) :
+                                if (name in self.actionsMapBypass) :
                                     self.build_button_map(button[0]["name"], button[1], name)
                         else:
                             # Add Mapping
