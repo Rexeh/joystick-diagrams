@@ -4,7 +4,9 @@ import adaptors.star_citizen as sc
 
 class TestSCParserCases(unittest.TestCase):
     def setUp(self):
-        self.file = sc.StarCitizen("./tests/data/star_citizen/layout_all_exported_valid.xml")
+        self.file = sc.StarCitizen(
+            "./tests/data/star_citizen/layout_all_exported_valid.xml"
+        )
         self.file.devices = {
             "js1": {"guid": "0000000", "name": "Joystick"},
             "kb1": {"guid": "1111111", "name": "Keyboard"},
@@ -92,10 +94,10 @@ class TestSCParserCases(unittest.TestCase):
                 "Default": {
                     "Axis": "",
                     "Buttons": {
-                        "AXIS_Rx": "View yaw",
-                        "AXIS_Ry": "View pitch",
                         "BUTTON_1": "View cycle fwd",
-                        "BUTTON_2": "View dyn zoom abs",
+                        "BUTTON_2": "View zoom abs",
+                        "AXIS_Ry": "View pitch",
+                        "AXIS_Rx": "View yaw",
                         "BUTTON_22": "Cruise control",
                     },
                     "Inherit": False,
