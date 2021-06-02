@@ -82,6 +82,8 @@ class TestSCParserCases(unittest.TestCase):
                 "Default": {
                     "Axis": "",
                     "Buttons": {
+                        "BUTTON_9": "Capitalisetest",
+                        "BUTTON_10": "Fire 1",
                         "BUTTON_1": "Close all doors",
                         "BUTTON_2": "Open all doors",
                         "BUTTON_3": "Unlock doors",

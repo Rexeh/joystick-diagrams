@@ -14,6 +14,15 @@
  <options type="joystick" instance="1" Product=" VKB-Sim Gladiator NXT L   {0201231D-0000-0000-0000-504944564944}"/>
  <options type="joystick" instance="2" Product=" VKB-Sim Gladiator NXT R   {0200231D-0000-0000-0000-504944564944}"/>
  <modifiers />
+
+ <actionmap name="adhoc_tests">
+   <action name="capitaliseTest">
+   <rebind input="js2_button9"/>
+  </action>
+  <action name="v_fire_1">
+   <rebind input="js2_button10"/>
+  </action>
+</actionmap>
  <actionmap name="spaceship_general">
   <action name="v_close_all_doors">
    <rebind input="kb1_lalt+k" activationMode="double_tap"/>
