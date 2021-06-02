@@ -22,6 +22,9 @@
   <action name="v_fire_1">
    <rebind input="js2_button10"/>
   </action>
+  <action name="v_fire_1">
+   <rebind input="js2_button10"/>
+  </action>
 </actionmap>
  <actionmap name="spaceship_general">
   <action name="v_close_all_doors">
