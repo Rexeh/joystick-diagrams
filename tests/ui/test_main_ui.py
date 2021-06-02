@@ -76,7 +76,7 @@ def test_sc_file_load_success(qtbot):
     window.show()
     qtbot.addWidget(window)
     assert window.application_information_textbrowser.toPlainText() == ""
-    window.sc_file = "./tests/data/star_citizen/valid.xml"
+    window.sc_file = "./tests/data/star_citizen/layout_all_exported_valid.xml"
     window.load_sc_file()
     assert (
         window.application_information_textbrowser.toPlainText()
