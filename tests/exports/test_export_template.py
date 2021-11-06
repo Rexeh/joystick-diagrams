@@ -1,5 +1,5 @@
 import unittest
-import classes.export as export
+import joystick_diagrams.classes.export as export
 import tempfile
 import os
 

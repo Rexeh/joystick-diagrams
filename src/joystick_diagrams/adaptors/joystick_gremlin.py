@@ -1,7 +1,7 @@
 """Joystick Gremlin (Version ~13) XML Parser for use with Joystick Diagrams"""
 from xml.dom import minidom
-import functions.helper as helper
-import adaptors.joystick_diagram_interface as jdi
+import joystick_diagrams.functions.helper as helper
+import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
 
 
 class JoystickGremlin(jdi.JDinterface):

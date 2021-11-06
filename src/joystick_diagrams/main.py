@@ -1,13 +1,13 @@
 import sys
 import os
 from PyQt5 import QtWidgets, QtGui, QtCore
-from ui import Ui_MainWindow
-import adaptors.dcs_world as dcs
-import adaptors.joystick_gremlin as jg
-import adaptors.star_citizen as sc
-import classes.export as export
-import functions.helper as helper
-import version
+from joystick_diagrams.ui import Ui_MainWindow
+import joystick_diagrams.adaptors.dcs_world as dcs
+import joystick_diagrams.adaptors.joystick_gremlin as jg
+import joystick_diagrams.adaptors.star_citizen as sc
+import joystick_diagrams.classes.export as export
+import joystick_diagrams.functions.helper as helper
+import joystick_diagrams.version as version
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):

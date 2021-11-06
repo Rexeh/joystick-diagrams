@@ -1,4 +1,4 @@
-import functions.helper as helper
+import joystick_diagrams.functions.helper as helper
 
 
 class JDinterface:

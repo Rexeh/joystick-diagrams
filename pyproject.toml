@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "joystick_diagrams"
+version = "1.5"
+description = ""
+authors = ["Robert Cox"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pytest = "^6.2.5"
+PyQt5 = "^5.15.6"
+ply = "^3.11"
+pytest-qt = "^4.0.2"
+pytest-cov = "^3.0.0"
+black = "^21.10b0"
+pre-commit = "^2.15.0"
+coveralls = "^3.3.0"
+pylint = "^2.11.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

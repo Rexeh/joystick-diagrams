@@ -1,5 +1,5 @@
 import unittest
-import adaptors.dcs_world as dcs
+import joystick_diagrams.adaptors.dcs_world as dcs
 import pprint
 
 

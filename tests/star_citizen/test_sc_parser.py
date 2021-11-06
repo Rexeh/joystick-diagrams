@@ -1,5 +1,5 @@
 import unittest
-import adaptors.star_citizen as sc
+import joystick_diagrams.adaptors.star_citizen as sc
 
 
 class TestSCParserCases(unittest.TestCase):

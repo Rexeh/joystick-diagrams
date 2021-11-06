@@ -4,8 +4,8 @@ from pathlib import Path
 import re
 import html
 from PyQt5 import QtWidgets
-import config
-import functions.helper as helper
+import joystick_diagrams.config as config
+import joystick_diagrams.functions.helper as helper
 
 
 class Export:

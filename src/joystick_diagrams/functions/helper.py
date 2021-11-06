@@ -3,8 +3,8 @@ from os import path
 import webbrowser
 from shutil import copyfile
 import re
-import config
-import version
+import joystick_diagrams.config as config
+import joystick_diagrams.version as version
 import logging
 import html
 
@@ -16,6 +16,7 @@ webbrowser.register("chrome", None, webbrowser.BackgroundBrowser(config.chrome_p
 
 
 def create_directory(directory):
+    LOGDIRABC = 123
     if not os.path.exists(directory):
         return os.makedirs(directory)
     else:

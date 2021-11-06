@@ -1,11 +1,10 @@
 from PyQt5 import QtCore
 import pytest
-import joystick_diagrams
-import version
-
+import joystick_diagrams.main as ui
+import joystick_diagrams.version as version
 
 def test_title(qtbot):
-    window = joystick_diagrams.MainWindow()
+    window = ui.MainWindow()
     qtbot.addWidget(window)
     title = "Joystick Diagrams - V"
     version_text = version.VERSION
@@ -15,14 +14,14 @@ def test_title(qtbot):
 
 
 def test_default_ui(qtbot):
-    window = joystick_diagrams.MainWindow()
+    window = ui.MainWindow()
     window.show()
     qtbot.addWidget(window)
     assert not window.export_button.isEnabled()
 
 
 def test_dcs_file_load_success(qtbot):
-    window = joystick_diagrams.MainWindow()
+    window = ui.MainWindow()
     window.show()
     qtbot.addWidget(window)
     window.dcs_directory = "./tests/data/dcs_world/valid_dcs_world_directory"
@@ -39,7 +38,7 @@ def test_dcs_file_load_success(qtbot):
 
 
 def test_dcs_file_load_failure_config(qtbot):
-    window = joystick_diagrams.MainWindow()
+    window = ui.MainWindow()
     window.show()
     qtbot.addWidget(window)
     window.dcs_directory = "./tests/data/dcs_world/invalid_dcs_world_no_config"
@@ -50,7 +49,7 @@ def test_dcs_file_load_failure_config(qtbot):
 
 
 def test_dcs_file_load_failure_input(qtbot):
-    window = joystick_diagrams.MainWindow()
+    window = ui.MainWindow()
     window.show()
     qtbot.addWidget(window)
     window.dcs_directory = "./tests/data/dcs_world/invalid_dcs_world_no_input"
@@ -62,7 +61,7 @@ def test_dcs_file_load_failure_input(qtbot):
 
 
 def test_jg_file_load(qtbot):
-    window = joystick_diagrams.MainWindow()
+    window = ui.MainWindow()
     window.show()
     qtbot.addWidget(window)
     assert window.jg_profile_list.count() == 0
@@ -72,7 +71,7 @@ def test_jg_file_load(qtbot):
 
 
 def test_sc_file_load_success(qtbot):
-    window = joystick_diagrams.MainWindow()
+    window = ui.MainWindow()
     window.show()
     qtbot.addWidget(window)
     assert window.application_information_textbrowser.toPlainText() == ""
@@ -85,7 +84,7 @@ def test_sc_file_load_success(qtbot):
 
 
 def test_sc_file_load_failure(qtbot):
-    window = joystick_diagrams.MainWindow()
+    window = ui.MainWindow()
     window.show()
     qtbot.addWidget(window)
     assert window.application_information_textbrowser.toPlainText() == ""

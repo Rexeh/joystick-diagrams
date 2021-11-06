@@ -1,5 +1,5 @@
 import unittest
-import adaptors.joystick_gremlin as gremlin
+import joystick_diagrams.adaptors.joystick_gremlin as gremlin
 
 
 class TestGremlin_No_Inherit(unittest.TestCase):

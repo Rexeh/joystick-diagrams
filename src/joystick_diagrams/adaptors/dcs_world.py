@@ -4,10 +4,10 @@ import re
 from pathlib import Path
 import ply.lex as lex
 import ply.yacc as yacc
-import functions.helper as helper
-import adaptors.joystick_diagram_interface as jdi
-import adaptors.dcs_world_lex  # pylint: disable=unused-import
-import adaptors.dcs_world_parse  # pylint: disable=unused-import
+import joystick_diagrams.functions.helper as helper
+import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
+import joystick_diagrams.adaptors.dcs_world_lex  # pylint: disable=unused-import
+import joystick_diagrams.adaptors.dcs_world_parse  # pylint: disable=unused-import
 
 
 class DCSWorldParser(jdi.JDinterface):
