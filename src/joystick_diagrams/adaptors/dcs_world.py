@@ -45,9 +45,7 @@ class DCSWorldParser(jdi.JDinterface):
                 if valid:
                     valid_items.append(item)
                 else:
-                    helper.log(
-                        "DCS: Profile {} has no joystick directory files".format(item)
-                    )
+                    helper.log("DCS: Profile {} has no joystick directory files".format(item))
         else:
             raise FileExistsError("DCS: No profiles exist in Input directory!")
 
@@ -59,19 +57,15 @@ class DCSWorldParser(jdi.JDinterface):
         Return Valid Profile
         """
 
-        if os.path.isdir(
-            os.path.join(self.path, "Config", "Input", item)
-        ) and "joystick" in os.listdir(
+        if os.path.isdir(os.path.join(self.path, "Config", "Input", item)) and "joystick" in os.listdir(
             os.path.join(self.path, "Config", "Input", item)
         ):
-            return os.listdir(
-                os.path.join(self.path, "Config", "Input", item, "joystick")
-            )
+            return os.listdir(os.path.join(self.path, "Config", "Input", item, "joystick"))
         else:
             return False
 
     def get_validated_profiles(self):
-        """ Expose Valid Profiles only to UI """
+        """Expose Valid Profiles only to UI"""
         if self.remove_easy_modes:
             return list(
                 filter(
@@ -83,7 +77,7 @@ class DCSWorldParser(jdi.JDinterface):
             return self.valid_profiles
 
     def convert_button_format(self, button):
-        """ Convert DCS Buttons to match expected "BUTTON_X" format """
+        """Convert DCS Buttons to match expected "BUTTON_X" format"""
         split = button.split("_")
 
         if len(split) == 2:
@@ -97,9 +91,7 @@ class DCSWorldParser(jdi.JDinterface):
                 return split[1]
 
         elif len(split) == 4:
-            return "{button}_{pov}_{dir}".format(
-                button=split[1].replace("BTN", "POV"), pov=split[2][3], dir=split[3]
-            )
+            return "{button}_{pov}_{dir}".format(button=split[1].replace("BTN", "POV"), pov=split[2][3], dir=split[3])
 
     def process_profiles(self, profile_list=None):
 
@@ -108,13 +100,9 @@ class DCSWorldParser(jdi.JDinterface):
         else:
             self.profiles_to_process = self.get_validated_profiles()
 
-        assert (
-            len(self.profiles_to_process) != 0
-        ), "DCS: There are no valid profiles to process"
+        assert len(self.profiles_to_process) != 0, "DCS: There are no valid profiles to process"
         for profile in self.profiles_to_process:
-            self.fq_path = os.path.join(
-                self.path, "Config", "Input", profile, "joystick"
-            )
+            self.fq_path = os.path.join(self.path, "Config", "Input", profile, "joystick")
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
             self.joystick_listing = {}
             for item in self.profile_devices:
@@ -125,9 +113,7 @@ class DCSWorldParser(jdi.JDinterface):
                     print("Skipping as Folder")
                 else:
                     try:
-                        self.file = Path(
-                            os.path.join(self.fq_path, joystick_file)
-                        ).read_text(encoding="utf-8")
+                        self.file = Path(os.path.join(self.fq_path, joystick_file)).read_text(encoding="utf-8")
                         self.file = self.file.replace("local diff = ", "")  ## CLEAN UP
                         self.file = self.file.replace("return diff", "")  ## CLEAN UP
                     except FileNotFoundError:
@@ -141,9 +127,7 @@ class DCSWorldParser(jdi.JDinterface):
 
                         button_map = self.create_joystick_map(dictionary_2)
 
-                        self.update_joystick_dictionary(
-                            joystick_device, profile, False, button_map
-                        )
+                        self.update_joystick_dictionary(joystick_device, profile, False, button_map)
         return self.joystick_dictionary
 
     def create_joystick_map(self, data):
@@ -209,7 +193,7 @@ class DCSWorldParser(jdi.JDinterface):
             return t
 
         def t_STRING(t):  # pylint: disable=invalid-name
-            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\s]+\""
+            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\s]+\" "
             t.value = t.value[1:-1]
             return t
 

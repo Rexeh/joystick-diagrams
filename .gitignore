@@ -17,3 +17,4 @@ play*.py
 tests/__pycache__/*.pyc
 *.ui
 *.bat
+.coverage

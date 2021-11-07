@@ -4,9 +4,7 @@ import joystick_diagrams.adaptors.star_citizen as sc
 
 class TestSCParserCases(unittest.TestCase):
     def setUp(self):
-        self.file = sc.StarCitizen(
-            "./tests/data/star_citizen/layout_all_exported_valid.xml"
-        )
+        self.file = sc.StarCitizen("./tests/data/star_citizen/layout_all_exported_valid.xml")
         self.file.devices = {
             "js1": {"guid": "0000000", "name": "Joystick"},
             "kb1": {"guid": "1111111", "name": "Keyboard"},
@@ -68,9 +66,7 @@ class TestSCParserCases(unittest.TestCase):
         self.assertEqual(data, ({"guid": "0000000", "name": "Joystick"}, "AXIS_x"))
 
         data = self.file.parse_map("js1_slider1")
-        self.assertEqual(
-            data, ({"guid": "0000000", "name": "Joystick"}, "AXIS_SLIDER_1")
-        )
+        self.assertEqual(data, ({"guid": "0000000", "name": "Joystick"}, "AXIS_SLIDER_1"))
 
     def test_bind_no_device(self):
         data = self.file.parse_map("abc_hat1_up")

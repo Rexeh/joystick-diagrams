@@ -133,16 +133,9 @@ class JoystickGremlin(jdi.JDinterface):
     def extract_buttons(self):
         for i in self.buttons:
             if i.getAttribute("description") != "":
-                self.button_array.update(
-                    {
-                        "BUTTON_"
-                        + str(i.getAttribute("id")): str(i.getAttribute("description"))
-                    }
-                )
+                self.button_array.update({"BUTTON_" + str(i.getAttribute("id")): str(i.getAttribute("description"))})
             else:
-                self.button_array.update(
-                    {"BUTTON_" + str(i.getAttribute("id")): self.no_bind_text}
-                )
+                self.button_array.update({"BUTTON_" + str(i.getAttribute("id")): self.no_bind_text})
         return self.button_array
 
     def extract_hats(self):
@@ -174,21 +167,19 @@ class JoystickGremlin(jdi.JDinterface):
 
                         if position.getElementsByTagName("description"):
                             # Ignore more than 1 description. always use first
-                            hat_direction_description = position.getElementsByTagName(
+                            hat_direction_description = position.getElementsByTagName("description")[0].getAttribute(
                                 "description"
-                            )[0].getAttribute("description")
+                            )
                         else:
                             hat_direction_description = hat_description
 
-                        helper.log(
-                            "POV Position: {}".format(self.position_map[pos]), "debug"
-                        )
+                        helper.log("POV Position: {}".format(self.position_map[pos]), "debug")
 
                         self.button_array.update(
                             {
-                                "POV_{ID}_{DIR}".format(
-                                    ID=i.getAttribute("id"), DIR=self.position_map[pos]
-                                ): str(hat_direction_description)
+                                "POV_{ID}_{DIR}".format(ID=i.getAttribute("id"), DIR=self.position_map[pos]): str(
+                                    hat_direction_description
+                                )
                             }
                         )
 

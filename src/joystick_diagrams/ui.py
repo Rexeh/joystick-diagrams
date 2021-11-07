@@ -154,9 +154,7 @@ class Ui_MainWindow(object):
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
         MainWindow.setPalette(palette)
         icon = QtGui.QIcon()
-        icon.addPixmap(
-            QtGui.QPixmap("images/logo.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off
-        )
+        icon.addPixmap(QtGui.QPixmap("images/logo.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setAutoFillBackground(True)
         MainWindow.setStyleSheet('font: 75 12pt "Arial";')
@@ -390,9 +388,7 @@ class Ui_MainWindow(object):
             "}"
         )
         self.jg_profile_list.setAlternatingRowColors(False)
-        self.jg_profile_list.setSelectionMode(
-            QtWidgets.QAbstractItemView.MultiSelection
-        )
+        self.jg_profile_list.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.jg_profile_list.setObjectName("jg_profile_list")
         item = QtWidgets.QListWidgetItem()
         self.jg_profile_list.addItem(item)
@@ -410,9 +406,7 @@ class Ui_MainWindow(object):
         self.jg_available_profiles_label.setObjectName("jg_available_profiles_label")
         self.jg_select_profile_button = QtWidgets.QPushButton(self.jg_tab)
         self.jg_select_profile_button.setGeometry(QtCore.QRect(20, 60, 261, 23))
-        self.jg_select_profile_button.setStyleSheet(
-            "color:white;\n" "border: 1px solid white;"
-        )
+        self.jg_select_profile_button.setStyleSheet("color:white;\n" "border: 1px solid white;")
         self.jg_select_profile_button.setObjectName("jg_select_profile_button")
         self.label = QtWidgets.QLabel(self.jg_tab)
         self.label.setGeometry(QtCore.QRect(20, 29, 221, 20))
@@ -443,9 +437,7 @@ class Ui_MainWindow(object):
         self.dcs_world_label.setObjectName("dcs_world_label")
         self.dcs_directory_select_button = QtWidgets.QPushButton(self.dcs_tab)
         self.dcs_directory_select_button.setGeometry(QtCore.QRect(20, 80, 261, 23))
-        self.dcs_directory_select_button.setStyleSheet(
-            "color:white;\n" "border: 1px solid white;"
-        )
+        self.dcs_directory_select_button.setStyleSheet("color:white;\n" "border: 1px solid white;")
         self.dcs_directory_select_button.setObjectName("dcs_directory_select_button")
         self.dcs_saved_games_label = QtWidgets.QLabel(self.dcs_tab)
         self.dcs_saved_games_label.setGeometry(QtCore.QRect(20, 50, 261, 20))
@@ -464,9 +456,7 @@ class Ui_MainWindow(object):
             "color: white\n"
             "}"
         )
-        self.dcs_profiles_list.setSelectionMode(
-            QtWidgets.QAbstractItemView.MultiSelection
-        )
+        self.dcs_profiles_list.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.dcs_profiles_list.setObjectName("dcs_profiles_list")
         item = QtWidgets.QListWidgetItem()
         self.dcs_profiles_list.addItem(item)
@@ -490,9 +480,7 @@ class Ui_MainWindow(object):
         self.dcs_easy_mode_checkbox.setObjectName("dcs_easy_mode_checkbox")
         self.dcs_selected_directory_label = QtWidgets.QLabel(self.dcs_tab)
         self.dcs_selected_directory_label.setGeometry(QtCore.QRect(20, 150, 261, 20))
-        self.dcs_selected_directory_label.setStyleSheet(
-            "font-size: 11px;\n" "color:white;"
-        )
+        self.dcs_selected_directory_label.setStyleSheet("font-size: 11px;\n" "color:white;")
         self.dcs_selected_directory_label.setObjectName("dcs_selected_directory_label")
         self.label_10 = QtWidgets.QLabel(self.dcs_tab)
         self.label_10.setEnabled(True)
@@ -566,12 +554,8 @@ class Ui_MainWindow(object):
         self.export_button.setChecked(False)
         self.export_button.setFlat(False)
         self.export_button.setObjectName("export_button")
-        self.application_information_textbrowser = QtWidgets.QTextBrowser(
-            self.centralwidget
-        )
-        self.application_information_textbrowser.setGeometry(
-            QtCore.QRect(40, 550, 521, 71)
-        )
+        self.application_information_textbrowser = QtWidgets.QTextBrowser(self.centralwidget)
+        self.application_information_textbrowser.setGeometry(QtCore.QRect(40, 550, 521, 71))
         self.application_information_textbrowser.setTextInteractionFlags(
             QtCore.Qt.LinksAccessibleByKeyboard
             | QtCore.Qt.LinksAccessibleByMouse
@@ -579,9 +563,7 @@ class Ui_MainWindow(object):
             | QtCore.Qt.TextSelectableByKeyboard
             | QtCore.Qt.TextSelectableByMouse
         )
-        self.application_information_textbrowser.setObjectName(
-            "application_information_textbrowser"
-        )
+        self.application_information_textbrowser.setObjectName("application_information_textbrowser")
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
         self.label_8.setGeometry(QtCore.QRect(10, 580, 31, 16))
         self.label_8.setStyleSheet("color: white;")
@@ -610,9 +592,7 @@ class Ui_MainWindow(object):
             "}"
         )
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(
-            QtGui.QPixmap("images/donate.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off
-        )
+        icon4.addPixmap(QtGui.QPixmap("images/donate.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.donate_button.setIcon(icon4)
         self.donate_button.setIconSize(QtCore.QSize(30, 30))
         self.donate_button.setObjectName("donate_button")
@@ -635,9 +615,7 @@ class Ui_MainWindow(object):
             "}"
         )
         icon5 = QtGui.QIcon()
-        icon5.addPixmap(
-            QtGui.QPixmap("images/discord.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off
-        )
+        icon5.addPixmap(QtGui.QPixmap("images/discord.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.discord_button.setIcon(icon5)
         self.discord_button.setIconSize(QtCore.QSize(30, 30))
         self.discord_button.setObjectName("discord_button")
@@ -654,9 +632,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(
-            _translate("MainWindow", "Joystick Diagrams - V1.1.0")
-        )
+        MainWindow.setWindowTitle(_translate("MainWindow", "Joystick Diagrams - V1.1.0"))
         __sortingEnabled = self.jg_profile_list.isSortingEnabled()
         self.jg_profile_list.setSortingEnabled(False)
         item = self.jg_profile_list.item(0)
@@ -670,28 +646,18 @@ class Ui_MainWindow(object):
         item = self.jg_profile_list.item(4)
         item.setText(_translate("MainWindow", "FA18-C"))
         self.jg_profile_list.setSortingEnabled(__sortingEnabled)
-        self.jg_available_profiles_label.setText(
-            _translate("MainWindow", "Available Profiles")
-        )
-        self.jg_select_profile_button.setText(
-            _translate("MainWindow", "Select your profile file")
-        )
+        self.jg_available_profiles_label.setText(_translate("MainWindow", "Available Profiles"))
+        self.jg_select_profile_button.setText(_translate("MainWindow", "Select your profile file"))
         self.label.setText(_translate("MainWindow", "Select your .XML profile "))
-        self.jg_option_inherit_checkbox.setText(
-            _translate("MainWindow", "Inherit Joystick Binds from Parents")
-        )
+        self.jg_option_inherit_checkbox.setText(_translate("MainWindow", "Inherit Joystick Binds from Parents"))
         self.label_11.setText(_translate("MainWindow", "Settings"))
         self.parser_selector.setTabText(
             self.parser_selector.indexOf(self.jg_tab),
             _translate("MainWindow", "Joystick Gremlin"),
         )
         self.dcs_world_label.setText(_translate("MainWindow", "DCS World Directory"))
-        self.dcs_directory_select_button.setText(
-            _translate("MainWindow", "Select your installation")
-        )
-        self.dcs_saved_games_label.setText(
-            _translate("MainWindow", "This should be your Saved Games/DCS folder")
-        )
+        self.dcs_directory_select_button.setText(_translate("MainWindow", "Select your installation"))
+        self.dcs_saved_games_label.setText(_translate("MainWindow", "This should be your Saved Games/DCS folder"))
         __sortingEnabled = self.dcs_profiles_list.isSortingEnabled()
         self.dcs_profiles_list.setSortingEnabled(False)
         item = self.dcs_profiles_list.item(0)
@@ -706,9 +672,7 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "F-14B_Rio"))
         self.dcs_profiles_list.setSortingEnabled(__sortingEnabled)
         self.label_7.setText(_translate("MainWindow", "Available DCS Profiles"))
-        self.dcs_easy_mode_checkbox.setText(
-            _translate("MainWindow", 'Exclude "Easy" Mode Profiles')
-        )
+        self.dcs_easy_mode_checkbox.setText(_translate("MainWindow", 'Exclude "Easy" Mode Profiles'))
         self.dcs_selected_directory_label.setText(_translate("MainWindow", "c:test"))
         self.label_10.setText(_translate("MainWindow", "Settings"))
         self.parser_selector.setTabText(
@@ -716,35 +680,23 @@ class Ui_MainWindow(object):
             _translate("MainWindow", "DCS World"),
         )
         self.sc_label.setText(_translate("MainWindow", "Star Citizen Config"))
-        self.sc_description_label.setText(
-            _translate("MainWindow", "Select your .XML config for Star Citizen")
-        )
-        self.sc_select_button.setText(
-            _translate("MainWindow", "Select your config file")
-        )
+        self.sc_description_label.setText(_translate("MainWindow", "Select your .XML config for Star Citizen"))
+        self.sc_select_button.setText(_translate("MainWindow", "Select your config file"))
         self.parser_selector.setTabText(
             self.parser_selector.indexOf(self.sc_tab),
             _translate("MainWindow", "Star Citizen"),
         )
-        self.label_2.setText(
-            _translate(
-                "MainWindow", "Do you have a game/tool you want to see included?"
-            )
-        )
+        self.label_2.setText(_translate("MainWindow", "Do you have a game/tool you want to see included?"))
         self.label_3.setText(
             _translate(
                 "MainWindow",
                 '<html><head/><body><p>Raise an issue on Github - <a href="https://github.com/Rexeh/joystick-diagrams"><span style=" text-decoration: underline; color:#0000ff;">https://github.com/Rexeh/joystick-diagrams</span></a></p></body></html>',
             )
         )
-        self.parser_selector.setTabText(
-            self.parser_selector.indexOf(self.tab), _translate("MainWindow", "+")
-        )
+        self.parser_selector.setTabText(self.parser_selector.indexOf(self.tab), _translate("MainWindow", "+"))
         self.title_label.setText(_translate("MainWindow", "Joystick Diagrams"))
         self.export_button.setText(_translate("MainWindow", "Export Joystick Profiles"))
-        self.application_information_textbrowser.setDocumentTitle(
-            _translate("MainWindow", "Testsd")
-        )
+        self.application_information_textbrowser.setDocumentTitle(_translate("MainWindow", "Testsd"))
         self.application_information_textbrowser.setHtml(
             _translate(
                 "MainWindow",

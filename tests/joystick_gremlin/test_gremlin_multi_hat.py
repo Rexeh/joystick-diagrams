@@ -30,9 +30,7 @@ class TestGremlinMultipleHats(unittest.TestCase):
     }
 
     def setUp(self):
-        self.file = gremlin.JoystickGremlin(
-            "./tests/data/joystick_gremlin/gremlin_pov_multi.xml"
-        )
+        self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_pov_multi.xml")
 
     def test_pov_multi_hats(self):
         self.maxDiff = None

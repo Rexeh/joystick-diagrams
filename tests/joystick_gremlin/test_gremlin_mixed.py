@@ -88,9 +88,7 @@ class TestGremlin_Mixed(unittest.TestCase):
     }
 
     def setUp(self):
-        self.file = gremlin.JoystickGremlin(
-            "./tests/data/joystick_gremlin/gremlin_inherit_no_inherit.xml"
-        )
+        self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_inherit_no_inherit.xml")
 
     def test_number_devices(self):
         self.assertEqual(2, self.file.get_device_count())

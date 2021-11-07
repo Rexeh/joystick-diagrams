@@ -26,9 +26,7 @@ class JDinterface:
                         "debug",
                     )
                     helper.log(
-                        "Profile inherits from {}".format(
-                            self.joystick_dictionary[item][profile]["Inherit"]
-                        ),
+                        "Profile inherits from {}".format(self.joystick_dictionary[item][profile]["Inherit"]),
                         "debug",
                     )
                     inherit = self.joystick_dictionary[item][profile]["Inherit"]
@@ -38,29 +36,16 @@ class JDinterface:
                         "debug",
                     )
                     helper.log(
-                        "Starting Profile Contains {}".format(
-                            self.joystick_dictionary[item][profile]["Buttons"]
-                        ),
+                        "Starting Profile Contains {}".format(self.joystick_dictionary[item][profile]["Buttons"]),
                         "debug",
                     )
                     for button, desc in inherited_profile["Buttons"].items():
-                        check_button = (
-                            button in self.joystick_dictionary[item][profile]["Buttons"]
-                        )
+                        check_button = button in self.joystick_dictionary[item][profile]["Buttons"]
                         if not check_button:
-                            self.joystick_dictionary[item][profile]["Buttons"].update(
-                                {button: desc}
-                            )
-                        elif (
-                            self.joystick_dictionary[item][profile]["Buttons"][button]
-                            == self.no_bind_text
-                        ):
-                            self.joystick_dictionary[item][profile]["Buttons"][
-                                button
-                            ] = desc
+                            self.joystick_dictionary[item][profile]["Buttons"].update({button: desc})
+                        elif self.joystick_dictionary[item][profile]["Buttons"][button] == self.no_bind_text:
+                            self.joystick_dictionary[item][profile]["Buttons"][button] = desc
                     helper.log(
-                        "Ending Profile Contains {}".format(
-                            self.joystick_dictionary[item][profile]["Buttons"]
-                        ),
+                        "Ending Profile Contains {}".format(self.joystick_dictionary[item][profile]["Buttons"]),
                         "debug",
                     )

@@ -5,19 +5,77 @@ description = ""
 authors = ["Robert Cox"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-pytest = "^6.2.5"
+python = "^3.7"
 PyQt5 = "^5.15.6"
 ply = "^3.11"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
 pytest-qt = "^4.0.2"
 pytest-cov = "^3.0.0"
 black = "^21.10b0"
 pre-commit = "^2.15.0"
 coveralls = "^3.3.0"
 pylint = "^2.11.1"
+cx-Freeze = "^6.8.1"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.scripts]
+build-exe = "build:setup"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.paths]
+source = ["src/", "*/site-packages/"]
+
+[tool.coverage.run]
+omit = [".*", "*/site-packages/*"]
+
+[tool.coverage.report]
+fail_under = 80
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    'if __name__ == "__main__":']
+
+[tool.black]
+line-length = 120
+target-version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.basic]
+variable-rgx = "[a-z_][a-z0-9_]{0,30}$"
+
+[tool.pylint.global]
+extension-pkg-whitelist="PyQt5"
+# ignoring missing module and missing class docstring errors
+disable = ["C0114", "C0115","W1201","W1202","logging-fstring-interpolation"]
+output-format = "colorized"

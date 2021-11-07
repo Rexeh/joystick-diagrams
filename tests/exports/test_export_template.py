@@ -59,19 +59,13 @@ class TestExport_Template(unittest.TestCase):
         self.assertEqual(len(os.listdir(self.template.name + "/new/")), 2)
 
     def test_unused_strings_replaced(self):
-        data = self.exporter.replace_unused_strings(
-            "<Item>BUTTON_26</Item>Some Text - Some more Text BUTTON_87"
-        )
+        data = self.exporter.replace_unused_strings("<Item>BUTTON_26</Item>Some Text - Some more Text BUTTON_87")
         self.assertEqual(data, "<Item>No Bind</Item>Some Text - Some more Text No Bind")
 
     def test_unused_strings_replaced_custom_text(self):
         self.exporter.no_bind_text = "OVERRIDE"
-        data = self.exporter.replace_unused_strings(
-            "<Item>BUTTON_26</Item>Some Text - Some more Text BUTTON_87"
-        )
-        self.assertEqual(
-            data, "<Item>OVERRIDE</Item>Some Text - Some more Text OVERRIDE"
-        )
+        data = self.exporter.replace_unused_strings("<Item>BUTTON_26</Item>Some Text - Some more Text BUTTON_87")
+        self.assertEqual(data, "<Item>OVERRIDE</Item>Some Text - Some more Text OVERRIDE")
 
     def test_string_replacement(self):
         data = self.exporter.replace_template_strings(
@@ -95,9 +89,7 @@ class TestExport_Template(unittest.TestCase):
 
     def test_branding_replace(self):
         self.exporter.no_bind_text = "OVERRIDE"
-        data = self.exporter.brand_template(
-            "ABC 123 -/12-a", "<XML><SOME><STUFF><TEMPLATE_NAME></XML>"
-        )
+        data = self.exporter.brand_template("ABC 123 -/12-a", "<XML><SOME><STUFF><TEMPLATE_NAME></XML>")
         self.assertEqual(data, "<XML><SOME><STUFF><ABC 123 -/12-a></XML>")
 
     def test_get_template_success(self):

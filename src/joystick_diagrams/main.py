@@ -40,9 +40,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             )
         )
         self.discord_button.clicked.connect(
-            lambda: QtGui.QDesktopServices.openUrl(
-                QtCore.QUrl("https://discord.gg/G8nRUS2")
-            )
+            lambda: QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://discord.gg/G8nRUS2"))
         )
 
         # JG UI Setup
@@ -79,13 +77,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def easy_mode_checkbox_action(self):
         if self.dcs_parser_instance:
-            self.dcs_parser_instance.remove_easy_modes = (
-                self.dcs_easy_mode_checkbox.isChecked()
-            )
+            self.dcs_parser_instance.remove_easy_modes = self.dcs_easy_mode_checkbox.isChecked()
             self.dcs_profiles_list.clear()
-            self.dcs_profiles_list.addItems(
-                self.dcs_parser_instance.get_validated_profiles()
-            )
+            self.dcs_profiles_list.addItems(self.dcs_parser_instance.get_validated_profiles())
 
     def clear_info(self):
         self.application_information_textbrowser.clear()
@@ -125,9 +119,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             )
             self.print_to_info("Succesfully loaded DCS profiles")
             self.enable_profile_load_button(self.dcs_directory_select_button)
-            self.dcs_selected_directory_label.setText(
-                "in {}".format(self.dcs_directory)
-            )
+            self.dcs_selected_directory_label.setText("in {}".format(self.dcs_directory))
             self.export_button.setEnabled(1)
         except Exception:
             self.disable_profile_load_button(self.dcs_directory_select_button)
@@ -136,9 +128,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             raise
         else:
             self.dcs_profiles_list.clear()
-            self.dcs_profiles_list.addItems(
-                self.dcs_parser_instance.get_validated_profiles()
-            )
+            self.dcs_profiles_list.addItems(self.dcs_parser_instance.get_validated_profiles())
 
     def set_sc_file(self):
         self.clear_info()
@@ -200,9 +190,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 profiles = []
                 for item in selected_profiles:
                     profiles.append(item.text())
-                self.print_to_info(
-                    "Exporting the following profile(s): {}".format(profiles)
-                )
+                self.print_to_info("Exporting the following profile(s): {}".format(profiles))
                 data = self.jg_parser_instance.create_dictionary(profiles)
             else:
                 data = self.jg_parser_instance.create_dictionary()
@@ -213,9 +201,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 profiles = []
                 for item in selected_profiles:
                     profiles.append(item.text())
-                self.print_to_info(
-                    "Exporting the following profile(s): {}".format(profiles)
-                )
+                self.print_to_info("Exporting the following profile(s): {}".format(profiles))
                 data = self.dcs_parser_instance.process_profiles(profiles)
             else:
                 data = self.dcs_parser_instance.process_profiles()

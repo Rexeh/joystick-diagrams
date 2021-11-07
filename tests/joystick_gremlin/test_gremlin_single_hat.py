@@ -26,9 +26,7 @@ class TestGremlin_Single_Hat(unittest.TestCase):
     }
 
     def setUp(self):
-        self.file = gremlin.JoystickGremlin(
-            "./tests/data/joystick_gremlin/gremlin_pov_single.xml"
-        )
+        self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_pov_single.xml")
 
     def test_pov_single_8_way(self):
         self.maxDiff = None

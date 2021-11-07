@@ -37,9 +37,7 @@ class Export:
                 for mode in self.joystick_listing[joystick]:
                     write_template = base_template
                     print("Replacing Strings")
-                    completed_template = self.replace_template_strings(
-                        joystick, mode, write_template
-                    )
+                    completed_template = self.replace_template_strings(joystick, mode, write_template)
                     print("Replacing Unused String")
                     completed_template = self.replace_unused_strings(completed_template)
                     print("Branding")
@@ -47,14 +45,9 @@ class Export:
                     print("Saving: {}".format(joystick))
                     self.save_template(joystick, mode, completed_template)
                     if isinstance(progress_bar, QtWidgets.QProgressBar):
-                        progress_bar.setValue(
-                            progress_bar.value()
-                            + (progress_increment / progress_increment_modes)
-                        )
+                        progress_bar.setValue(progress_bar.value() + (progress_increment / progress_increment_modes))
             else:
-                self.error_bucket.append(
-                    "No Template file found for: {}".format(joystick)
-                )
+                self.error_bucket.append("No Template file found for: {}".format(joystick))
 
             if isinstance(progress_bar, QtWidgets.QProgressBar):
                 progress_bar.setValue(progress_bar.value() + progress_increment)
@@ -78,23 +71,13 @@ class Export:
     def get_template(self, joystick):
         joystick = joystick.strip()
         if path.exists(self.templates_directory + joystick + ".svg"):
-            data = Path(
-                os.path.join(self.templates_directory, joystick + ".svg")
-            ).read_text(encoding="utf-8")
+            data = Path(os.path.join(self.templates_directory, joystick + ".svg")).read_text(encoding="utf-8")
             return data
         else:
             return False
 
     def save_template(self, joystick, mode, template):
-        output_path = (
-            self.export_directory
-            + self.executor
-            + "_"
-            + joystick.strip()
-            + "_"
-            + mode
-            + ".svg"
-        )
+        output_path = self.export_directory + self.executor + "_" + joystick.strip() + "_" + mode + ".svg"
         if not os.path.exists(self.export_directory):
             self.create_directory(self.export_directory)
         try:
@@ -125,9 +108,7 @@ class Export:
             if value == "NO BIND":
                 value = self.no_bind_text
             regex_search = "\\b" + button + "\\b"
-            template = re.sub(
-                regex_search, html.escape(value), template, flags=re.IGNORECASE
-            )
+            template = re.sub(regex_search, html.escape(value), template, flags=re.IGNORECASE)
         return template
 
     def brand_template(self, title, template):

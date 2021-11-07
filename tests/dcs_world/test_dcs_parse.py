@@ -5,9 +5,7 @@ import pprint
 
 class TestDCS_Parse_Test(unittest.TestCase):
     def setUp(self):
-        self.dcs_instance = dcs.DCSWorldParser(
-            "./tests/data/dcs_world/valid_dcs_world_directory"
-        )
+        self.dcs_instance = dcs.DCSWorldParser("./tests/data/dcs_world/valid_dcs_world_directory")
         self.maxDiff = None
 
     def test_no_profiles_selected_no_easy(self):

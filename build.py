@@ -1,19 +1,19 @@
 import pathlib
 import sys
-import src.version as ver
+import joystick_diagrams.version as ver
 from setuptools import find_packages
 from cx_Freeze import setup, Executable
 
-## Import SRC
-sys.path.insert(0, "./src")
 
 ver = ver.VERSION
 here = pathlib.Path(__file__).parent.resolve()
 base = None
+targetName = "joystick_diagrams"
 long_description = (here / "readme.md").read_text(encoding="utf-8")
 
 if sys.platform == "win32":
     base = "Win32GUI"
+    targetName = "joystick_diagrams.exe"
 
 build_options = {
     "include_files": [
@@ -57,9 +57,10 @@ setup(
     options={"build_exe": build_options},
     executables=[
         Executable(
-            "./src/joystick_diagrams.py",
+            "src/joystick_diagrams/main.py",
             base=base,
-            icon="./images/logo.ico",
+            target_name=targetName,
+            icon=pathlib.Path("images", "logo.ico"),
             copyright="Robert Cox - joystick-diagrams.com",
         )
     ],

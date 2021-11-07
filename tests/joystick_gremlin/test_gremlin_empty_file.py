@@ -7,9 +7,7 @@ class TestGremlin_No_Devices(unittest.TestCase):
     no_inherit_expected = {}
 
     def setUp(self):
-        self.file = gremlin.JoystickGremlin(
-            "./tests/data/joystick_gremlin/gremlin_no_devices.xml"
-        )
+        self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_no_devices.xml")
 
     def test_number_devices(self):
         self.assertEqual(0, self.file.get_device_count())
