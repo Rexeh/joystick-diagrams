@@ -2,8 +2,10 @@
 import os
 from pathlib import Path
 from xml.dom import minidom
-import joystick_diagrams.functions.helper as helper
+import logging
 import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
+
+_logger = logging.getLogger(__name__)
 
 
 class StarCitizen(jdi.JDinterface):
@@ -473,7 +475,7 @@ class StarCitizen(jdi.JDinterface):
             "zoom_out": "z_zoom_out",
         }
 
-    def __load_file(self):
+    def __load_file(self) -> str:
         if os.path.exists(self.file_path):
             if (os.path.splitext(self.file_path))[1] == ".xml":
                 data = Path(self.file_path).read_text(encoding="utf-8")
@@ -488,7 +490,7 @@ class StarCitizen(jdi.JDinterface):
         else:
             raise FileNotFoundError("File not found")
 
-    def __validate_file(self, data):
+    def __validate_file(self, data) -> bool:
         try:
             parsed_xml = minidom.parseString(data)
         except ValueError:
@@ -500,15 +502,15 @@ class StarCitizen(jdi.JDinterface):
                 and len(parsed_xml.getElementsByTagName("actionmap")) > 0
             ):
                 return True
-            else:
-                raise Exception
 
-    def parse_map(self, bind_map):
+            raise Exception
+
+    def parse_map(self, bind_map) -> tuple:
         segments = bind_map.split("_")
-        helper.log("Bind Information: {}".format(segments), "debug")
+        _logger.debug("Bind Information: {}".format(segments))
         bind_device = segments[0]
         device_object = self.get_stored_device(bind_device)
-        helper.log("Device: {}".format(device_object), "debug")
+        _logger.debug("Device: {}".format(device_object))
         if device_object is None:
             c_map = None
             return (device_object, c_map)
@@ -544,24 +546,24 @@ class StarCitizen(jdi.JDinterface):
         # Future for str replacements
         pass
 
-    def convert_hat_format(self, hat):
-        helper.log("Convert Hat: {}".format(hat), "debug")
+    def convert_hat_format(self, hat) -> str:
+        _logger.debug("Convert Hat: {}".format(hat))
         return self.hat_formats[hat]
 
-    def extract_device_information(self, option):
+    def extract_device_information(self, option) -> dict:
         """Accepts parsed OPTION from Star Citizen XML"""
         name = (option.getAttribute("Product")[0 : (len(option.getAttribute("Product")) - 38)]).strip()
         guid = option.getAttribute("Product")[-37:-2]  # GUID Fixed
         return {"name": name, "guid": guid}
 
-    def get_stored_device(self, device):
+    def get_stored_device(self, device) -> dict:
 
         if device in self.devices:
             return self.devices[device]
         else:
             return None
 
-    def add_device(self, option):
+    def add_device(self, option) -> None:
         """Accepts parsed OPTION from Star Citizen XML"""
         self.devices.update(
             {
@@ -570,10 +572,10 @@ class StarCitizen(jdi.JDinterface):
                 ): self.extract_device_information(option)
             }
         )
-        helper.log("Device List: {}".format(self.devices), "debug")
+        _logger.debug("Device List: {}".format(self.devices))
 
-    def process_name(self, name):
-        helper.log("Bind Name: {}".format(name), "debug")
+    def process_name(self, name) -> str:
+        _logger.debug("Bind Name: {}".format(name))
 
         # Set Custom Labels
         if name in self.customLabels:
@@ -585,13 +587,13 @@ class StarCitizen(jdi.JDinterface):
         else:
             return (" ".join(name[1:])).capitalize()
 
-    def build_button_map(self, device, button, name):
+    def build_button_map(self, device, button, name) -> dict:
         if device in self.button_array:
             self.button_array[device].update({button: name})
         else:
             self.button_array.update({device: {button: name}})
 
-    def device_id(self, device_type, instance):
+    def device_id(self, device_type, instance) -> str:
         if device_type == "keyboard":
             device_code = "kb"
         elif device_type == "joystick":
@@ -600,7 +602,7 @@ class StarCitizen(jdi.JDinterface):
             device_code = "mo"  ## Catch all for now
         return "{type}{instance}".format(type=device_code, instance=instance)
 
-    def parse(self):
+    def parse(self) -> dict:
         parse = minidom.parseString(self.data)
         joysticks = parse.getElementsByTagName("options")
         for j in joysticks:
@@ -608,21 +610,18 @@ class StarCitizen(jdi.JDinterface):
         actions = parse.getElementsByTagName("actionmap")
 
         for i in actions:
-            helper.log(
-                "Bind Category: {}".format(self.process_name(i.getAttribute("name"))),
-                "debug",
-            )
+            _logger.debug("Bind Category: {}".format(self.process_name(i.getAttribute("name"))))
             single_actions = i.getElementsByTagName("action")
             for action in single_actions:
                 name = self.process_name(action.getAttribute("name"))
                 binds = action.getElementsByTagName("rebind")
-                helper.log("Binds in group: {}".format(binds), "debug")
+                _logger.debug("Binds in group: {}".format(binds))
                 for bind in binds:
                     bind = bind.getAttribute("input")
                     button = self.parse_map(bind)
-                    helper.log("Parsed Control: {}".format(button), "debug")
+                    _logger.debug("Parsed Control: {}".format(button))
                     if button and button[1] is not None:
-                        helper.log("Valid button, adding to map", "debug")
+                        _logger.debug("Valid button, adding to map")
                         # Check if the Device exist is already Mapped
                         if button[0]["name"] in self.button_array:
                             # Check if the Button is already Mapped for this Device
@@ -636,9 +635,9 @@ class StarCitizen(jdi.JDinterface):
                         else:
                             # Add Mapping
                             self.build_button_map(button[0]["name"], button[1], name)
-                        helper.log("Button Map is now: {}".format(self.button_array))
+                        _logger.debug("Button Map is now: {}".format(self.button_array))
                     else:
-                        helper.log("Button not valid, skipping", "debug")
+                        _logger.debug("Button not valid, skipping")
 
         for item in self.button_array:
             self.update_joystick_dictionary(item, "Default", False, self.button_array[item])

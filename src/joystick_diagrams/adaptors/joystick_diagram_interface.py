@@ -1,4 +1,6 @@
-import joystick_diagrams.functions.helper as helper
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class JDinterface:
@@ -21,23 +23,13 @@ class JDinterface:
         for item in self.joystick_dictionary:
             for profile in self.joystick_dictionary[item]:
                 if self.joystick_dictionary[item][profile]["Inherit"]:
-                    helper.log(
-                        "{} Profile has inheritance in mode {}".format(item, profile),
-                        "debug",
-                    )
-                    helper.log(
-                        "Profile inherits from {}".format(self.joystick_dictionary[item][profile]["Inherit"]),
-                        "debug",
-                    )
+                    _logger.debug("{} Profile has inheritance in mode {}".format(item, profile))
+                    _logger.debug("Profile inherits from {}".format(self.joystick_dictionary[item][profile]["Inherit"]))
                     inherit = self.joystick_dictionary[item][profile]["Inherit"]
                     inherited_profile = self.joystick_dictionary[item][inherit]
-                    helper.log(
-                        "Inherited Profile Contains {}".format(inherited_profile),
-                        "debug",
-                    )
-                    helper.log(
-                        "Starting Profile Contains {}".format(self.joystick_dictionary[item][profile]["Buttons"]),
-                        "debug",
+                    _logger.debug("Inherited Profile Contains {}".format(inherited_profile))
+                    _logger.debug(
+                        "Starting Profile Contains {}".format(self.joystick_dictionary[item][profile]["Buttons"])
                     )
                     for button, desc in inherited_profile["Buttons"].items():
                         check_button = button in self.joystick_dictionary[item][profile]["Buttons"]
@@ -45,7 +37,6 @@ class JDinterface:
                             self.joystick_dictionary[item][profile]["Buttons"].update({button: desc})
                         elif self.joystick_dictionary[item][profile]["Buttons"][button] == self.no_bind_text:
                             self.joystick_dictionary[item][profile]["Buttons"][button] = desc
-                    helper.log(
-                        "Ending Profile Contains {}".format(self.joystick_dictionary[item][profile]["Buttons"]),
-                        "debug",
+                    _logger.debug(
+                        "Ending Profile Contains {}".format(self.joystick_dictionary[item][profile]["Buttons"])
                     )

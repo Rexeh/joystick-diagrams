@@ -1,18 +1,23 @@
 import sys
 import os
+import logging
+from pathlib import Path
 from PyQt5 import QtWidgets, QtGui, QtCore
 from joystick_diagrams.ui import Ui_MainWindow
-import joystick_diagrams.adaptors.dcs_world as dcs
-import joystick_diagrams.adaptors.joystick_gremlin as jg
-import joystick_diagrams.adaptors.star_citizen as sc
-import joystick_diagrams.classes.export as export
-import joystick_diagrams.functions.helper as helper
-import joystick_diagrams.version as version
+from joystick_diagrams import config, version
+
+from joystick_diagrams.adaptors.dcs_world import DCSWorldParser
+from joystick_diagrams.adaptors.joystick_gremlin import JoystickGremlin
+from joystick_diagrams.adaptors.star_citizen import StarCitizen
+from joystick_diagrams.classes import export
+from joystick_diagrams.functions import helper
+
+_logger = logging.getLogger(__name__)
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.setupUi(self)
         self.set_version()
         # Clean up GUI Defaults
@@ -51,12 +56,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sc_parser_instance = None
         self.sc_select_button.clicked.connect(self.set_sc_file)
 
-    def set_version(self):
+    def set_version(self) -> None:
         version_text = version.VERSION
         self.label_9.setText(version_text)
         self.setWindowTitle("Joystick Diagrams - V" + version_text)
 
-    def change_export_button(self):
+    def change_export_button(self) -> None:
         if self.parser_selector.currentIndex() == 0:
             if self.jg_parser_instance:
                 self.export_button.setEnabled(1)
@@ -75,22 +80,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.export_button.setDisabled(1)
 
-    def easy_mode_checkbox_action(self):
+    def easy_mode_checkbox_action(self) -> None:
         if self.dcs_parser_instance:
             self.dcs_parser_instance.remove_easy_modes = self.dcs_easy_mode_checkbox.isChecked()
             self.dcs_profiles_list.clear()
             self.dcs_profiles_list.addItems(self.dcs_parser_instance.get_validated_profiles())
 
-    def clear_info(self):
+    def clear_info(self) -> None:
         self.application_information_textbrowser.clear()
 
-    def enable_profile_load_button(self, button):
+    def enable_profile_load_button(self, button) -> None:
         button.setStyleSheet("background: #007acc; color: white;")
 
-    def disable_profile_load_button(self, button):
+    def disable_profile_load_button(self, button) -> None:
         button.setStyleSheet("color:white; border: 1px solid white;")
 
-    def print_to_info(self, error_text):
+    def print_to_info(self, error_text) -> None:
         self.application_information_textbrowser.append(error_text)
         self.application_information_textbrowser.verticalScrollBar().setValue(
             self.application_information_textbrowser.verticalScrollBar().maximum()
@@ -114,7 +119,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def load_dcs_directory(self):
         try:
             self.dcs_profiles_list.clear()
-            self.dcs_parser_instance = dcs.DCSWorldParser(
+            self.dcs_parser_instance = DCSWorldParser(
                 self.dcs_directory, easy_modes=self.dcs_easy_mode_checkbox.isChecked()
             )
             self.print_to_info("Succesfully loaded DCS profiles")
@@ -140,9 +145,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.print_to_info("No File Selected")
 
-    def load_sc_file(self):
+    def load_sc_file(self) -> None:
         try:
-            self.sc_parser_instance = sc.StarCitizen(self.sc_file)
+            self.sc_parser_instance = StarCitizen(self.sc_file)
             self.enable_profile_load_button(self.sc_select_button)
             self.export_button.setEnabled(1)
             self.print_to_info("Succesfully loaded Star Citizen profile")
@@ -152,7 +157,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.sc_file = None
             self.print_to_info("Error Loading File: {}".format(e))
 
-    def set_jg_file(self):
+    def set_jg_file(self) -> None:
         self.jg_file = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Select Joystick Gremlin Config file",
@@ -170,7 +175,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def load_jg_file(self):
         try:
-            self.jg_parser_instance = jg.JoystickGremlin(self.jg_file)
+            self.jg_parser_instance = JoystickGremlin(self.jg_file)
             self.jg_devices = self.jg_parser_instance.get_device_names()
             self.jg_modes = self.jg_parser_instance.get_modes()
             self.enable_profile_load_button(self.jg_select_profile_button)
@@ -181,7 +186,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.disable_profile_load_button(self.jg_select_profile_button)
             self.jg_profile_list.clear()
             self.export_button.setEnabled(0)
-            raise Exception(e)
+            raise e
 
     def export_profiles(self):
         if self.parser_selector.currentIndex() == 0:  ## JOYSTICK GREMLIN
@@ -222,10 +227,46 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for item in success:
             self.print_to_info(item)
         self.print_to_info("Export Finished")
-        helper.log(success, "info")
+        _logger.info(success)
+
+
+def setup_logging() -> None:
+    """Setup basic logging
+
+    Args:
+      loglevel (int): minimum loglevel for emitting messages
+    """
+
+    log_dir = Path("logs")
+    log_file = Path("jv.log")
+    log_file_location = Path.joinpath(log_dir, log_file)
+
+    logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
+
+    if not Path.exists(log_dir):
+        Path.mkdir(log_dir)
+
+    logging.basicConfig(
+        level=get_log_level(),
+        filename=log_file_location,
+        format=logformat,
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+
+def get_log_level() -> str:
+    if config.debugLevel == 1:
+        return "WARNING"
+    if config.debugLevel == 2:
+        return "ERROR"
+    if config.debugLevel == 3:
+        return "DEBUG"
+    return "ERROR"
 
 
 if __name__ == "__main__":
+
+    setup_logging()
 
     try:
         app = QtWidgets.QApplication(sys.argv)

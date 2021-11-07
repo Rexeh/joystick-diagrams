@@ -1,19 +1,18 @@
 import pathlib
 import sys
-import joystick_diagrams.version as ver
 from setuptools import find_packages
 from cx_Freeze import setup, Executable
+import joystick_diagrams.version as ver
 
-
-ver = ver.VERSION
-here = pathlib.Path(__file__).parent.resolve()
-base = None
-targetName = "joystick_diagrams"
-long_description = (here / "readme.md").read_text(encoding="utf-8")
+VER = ver.VERSION
+HERE = pathlib.Path(__file__).parent.resolve()
+BASE = None
+TARGET_NAME: str = "joystick_diagrams"
+LONG_DESC = (HERE / "readme.md").read_text(encoding="utf-8")
 
 if sys.platform == "win32":
-    base = "Win32GUI"
-    targetName = "joystick_diagrams.exe"
+    BASE = "Win32GUI"
+    TARGET_NAME = "joystick_diagrams.exe"
 
 build_options = {
     "include_files": [
@@ -22,7 +21,7 @@ build_options = {
         "./config.cfg",
         "./readme.md",
     ],
-    "excludes": ["tkinter", "test", "http", "email", "distutils", "ssl"],
+    "excludes": ["tkinter", "test", "http", "email", "distutils", "ssl","asyncio","concurrent"],
     "optimize": 2,
 }
 
@@ -30,7 +29,7 @@ setup(
     name="Joystick Diagrams",
     version=ver,
     description="Automatically create diagrams for your throttles, joysticks and custom HID devices",
-    long_description=long_description,
+    long_description=LONG_DESC,
     long_description_content_type="text/markdown",
     url="https://github.com/Rexeh/joystick-diagrams",
     author="Robert Cox",
@@ -58,8 +57,8 @@ setup(
     executables=[
         Executable(
             "src/joystick_diagrams/main.py",
-            base=base,
-            target_name=targetName,
+            base=BASE,
+            target_name=TARGET_NAME,
             icon=pathlib.Path("images", "logo.ico"),
             copyright="Robert Cox - joystick-diagrams.com",
         )

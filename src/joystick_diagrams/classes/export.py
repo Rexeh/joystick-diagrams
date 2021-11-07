@@ -3,9 +3,11 @@ import os
 from pathlib import Path
 import re
 import html
+import logging
 from PyQt5 import QtWidgets
-import joystick_diagrams.config as config
-import joystick_diagrams.functions.helper as helper
+from joystick_diagrams import config
+
+_logger = logging.getLogger(__name__)
 
 
 class Export:
@@ -19,12 +21,12 @@ class Export:
         self.executor = parser_id
         self.error_bucket = []
 
-    def export_config(self, progress_bar=None):
+    def export_config(self, progress_bar=None) -> list:
 
         joystick_count = len(self.joystick_listing)
 
-        helper.log("Export Started with {} joysticks".format(joystick_count), "debug")
-        helper.log("Export Data: {}".format(self.joystick_listing), "debug")
+        _logger.debug("Export Started with {} joysticks".format(joystick_count))
+        _logger.debug("Export Data: {}".format(self.joystick_listing))
 
         if isinstance(progress_bar, QtWidgets.QProgressBar):
             progress_bar.setValue(0)
@@ -56,12 +58,12 @@ class Export:
             progress_bar.setValue(100)
         return self.error_bucket
 
-    def create_directory(self, directory):
+    def create_directory(self, directory) -> bool:
         if not os.path.exists(directory):
             try:
                 return os.makedirs(directory)
             except PermissionError as e:
-                helper.log(e, "error")
+                _logger.error(e)
                 raise
             else:
                 return False
@@ -85,7 +87,7 @@ class Export:
             outputfile.write(template)
             outputfile.close()
         except PermissionError as e:
-            helper.log(e, "error")
+            _logger.error(e)
             raise
 
     def replace_unused_strings(self, template):
