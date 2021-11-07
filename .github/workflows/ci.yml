@@ -1,4 +1,4 @@
-name: Pylint
+name: Linting & Tests
 
 on: [push]
 
@@ -21,4 +21,6 @@ jobs:
         poetry install
     - name: Analysing the code with pylint
       run: |
-        make test
+        make lint
+        make unit-test
+        make fmt
