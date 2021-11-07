@@ -15,4 +15,4 @@ lint:
 	@poetry run pylint --rcfile pyproject.toml src/ tests/
 
 build-exe:
-	@python build.py build
+	@poetry run python build.py build
