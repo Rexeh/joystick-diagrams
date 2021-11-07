@@ -24,11 +24,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install cx-freeze
-        python -m pip install -e .
+        python -m pip install poetry
+        poetry shell
+        poetry install
     - name: Build Package
       run: |
-        python setup.py build
+        make build-exe
     - name: Upload  
       uses: actions/upload-artifact@v2
       with:
