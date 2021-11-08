@@ -1,10 +1,10 @@
 .DEFAULT_GOAL := build-exe
 
-test: lint unit-test fmt
+test: fmt lint unit-test
 
 unit-test:
 	@echo "Running unit tests"
-	@poetry run pytest --cov-report term-missing --cov=src tests/
+	@poetry run pytest -sv --cov-report term-missing --cov=src tests/
 	
 fmt:
 	@echo "Formatting source code"

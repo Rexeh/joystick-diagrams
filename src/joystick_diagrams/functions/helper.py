@@ -1,17 +1,23 @@
+import logging
 from pathlib import Path
 from joystick_diagrams import version
-import logging
 
 _logger = logging.getLogger(__name__)
 
 
-def create_directory(directory):
-    if not Path.exists(directory):
-        return Path.mkdir(directory)
-    else:
-        _logger.error("Failed to create directory: {}".format(directory), "error")
-        return False
+def create_directory(directory) -> None:  # pylint: disable=missing-function-docstring
+
+    try:
+        if not Path(directory).exists():
+            Path(directory).mkdir()
+    except OSError as error:
+        _logger.error(f"Failed to create directory: {directory} with {error}")
 
 
-def getVersion():
+def get_version() -> str:
+    """
+    Returns the current version of the application from Version File
+
+    Returns: String
+    """
     return "Version: " + version.VERSION

@@ -10,12 +10,11 @@ from joystick_diagrams.adaptors.dcs_world import DCSWorldParser
 from joystick_diagrams.adaptors.joystick_gremlin import JoystickGremlin
 from joystick_diagrams.adaptors.star_citizen import StarCitizen
 from joystick_diagrams.classes import export
-from joystick_diagrams.functions import helper
 
 _logger = logging.getLogger(__name__)
 
 
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Refactor pylint: disable=too-many-instance-attributes
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
@@ -57,11 +56,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sc_select_button.clicked.connect(self.set_sc_file)
 
     def set_version(self) -> None:
+        """
+        Set version in UI window
+        """
         version_text = version.VERSION
         self.label_9.setText(version_text)
         self.setWindowTitle("Joystick Diagrams - V" + version_text)
 
     def change_export_button(self) -> None:
+        """
+        UI tab control, prevents export button being enabled
+        for non initialised tabs
+        """
         if self.parser_selector.currentIndex() == 0:
             if self.jg_parser_instance:
                 self.export_button.setEnabled(1)
@@ -81,27 +87,41 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.export_button.setDisabled(1)
 
     def easy_mode_checkbox_action(self) -> None:
+        """
+        DCS World, easy mode selector option.
+
+        Forces reparse of DCS World profiles when checked.
+        """
         if self.dcs_parser_instance:
             self.dcs_parser_instance.remove_easy_modes = self.dcs_easy_mode_checkbox.isChecked()
             self.dcs_profiles_list.clear()
             self.dcs_profiles_list.addItems(self.dcs_parser_instance.get_validated_profiles())
 
     def clear_info(self) -> None:
+        """
+        Clear application log window
+        """
         self.application_information_textbrowser.clear()
 
-    def enable_profile_load_button(self, button) -> None:
+    def enable_profile_load_button(self, button) -> None:  # pylint: disable=missing-function-docstring,no-self-use
         button.setStyleSheet("background: #007acc; color: white;")
 
-    def disable_profile_load_button(self, button) -> None:
+    def disable_profile_load_button(self, button) -> None:  # pylint: disable=missing-function-docstring,no-self-use
         button.setStyleSheet("color:white; border: 1px solid white;")
 
     def print_to_info(self, error_text) -> None:
+        """
+        Print to the UI log window, auto scroll to bottom
+        """
         self.application_information_textbrowser.append(error_text)
         self.application_information_textbrowser.verticalScrollBar().setValue(
             self.application_information_textbrowser.verticalScrollBar().maximum()
         )
 
-    def set_dcs_directory(self):
+    def set_dcs_directory(self) -> None:
+        """
+        Attempt to set the DCS directory, on user input
+        """
         self.dcs_directory = QtWidgets.QFileDialog.getExistingDirectory(
             self,
             "Select DCS Saved Games Directory",
@@ -111,12 +131,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.dcs_directory:
             try:
                 self.load_dcs_directory()
-            except Exception as e:
-                self.print_to_info("Error: {}".format(e))
+            except Exception as e:  # Change to custom exception type pylint: disable=broad-except
+                self.print_to_info(f"Error: {e}")
         else:
             self.print_to_info("No DCS Directory Selected")
 
-    def load_dcs_directory(self):
+    def load_dcs_directory(self) -> None:
+        """
+        Attempt to load a selected directory, and initalise the DCS parser
+        """
         try:
             self.dcs_profiles_list.clear()
             self.dcs_parser_instance = DCSWorldParser(
@@ -124,9 +147,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             )
             self.print_to_info("Succesfully loaded DCS profiles")
             self.enable_profile_load_button(self.dcs_directory_select_button)
-            self.dcs_selected_directory_label.setText("in {}".format(self.dcs_directory))
+            self.dcs_selected_directory_label.setText(f"in {self.dcs_directory}")
             self.export_button.setEnabled(1)
-        except Exception:
+        except Exception:  # Change to custom exception type pylint: disable=broad-except
             self.disable_profile_load_button(self.dcs_directory_select_button)
             self.export_button.setEnabled(0)
             self.dcs_selected_directory_label.setText("")
@@ -135,7 +158,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.dcs_profiles_list.clear()
             self.dcs_profiles_list.addItems(self.dcs_parser_instance.get_validated_profiles())
 
-    def set_sc_file(self):
+    def set_sc_file(self) -> None:
+        """
+        Set Star Citizen game file, and attempt to load
+        """
         self.clear_info()
         self.sc_file = QtWidgets.QFileDialog.getOpenFileName(
             self, "Select Star Citizen Config file", None, "XMl Files (*.xml)"
@@ -146,18 +172,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.print_to_info("No File Selected")
 
     def load_sc_file(self) -> None:
+        """
+        Attempt to load a selected file, and initalise the SC parser
+        """
         try:
             self.sc_parser_instance = StarCitizen(self.sc_file)
             self.enable_profile_load_button(self.sc_select_button)
             self.export_button.setEnabled(1)
             self.print_to_info("Succesfully loaded Star Citizen profile")
-        except Exception as e:
+        except Exception as e:  # Change to custom exception type pylint: disable=broad-except
             self.disable_profile_load_button(self.sc_select_button)
             self.export_button.setEnabled(0)
             self.sc_file = None
-            self.print_to_info("Error Loading File: {}".format(e))
+            self.print_to_info(f"Error Loading File: {e}")
 
     def set_jg_file(self) -> None:
+        """
+        Set Joystick Game file, and attempt to load
+        """
         self.jg_file = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Select Joystick Gremlin Config file",
@@ -168,12 +200,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.jg_file:
             try:
                 self.load_jg_file()
-            except Exception as e:
-                self.print_to_info("Error Loading File: {}".format(e))
+            except Exception as e:  # Change to custom exception type pylint: disable=broad-except
+                self.print_to_info(f"Error Loading File: {e}")
         else:
             self.print_to_info("No File Selected")
 
     def load_jg_file(self):
+        """
+        Attempt to load a selected file, and initalise the JG parser
+        """
         try:
             self.jg_parser_instance = JoystickGremlin(self.jg_file)
             self.jg_devices = self.jg_parser_instance.get_device_names()
@@ -189,13 +224,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             raise e
 
     def export_profiles(self):
+        """
+        Force parsers to process selected profiles (where applicable)
+
+        Output is written to the log window
+        Files written to output directories
+        """
         if self.parser_selector.currentIndex() == 0:  ## JOYSTICK GREMLIN
             selected_profiles = self.jg_profile_list.selectedItems()
             if len(selected_profiles) > 0:
                 profiles = []
                 for item in selected_profiles:
                     profiles.append(item.text())
-                self.print_to_info("Exporting the following profile(s): {}".format(profiles))
+                self.print_to_info(f"Exporting the following profile(s): {profiles}")
                 data = self.jg_parser_instance.create_dictionary(profiles)
             else:
                 data = self.jg_parser_instance.create_dictionary()
@@ -206,7 +247,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 profiles = []
                 for item in selected_profiles:
                     profiles.append(item.text())
-                self.print_to_info("Exporting the following profile(s): {}".format(profiles))
+                self.print_to_info(f"Exporting the following profile(s): {profiles}")
                 data = self.dcs_parser_instance.process_profiles(profiles)
             else:
                 data = self.dcs_parser_instance.process_profiles()
@@ -218,7 +259,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             pass  # no other tabs have functionality right now
 
     def export_to_svg(self, data, parser_type):
-
+        """
+        Export data to SVG file
+        """
         self.export_progress_bar.setValue(0)
         self.clear_info()
         self.print_to_info("Export Started")
@@ -255,6 +298,9 @@ def setup_logging() -> None:
 
 
 def get_log_level() -> str:
+    """
+    Returns log level as specified in config file
+    """
     if config.debugLevel == 1:
         return "WARNING"
     if config.debugLevel == 2:
@@ -273,5 +319,5 @@ if __name__ == "__main__":
         window = MainWindow()
         window.show()
         app.exec()
-    except Exception as error:
-        helper.log(error, "error", True)
+    except Exception as error:  # pylint: disable=broad-except
+        _logger.error(error, exc_info=True)

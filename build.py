@@ -21,7 +21,7 @@ build_options = {
         "./config.cfg",
         "./readme.md",
     ],
-    "excludes": ["tkinter", "test", "http", "email", "distutils", "ssl","asyncio","concurrent"],
+    "excludes": ["tkinter", "test", "http", "email", "distutils", "ssl", "asyncio", "concurrent"],
     "optimize": 2,
 }
 

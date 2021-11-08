@@ -18,3 +18,4 @@ tests/__pycache__/*.pyc
 *.ui
 *.bat
 .coverage
+.DS_Store

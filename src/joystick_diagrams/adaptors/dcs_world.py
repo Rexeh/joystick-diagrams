@@ -31,7 +31,7 @@ class DCSWorldParser(jdi.JDinterface):
             try:
                 return os.listdir(os.path.join(self.path, "Config", "Input"))
             except FileNotFoundError:
-                raise FileNotFoundError("DCS: No input directory found")
+                raise FileNotFoundError("DCS: No input directory found") from None
         else:
             raise FileNotFoundError("DCS: No Config Folder found in DCS Folder.")
 

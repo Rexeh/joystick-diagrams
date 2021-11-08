@@ -75,7 +75,7 @@ max-line-length = 120
 variable-rgx = "[a-z_][a-z0-9_]{0,30}$"
 
 [tool.pylint.global]
-extension-pkg-whitelist="PyQt5"
+extension-pkg-whitelist = ["PyQt5"]
 # ignoring missing module and missing class docstring errors
 disable = ["C0114", "C0115","W1201","W1202","logging-fstring-interpolation"]
 output-format = "colorized"
