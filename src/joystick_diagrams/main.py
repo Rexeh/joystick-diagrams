@@ -3,13 +3,15 @@ import os
 import logging
 from pathlib import Path
 from PyQt5 import QtWidgets, QtGui, QtCore
+from joystick_diagrams import manager
 from joystick_diagrams.ui import Ui_MainWindow
-from joystick_diagrams import config, version
+from joystick_diagrams import config, version, manager
 
 from joystick_diagrams.adaptors.dcs_world import DCSWorldParser
 from joystick_diagrams.adaptors.joystick_gremlin import JoystickGremlin
 from joystick_diagrams.adaptors.star_citizen import StarCitizen
 from joystick_diagrams.classes import export
+
 
 _logger = logging.getLogger(__name__)
 
@@ -315,9 +317,10 @@ if __name__ == "__main__":
     setup_logging()
 
     try:
-        app = QtWidgets.QApplication(sys.argv)
-        window = MainWindow()
-        window.show()
-        app.exec()
+        # app = QtWidgets.QApplication(sys.argv)
+        # window = MainWindow()
+        # window.show()
+        # app.exec()
+        manager.ParserPluginManager()
     except Exception as error:  # pylint: disable=broad-except
-        _logger.error(error, exc_info=True)
+        _logger.exception(error)
