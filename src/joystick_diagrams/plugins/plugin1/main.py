@@ -13,6 +13,9 @@ class CustomPlugin(PluginInterface):
     def init(self):
         print("Init plugin")
 
+    def load(self):
+        print("Load plugin")
+
     def name(self) -> str:
         return NAME
 

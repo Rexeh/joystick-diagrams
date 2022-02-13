@@ -70,3 +70,5 @@ if __name__ == "__main__":
     app = ParserPluginManager()
     # We are going to run it
     app.run()
+    print(app._available[0].name.version())
+    print()
