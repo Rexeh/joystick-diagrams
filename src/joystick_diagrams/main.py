@@ -3,8 +3,7 @@ import os
 import logging
 from pathlib import Path
 from PyQt5 import QtWidgets, QtGui, QtCore
-from joystick_diagrams import manager
-from joystick_diagrams.ui import Ui_MainWindow
+from joystick_diagrams.ui import ui
 from joystick_diagrams import config, version, manager
 
 from joystick_diagrams.adaptors.dcs_world import DCSWorldParser
@@ -16,11 +15,12 @@ from joystick_diagrams.classes import export
 _logger = logging.getLogger(__name__)
 
 
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Refactor pylint: disable=too-many-instance-attributes
+class MainWindow(QtWidgets.QMainWindow, ui.Ui_MainWindow):  # Refactor pylint: disable=too-many-instance-attributes
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
         self.set_version()
+
         # Clean up GUI Defaults
         self.dcs_profiles_list.clear()
         self.jg_profile_list.clear()
@@ -301,7 +301,7 @@ def setup_logging() -> None:
 
 def get_log_level() -> str:
     """
-    Returns log level as specified in config file
+    Returns log level as specified in config filpipe
     """
     if config.debugLevel == 1:
         return "WARNING"
@@ -317,10 +317,10 @@ if __name__ == "__main__":
     setup_logging()
 
     try:
-        # app = QtWidgets.QApplication(sys.argv)
-        # window = MainWindow()
-        # window.show()
-        # app.exec()
+        app = QtWidgets.QApplication(sys.argv)
+        window = MainWindow()
+        window.show()
+        app.exec()
         manager.ParserPluginManager()
     except Exception as error:  # pylint: disable=broad-except
         _logger.exception(error)

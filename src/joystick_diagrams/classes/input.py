@@ -15,7 +15,6 @@ import logging
 _logger = logging.getLogger(__name__)
 _devices = {}
 
-
 @dataclass
 class Command:
     name: str

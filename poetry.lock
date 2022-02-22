@@ -211,7 +211,7 @@ importlib-metadata = ">=4.3.1"
 name = "cx-logging"
 version = "3.0"
 description = "Python and C interfaces for logging"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -916,7 +916,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b76a4c50b1bf4c731c6c13f93761a51555244514d0cbc0345b80d5acbf5d0e50"
+content-hash = "5a16fef5a3378d148abcb37e6334d9897ea2afffc2930b0018e4dda83120e30d"
 
 [metadata.files]
 appnope = [

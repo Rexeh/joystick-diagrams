@@ -41,7 +41,7 @@ build_options = {
 
 setup(
     name="Joystick Diagrams",
-    version=ver,
+    version=VER,
     description="Automatically create diagrams for your throttles, joysticks and custom HID devices",
     long_description=LONG_DESC,
     long_description_content_type="text/markdown",
