@@ -8,7 +8,7 @@ http://joystick-diagrams.com/
 Please use the website for documentation and information
 
 # Bugs
-This project is still early days, if you encounter any issues please raise a bug ticket or reach out on Discord.
+If you experience a bug, please feel free to raise a GITHUB issue, or get in touch on discord.
 
 # Support / Beer fund
 
