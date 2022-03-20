@@ -7,7 +7,7 @@ import ply.yacc as yacc
 import functions.helper as helper
 import adaptors.joystick_diagram_interface as jdi
 import adaptors.dcs_world_lex  # pylint: disable=unused-import
-import adaptors.dcs_world_parse  # pylint: disable=unused-import
+import adaptors.dcs_world_yacc  # pylint: disable=unused-import
 
 
 class DCSWorldParser(jdi.JDinterface):
@@ -71,7 +71,7 @@ class DCSWorldParser(jdi.JDinterface):
             return False
 
     def get_validated_profiles(self):
-        """ Expose Valid Profiles only to UI """
+        """Expose Valid Profiles only to UI"""
         if self.remove_easy_modes:
             return list(
                 filter(
@@ -83,7 +83,7 @@ class DCSWorldParser(jdi.JDinterface):
             return self.valid_profiles
 
     def convert_button_format(self, button):
-        """ Convert DCS Buttons to match expected "BUTTON_X" format """
+        """Convert DCS Buttons to match expected "BUTTON_X" format"""
         split = button.split("_")
 
         if len(split) == 2:
@@ -137,7 +137,13 @@ class DCSWorldParser(jdi.JDinterface):
                             )
                         )
                     else:
+
+                        print(
+                            f"Processing Device: {joystick_device} and file {joystick_file}"
+                        )
                         dictionary_2 = self.parse_file()
+
+                        print(dictionary_2)
 
                         button_map = self.create_joystick_map(dictionary_2)
 
@@ -209,7 +215,7 @@ class DCSWorldParser(jdi.JDinterface):
             return t
 
         def t_STRING(t):  # pylint: disable=invalid-name
-            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\s]+\""
+            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\<|\>|\s]+\" "
             t.value = t.value[1:-1]
             return t
 
@@ -274,7 +280,7 @@ class DCSWorldParser(jdi.JDinterface):
         )
 
         # Build the parser
-        parser = yacc.yacc(debug=False, optimize=1, tabmodule="dcs_world_parse")
+        parser = yacc.yacc(debug=False, optimize=1, tabmodule="dcs_world_yacc")
 
         # Parse the data
         try:
