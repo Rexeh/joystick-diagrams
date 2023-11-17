@@ -14,6 +14,9 @@ tests/*/__pycache__/
 
 # Folders
 *__pycache__/
+
+# Folders
+*__pycache__/
 /build/
 /dist/
 .env
@@ -27,5 +30,8 @@ temp/
 
 # Development
 play*.py
+venv/
+0.12.0.dev0
+
 venv/
 0.12.0.dev0
