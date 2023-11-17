@@ -53,12 +53,12 @@ class Export:
                     print(f"Saving: {joystick}")
                     self.save_template(joystick, mode, completed_template)
                     if isinstance(progress_bar, QtWidgets.QProgressBar):
-                        progress_bar.setValue(progress_bar.value() + (progress_increment / progress_increment_modes))
+                        progress_bar.setValue(int(progress_bar.value() + (progress_increment / progress_increment_modes)))
             else:
                 self.error_bucket.append(f"No Template file found for: {joystick}")
 
             if isinstance(progress_bar, QtWidgets.QProgressBar):
-                progress_bar.setValue(progress_bar.value() + progress_increment)
+                progress_bar.setValue(int(progress_bar.value() + progress_increment))
 
         if isinstance(progress_bar, QtWidgets.QProgressBar):
             progress_bar.setValue(100)

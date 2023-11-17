@@ -2,19 +2,21 @@
 
 ![Joystick Diagrams](https://joystick-diagrams.com/img/main-hero.png)
 
-# ANNOUNCEMENT
-This project is set to close at the end of 2022, please see - https://www.reddit.com/r/hotas/comments/xufar0/joystick_diagrams_project_closing/
+# Official Website
+http://joystick-diagrams.com/
 
+Please use the website for documentation and information
 
-## FORKS
-If you are maintaining a fork, get in touch so I can add here to guide others to your repository.
+# Bugs
+This project is still early days, if you encounter any issues please raise a bug ticket or reach out on Discord.
 
-
-## Official Website
-http://joystick-diagrams.com/ - Please use the website for documentation and information
+# Support / Beer fund
 
 ## Discord
 If you have any issues/questions, pop along to discord - https://discord.gg/JC5QFMB
 
-## Development Notes
-TBC
+## Beer
+I plan to expand this out and continue on this journey. If you like the tool, maybe buy me a beer.
+[Donate via Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url)
+
+

@@ -4,30 +4,44 @@ from setuptools import find_packages
 from cx_Freeze import setup, Executable
 import joystick_diagrams.version as ver
 
-VER = ver.VERSION
+VER = ver.get_current_version()
 HERE = pathlib.Path(__file__).parent.resolve()
 BASE = None
 TARGET_NAME: str = "joystick_diagrams"
 LONG_DESC = (HERE / "readme.md").read_text(encoding="utf-8")
 
+try:
+    from cx_Freeze.hooks import get_qt_plugins_paths
+except ImportError:
+    include_files = []
+else:
+    # Inclusion of extra plugins (new in cx_Freeze 6.8b2)
+    # cx_Freeze imports automatically the following plugins depending of the
+    # use of some modules:
+    # imageformats - QtGui
+    # platforms - QtGui
+    # mediaservice - QtMultimedia
+    # printsupport - QtPrintSupport
+    #
+    # So, "platforms" is used here for demonstration purposes.
+    include_files = get_qt_plugins_paths("PyQt5", "QtGui")
+
 if sys.platform == "win32":
     BASE = "Win32GUI"
     TARGET_NAME = "joystick_diagrams.exe"
 
+extra_includes = ["./images", "./templates", "./config.cfg", "./readme.md"]
+include_files.extend(extra_includes)
+
 build_options = {
-    "include_files": [
-        "./images",
-        "./templates",
-        "./config.cfg",
-        "./readme.md",
-    ],
-    "excludes": ["tkinter", "test", "http", "email", "distutils", "ssl", "asyncio", "concurrent"],
+    "include_files": include_files,
+    "excludes": ["tkinter", "test", "http", "email", "distutils", "ssl", "asyncio", "concurrent", "pyqt5"],
     "optimize": 2,
 }
 
 setup(
     name="Joystick Diagrams",
-    version=ver,
+    version=VER,
     description="Automatically create diagrams for your throttles, joysticks and custom HID devices",
     long_description=LONG_DESC,
     long_description_content_type="text/markdown",

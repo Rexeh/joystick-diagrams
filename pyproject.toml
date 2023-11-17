@@ -5,7 +5,7 @@ description = ""
 authors = ["Robert Cox"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.11"
 PyQt5 = "^5.15.6"
 ply = "^3.11"
 
@@ -17,7 +17,8 @@ black = "^21.10b0"
 pre-commit = "^2.15.0"
 coveralls = "^3.3.0"
 pylint = "^2.11.1"
-cx-Freeze = "^6.8.1"
+cx-Freeze = "^6.8.0"
+ipykernel = "^6.5.0"
 
 [tool.poetry.scripts]
 build-exe = "build:setup"
