@@ -6,8 +6,8 @@ from pathlib import Path
 import logging
 from shutil import ExecError
 from ply import lex, yacc
-import joystick_diagrams.adaptors.dcs_world_lex  # pylint: disable=unused-import
-import joystick_diagrams.adaptors.dcs_world_parse  # pylint: disable=unused-import
+#import joystick_diagrams.adaptors.dcs_world_lex  # pylint: disable=unused-import
+#import joystick_diagrams.adaptors.dcs_world_parse  # pylint: disable=unused-import
 import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
 
 _logger = logging.getLogger(__name__)
@@ -202,7 +202,7 @@ class DCSWorldParser(jdi.JDinterface):
             return t
 
         def t_STRING(t):  # pylint: disable=invalid-name
-            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\s]+\" "
+            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\<|\>|\s]+\" "
             t.value = t.value[1:-1]
             return t
 
@@ -267,7 +267,7 @@ class DCSWorldParser(jdi.JDinterface):
         )
 
         # Build the parser
-        parser = yacc.yacc(debug=False, optimize=1, tabmodule="dcs_world_parse")
+        parser = yacc.yacc(debug=False, optimize=1, tabmodule="dcs_world_yacc")
 
         # Parse the data
         try:
