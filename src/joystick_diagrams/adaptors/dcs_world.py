@@ -1,8 +1,10 @@
 """DCS World Lua Config Parser for use with Joystick Diagrams"""
+from ast import Str
 import os
 import re
 from pathlib import Path
 import logging
+from shutil import ExecError
 from ply import lex, yacc
 import joystick_diagrams.adaptors.dcs_world_lex  # pylint: disable=unused-import
 import joystick_diagrams.adaptors.dcs_world_parse  # pylint: disable=unused-import
@@ -10,17 +12,17 @@ import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
 
 _logger = logging.getLogger(__name__)
 
+EASY_MODES = "_easy"
 
 class DCSWorldParser(jdi.JDinterface):
     def __init__(self, path, easy_modes=True):
         jdi.JDinterface.__init__(self)
         self.path = path
         self.remove_easy_modes = easy_modes
-        self.__easy_mode = "_easy"
+        self.__easy_mode = EASY_MODES
         self.base_directory = self.__validate_base_directory()
         self.valid_profiles = self.__validate_profiles()
         self.joystick_listing = {}
-        self.file = None
         self.profiles_to_process = None
         self.profile_devices = None
         self.fq_path = None
@@ -80,21 +82,23 @@ class DCSWorldParser(jdi.JDinterface):
         """Convert DCS Buttons to match expected "BUTTON_X" format"""
         split = button.split("_")
 
-        if len(split) == 2:
-            if split[1][0:3] == "BTN":
-                return split[1].replace("BTN", "BUTTON_")
-            elif split[1].isalpha():
-                return "AXIS_{}".format(split[1])
-            elif split[1][0:6] == "SLIDER":
-                return "AXIS_SLIDER_{}".format(split[1][6:])
-            else:
-                return split[1]
+        match len(split):
 
-        elif len(split) == 4:
-            return "{button}_{pov}_{dir}".format(button=split[1].replace("BTN", "POV"), pov=split[2][3], dir=split[3])
+            case 2:
+                if len(split) == 2:
+                    if split[1][0:3] == "BTN":
+                        return split[1].replace("BTN", "BUTTON_")
+                    elif split[1].isalpha():
+                        return "AXIS_{}".format(split[1])
+                    elif split[1][0:6] == "SLIDER":
+                        return "AXIS_SLIDER_{}".format(split[1][6:])
+                    else:
+                        return split[1]
+            ## Add default case / better handling
+            case 4:
+                return "{button}_{pov}_{dir}".format(button=split[1].replace("BTN", "POV"), pov=split[2][3], dir=split[3])
 
     def process_profiles(self, profile_list=None) -> dict:
-
         if isinstance(profile_list, list) and len(profile_list) > 0:
             self.profiles_to_process = profile_list
         else:
@@ -108,7 +112,6 @@ class DCSWorldParser(jdi.JDinterface):
             for item in self.profile_devices:
                 self.joystick_listing.update({item[:-48]: item})
             for joystick_device, joystick_file in self.joystick_listing.items():
-
                 if os.path.isdir(os.path.join(self.fq_path, joystick_file)):
                     print("Skipping as Folder")
                 else:
@@ -123,12 +126,18 @@ class DCSWorldParser(jdi.JDinterface):
                             )
                         )
                     else:
-                        dictionary_2 = self.parse_file()
+                        parsed_config = self.parse_config(self.file)  ##Better handling - decompose
 
-                        button_map = self.create_joystick_map(dictionary_2)
+                        button_map = self.create_joystick_map(parsed_config)
 
                         self.update_joystick_dictionary(joystick_device, profile, False, button_map)
         return self.joystick_dictionary
+
+    def parse_config(self, file: Str):
+        try:
+            return self.parse_file(file)
+        except Exception as error:
+            _logger.error(error)
 
     def create_joystick_map(self, data) -> dict:
         write_val = False
@@ -159,7 +168,7 @@ class DCSWorldParser(jdi.JDinterface):
                     write_val = False
         return button_array
 
-    def parse_file(self) -> dict:
+    def parse_file(self, file: Str) -> dict:
         # pylint: disable=unused-variable
         tokens = (
             "LCURLY",
@@ -262,7 +271,7 @@ class DCSWorldParser(jdi.JDinterface):
 
         # Parse the data
         try:
-            data = parser.parse(self.file)
+            data = parser.parse(file)
         except Exception as error:
             _logger.error(error)
             raise
