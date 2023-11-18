@@ -11,9 +11,6 @@ This module operates on FIFO basis, and is designed to be used by a single threa
 from dataclasses import dataclass
 from enum import auto, Enum
 import logging
-from typing import Optional, final
-
-from traitlets import This
 
 _logger = logging.getLogger(__name__)
 _devices = {}
@@ -109,7 +106,7 @@ class LogicalDevice:
         obj = self._get_input(input_id)
         _logger.debug(f"Modifier input is: {obj}")
         if obj is None:
-            self.create_input(input_id, InputTypes.BUTTON, "Not Used", [])
+            self.create_input(input_id, InputTypes.BUTTON, "Not Used")
             obj = self._get_input(input_id)
             _logger.debug(f"Modifier input created now: {obj}")
         obj.add_modifier(modifier, command)

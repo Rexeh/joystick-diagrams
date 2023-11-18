@@ -2,12 +2,9 @@
 # Test duplication of new device is prevented
 # Check a device can have an input registered
 # Check a device can have an input overwritten
-
-import pytest
-import unittest
+import logging
 from joystick_diagrams.classes.input import (
     add_device,
-    Input,
     LogicalDevice,
     InputTypes,
     Command,
@@ -16,7 +13,6 @@ from joystick_diagrams.classes.input import (
     get_devices,
     clear_devices,
 )
-import logging
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,9 +27,9 @@ def test_add_device():
     name = "test_name"
     add_device(guid, name)
     devices = get_devices()
-    assert (len(devices), 1)
-    assert (devices[guid].guid, guid)
-    assert (devices[guid].name, name)
+    assert len(devices), 1
+    assert devices[guid].guid, guid
+    assert devices[guid].name, name
 
 
 def test_check_devices_registered():
@@ -52,7 +48,7 @@ def test_check_devices_duplication_name(caplog):
     device = add_device("dev-1", "device XYZ")
     assert device.guid == "dev-1"
     assert device.name == "device 1"
-    assert type(device) == LogicalDevice
+    assert isinstance(device, type) == LogicalDevice
     assert "Device dev-1 already exists and will not be re-added" in caplog.text
 
 
@@ -85,23 +81,23 @@ def test_add_multiple_inputs_with_modifiers():
     device_inputs = get_devices(guid).get_device_inputs()
 
     # Check that the correct number of inputs were added
-    assert (len(device_inputs), len(inputs))
+    assert len(device_inputs), len(inputs)
 
     # Check that each input has the correct properties
     for input_data in inputs:
         input = next((x for x in device_inputs if x.identifier == input_data["id"]), None)
-        assert (input, None)
-        assert (input.style, input_data["style"])
-        assert (input.command.name, input_data["command"].name)
+        assert input, None
+        assert input.style, input_data["style"]
+        assert input.command.name, input_data["command"].name
 
         # Check that each input has the correct modifiers
         for modifier_data in modifiers:
             modifier = next((x for x in input.modifiers if x.modifiers == modifier_data["input"]), None)
-            assert (modifier, None)
-            assert (modifier.command.name, modifier_data["command"].name)
+            assert modifier, None
+            assert modifier.command.name, modifier_data["command"].name
 
 
-def test_add_modify_existing_modifier(caplog):
+def test_add_modify_existing_modifier():
     # TO DO > Setup in fixture
     guid = "dev-1"
     # Define the inputs and modifiers
@@ -112,10 +108,6 @@ def test_add_modify_existing_modifier(caplog):
     modifiers = [
         {"input": {"modifier1"}, "command": Command("modifier_command1")},
         {"input": {"modifier2"}, "command": Command("modifier_command2")},
-    ]
-
-    changes = [
-        {"input": {"modifier1"}, "command": Command("modifer_command_changed")},
     ]
 
     # Add the inputs and modifiers to the device
@@ -130,15 +122,15 @@ def test_add_modify_existing_modifier(caplog):
     # Check that each input has the correct properties
     for input_data in inputs:
         input = next((x for x in device_inputs if x.identifier == input_data["id"]), None)
-        assert (input, None)
-        assert (input.style, input_data["style"])
-        assert (input.command.name, input_data["command"].name)
+        assert input, None
+        assert input.style, input_data["style"]
+        assert input.command.name, input_data["command"].name
 
         # Check that each input has the correct modifiers
         for modifier_data in modifiers:
             modifier = next((x for x in input.modifiers if x.modifiers == modifier_data["input"]), None)
-            assert (modifier, None)
-            assert (modifier.command.name, modifier_data["command"].name)
+            assert modifier, None
+            assert modifier.command.name, modifier_data["command"].name
 
     # Change a modifier
     device = get_devices(guid)
