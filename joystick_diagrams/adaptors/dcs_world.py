@@ -51,7 +51,7 @@ class DCSWorldParser(jdi.JDinterface):
             if valid:
                 valid_items.append(item)
             else:
-                _logger.info("DCS: Profile {} has no joystick directory files".format(item))
+                _logger.info(f"DCS: Profile {item} has no joystick directory files")
 
         return valid_items
 
@@ -89,16 +89,14 @@ class DCSWorldParser(jdi.JDinterface):
                     if split[1][0:3] == "BTN":
                         return split[1].replace("BTN", "BUTTON_")
                     elif split[1].isalpha():
-                        return "AXIS_{}".format(split[1])
+                        return f"AXIS_{split[1]}"
                     elif split[1][0:6] == "SLIDER":
-                        return "AXIS_SLIDER_{}".format(split[1][6:])
+                        return f"AXIS_SLIDER_{split[1][6:]}"
                     else:
                         return split[1]
             ## Add default case / better handling
             case 4:
-                return "{button}_{pov}_{dir}".format(
-                    button=split[1].replace("BTN", "POV"), pov=split[2][3], dir=split[3]
-                )
+                return f"{split[1].replace('BTN', 'POV')}_{split[2][3]}_{split[3]}"
 
     def process_profiles(self, profile_list: list = None) -> dict:
         if isinstance(profile_list, list) and len(profile_list) > 0:
@@ -121,7 +119,7 @@ class DCSWorldParser(jdi.JDinterface):
                     _logger.info("Skipping as Folder")
                 else:
                     try:
-                        self.file = (
+                        file_data = (
                             Path(os.path.join(self.fq_path, joystick_file))
                             .read_text(encoding="utf-8")
                             .replace("local diff = ", "")
@@ -135,7 +133,7 @@ class DCSWorldParser(jdi.JDinterface):
                             )
                         )
                     else:
-                        parsed_config = self.parse_config(self.file)  ##Better handling - decompose
+                        parsed_config = self.parse_config(file_data)  ##Better handling - decompose
 
                         if parsed_config is None:
                             break
@@ -232,7 +230,7 @@ class DCSWorldParser(jdi.JDinterface):
         t_ignore = " \t\n"
 
         def t_error(t):  # pylint: disable=invalid-name
-            print("Illegal character '%s'" % t.value[0])
+            _logger.error(f"Illegal character '{t.value[0]}'")
             t.lexer.skip(1)
 
         # Parsing rules
@@ -269,7 +267,7 @@ class DCSWorldParser(jdi.JDinterface):
             p[0] = p[1]
 
         def p_error(t):  # pylint: disable=invalid-name
-            print("Syntax error at '%s'" % t.value)
+            _logger.error(f"Syntax error at '{ (t.value)}'")
 
         # Build the lexer
         lexer = lex.lex(

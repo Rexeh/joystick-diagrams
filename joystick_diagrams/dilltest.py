@@ -25,6 +25,9 @@ from enum import Enum
 import os
 import time
 from typing import Callable
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class DILLError(Exception):
@@ -363,6 +366,9 @@ class DeviceSummary:
             self.axis_map.append(AxisMap(data.axis_map[i]))
         self.vjoy_id = -1
 
+    def __repr__(self):
+        return f"DeviceSummary: GUID {self.device_guid} - NAME {self.name}"
+
     @property
     def is_virtual(self) -> bool:
         """Returns if a device is virtual.
@@ -575,18 +581,18 @@ class DILL:
                 dll_fn.restype = params["returns"]
 
 
-# Initialize the class
-DILL.initialize_capi()
+def main():
+    # Initialize the class
+    DILL.initialize_capi()
 
-dll = DILL()
+    dll = DILL()
 
-dll.init()
+    dll.init()
 
-devices = dll.get_device_count()
+    devices = dll.get_device_count()
+    _logger.info(devices)
 
-print(devices)
+    device = dll.get_device_information_by_index(1)
+    _logger.info(device)
 
-device = dll.get_device_information_by_index(1)
-
-print(device.name)
-print(device.device_guid)
+    return True

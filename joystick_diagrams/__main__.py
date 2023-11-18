@@ -3,14 +3,12 @@ import os
 import logging
 from pathlib import Path
 from PyQt5 import QtWidgets, QtGui, QtCore
-from joystick_diagrams.ui import ui
 from joystick_diagrams import config, version, manager
-
+from joystick_diagrams.ui import ui
 from joystick_diagrams.adaptors.dcs_world import DCSWorldParser
 from joystick_diagrams.adaptors.joystick_gremlin import JoystickGremlin
 from joystick_diagrams.adaptors.star_citizen import StarCitizen
 from joystick_diagrams.classes import export
-
 
 _logger = logging.getLogger(__name__)
 
@@ -245,6 +243,7 @@ class MainWindow(QtWidgets.QMainWindow, ui.Ui_MainWindow):  # Refactor pylint: d
             self.export_to_svg(data, "JG")
         elif self.parser_selector.currentIndex() == 1:  ## DCS
             selected_profiles = self.dcs_profiles_list.selectedItems()
+
             if len(selected_profiles) > 0:
                 profiles = []
                 for item in selected_profiles:

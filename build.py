@@ -35,7 +35,7 @@ include_files.extend(extra_includes)
 
 build_options = {
     "include_files": include_files,
-    "excludes": ["tkinter", "test", "http", "email", "distutils", "ssl", "asyncio", "concurrent", "pyqt5"],
+    "excludes": ["tkinter", "test", "distutils", "ssl", "asyncio", "concurrent", "pyqt5"],
     "optimize": 2,
 }
 
@@ -49,7 +49,7 @@ setup(
     author="Robert Cox",
     keywords="joystick, HID, diagrams, joystick gremlin, dcs world",
     packages=find_packages(),
-    python_requires=">=3.8, <4",
+    python_requires=">=3.11, <4",
     install_requires=[
         "cx-freeze",
         "pyqt5",
