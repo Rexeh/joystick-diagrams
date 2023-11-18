@@ -19,8 +19,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install poetry
         poetry install
+        poetry add pylint-exit
     - name: Analysing the code with pylint
       run: |
-        make lint
-        make unit-test
-        make fmt
+        poetry run pylint --rcfile pyproject.toml src/ tests/ | pylint-exit $?
