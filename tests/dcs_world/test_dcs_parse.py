@@ -201,7 +201,6 @@ class TestDCS_Parse_Test(unittest.TestCase):
         pass
 
     def test_button_convert_button(self):
-
         button = self.dcs_instance.convert_button_format("JOY_BTN2")
         self.assertEqual(button, "BUTTON_2")
 
@@ -209,7 +208,6 @@ class TestDCS_Parse_Test(unittest.TestCase):
         self.assertEqual(button, "BUTTON_59")
 
     def test_button_convert_axis(self):
-
         button = self.dcs_instance.convert_button_format("JOY_RZ")
         self.assertEqual(button, "AXIS_RZ")
 
@@ -217,7 +215,6 @@ class TestDCS_Parse_Test(unittest.TestCase):
         self.assertEqual(button, "AXIS_Z")
 
     def test_button_convert_pov(self):
-
         button = self.dcs_instance.convert_button_format("JOY_BTN_POV1_UR")
         self.assertEqual(button, "POV_1_UR")
 

@@ -4,15 +4,16 @@ import os
 import re
 from pathlib import Path
 import logging
-from shutil import ExecError
 from ply import lex, yacc
-#import joystick_diagrams.adaptors.dcs_world_lex  # pylint: disable=unused-import
-#import joystick_diagrams.adaptors.dcs_world_parse  # pylint: disable=unused-import
+
+import joystick_diagrams.adaptors.dcs_world_lex  # pylint: disable=unused-import
+import joystick_diagrams.adaptors.dcs_world_yacc  # pylint: disable=unused-import
 import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
 
 _logger = logging.getLogger(__name__)
 
 EASY_MODES = "_easy"
+
 
 class DCSWorldParser(jdi.JDinterface):
     def __init__(self, path, easy_modes=True):
@@ -27,7 +28,7 @@ class DCSWorldParser(jdi.JDinterface):
         self.profile_devices = None
         self.fq_path = None
 
-    def __validate_base_directory(self):
+    def __validate_base_directory(self) -> list:
         """validate the base directory structure, make sure there are files."""
         if "Config" in os.listdir(self.path):
             try:
@@ -37,20 +38,20 @@ class DCSWorldParser(jdi.JDinterface):
         else:
             raise FileNotFoundError("DCS: No Config Folder found in DCS Folder.")
 
-    def __validate_profiles(self):
+    def __validate_profiles(self) -> list:
         """
         Validate Profiles Routine
         """
-        if len(self.base_directory) > 0:
-            valid_items = []
-            for item in self.base_directory:
-                valid = self.__validate_profile(item)
-                if valid:
-                    valid_items.append(item)
-                else:
-                    _logger.info("DCS: Profile {} has no joystick directory files".format(item))
-        else:
+        if len(self.base_directory) == 0:
             raise FileExistsError("DCS: No profiles exist in Input directory!")
+
+        valid_items = list()
+        for item in self.base_directory:
+            valid = self.__validate_profile(item)
+            if valid:
+                valid_items.append(item)
+            else:
+                _logger.info("DCS: Profile {} has no joystick directory files".format(item))
 
         return valid_items
 
@@ -83,7 +84,6 @@ class DCSWorldParser(jdi.JDinterface):
         split = button.split("_")
 
         match len(split):
-
             case 2:
                 if len(split) == 2:
                     if split[1][0:3] == "BTN":
@@ -96,15 +96,20 @@ class DCSWorldParser(jdi.JDinterface):
                         return split[1]
             ## Add default case / better handling
             case 4:
-                return "{button}_{pov}_{dir}".format(button=split[1].replace("BTN", "POV"), pov=split[2][3], dir=split[3])
+                return "{button}_{pov}_{dir}".format(
+                    button=split[1].replace("BTN", "POV"), pov=split[2][3], dir=split[3]
+                )
 
-    def process_profiles(self, profile_list=None) -> dict:
+    def process_profiles(self, profile_list: list = None) -> dict:
         if isinstance(profile_list, list) and len(profile_list) > 0:
             self.profiles_to_process = profile_list
         else:
             self.profiles_to_process = self.get_validated_profiles()
 
-        assert len(self.profiles_to_process) != 0, "DCS: There are no valid profiles to process"
+        assert (
+            len(self.profiles_to_process) != 0
+        ), "DCS: There are no valid profiles to process"  ## Replace with exception type
+
         for profile in self.profiles_to_process:
             self.fq_path = os.path.join(self.path, "Config", "Input", profile, "joystick")
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
@@ -113,12 +118,16 @@ class DCSWorldParser(jdi.JDinterface):
                 self.joystick_listing.update({item[:-48]: item})
             for joystick_device, joystick_file in self.joystick_listing.items():
                 if os.path.isdir(os.path.join(self.fq_path, joystick_file)):
-                    print("Skipping as Folder")
+                    _logger.info("Skipping as Folder")
                 else:
                     try:
-                        self.file = Path(os.path.join(self.fq_path, joystick_file)).read_text(encoding="utf-8")
-                        self.file = self.file.replace("local diff = ", "")  ## CLEAN UP
-                        self.file = self.file.replace("return diff", "")  ## CLEAN UP
+                        self.file = (
+                            Path(os.path.join(self.fq_path, joystick_file))
+                            .read_text(encoding="utf-8")
+                            .replace("local diff = ", "")
+                            .replace("return diff", "")
+                        )
+
                     except FileNotFoundError:
                         raise FileExistsError(
                             "DCS: File {} no longer found - It has been moved/deleted from directory".format(

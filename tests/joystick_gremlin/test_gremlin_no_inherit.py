@@ -3,7 +3,6 @@ import joystick_diagrams.adaptors.joystick_gremlin as gremlin
 
 
 class TestGremlin_No_Inherit(unittest.TestCase):
-
     no_inherit_expected = {
         "VPC Throttle MT-50 CM2": {
             "A10": {

@@ -3,7 +3,6 @@ import joystick_diagrams.adaptors.joystick_gremlin as gremlin
 
 
 class TestGremlinMultipleHats(unittest.TestCase):
-
     expected = {
         "VPC Stick MT-50CM": {
             "Default": {

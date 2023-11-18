@@ -3,7 +3,6 @@ import joystick_diagrams.adaptors.joystick_gremlin as gremlin
 
 
 class TestGremlin_No_Devices(unittest.TestCase):
-
     no_inherit_expected = {}
 
     def setUp(self):

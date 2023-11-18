@@ -139,7 +139,6 @@ class JoystickGremlin(jdi.JDinterface):
         return self.button_array
 
     def extract_hats(self) -> None:
-
         for i in self.hats:
             hat_id = i.getAttribute("id")
             _logger.debug("Hat ID: {}".format(hat_id))
@@ -156,7 +155,6 @@ class JoystickGremlin(jdi.JDinterface):
                 _logger.debug("Has containers: {}".format(hat_containers.length))
 
                 for container in hat_containers:
-
                     hat_positions = container.getElementsByTagName("action-set")
                     hat_count = hat_positions.length
                     increment = 8 / hat_count
@@ -164,7 +162,6 @@ class JoystickGremlin(jdi.JDinterface):
                     _logger.debug("We have {} hat positions".format(hat_count))
 
                     for position in hat_positions:
-
                         if position.getElementsByTagName("description"):
                             # Ignore more than 1 description. always use first
                             hat_direction_description = position.getElementsByTagName("description")[0].getAttribute(

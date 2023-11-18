@@ -5,7 +5,6 @@ import os
 
 
 class TestExport_Template(unittest.TestCase):
-
     data = {
         "VPC Throttle MT-50 CM2": {
             "A10": {

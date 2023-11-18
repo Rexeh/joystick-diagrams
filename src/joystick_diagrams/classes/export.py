@@ -36,7 +36,6 @@ class Export:
         if isinstance(progress_bar, QtWidgets.QProgressBar):
             progress_bar.setValue(0)
             progress_increment = int(100 / joystick_count)
-            print(progress_increment)
 
         for joystick in self.joystick_listing:
             base_template = self.get_template(joystick)
@@ -53,7 +52,9 @@ class Export:
                     print(f"Saving: {joystick}")
                     self.save_template(joystick, mode, completed_template)
                     if isinstance(progress_bar, QtWidgets.QProgressBar):
-                        progress_bar.setValue(int(progress_bar.value() + (progress_increment / progress_increment_modes)))
+                        progress_bar.setValue(
+                            int(progress_bar.value() + (progress_increment / progress_increment_modes))
+                        )
             else:
                 self.error_bucket.append(f"No Template file found for: {joystick}")
 

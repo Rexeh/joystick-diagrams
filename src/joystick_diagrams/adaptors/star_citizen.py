@@ -542,9 +542,18 @@ class StarCitizen(jdi.JDinterface):
             c_map = None
             return (device_object, c_map)
 
-    def get_human_readable_name(self):
-        # Future for str replacements
-        pass
+    def get_human_readable_name(self, name) -> str:
+        if name in self.customLabels:
+            return self.name_format(self.customLabels.get(name))
+
+        return self.name_format(name)
+
+    def name_format(self, name: str) -> str:
+        name = name.split("_")
+        if len(name) == 1:
+            return name[0].capitalize()
+        else:
+            return (" ".join(name[1:])).capitalize()
 
     def convert_hat_format(self, hat) -> str:
         _logger.debug("Convert Hat: {}".format(hat))
@@ -557,7 +566,6 @@ class StarCitizen(jdi.JDinterface):
         return {"name": name, "guid": guid}
 
     def get_stored_device(self, device) -> dict:
-
         if device in self.devices:
             return self.devices[device]
         else:
@@ -574,18 +582,10 @@ class StarCitizen(jdi.JDinterface):
         )
         _logger.debug("Device List: {}".format(self.devices))
 
-    def process_name(self, name) -> str:
+    def process_name(self, name: str) -> str:
         _logger.debug("Bind Name: {}".format(name))
 
-        # Set Custom Labels
-        if name in self.customLabels:
-            name = self.customLabels.get(name)
-        # Split the String to Array
-        name = name.split("_")
-        if len(name) == 1:
-            return name[0].capitalize()
-        else:
-            return (" ".join(name[1:])).capitalize()
+        return self.get_human_readable_name(name)
 
     def build_button_map(self, device, button, name) -> dict:
         if device in self.button_array:

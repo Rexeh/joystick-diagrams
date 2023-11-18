@@ -6,7 +6,6 @@ _logger = logging.getLogger(__name__)
 
 
 def create_directory(directory) -> None:  # pylint: disable=missing-function-docstring
-
     try:
         if not Path(directory).exists():
             Path(directory).mkdir()

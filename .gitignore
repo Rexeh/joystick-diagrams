@@ -23,6 +23,7 @@ tests/*/__pycache__/
 temp/
 /notebooks
 /logs/*
+/src/joystick_diagrams/logs*
 
 # IDE
 *.code-workspace

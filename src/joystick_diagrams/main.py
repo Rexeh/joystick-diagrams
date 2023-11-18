@@ -313,7 +313,6 @@ def get_log_level() -> str:
 
 
 if __name__ == "__main__":
-
     setup_logging()
 
     try:

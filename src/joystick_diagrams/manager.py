@@ -19,7 +19,6 @@ _logger = logging.getLogger(__name__)
 
 class ParserPluginManager:
     def __init__(self):
-
         plugins = self.find_plugins()
         self._plugins = []
         self._available = []
