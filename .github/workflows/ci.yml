@@ -22,4 +22,4 @@ jobs:
         poetry add pylint-exit
     - name: Analysing the code with pylint
       run: |
-        poetry run pylint --rcfile pyproject.toml src/ tests/ | pylint-exit $?
+        poetry run pylint --rcfile pyproject.toml src/ tests/ | poetry run pylint-exit $?
