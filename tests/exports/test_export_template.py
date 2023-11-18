@@ -1,3 +1,4 @@
+import datetime
 import unittest
 import joystick_diagrams.classes.export as export
 import tempfile
@@ -102,6 +103,11 @@ class TestExport_Template(unittest.TestCase):
     def test_get_template_failure(self):
         data = self.exporter.get_template("Not a Template")
         self.assertEqual(data, False)
+
+    def test_template_date(self):
+        dt = datetime.datetime.now().strftime("%d/%m/%Y")
+        temp = self.exporter.date_template("XYZ DATE_STAMP XYZ")
+        assert dt in temp
 
 
 if __name__ == "__main__":

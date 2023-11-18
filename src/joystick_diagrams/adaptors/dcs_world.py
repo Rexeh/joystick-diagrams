@@ -137,6 +137,9 @@ class DCSWorldParser(jdi.JDinterface):
                     else:
                         parsed_config = self.parse_config(self.file)  ##Better handling - decompose
 
+                        if parsed_config is None:
+                            break
+
                         button_map = self.create_joystick_map(parsed_config)
 
                         self.update_joystick_dictionary(joystick_device, profile, False, button_map)
@@ -147,6 +150,7 @@ class DCSWorldParser(jdi.JDinterface):
             return self.parse_file(file)
         except Exception as error:
             _logger.error(error)
+            return None
 
     def create_joystick_map(self, data) -> dict:
         write_val = False

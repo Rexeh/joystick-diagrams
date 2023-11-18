@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 import html
 import logging
+from datetime import datetime
 from PyQt5 import QtWidgets
 from joystick_diagrams import config
 from joystick_diagrams.functions import helper
@@ -43,13 +44,15 @@ class Export:
                 progress_increment_modes = len(self.joystick_listing[joystick])
                 for mode in self.joystick_listing[joystick]:
                     write_template = base_template
-                    print("Replacing Strings")
+                    _logger.info("Replacing Strings")
                     completed_template = self.replace_template_strings(joystick, mode, write_template)
-                    print("Replacing Unused String")
+                    _logger.info("Replacing Unused String")
                     completed_template = self.replace_unused_strings(completed_template)
-                    print("Branding")
+                    _logger.info("Branding")
                     completed_template = self.brand_template(mode, completed_template)
-                    print(f"Saving: {joystick}")
+                    _logger.info("Adding Date")
+                    completed_template = self.date_template(completed_template)
+                    _logger.info(f"Saving: {joystick}")
                     self.save_template(joystick, mode, completed_template)
                     if isinstance(progress_bar, QtWidgets.QProgressBar):
                         progress_bar.setValue(
@@ -110,4 +113,8 @@ class Export:
 
     def brand_template(self, title, template):
         template = re.sub("\\bTEMPLATE_NAME\\b", title, template)
+        return template
+
+    def date_template(self, template):
+        template = re.sub("\\bDATE_STAMP\\b", datetime.now().strftime("%d/%m/%Y"), template)
         return template
