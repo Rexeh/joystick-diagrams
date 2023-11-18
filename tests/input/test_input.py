@@ -48,7 +48,7 @@ def test_check_devices_duplication_name(caplog):
     device = add_device("dev-1", "device XYZ")
     assert device.guid == "dev-1"
     assert device.name == "device 1"
-    assert isinstance(device, type) == LogicalDevice
+    assert isinstance(device, LogicalDevice), LogicalDevice
     assert "Device dev-1 already exists and will not be re-added" in caplog.text
 
 

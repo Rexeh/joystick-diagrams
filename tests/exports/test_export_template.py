@@ -106,7 +106,7 @@ class TestExport_Template(unittest.TestCase):
 
     def test_template_date(self):
         dt = datetime.datetime.now().strftime("%d/%m/%Y")
-        temp = self.exporter.date_template("XYZ DATE_STAMP XYZ")
+        temp = self.exporter.date_template("XYZ CURRENT_DATE XYZ")
         assert dt in temp
 
 

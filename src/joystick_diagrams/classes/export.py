@@ -116,5 +116,5 @@ class Export:
         return template
 
     def date_template(self, template):
-        template = re.sub("\\bDATE_STAMP\\b", datetime.now().strftime("%d/%m/%Y"), template)
+        template = re.sub("\\bCURRENT_DATE\\b", datetime.now().strftime("%d/%m/%Y"), template)
         return template
