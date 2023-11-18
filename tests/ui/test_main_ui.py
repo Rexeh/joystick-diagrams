@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 import pytest
-import joystick_diagrams.main as ui
+import joystick_diagrams.__main__ as ui
 import joystick_diagrams.version as version
 
 
