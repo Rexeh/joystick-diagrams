@@ -60,6 +60,7 @@ setup(
         "black",
         "pre-commit",
         "coveralls",
+        "ply",
     ],
     project_urls={
         "Documentation": "https://joystick-diagrams.com/",
@@ -70,7 +71,7 @@ setup(
     options={"build_exe": build_options},
     executables=[
         Executable(
-            "src/joystick_diagrams/main.py",
+            "joystick_diagrams/__main__.py",
             base=BASE,
             target_name=TARGET_NAME,
             icon=pathlib.Path("images", "logo.ico"),

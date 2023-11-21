@@ -561,7 +561,8 @@ class StarCitizen(jdi.JDinterface):
 
     def extract_device_information(self, option) -> dict:
         """Accepts parsed OPTION from Star Citizen XML"""
-        name = (option.getAttribute("Product")[0 : (len(option.getAttribute("Product")) - 38)]).strip()
+        #replace double spaces in name to match template names
+        name = (option.getAttribute("Product")[0 : (len(option.getAttribute("Product")) - 38)]).strip().replace('  ', ' ')
         guid = option.getAttribute("Product")[-37:-2]  # GUID Fixed
         return {"name": name, "guid": guid}
 
