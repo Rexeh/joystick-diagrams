@@ -13,9 +13,6 @@ from enum import auto, Enum
 import logging
 
 _logger = logging.getLogger(__name__)
-_devices = {}
-
-print(__name__)
 
 
 @dataclass
@@ -39,12 +36,16 @@ class InputTypes(Enum):
 
 
 class Input:
-    def __init__(self, identifier: str, style: InputTypes, command: Command, modifiers: list[Modifier] = None) -> None:
+    # Rework input
+    # Better naming of the entities
+    # Change input to non conflciting class
+
+    def __init__(self, identifier: str, style: InputTypes, command: Command, modifiers: list[Modifier] = []) -> None:
         style.validate(identifier)
         self.identifier = identifier
         self.style = style
         self.command = command
-        self.modifiers = modifiers = [] if modifiers is None else modifiers
+        self.modifiers = modifiers
 
     def add_modifier(self, modifier: set, command: Command):
         """
@@ -75,7 +76,7 @@ class LogicalDevice:
     def __init__(self, guid: str, name: str):
         self.guid = guid.strip().lower()
         self.name = name.strip().lower()
-        self.inputs = []
+        self.inputs: list[Input] = []
 
     def create_input(self, input_id: str, style: InputTypes, command: Command) -> None:
         existing = self.__check_existing_input(input_id, style)
@@ -94,7 +95,7 @@ class LogicalDevice:
                 return x
         return None
 
-    def get_device_inputs(self) -> dict:
+    def get_device_inputs(self) -> list[Input]:
         return self.inputs
 
     def add_modifier_to_input(self, input_id, modifier: set, command: Command) -> None:
@@ -109,7 +110,8 @@ class LogicalDevice:
             self.create_input(input_id, InputTypes.BUTTON, "Not Used")
             obj = self._get_input(input_id)
             _logger.debug(f"Modifier input created now: {obj}")
-        obj.add_modifier(modifier, command)
+        else:
+            obj.add_modifier(modifier, command)
 
     def __check_existing_input(self, input_id: str, style: InputTypes) -> Input | None:
         """
@@ -149,8 +151,14 @@ def add_device(guid: str, name: str) -> LogicalDevice:
 
 
 def add_input_modifier(guid: str, input_id: str, modifier: set, command: Command) -> None:
-    _get_device(guid).add_modifier_to_input(input_id, modifier, command)
+    try:
+        _get_device(guid).add_modifier_to_input(input_id, modifier, command)
+    except:
+        pass
 
 
 def add_inputs(guid: str, **kwargs) -> None:
     _devices[guid].create_input(**kwargs)
+
+
+_devices = {}

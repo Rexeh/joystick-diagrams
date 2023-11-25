@@ -1,11 +1,9 @@
 """DCS World Lua Config Parser for use with Joystick Diagrams"""
-from ast import Str
 import os
 import re
 from pathlib import Path
 import logging
-from ply import lex, yacc
-
+from ply import lex, yacc  # type: ignore
 import joystick_diagrams.adaptors.dcs_world_lex  # pylint: disable=unused-import
 import joystick_diagrams.adaptors.dcs_world_yacc  # pylint: disable=unused-import
 import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
@@ -38,14 +36,14 @@ class DCSWorldParser(jdi.JDinterface):
         else:
             raise FileNotFoundError("DCS: No Config Folder found in DCS Folder.")
 
-    def __validate_profiles(self) -> list:
+    def __validate_profiles(self) -> list[str]:
         """
         Validate Profiles Routine
         """
         if len(self.base_directory) == 0:
             raise FileExistsError("DCS: No profiles exist in Input directory!")
 
-        valid_items = list()
+        valid_items = []
         for item in self.base_directory:
             valid = self.__validate_profile(item)
             if valid:
@@ -55,7 +53,7 @@ class DCSWorldParser(jdi.JDinterface):
 
         return valid_items
 
-    def __validate_profile(self, item):
+    def __validate_profile(self, item: str) -> list | bool:
         """
         Validate Inidividual Profile
         Return Valid Profile
@@ -68,7 +66,7 @@ class DCSWorldParser(jdi.JDinterface):
 
         return False
 
-    def get_validated_profiles(self):
+    def get_validated_profiles(self) -> list[str]:
         """Expose Valid Profiles only to UI"""
         if self.remove_easy_modes:
             return list(
@@ -85,20 +83,21 @@ class DCSWorldParser(jdi.JDinterface):
 
         match len(split):
             case 2:
-                if len(split) == 2:
-                    if split[1][0:3] == "BTN":
-                        return split[1].replace("BTN", "BUTTON_")
-                    elif split[1].isalpha():
-                        return f"AXIS_{split[1]}"
-                    elif split[1][0:6] == "SLIDER":
-                        return f"AXIS_SLIDER_{split[1][6:]}"
-                    else:
-                        return split[1]
-            ## Add default case / better handling
+                if split[1][0:3] == "BTN":
+                    return f"{split[1].replace('BTN', 'BUTTON_')}"
+                elif split[1].isalpha():
+                    return f"AXIS_{split[1]}"
+                elif split[1][0:6] == "SLIDER":
+                    return f"AXIS_SLIDER_{split[1][6:]}"
+                else:
+                    return f"{split[1]}"
             case 4:
                 return f"{split[1].replace('BTN', 'POV')}_{split[2][3]}_{split[3]}"
+            case _:
+                _logger.warning(f"Button format not found for {split}")
+                return f"{button}"
 
-    def process_profiles(self, profile_list: list = None) -> dict:
+    def process_profiles(self, profile_list: list | None = None) -> dict:
         if isinstance(profile_list, list) and len(profile_list) > 0:
             self.profiles_to_process = profile_list
         else:
@@ -119,6 +118,7 @@ class DCSWorldParser(jdi.JDinterface):
                     _logger.info("Skipping as Folder")
                 else:
                     try:
+                        _logger.debug(f"Obtaining file data  for {joystick_file}")
                         file_data = (
                             Path(os.path.join(self.fq_path, joystick_file))
                             .read_text(encoding="utf-8")
@@ -126,12 +126,12 @@ class DCSWorldParser(jdi.JDinterface):
                             .replace("return diff", "")
                         )
 
-                    except FileNotFoundError:
-                        raise FileExistsError(
-                            "DCS: File {} no longer found - It has been moved/deleted from directory".format(
-                                joystick_file
-                            )
+                    except FileNotFoundError as err:
+                        _logger.error(
+                            f"DCS: File {joystick_file} no longer found - It has been moved/deleted from directory. {err}"
                         )
+                        raise
+
                     else:
                         parsed_config = self.parse_config(file_data)  ##Better handling - decompose
 
@@ -143,10 +143,11 @@ class DCSWorldParser(jdi.JDinterface):
                         self.update_joystick_dictionary(joystick_device, profile, False, button_map)
         return self.joystick_dictionary
 
-    def parse_config(self, file: Str):
+    def parse_config(self, file: str):
         try:
             return self.parse_file(file)
         except Exception as error:
+            _logger.error("There was a parsing issue with the text data, this could mean an unhandled character.")
             _logger.error(error)
             return None
 
@@ -179,7 +180,7 @@ class DCSWorldParser(jdi.JDinterface):
                     write_val = False
         return button_array
 
-    def parse_file(self, file: Str) -> dict:
+    def parse_file(self, file: str) -> dict:
         # pylint: disable=unused-variable
         tokens = (
             "LCURLY",
@@ -271,14 +272,11 @@ class DCSWorldParser(jdi.JDinterface):
 
         # Build the lexer
         lexer = lex.lex(
-            debug=False,
-            optimize=1,
-            lextab="dcs_world_lex",
-            reflags=re.UNICODE | re.VERBOSE,
+            debug=False, optimize=1, lextab="dcs_world_lex", reflags=re.UNICODE | re.VERBOSE, errorlog=_logger
         )
 
         # Build the parser
-        parser = yacc.yacc(debug=False, optimize=1, tabmodule="dcs_world_yacc")
+        parser = yacc.yacc(debug=False, optimize=1, tabmodule="dcs_world_yacc", errorlog=_logger)
 
         # Parse the data
         try:

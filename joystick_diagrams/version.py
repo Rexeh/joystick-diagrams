@@ -3,10 +3,9 @@ Versioning for Joystick Diagrams
 
 Author: Robert Cox
 """
-import requests
 from dataclasses import dataclass
 
-VERSION = "1.4.1"
+VERSION = "1.5"
 VERSION_SERVER = "http://localhost:5000/api/v1/version/"
 
 

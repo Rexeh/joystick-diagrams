@@ -28,10 +28,10 @@ class ParserPluginManager:
                 try:
                     # Try initiate the plugin
                     self._plugins.append(self.load_plugin(plugin))
-                except exp.plugin_not_valid as e:
+                except exp.PluginNotValid as e:
                     _logger.error(e)
         else:
-            raise exp.no_plugins_exist()
+            raise exp.NoPluginsExist()
 
     def load_plugin(self, module_path: str) -> ModuleType:
         """Attempt to load the plugin"""
@@ -39,9 +39,9 @@ class ParserPluginManager:
             # Todo make nicer the joining of relative pathing...
             return import_module("." + module_path + ".main", "joystick_diagrams.plugins").CustomPlugin()
         except TypeError as e:
-            raise exp.plugin_not_valid(error=e) from e
+            raise exp.PluginNotValid(error=e) from e
         except ModuleNotFoundError as e:
-            raise exp.plugin_not_valid(value=module_path, error=e) from e
+            raise exp.PluginNotValid(value=module_path, error=e) from e
 
     def find_plugins(self, directory="plugins") -> list:
         """

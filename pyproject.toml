@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "joystick_diagrams"
-version = "1.5"
 description = ""
 authors = ["Robert Cox"]
+version = "1.5"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -19,13 +19,25 @@ pre-commit = "^2.15.0"
 coveralls = "^3.3.0"
 pylint = "^3.0.0"
 cx-Freeze = "^6.15.0"
-
-[tool.poetry.scripts]
-build-exe = "build:setup"
+mypy = "^1.7.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "Joystick_Diagrams"
+description = "Automatically create diagrams for your throttles, joysticks and custom HID devices"
+dynamic = ["version", "readme"]
+
+[tool.setuptools.dynamic]
+version = {attr = "joystick_diagrams.version.VERSION"}
+readme =  {file = "readme.md"}
+
+[tool.distutils.build_exe]
+include_files =  ["./images", "./templates", "./config.cfg", "./readme.md"]
+excludes  = ["tkinter", "test", "distutils", "ssl", "asyncio", "concurrent", "pyqt5"]
+optimize = 2
 
 [tool.coverage.paths]
 source = ["joystick_diagrams/", "*/site-packages/"]
@@ -80,3 +92,7 @@ extension-pkg-whitelist = ["PyQt5"]
 # ignoring missing module and missing class docstring errors
 disable = ["C0114", "C0115","W1201","W1202","logging-fstring-interpolation","missing-function-docstring"]
 output-format = "colorized"
+
+[tool.mypy]
+warn_return_any = "False"
+warn_unused_configs = "True"

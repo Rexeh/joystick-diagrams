@@ -25,6 +25,7 @@ temp/
 /notebooks
 /logs/*
 /src/joystick_diagrams/logs*
+*.egg-info/
 
 # IDE
 *.code-workspace

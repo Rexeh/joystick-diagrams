@@ -12,7 +12,10 @@ fmt:
 
 lint: 
 	@echo "Linting source code"
-	@poetry run pylint --rcfile pyproject.toml src/ tests/
+	@poetry run pylint --rcfile pyproject.toml joystick_diagrams/ tests/
 
 build-exe:
-	@poetry run python build.py build
+	@echo "Making standard portable package"
+	@poetry run setup.py build
+	@echo "Making MSI Build"
+	@poetry run setup.py build bdist_msi
