@@ -10,8 +10,9 @@ from joystick_diagrams.classes.input import (
     Command,
     add_inputs,
     add_input_modifier,
-    get_devices,
     clear_devices,
+    get_all_devices,
+    get_device,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -26,22 +27,22 @@ def test_add_device():
     guid = "test_guid"
     name = "test_name"
     add_device(guid, name)
-    devices = get_devices()
+    devices = get_all_devices()
     assert len(devices), 1
     assert devices[guid].guid, guid
     assert devices[guid].name, name
 
 
 def test_check_devices_registered():
-    devices = get_devices()
+    devices = get_all_devices()
     assert "dev-1" in devices
     assert "dev-2" in devices
 
 
 def test_clear_devices():
-    assert len(get_devices()) > 0
+    assert len(get_all_devices()) > 0
     clear_devices()
-    assert len(get_devices()) == 0
+    assert len(get_all_devices()) == 0
 
 
 def test_check_devices_duplication_name(caplog):
@@ -78,7 +79,7 @@ def test_add_multiple_inputs_with_modifiers():
             add_input_modifier(guid, input_data["id"], modifier_data["input"], modifier_data["command"])
 
     # Retrieve the inputs from the device
-    device_inputs = get_devices(guid).get_device_inputs()
+    device_inputs = get_device(guid).get_device_inputs()
 
     # Check that the correct number of inputs were added
     assert len(device_inputs), len(inputs)
@@ -117,7 +118,7 @@ def test_add_modify_existing_modifier():
             add_input_modifier(guid, input_data["id"], modifier_data["input"], modifier_data["command"])
 
     # Retrieve the inputs from the device
-    device_inputs = get_devices(guid).get_device_inputs()
+    device_inputs = get_device(guid).get_device_inputs()
 
     # Check that each input has the correct properties
     for input_data in inputs:
@@ -133,6 +134,6 @@ def test_add_modify_existing_modifier():
             assert modifier.command.name, modifier_data["command"].name
 
     # Change a modifier
-    device = get_devices(guid)
+    device = get_device(guid)
     add_input_modifier(guid, "input1", {"modifier1"}, "potato")
     assert device.inputs[0].modifiers[0].command == "potato"

@@ -30,10 +30,6 @@ class InputTypes(Enum):
     BUTTON = auto()
     AXIS = auto()
 
-    @staticmethod
-    def validate(identifier):
-        return "baaa"
-
 
 class Input:
     # Rework input
@@ -41,7 +37,6 @@ class Input:
     # Change input to non conflciting class
 
     def __init__(self, identifier: str, style: InputTypes, command: Command, modifiers: list[Modifier] = []) -> None:
-        style.validate(identifier)
         self.identifier = identifier
         self.style = style
         self.command = command
@@ -107,9 +102,7 @@ class LogicalDevice:
         obj = self._get_input(input_id)
         _logger.debug(f"Modifier input is: {obj}")
         if obj is None:
-            self.create_input(input_id, InputTypes.BUTTON, "Not Used")
-            obj = self._get_input(input_id)
-            _logger.debug(f"Modifier input created now: {obj}")
+            _logger.warning(f"Modifier added to {input_id} but input does not exist")
         else:
             obj.add_modifier(modifier, command)
 
@@ -132,13 +125,12 @@ def clear_devices():
     _devices.clear()
 
 
-def get_devices(guid=None) -> dict[str:LogicalDevice]:
-    """Returns a dictionary of all devices"""
-    return _get_device(guid) if guid else _devices
-
-
-def _get_device(guid: str) -> LogicalDevice:
+def get_device(guid: str) -> LogicalDevice:
     return _devices[guid]
+
+
+def get_all_devices() -> dict[str, LogicalDevice]:
+    return _devices
 
 
 def add_device(guid: str, name: str) -> LogicalDevice:
@@ -151,14 +143,11 @@ def add_device(guid: str, name: str) -> LogicalDevice:
 
 
 def add_input_modifier(guid: str, input_id: str, modifier: set, command: Command) -> None:
-    try:
-        _get_device(guid).add_modifier_to_input(input_id, modifier, command)
-    except:
-        pass
+    get_device(guid).add_modifier_to_input(input_id, modifier, command)
 
 
 def add_inputs(guid: str, **kwargs) -> None:
     _devices[guid].create_input(**kwargs)
 
 
-_devices = {}
+_devices: dict[str, LogicalDevice] = {}

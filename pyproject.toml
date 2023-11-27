@@ -9,6 +9,7 @@ python = "^3.11"
 PyQt5 = "^5.15.8"
 PyQt5-Qt5 = "5.15.2"
 ply = "^3.11"
+requests = "^2.31.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
