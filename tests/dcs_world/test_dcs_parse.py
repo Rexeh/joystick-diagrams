@@ -1,16 +1,14 @@
 import unittest
-import joystick_diagrams.adaptors.dcs_world as dcs
-import pprint
+
+import joystick_diagrams.adaptors.dcs.dcs_world as dcs
 
 
-class TestDCS_Parse_Test(unittest.TestCase):
+class TestDCSParseTest(unittest.TestCase):
     def setUp(self):
         self.dcs_instance = dcs.DCSWorldParser("./tests/data/dcs_world/valid_dcs_world_directory")
-        self.maxDiff = None
 
     def test_no_profiles_selected_no_easy(self):
         """Test default no selection, with easy modes disabled (excluded)"""
-        profiles = self.dcs_instance.get_validated_profiles()
 
         expected = {
             "Throttle - HOTAS Warthog": {
@@ -55,7 +53,7 @@ class TestDCS_Parse_Test(unittest.TestCase):
 
     def test_no_profiles_selected_including_easy_modes(self):
         """Test default no selection, with easy modes enabled (included)"""
-        profiles = self.dcs_instance.get_validated_profiles()
+
         expected = {
             "Throttle - HOTAS Warthog": {
                 "CoolPlane-A": {

@@ -1,11 +1,13 @@
 """DCS World Lua Config Parser for use with Joystick Diagrams"""
+import logging
 import os
 import re
 from pathlib import Path
-import logging
+
 from ply import lex, yacc  # type: ignore
-import joystick_diagrams.adaptors.dcs_world_lex  # pylint: disable=unused-import
-import joystick_diagrams.adaptors.dcs_world_yacc  # pylint: disable=unused-import
+
+import joystick_diagrams.adaptors.dcs.dcs_world_lex  # pylint: disable=unused-import
+import joystick_diagrams.adaptors.dcs.dcs_world_yacc  # pylint: disable=unused-import
 import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
 
 _logger = logging.getLogger(__name__)
@@ -128,7 +130,8 @@ class DCSWorldParser(jdi.JDinterface):
 
                     except FileNotFoundError as err:
                         _logger.error(
-                            f"DCS: File {joystick_file} no longer found - It has been moved/deleted from directory. {err}"
+                            f"DCS: File {joystick_file} no longer found - \
+                                It has been moved/deleted from directory. {err}"
                         )
                         raise
 

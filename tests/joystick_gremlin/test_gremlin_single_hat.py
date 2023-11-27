@@ -1,8 +1,8 @@
 import unittest
-import joystick_diagrams.adaptors.joystick_gremlin as gremlin
+import joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin as gremlin
 
 
-class TestGremlin_Single_Hat(unittest.TestCase):
+class TestGremlinSingleHat(unittest.TestCase):
     expected = {
         "VPC Stick MT-50CM": {
             "Default": {
@@ -28,9 +28,8 @@ class TestGremlin_Single_Hat(unittest.TestCase):
         self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_pov_single.xml")
 
     def test_pov_single_8_way(self):
-        self.maxDiff = None
-        self.parsedFile = self.file.create_dictionary()
-        self.assertEqual(self.expected, self.parsedFile)
+        parsed_file = self.file.create_dictionary()
+        self.assertEqual(self.expected, parsed_file)
 
 
 if __name__ == "__main__":

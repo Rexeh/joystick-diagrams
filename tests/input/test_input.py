@@ -1,7 +1,7 @@
 # Test creation of new devicew
 # Test duplication of new device is prevented
-# Check a device can have an input registered
-# Check a device can have an input overwritten
+# Check a device can have an device_input registered
+# Check a device can have an device_input overwritten
 import logging
 from joystick_diagrams.classes.input import (
     add_device,
@@ -54,9 +54,9 @@ def test_check_devices_duplication_name(caplog):
 
 
 # Test for correct behaviour
-# Add an input
-# Moodify an input (overwrtite)
-# Add modifiers to an existing input (but original input not changed)
+# Add an device_input
+# Moodify an device_input (overwrtite)
+# Add modifiers to an existing device_input (but original device_input not changed)
 
 
 def test_add_multiple_inputs_with_modifiers():
@@ -68,15 +68,15 @@ def test_add_multiple_inputs_with_modifiers():
         {"id": "input2", "style": InputTypes.AXIS, "command": Command("command2")},
     ]
     modifiers = [
-        {"input": {"modifier1"}, "command": Command("modifier_command1")},
-        {"input": {"modifier2"}, "command": Command("modifier_command2")},
+        {"device_input": {"modifier1"}, "command": Command("modifier_command1")},
+        {"device_input": {"modifier2"}, "command": Command("modifier_command2")},
     ]
 
     # Add the inputs and modifiers to the device
     for input_data in inputs:
         add_inputs(guid, input_id=input_data["id"], style=input_data["style"], command=input_data["command"])
         for modifier_data in modifiers:
-            add_input_modifier(guid, input_data["id"], modifier_data["input"], modifier_data["command"])
+            add_input_modifier(guid, input_data["id"], modifier_data["device_input"], modifier_data["command"])
 
     # Retrieve the inputs from the device
     device_inputs = get_device(guid).get_device_inputs()
@@ -84,16 +84,16 @@ def test_add_multiple_inputs_with_modifiers():
     # Check that the correct number of inputs were added
     assert len(device_inputs), len(inputs)
 
-    # Check that each input has the correct properties
+    # Check that each device_input has the correct properties
     for input_data in inputs:
-        input = next((x for x in device_inputs if x.identifier == input_data["id"]), None)
-        assert input, None
-        assert input.style, input_data["style"]
-        assert input.command.name, input_data["command"].name
+        device_input = next((x for x in device_inputs if x.identifier == input_data["id"]), None)
+        assert device_input, None
+        assert device_input.style, input_data["style"]
+        assert device_input.command.name, input_data["command"].name
 
-        # Check that each input has the correct modifiers
+        # Check that each device_input has the correct modifiers
         for modifier_data in modifiers:
-            modifier = next((x for x in input.modifiers if x.modifiers == modifier_data["input"]), None)
+            modifier = next((x for x in device_input.modifiers if x.modifiers == modifier_data["device_input"]), None)
             assert modifier, None
             assert modifier.command.name, modifier_data["command"].name
 
@@ -107,29 +107,29 @@ def test_add_modify_existing_modifier():
         {"id": "input2", "style": InputTypes.AXIS, "command": Command("command2")},
     ]
     modifiers = [
-        {"input": {"modifier1"}, "command": Command("modifier_command1")},
-        {"input": {"modifier2"}, "command": Command("modifier_command2")},
+        {"device_input": {"modifier1"}, "command": Command("modifier_command1")},
+        {"device_input": {"modifier2"}, "command": Command("modifier_command2")},
     ]
 
     # Add the inputs and modifiers to the device
     for input_data in inputs:
         add_inputs(guid, input_id=input_data["id"], style=input_data["style"], command=input_data["command"])
         for modifier_data in modifiers:
-            add_input_modifier(guid, input_data["id"], modifier_data["input"], modifier_data["command"])
+            add_input_modifier(guid, input_data["id"], modifier_data["device_input"], modifier_data["command"])
 
     # Retrieve the inputs from the device
     device_inputs = get_device(guid).get_device_inputs()
 
-    # Check that each input has the correct properties
+    # Check that each device_input has the correct properties
     for input_data in inputs:
-        input = next((x for x in device_inputs if x.identifier == input_data["id"]), None)
-        assert input, None
-        assert input.style, input_data["style"]
-        assert input.command.name, input_data["command"].name
+        device_input = next((x for x in device_inputs if x.identifier == input_data["id"]), None)
+        assert device_input, None
+        assert device_input.style, input_data["style"]
+        assert device_input.command.name, input_data["command"].name
 
-        # Check that each input has the correct modifiers
+        # Check that each device_input has the correct modifiers
         for modifier_data in modifiers:
-            modifier = next((x for x in input.modifiers if x.modifiers == modifier_data["input"]), None)
+            modifier = next((x for x in device_input.modifiers if x.modifiers == modifier_data["device_input"]), None)
             assert modifier, None
             assert modifier.command.name, modifier_data["command"].name
 

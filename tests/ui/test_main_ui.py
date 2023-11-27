@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 import joystick_diagrams.__main__ as ui
-import joystick_diagrams.version as version
+import joystick_diagrams.classes.version.version as version
 
 
 def test_title(qtbot):
@@ -8,7 +8,7 @@ def test_title(qtbot):
     qtbot.addWidget(window)
     title = "Joystick Diagrams - V"
     version_text = version.VERSION
-    assert window.windowTitle() == "{title}{version}".format(title=title, version=version_text)
+    assert window.windowTitle() == f"{title}{version_text}"
 
 
 def test_default_ui(qtbot):

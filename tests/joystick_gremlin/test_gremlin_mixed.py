@@ -1,8 +1,8 @@
 import unittest
-import joystick_diagrams.adaptors.joystick_gremlin as gremlin
+import joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin as gremlin
 
 
-class TestGremlin_Mixed(unittest.TestCase):
+class TestGremlinMixed(unittest.TestCase):
     inherit_no_inherit_expected = {
         "VPC Throttle MT-50 CM2": {
             "A10": {
@@ -94,9 +94,8 @@ class TestGremlin_Mixed(unittest.TestCase):
 
     # Not a unit test, revisit later if needed
     def test_device_object(self):
-        self.maxDiff = None
-        self.parsedFile = self.file.create_dictionary()
-        self.assertEqual(self.inherit_no_inherit_expected, self.parsedFile)
+        parsed_file = self.file.create_dictionary()
+        self.assertEqual(self.inherit_no_inherit_expected, parsed_file)
 
 
 if __name__ == "__main__":

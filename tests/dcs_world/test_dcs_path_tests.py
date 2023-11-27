@@ -1,12 +1,11 @@
-import unittest
-import joystick_diagrams.adaptors.dcs_world as dcs
 import os
-import pytest
-import tempfile
 import shutil
+import unittest
+
+import joystick_diagrams.adaptors.dcs.dcs_world as dcs
 
 
-class TestDCS_Paths(unittest.TestCase):
+class TestDCSPaths(unittest.TestCase):
     def setUp(self):
         pass
 

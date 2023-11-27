@@ -1,9 +1,9 @@
 import unittest
-import joystick_diagrams.adaptors.joystick_gremlin as gremlin
+import joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin as gremlin
 
 
-class TestGremlin_No_Devices(unittest.TestCase):
-    no_inherit_expected = {}
+class TestGremlinNoDevices(unittest.TestCase):
+    no_inherit_expected: dict = {}
 
     def setUp(self):
         self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_no_devices.xml")
@@ -13,9 +13,8 @@ class TestGremlin_No_Devices(unittest.TestCase):
 
     # Not a unit test, revisit later if needed
     def test_device_object(self):
-        self.maxDiff = None
-        self.parsedFile = self.file.create_dictionary()
-        self.assertEqual(self.no_inherit_expected, self.parsedFile)
+        parsed_file = self.file.create_dictionary()
+        self.assertEqual(self.no_inherit_expected, parsed_file)
 
 
 if __name__ == "__main__":

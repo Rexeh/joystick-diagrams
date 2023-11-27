@@ -1,8 +1,9 @@
 """Star Citizen XML Parser for use with Joystick Diagrams"""
+import logging
 import os
 from pathlib import Path
 from xml.dom import minidom
-import logging
+
 import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
 
 _logger = logging.getLogger(__name__)
@@ -17,9 +18,9 @@ class StarCitizen(jdi.JDinterface):
         self.hat = None
         self.devices = {}
         self.button_array = {}
-        self.actionsMapBypass = {"Fire 1", "Fire 2"}
+        self.action_map_bypass = {"Fire 1", "Fire 2"}
         # Force some Labels, this ideally need to be declared elsewhere or from an external file
-        self.customLabels = {
+        self.custom_labels = {
             "attack1": "z_attack",
             "combatheal": "z_combat_heal",
             "combathealtarget": "z_heal_target",
@@ -507,10 +508,10 @@ class StarCitizen(jdi.JDinterface):
 
     def parse_map(self, bind_map) -> tuple:
         segments = bind_map.split("_")
-        _logger.debug("Bind Information: {}".format(segments))
+        _logger.debug(f"Bind Information: {segments}")
         bind_device = segments[0]
         device_object = self.get_stored_device(bind_device)
-        _logger.debug("Device: {}".format(device_object))
+        _logger.debug(f"Device: {device_object}")
         if device_object is None:
             c_map = None
             return (device_object, c_map)
@@ -519,44 +520,44 @@ class StarCitizen(jdi.JDinterface):
             return (device_object, c_map)
         elif segments[1][0:6] == "button":
             button_id = segments[1][6:]
-            c_map = "BUTTON_{id}".format(id=button_id)
+            c_map = f"BUTTON_{button_id}"
             return (device_object, c_map)
         elif segments[1][0:3] == "hat":
             pov_id = segments[1][3:]
             pov_dir = self.convert_hat_format(segments[2])
-            c_map = "POV_{id}_{dir}".format(id=pov_id, dir=pov_dir)
+            c_map = f"POV_{pov_id}_{pov_dir}"
             return (device_object, c_map)
         elif segments[1][0] in ("x", "y", "z"):
             axis = segments[1][0]
-            c_map = "AXIS_{axis}".format(axis=axis)
+            c_map = f"AXIS_{axis}"
             return (device_object, c_map)
         elif segments[1][0:3] == "rot":
             axis = segments[1][3:]
-            c_map = "AXIS_R{axis}".format(axis=axis)
+            c_map = f"AXIS_R{axis}"
             return (device_object, c_map)
         elif segments[1][0:6] == "slider":
             slider_id = segments[1][6:]
-            c_map = "AXIS_SLIDER_{id}".format(id=slider_id)
+            c_map = f"AXIS_SLIDER_{slider_id}"
             return (device_object, c_map)
         else:
             c_map = None
             return (device_object, c_map)
 
     def get_human_readable_name(self, name) -> str:
-        if name in self.customLabels:
-            return self.name_format(self.customLabels.get(name))
+        if name in self.custom_labels:
+            return self.name_format(self.custom_labels.get(name))
 
         return self.name_format(name)
 
     def name_format(self, name: str) -> str:
-        name = name.split("_")
-        if len(name) == 1:
-            return name[0].capitalize()
+        name_parts = name.split("_")
+        if len(name_parts) == 1:
+            return name_parts[0].capitalize()
         else:
-            return (" ".join(name[1:])).capitalize()
+            return (" ".join(name_parts[1:])).capitalize()
 
     def convert_hat_format(self, hat) -> str:
-        _logger.debug("Convert Hat: {}".format(hat))
+        _logger.debug(f"Convert Hat: {hat}")
         return self.hat_formats[hat]
 
     def extract_device_information(self, option) -> dict:
@@ -580,10 +581,10 @@ class StarCitizen(jdi.JDinterface):
                 ): self.extract_device_information(option)
             }
         )
-        _logger.debug("Device List: {}".format(self.devices))
+        _logger.debug(f"Device List: {self.devices}")
 
     def process_name(self, name: str) -> str:
-        _logger.debug("Bind Name: {}".format(name))
+        _logger.debug(f"Bind Name: {name}")
 
         return self.get_human_readable_name(name)
 
@@ -600,7 +601,7 @@ class StarCitizen(jdi.JDinterface):
             device_code = "js"
         else:
             device_code = "mo"  ## Catch all for now
-        return "{type}{instance}".format(type=device_code, instance=instance)
+        return f"{device_code}{instance}"
 
     def parse(self) -> dict:
         parse = minidom.parseString(self.data)
@@ -610,16 +611,16 @@ class StarCitizen(jdi.JDinterface):
         actions = parse.getElementsByTagName("actionmap")
 
         for i in actions:
-            _logger.debug("Bind Category: {}".format(self.process_name(i.getAttribute("name"))))
+            _logger.debug(f"Bind Category: {self.process_name(i.getAttribute('name'))}")
             single_actions = i.getElementsByTagName("action")
             for action in single_actions:
                 name = self.process_name(action.getAttribute("name"))
                 binds = action.getElementsByTagName("rebind")
-                _logger.debug("Binds in group: {}".format(binds))
+                _logger.debug("Binds in group: {binds}")
                 for bind in binds:
-                    bind = bind.getAttribute("input")
-                    button = self.parse_map(bind)
-                    _logger.debug("Parsed Control: {}".format(button))
+                    bind_input = bind.getAttribute("input")
+                    button = self.parse_map(bind_input)
+                    _logger.debug("Parsed Control: {button}")
                     if button and button[1] is not None:
                         _logger.debug("Valid button, adding to map")
                         # Check if the Device exist is already Mapped
@@ -630,12 +631,12 @@ class StarCitizen(jdi.JDinterface):
                                 self.build_button_map(button[0]["name"], button[1], name)
                             else:
                                 # Check if the current Binding bypass existing one
-                                if name in self.actionsMapBypass:
+                                if name in self.action_map_bypass:
                                     self.build_button_map(button[0]["name"], button[1], name)
                         else:
                             # Add Mapping
                             self.build_button_map(button[0]["name"], button[1], name)
-                        _logger.debug("Button Map is now: {}".format(self.button_array))
+                        _logger.debug("Button Map is now: {self.button_array}")
                     else:
                         _logger.debug("Button not valid, skipping")
 

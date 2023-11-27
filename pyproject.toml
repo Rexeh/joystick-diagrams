@@ -21,6 +21,7 @@ coveralls = "^3.3.0"
 pylint = "^3.0.0"
 cx-Freeze = "^6.15.0"
 mypy = "^1.7.1"
+isort = "^5.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -82,6 +83,7 @@ exclude = '''
                      # the root of the project
 )
 '''
+
 [tool.pylint.format]
 max-line-length = 120
 
@@ -95,5 +97,5 @@ disable = ["C0114", "C0115","W1201","W1202","logging-fstring-interpolation","mis
 output-format = "colorized"
 
 [tool.mypy]
-warn_return_any = "False"
-warn_unused_configs = "True"
+warn_return_any = false
+warn_unused_configs = true

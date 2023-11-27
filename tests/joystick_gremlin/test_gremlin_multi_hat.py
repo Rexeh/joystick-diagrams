@@ -1,5 +1,5 @@
 import unittest
-import joystick_diagrams.adaptors.joystick_gremlin as gremlin
+import joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin as gremlin
 
 
 class TestGremlinMultipleHats(unittest.TestCase):
@@ -32,9 +32,8 @@ class TestGremlinMultipleHats(unittest.TestCase):
         self.file = gremlin.JoystickGremlin("./tests/data/joystick_gremlin/gremlin_pov_multi.xml")
 
     def test_pov_multi_hats(self):
-        self.maxDiff = None
-        self.parsed_file = self.file.create_dictionary()
-        self.assertEqual(self.expected, self.parsed_file)
+        parsed_file = self.file.create_dictionary()
+        self.assertEqual(self.expected, parsed_file)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,12 @@
 import datetime
-import unittest
-import joystick_diagrams.classes.export as export
-import tempfile
 import os
+import tempfile
+import unittest
+
+from joystick_diagrams.classes import export
 
 
-class TestExport_Template(unittest.TestCase):
+class TestExportTemplate(unittest.TestCase):
     data = {
         "VPC Throttle MT-50 CM2": {
             "A10": {

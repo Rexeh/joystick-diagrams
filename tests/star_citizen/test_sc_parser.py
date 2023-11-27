@@ -1,5 +1,5 @@
 import unittest
-import joystick_diagrams.adaptors.star_citizen as sc
+import joystick_diagrams.adaptors.star_citizen.star_citizen as sc
 
 
 class TestSCParserCases(unittest.TestCase):
@@ -104,7 +104,6 @@ class TestSCParserCases(unittest.TestCase):
         }
 
         data = self.file.parse()
-        self.maxDiff = None
         self.assertEqual(expected, data)
 
 
