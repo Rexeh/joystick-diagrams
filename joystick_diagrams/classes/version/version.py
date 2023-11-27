@@ -22,10 +22,14 @@ MANIFEST_FILE = "version_manifest.json"
 ENCODING = "UTF8"
 
 
-@dataclass
+@dataclass(eq=False)
 class JoystickDiagramVersion:
     version: str
     template_hashes: dict
+
+    # Temporary EQ override as templates are not yet integrated to avoid incorrect version checks
+    def __eq__(self, other):
+        return self.version == other.version
 
 
 class VersionEncode(json.JSONEncoder):
@@ -63,9 +67,7 @@ def performn_version_check() -> bool:
     latest_version = __convert_json_to_object(remote_manifest)
 
     # Check Versions
-    version_match = compare_versions(latest_version=latest_version, running_version=running_version)
-
-    return version_match
+    return compare_versions(latest_version=latest_version, running_version=running_version)
 
 
 def __convert_json_to_object(payload: str) -> JoystickDiagramVersion:
@@ -108,7 +110,7 @@ def generate_template_manifest() -> dict[str, str]:
 
 
 def compare_versions(running_version: JoystickDiagramVersion, latest_version: JoystickDiagramVersion) -> bool:
-    return running_version.version == latest_version.version
+    return running_version == latest_version
 
 
 def get_current_version() -> str:
@@ -116,4 +118,4 @@ def get_current_version() -> str:
 
 
 if __name__ == "__main__":
-    performn_version_check()
+    generate_version()
