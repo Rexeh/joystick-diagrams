@@ -1,7 +1,7 @@
 """ 
 Versioning for Joystick Diagrams
 
-Author: Robert Cox
+Author: https://github.com/Rexeh
 """
 from dataclasses import dataclass
 import logging
@@ -55,18 +55,17 @@ def fetch_local_manifest() -> str | None:
 
 def performn_version_check() -> bool:
     """Checks the local version against the latest release"""
-    # GET REMOTE JSON
+
     remote_manifest = fetch_remote_manifest()
     local_manifest = fetch_local_manifest()
 
     if not remote_manifest or not local_manifest:
-        _LOGGER.error("Unable to perform version check")
+        _LOGGER.error("Unable to perform version check due to an error")
         return True
 
     running_version = __convert_json_to_object(local_manifest)
     latest_version = __convert_json_to_object(remote_manifest)
 
-    # Check Versions
     return compare_versions(latest_version=latest_version, running_version=running_version)
 
 

@@ -3,12 +3,13 @@ import os
 import logging
 from pathlib import Path
 from PyQt5 import QtWidgets, QtGui, QtCore
-from joystick_diagrams import config, version, manager
+from joystick_diagrams import config
 from joystick_diagrams.ui import ui
 from joystick_diagrams.adaptors.dcs_world import DCSWorldParser
 from joystick_diagrams.adaptors.joystick_gremlin import JoystickGremlin
 from joystick_diagrams.adaptors.star_citizen import StarCitizen
 from joystick_diagrams.classes import export
+from joystick_diagrams.classes.version import version
 
 _logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class MainWindow(QtWidgets.QMainWindow, ui.Ui_MainWindow):  # Refactor pylint: d
         """
         Set version in UI window
         """
-        version_text = version.VERSION
+        version_text = version.get_current_version()
         self.label_9.setText(version_text)
         self.setWindowTitle("Joystick Diagrams - V" + version_text)
 
@@ -298,17 +299,11 @@ def setup_logging() -> None:
     )
 
 
-def get_log_level() -> str:
-    """
-    Returns log level as specified in config filpipe
-    """
-    if config.debugLevel == 1:
-        return "WARNING"
-    if config.debugLevel == 2:
-        return "ERROR"
-    if config.debugLevel == 3:
-        return "DEBUG"
-    return "ERROR"
+def get_log_level():
+    try:
+        return logging.getLevelNamesMapping()[config.debugLevel]
+    except KeyError:
+        return logging.getLevelNamesMapping()["INFO"]
 
 
 if __name__ == "__main__":
@@ -319,6 +314,6 @@ if __name__ == "__main__":
         window = MainWindow()
         window.show()
         app.exec()
-        manager.ParserPluginManager()
+        # manager.ParserPluginManager()
     except Exception as error:  # pylint: disable=broad-except
         _logger.exception(error)
