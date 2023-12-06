@@ -20,14 +20,14 @@ from __future__ import annotations
 import copy
 import ctypes
 import ctypes.wintypes as ctwt
+import logging
+import os
 import uuid
 from enum import Enum
-import os
-import time
 from typing import Callable
-import logging
 
 _logger = logging.getLogger(__name__)
+_DILL_PATH = "./dill.dll"
 
 
 class DILLError(Exception):
@@ -396,7 +396,7 @@ class DeviceSummary:
 C_EVENT_CALLBACK = ctypes.CFUNCTYPE(None, _JoystickInputData)
 C_DEVICE_CHANGE_CALLBACK = ctypes.CFUNCTYPE(None, _DeviceSummary, ctypes.c_uint8)
 
-_dll_path = os.path.join(os.path.dirname(__file__), "includes\dill.dll")
+_dll_path = os.path.join(os.path.dirname(__file__), _DILL_PATH)
 _di_listener_dll = ctypes.cdll.LoadLibrary(_dll_path)
 
 _di_listener_dll.get_device_information_by_index.argtypes = [ctypes.c_uint]
@@ -409,7 +409,7 @@ class DILL:
 
     # Attempt to find the correct location of the dll for development
     # and installed use cases.
-    _dev_path = os.path.join(os.path.dirname(__file__), "includes\dill.dll")
+    _dev_path = os.path.join(os.path.dirname(__file__), _DILL_PATH)
     if os.path.isfile("dill.dll"):
         _dll_path = "dill.dll"
     elif os.path.isfile(_dev_path):
@@ -581,18 +581,6 @@ class DILL:
                 dll_fn.restype = params["returns"]
 
 
-def main():
-    # Initialize the class
-    DILL.initialize_capi()
-
-    dll = DILL()
-
-    dll.init()
-
-    devices = dll.get_device_count()
-    _logger.info(devices)
-
-    device = dll.get_device_information_by_index(1)
-    _logger.info(device)
-
-    return True
+# Initialize the class
+DILL.initialize_capi()
+DILL.init()

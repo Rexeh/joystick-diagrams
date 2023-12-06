@@ -1,15 +1,22 @@
-import sys
-import os
 import logging
+import os
+import sys
+import threading
 from pathlib import Path
-from PyQt5 import QtWidgets, QtGui, QtCore
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
 from joystick_diagrams import config
-from joystick_diagrams.ui import ui
 from joystick_diagrams.adaptors.dcs.dcs_world import DCSWorldParser
 from joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin import JoystickGremlin
 from joystick_diagrams.adaptors.star_citizen.star_citizen import StarCitizen
 from joystick_diagrams.classes import export
 from joystick_diagrams.classes.version import version
+from joystick_diagrams.devices import device_manager
+from joystick_diagrams.ui import ui
 
 _logger = logging.getLogger(__name__)
 
@@ -313,7 +320,12 @@ if __name__ == "__main__":
         app = QtWidgets.QApplication(sys.argv)
         window = MainWindow()
         window.show()
+
+        x = threading.Thread(target=device_manager.run, daemon=True)
+        x.start()
+
         app.exec()
+
         # manager.ParserPluginManager()
     except Exception as error:  # pylint: disable=broad-except
         _logger.exception(error)
