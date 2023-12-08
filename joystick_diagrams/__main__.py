@@ -31,12 +31,11 @@ class MainWindow(QtWidgets.QMainWindow, main_UI.Ui_MainWindow):  # Refactor pyli
         self.dcs_profiles_list.clear()
         self.jg_profile_list.clear()
         self.application_information_textbrowser.clear()
-        self.donate_button.clicked.connect(self.open_version_window)
         self.discord_button.clicked.connect(
             lambda: QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://discord.gg/G8nRUS2"))
         )
         self.version_checked = self.version_check()
-
+        self.donate_button.hide()
         # DCS UI Setup
         self.dcs_selected_directory_label.setText("")
         self.dcs_parser_instance = None
@@ -62,7 +61,7 @@ class MainWindow(QtWidgets.QMainWindow, main_UI.Ui_MainWindow):  # Refactor pyli
     def version_check(self):
         check = version.performn_version_check()
 
-        if check:
+        if not check:
             self.open_version_window()
 
         return check

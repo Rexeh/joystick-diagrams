@@ -15,7 +15,7 @@ import requests
 
 _LOGGER = logging.getLogger(__name__)
 
-VERSION = "2.0-ALPHA"
+VERSION = "2.0 ALPHA"  # Format Major.Minor
 VERSION_SERVER = "https://www.joystick-diagrams.com/"
 TEMPLATE_DIR = "./templates"
 MANIFEST_DIR = "./"
@@ -30,7 +30,9 @@ class JoystickDiagramVersion:
 
     # Temporary EQ override as templates are not yet integrated to avoid incorrect version checks
     def __eq__(self, other):
-        return self.version == other.version
+        me = float(self.version.split()[0])
+        other = float(other.version.split()[0])
+        return me >= other
 
 
 class VersionEncode(json.JSONEncoder):
