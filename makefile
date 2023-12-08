@@ -19,3 +19,7 @@ build-exe:
 	@poetry run setup.py build
 	@echo "Making MSI Build"
 	@poetry run setup.py build bdist_msi
+
+make-version:
+	@echo "Making version manifest"
+	@poetry run python joystick_diagrams/classes/version/version.py

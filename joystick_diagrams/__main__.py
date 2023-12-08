@@ -6,9 +6,6 @@ from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
-
 from joystick_diagrams import config
 from joystick_diagrams.adaptors.dcs.dcs_world import DCSWorldParser
 from joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin import JoystickGremlin
@@ -16,12 +13,15 @@ from joystick_diagrams.adaptors.star_citizen.star_citizen import StarCitizen
 from joystick_diagrams.classes import export
 from joystick_diagrams.classes.version import version
 from joystick_diagrams.devices import device_manager
-from joystick_diagrams.ui import ui
+from joystick_diagrams.ui import main_UI
+
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # type: ignore
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # type: ignore
 
 _logger = logging.getLogger(__name__)
 
 
-class MainWindow(QtWidgets.QMainWindow, ui.Ui_MainWindow):  # Refactor pylint: disable=too-many-instance-attributes
+class MainWindow(QtWidgets.QMainWindow, main_UI.Ui_MainWindow):  # Refactor pylint: disable=too-many-instance-attributes
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
@@ -31,6 +31,12 @@ class MainWindow(QtWidgets.QMainWindow, ui.Ui_MainWindow):  # Refactor pylint: d
         self.dcs_profiles_list.clear()
         self.jg_profile_list.clear()
         self.application_information_textbrowser.clear()
+        self.donate_button.clicked.connect(self.open_version_window)
+        self.discord_button.clicked.connect(
+            lambda: QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://discord.gg/G8nRUS2"))
+        )
+        self.version_checked = self.version_check()
+
         # DCS UI Setup
         self.dcs_selected_directory_label.setText("")
         self.dcs_parser_instance = None
@@ -44,16 +50,6 @@ class MainWindow(QtWidgets.QMainWindow, ui.Ui_MainWindow):  # Refactor pylint: d
         self.export_button.clicked.connect(self.export_profiles)
         self.parser_selector.currentChanged.connect(self.change_export_button)
         self.change_export_button()
-        self.donate_button.clicked.connect(
-            lambda: QtGui.QDesktopServices.openUrl(
-                QtCore.QUrl(
-                    "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url"
-                )
-            )
-        )
-        self.discord_button.clicked.connect(
-            lambda: QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://discord.gg/G8nRUS2"))
-        )
 
         # JG UI Setup
         self.jg_select_profile_button.clicked.connect(self.set_jg_file)
@@ -62,6 +58,25 @@ class MainWindow(QtWidgets.QMainWindow, ui.Ui_MainWindow):  # Refactor pylint: d
         self.sc_file = None
         self.sc_parser_instance = None
         self.sc_select_button.clicked.connect(self.set_sc_file)
+
+    def version_check(self):
+        check = version.performn_version_check()
+
+        if check:
+            self.open_version_window()
+
+        return check
+
+    def open_version_window(self):
+        msg_box = QtWidgets.QMessageBox()
+        msg_box.setIcon(QtWidgets.QMessageBox.Information)
+        msg_box.setText(
+            "A new version is available at <a href='https://www.joystick-diagrams.com/'>Joystick Diagrams</a> website"
+        )
+        msg_box.setWindowTitle("Joystick Diagrams - Update available")
+        msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
+
+        msg_box.exec()
 
     def set_version(self) -> None:
         """

@@ -1,11 +1,10 @@
 import logging
 from time import sleep
-from typing import Any
 
 from joystick_diagrams.devices import dill
 
 _LOGGER = logging.getLogger(__name__)
-_ACTIVE_DEViCES = {}
+_ACTIVE_DEViCES: dict[str, str] = {}  # GUID : Display Name
 
 # Action mappings for device changes
 DEVICE_ACTIONS = {1: "DEVICE_ADDED", 2: "DEVICE_REMOVED"}
@@ -15,11 +14,11 @@ _device_changes = []
 
 # Cannot debug?
 def _update_device_register(data: dill._DeviceSummary, action):
-    _LOGGER.info(f"Device was altered, added to device changes")
+    _LOGGER.info(f"Device {data} was altered, added to device changes")
     _device_changes.append([dill.DeviceSummary(data), action])
 
 
-dill.DILL.set_device_change_callback(_update_device_register)  # Figure out this callable
+dill.DILL.set_device_change_callback(_update_device_register)  # mypy: ignore
 
 
 # CAN BE DEBUGGED
@@ -42,10 +41,4 @@ def run():
 
 
 if __name__ == "__main__":
-    lst = [1, 2, 3, 4, 5]
-
-    while len(lst) != 0:
-        i = lst.pop(0)
-        print(f"Popped {i}")
-
-    print("finished")
+    pass

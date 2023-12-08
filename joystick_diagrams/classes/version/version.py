@@ -3,18 +3,19 @@ Versioning for Joystick Diagrams
 
 Author: https://github.com/Rexeh
 """
-from dataclasses import dataclass
-import logging
-from pathlib import Path
-from hashlib import sha256
 import json
-from typing import Any
+import logging
 import os
+from dataclasses import dataclass
+from hashlib import sha256
+from pathlib import Path
+from typing import Any
+
 import requests
 
 _LOGGER = logging.getLogger(__name__)
 
-VERSION = "1.6"
+VERSION = "2.0-ALPHA"
 VERSION_SERVER = "https://www.joystick-diagrams.com/"
 TEMPLATE_DIR = "./templates"
 MANIFEST_DIR = "./"
@@ -54,7 +55,11 @@ def fetch_local_manifest() -> str | None:
 
 
 def performn_version_check() -> bool:
-    """Checks the local version against the latest release"""
+    """Checks the local version against the latest release#
+
+    Returns True for Matched Versions
+    Returns False for Unmatched Versions
+    """
 
     remote_manifest = fetch_remote_manifest()
     local_manifest = fetch_local_manifest()
@@ -109,6 +114,10 @@ def generate_template_manifest() -> dict[str, str]:
 
 
 def compare_versions(running_version: JoystickDiagramVersion, latest_version: JoystickDiagramVersion) -> bool:
+    """Compares versions based on object __eq__
+
+    Returns TRUE for MATCH
+    """
     return running_version == latest_version
 
 
