@@ -2,7 +2,7 @@
 name = "joystick_diagrams"
 description = ""
 authors = ["Robert Cox"]
-version = "1.5"
+version = "2.0"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -10,6 +10,8 @@ PyQt5 = "^5.15.8"
 PyQt5-Qt5 = "5.15.2"
 ply = "^3.11"
 requests = "^2.31.0"
+qt-material = "^2.14"
+dynaconf = "^3.2.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
@@ -39,12 +41,18 @@ description = "Automatically create diagrams for your throttles, joysticks and c
 dynamic = ["version", "readme"]
 
 [tool.setuptools.dynamic]
-version = {attr = "joystick_diagrams.version.VERSION"}
+version = {attr = "joystick_diagrams.classes.version.version.VERSION"}
 readme =  {file = "readme.md"}
 
+[tool.setuptools.packages.find]
+where = ["joystick_diagrams"]
+namespaces = false
+
 [tool.distutils.build_exe]
-include_files =  ["./images", "./templates", "./config.cfg", "./readme.md"]
-excludes  = ["tkinter", "test", "distutils", "ssl", "asyncio", "concurrent", "pyqt5"]
+includes = ["joystick_diagrams.plugins","joystick_diagrams.plugins.plugin1"]
+packages = ["joystick_diagrams.plugins","joystick_diagrams.plugins.plugin1"]
+include_files =  ["./images", "./templates", "./config.cfg", "./readme.md", "version_manifest.json"]
+excludes  = ["tkinter", "test", "distutils", "asyncio", "concurrent", "pyqt5"]
 optimize = 2
 
 [tool.coverage.paths]

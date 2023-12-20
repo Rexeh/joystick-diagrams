@@ -1,12 +1,14 @@
-from os import path
-import os
-from pathlib import Path
-import re
 import html
 import logging
+import os
+import re
 from datetime import datetime
+from os import path
+from pathlib import Path
+
 from PyQt5 import QtWidgets
-from joystick_diagrams import config
+
+from joystick_diagrams.config import settings
 from joystick_diagrams.functions import helper
 
 _logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ class Export:
         self.file_name_divider = "_"
         self.joystick_listing = joystick_listing
         self.export_progress = None
-        self.no_bind_text = config.noBindText
+        self.no_bind_text = settings.noBindText | ""
         self.executor = parser_id
         self.error_bucket = []
 

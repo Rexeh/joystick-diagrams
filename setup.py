@@ -1,8 +1,8 @@
 import pathlib
 import sys
-from setuptools import find_packages
-from cx_Freeze import setup, Executable
 
+from cx_Freeze import Executable, setup
+from setuptools import find_packages
 
 HERE = pathlib.Path(__file__).parent.resolve()
 TARGET_NAME: str = "joystick_diagrams"
@@ -16,7 +16,6 @@ def main():
         url="https://github.com/Rexeh/joystick-diagrams",
         author="Robert Cox",
         keywords="joystick, HID, diagrams, joystick gremlin, dcs world",
-        packages=find_packages(),
         python_requires=">=3.11, <4",
         install_requires=["cx-freeze", "pyqt5", "ply"],
         project_urls={

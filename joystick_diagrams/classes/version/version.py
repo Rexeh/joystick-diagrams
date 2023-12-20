@@ -9,13 +9,12 @@ import os
 from dataclasses import dataclass
 from hashlib import sha256
 from pathlib import Path
-from typing import Any
 
 import requests
 
 _LOGGER = logging.getLogger(__name__)
 
-VERSION = "2.0 ALPHA"  # Format Major.Minor
+VERSION = "2.0"  # Format Major.Minor
 VERSION_SERVER = "https://www.joystick-diagrams.com/"
 TEMPLATE_DIR = "./templates"
 MANIFEST_DIR = "./"
@@ -36,7 +35,7 @@ class JoystickDiagramVersion:
 
 
 class VersionEncode(json.JSONEncoder):
-    def default(self, o: JoystickDiagramVersion) -> Any:
+    def default(self, o: JoystickDiagramVersion) -> dict:
         return {"version": o.version, "template_hashes": o.template_hashes}
 
 
