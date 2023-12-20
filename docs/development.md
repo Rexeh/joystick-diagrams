@@ -25,4 +25,4 @@ Note that the build will need to take place on the target OS for deployment whic
 
 ## Developer Documentation
 
-- Plugins ([link]./development/plugins.md)
+- Plugins [(LINK)](./docs/development/plugins.md)
