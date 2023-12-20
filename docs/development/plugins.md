@@ -1,7 +1,7 @@
 # Joystick Diagrams - Plugins
 
-[!CAUTION]
-All information here is subject to change during the course of 2.0 pre-release. If you want to build a plugin based off this, then please get in touch on Discord to work together.
+> [!CAUTION]
+> All information here is subject to change during the course of 2.0 pre-release. If you want to build a plugin based off this, then please get in touch on Discord to work together.
 
 ## Parser Plugins
 With version 2.0, Joystick Diagrams has moved to a plugin system to allow further games to be supported faster.

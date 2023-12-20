@@ -20,8 +20,8 @@ The easiest way to do this is via Make (https://gnuwin32.sourceforge.net/package
 
 This will build the standalone binary package, as well as the installer package for output in **/build**
 
-[!NOTE]
-Note that the build will need to take place on the target OS for deployment which for Joystick Diagrams is Windows. While the tool does support cross-platform, no need has yet come up to compile for Linux/Mac
+>  [!NOTE]
+>  Note that the build will need to take place on the target OS for deployment which for Joystick Diagrams is Windows. While the tool does support cross-platform, no need has yet come up to compile for Linux/Mac
 
 ## Developer Documentation
 
