@@ -11,7 +11,7 @@ Are you tired of making your own PDF/Powerpoint diagrams of what you've configur
 # Development
 The project currently undergoing a v2 rework, allowing new features to be added easier. The latest stable release is  1.4.2.
 
-For project setup and documentation see [Development](./docs/development.md)
+For project setup and documentation see [Development](./docs/index.md)
 
 # Support
 
