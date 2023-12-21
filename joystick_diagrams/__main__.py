@@ -66,15 +66,6 @@ if __name__ == "__main__":
         window = MainWindow()
         window.show()
 
-        from dynaconf.loaders.json_loader import write
-
-        write("settings.json", {"username": "poo"})
-
-        write(
-            "D:\\Git Repos\\joystick-diagrams\\joystick_diagrams\\plugins\\plugin1\\settings.json",
-            {"username": "potato"},
-        )
-
         # Load Plugins
         plugins = initialise_plugins()
 
@@ -83,14 +74,6 @@ if __name__ == "__main__":
         # _device_manager.start()
 
         apply_stylesheet(app, theme="dark_lightgreen.xml")
-
-        for plugin in plugins.loaded_plugins:
-            plugin.set_path(Path(""))
-            _logger.info({plugin.version})
-            write(
-                Path(plugin.settings.path_for()).joinpath("settings.json"),
-                {"username": "IM CHANGING PLUGIN VARIABLE"},
-            )
 
         app.exec()
     except Exception as error:  # pylint: disable=broad-except
