@@ -1,13 +1,10 @@
 import logging
 from pathlib import Path
 
+from config import settings
+from dynaconf import Dynaconf, Validator
+
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
-
-from .config import settings
-
-PLUGIN_NAME = "Star Citizen"
-PLUGIN_ICON = "img/logo.ico"
-VERSION = "0.0.1"
 
 _logger = logging.getLogger("__name__")
 
@@ -16,6 +13,7 @@ class ParserPlugin(PluginInterface):
     def __init__(self):
         self.path = None
         self.settings = settings
+        self.settings.validators.register()
 
     def process(self):
         return None
@@ -26,16 +24,20 @@ class ParserPlugin(PluginInterface):
 
     @property
     def name(self) -> str:
-        return f"{PLUGIN_NAME}"
+        return f"{self.settings.PLUGIN_NAME}"
 
     @property
     def version(self) -> str:
-        return f"{VERSION}"
+        return f"{self.settings.VERSION}"
 
     @property
     def icon(self) -> str:
-        return f"{Path.joinpath(Path(__file__).parent,PLUGIN_ICON)}"
+        return f"{Path.joinpath(Path(__file__).parent,self.settings.PLUGIN_ICON)}"
 
     @property
     def get_path(self) -> bool:
         return self.path
+
+
+if __name__ == "__main__":
+    plugin = ParserPlugin()

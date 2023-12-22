@@ -1,10 +1,14 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+import dynaconf
+
 import joystick_diagrams.exceptions as JDException
 
 
 class PluginInterface(ABC):
+    settings: dynaconf.LazySettings
+
     def file_not_valid_exception(self, exceptionMessage: str):
         return JDException.FileNotValid(value=exceptionMessage)
 

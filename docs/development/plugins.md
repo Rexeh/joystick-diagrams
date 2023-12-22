@@ -6,6 +6,13 @@
 ## Parser Plugins
 With version 2.0, Joystick Diagrams has moved to a plugin system to allow further games to be supported faster.
 
+## Plugin Structure
+-  plugins/ - Directory for plugins
+   - *plugin name*
+     - \__init\__.py
+     - main.py
+     - config.py
+
 ### Example Plugin
 
 ```python
