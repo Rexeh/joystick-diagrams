@@ -21,7 +21,7 @@ class Export:
         self.file_name_divider = "_"
         self.joystick_listing = joystick_listing
         self.export_progress = None
-        self.no_bind_text = settings.noBindText | ""
+        self.no_bind_text = settings.noBindText
         self.executor = parser_id
         self.error_bucket = []
 

@@ -3,17 +3,8 @@
 # Check a device can have an device_input registered
 # Check a device can have an device_input overwritten
 import logging
-from joystick_diagrams.classes.input import (
-    add_device,
-    LogicalDevice,
-    InputTypes,
-    Command,
-    add_inputs,
-    add_input_modifier,
-    clear_devices,
-    get_all_devices,
-    get_device,
-)
+
+from joystick_diagrams.input.device import Device_
 
 LOGGER = logging.getLogger(__name__)
 
@@ -125,13 +116,13 @@ def test_add_modify_existing_modifier():
         device_input = next((x for x in device_inputs if x.identifier == input_data["id"]), None)
         assert device_input, None
         assert device_input.style, input_data["style"]
-        assert device_input.command.name, input_data["command"].name
+        assert device_input.command, input_data["command"]
 
         # Check that each device_input has the correct modifiers
         for modifier_data in modifiers:
             modifier = next((x for x in device_input.modifiers if x.modifiers == modifier_data["device_input"]), None)
             assert modifier, None
-            assert modifier.command.name, modifier_data["command"].name
+            assert modifier.command, modifier_data["command"]
 
     # Change a modifier
     device = get_device(guid)

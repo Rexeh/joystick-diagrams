@@ -1,1 +1,4 @@
-{"username": "poo", "logLevel": "INFO"}
+{
+    "noBindText": "No Bind",
+    "logLevel": "INFO"
+}

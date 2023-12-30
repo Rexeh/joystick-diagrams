@@ -15,9 +15,6 @@ tests/*/__pycache__/
 
 # Folders
 *__pycache__/
-
-# Folders
-*__pycache__/
 /build/
 /dist/
 .env
@@ -26,6 +23,9 @@ temp/
 /logs/*
 /src/joystick_diagrams/logs*
 *.egg-info/
+htmlcov
+.mypy*
+.pytest*
 
 # IDE
 *.code-workspace

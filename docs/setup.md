@@ -25,4 +25,4 @@ This will build the standalone binary package, as well as the installer package 
 
 ## Developer Documentation
 
-- Plugins [(LINK)](./development/plugins.md)
+- Plugins [(LINK)](./plugins.md)

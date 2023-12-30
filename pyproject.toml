@@ -3,6 +3,9 @@ name = "joystick_diagrams"
 description = ""
 authors = ["Robert Cox"]
 version = "2.0"
+homepage = "https://www.joystick-diagrams.com"
+readme = "readme.md"
+repository = "https://github.com/Rexeh/joystick-diagrams"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -93,8 +96,7 @@ exclude = '''
     | build
     | dist
   )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
+            # the root of the project
 )
 '''
 
@@ -113,3 +115,5 @@ output-format = "colorized"
 [tool.mypy]
 warn_return_any = false
 warn_unused_configs = true
+warn_annotation_unchecked = false
+show_error_codes = true

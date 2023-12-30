@@ -35,9 +35,9 @@ class ParserPlugin(PluginInterface):
         self.path = None
         self.settings = settings
 
-    def process(self) -> InputCollection():
-        ## Parse things into an InputCollection()
-        ## Return
+    def process(self) -> ProfileCollection():
+        ## Parse things into an ProfileCollection()
+        ## Return ProfileCollection()
         return None
 
     def set_path(self, path: Path) -> bool:

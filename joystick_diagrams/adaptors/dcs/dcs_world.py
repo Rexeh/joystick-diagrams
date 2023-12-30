@@ -9,6 +9,8 @@ from ply import lex, yacc  # type: ignore
 import joystick_diagrams.adaptors.dcs.dcs_world_lex  # pylint: disable=unused-import
 import joystick_diagrams.adaptors.dcs.dcs_world_yacc  # pylint: disable=unused-import
 import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
+from joystick_diagrams.input.device import Device_
+from joystick_diagrams.input.profile_collection import ProfileCollection
 
 _logger = logging.getLogger(__name__)
 
@@ -99,7 +101,7 @@ class DCSWorldParser(jdi.JDinterface):
                 _logger.warning(f"Button format not found for {split}")
                 return f"{button}"
 
-    def process_profiles(self, profile_list: list | None = None) -> dict:
+    def process_profiles(self, profile_list: list | None = None) -> ProfileCollection:
         if isinstance(profile_list, list) and len(profile_list) > 0:
             self.profiles_to_process = profile_list
         else:
@@ -109,20 +111,24 @@ class DCSWorldParser(jdi.JDinterface):
             len(self.profiles_to_process) != 0
         ), "DCS: There are no valid profiles to process"  ## Replace with exception type
 
+        collection = ProfileCollection()
+
         for profile in self.profiles_to_process:
+            prof = collection.create_profile(profile_name=profile)
             self.fq_path = os.path.join(self.path, "Config", "Input", profile, "joystick")
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
             self.joystick_listing = {}
             for item in self.profile_devices:
-                self.joystick_listing.update({item[:-48]: item})
-            for joystick_device, joystick_file in self.joystick_listing.items():
-                if os.path.isdir(os.path.join(self.fq_path, joystick_file)):
+                guid, name = item[-46:-11], item[:-48]
+                active_profile = prof.add_device(guid, name)
+
+                if os.path.isdir(os.path.join(self.fq_path, item)):
                     _logger.info("Skipping as Folder")
                 else:
                     try:
-                        _logger.debug(f"Obtaining file data  for {joystick_file}")
+                        _logger.debug(f"Obtaining file data  for {item}")
                         file_data = (
-                            Path(os.path.join(self.fq_path, joystick_file))
+                            Path(os.path.join(self.fq_path, item))
                             .read_text(encoding="utf-8")
                             .replace("local diff = ", "")
                             .replace("return diff", "")
@@ -130,7 +136,7 @@ class DCSWorldParser(jdi.JDinterface):
 
                     except FileNotFoundError as err:
                         _logger.error(
-                            f"DCS: File {joystick_file} no longer found - \
+                            f"DCS: File {item} no longer found - \
                                 It has been moved/deleted from directory. {err}"
                         )
                         raise
@@ -141,10 +147,29 @@ class DCSWorldParser(jdi.JDinterface):
                         if parsed_config is None:
                             break
 
+                        self.assign_to_inputs(parsed_config, active_profile)
+
                         button_map = self.create_joystick_map(parsed_config)
 
-                        self.update_joystick_dictionary(joystick_device, profile, False, button_map)
-        return self.joystick_dictionary
+                        #self.update_joystick_dictionary(name, profile, False, button_map)
+
+        return collection
+        # return self.joystick_dictionary
+
+    def assign_to_inputs(self, config: dict, profile: Device_):
+        if "keyDiffs" in config.keys():
+            for data in config["keyDiffs"].values():
+                operation = data["name"]
+                if data.get("added"):
+                    for binding in data["added"].values():
+                        profile.create_input(binding["key"], operation)
+
+                        if binding.get("reformers"):
+                            reform_set = self.reformers_to_set(binding.get("reformers"))
+                            profile.add_modifier_to_input(binding["key"], reform_set, operation)
+
+    def reformers_to_set(self, reformers: dict) -> set:
+        return {x for x in reformers.values()}
 
     def parse_config(self, file: str):
         try:
@@ -288,3 +313,9 @@ class DCSWorldParser(jdi.JDinterface):
             _logger.error(error)
             raise
         return data
+
+
+if __name__ == "__main__":
+    instance = DCSWorldParser("C:\\Users\\RCox\\Saved Games\\DCS.openbeta")
+    data = instance.process_profiles()
+    print(data)

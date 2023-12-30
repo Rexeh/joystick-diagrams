@@ -1,4 +1,5 @@
-# Joystick Diagrams - Visualise your binds ![Discord](https://img.shields.io/discord/733253732355276800?label=Discord)
+# Joystick Diagrams - Visualise your binds ![Discord](https://img.shields.io/discord/733253732355276800?label=Discord) [![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/)
+
 
 ![Joystick Diagrams](https://joystick-diagrams.com/img/main-hero.png)
 
@@ -11,7 +12,7 @@ Are you tired of making your own PDF/Powerpoint diagrams of what you've configur
 # Development
 The project currently undergoing a v2 rework, allowing new features to be added easier. The latest stable release is  1.4.2.
 
-For project setup and documentation see [Development](./docs/index.md)
+For project setup and documentation see [Development](./docs/setup.md)
 
 # Support
 
