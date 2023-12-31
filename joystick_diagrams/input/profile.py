@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+from uuid import UUID
 
 from joystick_diagrams.input.device import Device_
 
@@ -15,6 +16,8 @@ class Profile_:
         return f"(Profile Object: {self.name})"
 
     def add_device(self, guid: str, name: str) -> Device_:
+        guid = guid.lower()
+
         if self.get_device(guid) is None:
             self.devices.update({guid: Device_(guid, name)})
 
@@ -25,3 +28,7 @@ class Profile_:
 
     def get_device(self, guid: str) -> Device_ | None:
         return self.devices.get(guid)
+
+
+if __name__ == "__main__":
+    pass

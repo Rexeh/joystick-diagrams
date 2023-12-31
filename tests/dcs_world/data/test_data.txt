@@ -1,0 +1,68 @@
+local diff = {
+	["axisDiffs"] = {
+		["a2004cdnil"] = {
+			["name"] = "Throttle Both",
+			["removed"] = {
+				[1] = {
+					["key"] = "JOY_Z",
+				},
+			},
+		},
+	},
+	["keyDiffs"] = {
+		["d3001pnilu3001cd75vd1vpnilvu0"] = {
+			["added"] = {
+				[1] = {
+					["key"] = "JOY_BTN20",
+				},
+				[2] = {
+					["key"] = "JOY_BTN20",
+					["reformers"] = {
+						[1] = "LAlt",
+					},
+				},
+			},
+			["name"] = "HMCS Power 3-pos Switch : ON<>OFF",
+		},
+		["d3001pnilunilcd75vd-1vpnilvunil"] = {
+			["added"] = {
+				[1] = {
+					["key"] = "JOY_BTN6",
+				},
+			},
+			["name"] = "HMCS Power BAT",
+		},
+		["d3001pnilunilcd75vd0vpnilvunil"] = {
+			["added"] = {
+				[1] = {
+					["key"] = "JOY_BTN20",
+					["reformers"] = {
+						[1] = "LCtrl",
+						[2] = "RCtrl",
+					},
+				},
+				[2] = {
+					["key"] = "JOY_BTN7",
+					["reformers"] = {
+						[1] = "LShift",
+						[2] = "LWin",
+						[3] = "RCtrl",
+					},
+				},
+			},
+			["name"] = "HMCS Power OFF",
+		},
+		["d3001pnilunilcd75vd1vpnilvunil"] = {
+			["added"] = {
+				[1] = {
+					["key"] = "JOY_BTN6",
+					["reformers"] = {
+						[1] = "LAlt",
+					},
+				},
+			},
+			["name"] = "HMCS Power ON",
+		},
+	},
+}
+return diff

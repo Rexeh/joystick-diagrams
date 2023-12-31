@@ -8,7 +8,7 @@ from joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin import Joystic
 from joystick_diagrams.adaptors.star_citizen.star_citizen import StarCitizen
 from joystick_diagrams.classes import export
 from joystick_diagrams.classes.version import version
-from joystick_diagrams.ui.main_widow.qt_designer import main_UI
+from joystick_diagrams.ui.main_window.qt_designer import main_UI
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # type: ignore
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # type: ignore

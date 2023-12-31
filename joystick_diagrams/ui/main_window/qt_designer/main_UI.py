@@ -154,24 +154,31 @@ class Ui_MainWindow(object):
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
         MainWindow.setPalette(palette)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("./qt_ui\\images/logo.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        from pathlib import Path
+
+        print(Path("../").absolute())
+        icon.addPixmap(
+            QtGui.QPixmap("./joystick_diagrams/ui/main_window/images/logo.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off
+        )
         MainWindow.setWindowIcon(icon)
         MainWindow.setAutoFillBackground(True)
-        MainWindow.setStyleSheet("font: 75 12pt \"Arial\";")
+        MainWindow.setStyleSheet('font: 75 12pt "Arial";')
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.export_progress_bar = QtWidgets.QProgressBar(self.centralwidget)
         self.export_progress_bar.setGeometry(QtCore.QRect(570, 600, 301, 23))
-        self.export_progress_bar.setStyleSheet("color: white;\n"
-"\n"
-"QProgressBar::horizontal {\n"
-"border: 1px solid gray;\n"
-"border-radius: 3px;\n"
-"background: white;\n"
-"padding: 1px;\n"
-"text-align: right;\n"
-"margin-right: 4ex;\n"
-"};")
+        self.export_progress_bar.setStyleSheet(
+            "color: white;\n"
+            "\n"
+            "QProgressBar::horizontal {\n"
+            "border: 1px solid gray;\n"
+            "border-radius: 3px;\n"
+            "background: white;\n"
+            "padding: 1px;\n"
+            "text-align: right;\n"
+            "margin-right: 4ex;\n"
+            "};"
+        )
         self.export_progress_bar.setMaximum(100)
         self.export_progress_bar.setProperty("value", 0)
         self.export_progress_bar.setInvertedAppearance(False)
@@ -188,7 +195,7 @@ class Ui_MainWindow(object):
         self.version_label.setFocusPolicy(QtCore.Qt.NoFocus)
         self.version_label.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.version_label.setText("")
-        self.version_label.setPixmap(QtGui.QPixmap("./qt_ui\\images/logo.png"))
+        self.version_label.setPixmap(QtGui.QPixmap("./joystick_diagrams/ui/main_window/images/logo.png"))
         self.version_label.setScaledContents(True)
         self.version_label.setObjectName("version_label")
         self.parser_selector = QtWidgets.QTabWidget(self.centralwidget)
@@ -331,39 +338,41 @@ class Ui_MainWindow(object):
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
         self.parser_selector.setPalette(palette)
         self.parser_selector.setAutoFillBackground(False)
-        self.parser_selector.setStyleSheet("QWidget {\n"
-"background: #1e1e1e\n"
-"}\n"
-"\n"
-"QTabWidget::pane { /* The tab widget frame */\n"
-"border-top: 2px solid #C2C7CB;\n"
-"}\n"
-"QTabWidget::tab-bar {\n"
-"left: 0px; /* move to the right by 5px */\n"
-"}\n"
-"/* Style the tab using the tab sub-control. Note that it reads QTabBar _not_ QTabWidget */\n"
-"QTabBar::tab {\n"
-"background: #2d2d2d;\n"
-"border-bottom-color: #C2C7CB; /* same as the pane color */\n"
-"border-top-left-radius: 4px;\n"
-"border-top-right-radius: 4px;\n"
-"min-width: 8ex;\n"
-"padding: 10px;\n"
-"color: white;\n"
-"}\n"
-"QTabBar::tab:selected, QTabBar::tab:hover {\n"
-"background: #1e1e1e;\n"
-"}\n"
-"QTabBar::tab:selected {\n"
-"border-color: #1e1e1e;\n"
-"bottom-left-color:white;\n"
-"border-right-color:white;\n"
-"border: 1px;\n"
-"border-bottom-color: #C2C7CB; /* same as pane color */\n"
-"}\n"
-"QTabBar::tab:!selected {\n"
-"margin-top: 2px; /* make non-selected tabs look smaller */\n"
-"}")
+        self.parser_selector.setStyleSheet(
+            "QWidget {\n"
+            "background: #1e1e1e\n"
+            "}\n"
+            "\n"
+            "QTabWidget::pane { /* The tab widget frame */\n"
+            "border-top: 2px solid #C2C7CB;\n"
+            "}\n"
+            "QTabWidget::tab-bar {\n"
+            "left: 0px; /* move to the right by 5px */\n"
+            "}\n"
+            "/* Style the tab using the tab sub-control. Note that it reads QTabBar _not_ QTabWidget */\n"
+            "QTabBar::tab {\n"
+            "background: #2d2d2d;\n"
+            "border-bottom-color: #C2C7CB; /* same as the pane color */\n"
+            "border-top-left-radius: 4px;\n"
+            "border-top-right-radius: 4px;\n"
+            "min-width: 8ex;\n"
+            "padding: 10px;\n"
+            "color: white;\n"
+            "}\n"
+            "QTabBar::tab:selected, QTabBar::tab:hover {\n"
+            "background: #1e1e1e;\n"
+            "}\n"
+            "QTabBar::tab:selected {\n"
+            "border-color: #1e1e1e;\n"
+            "bottom-left-color:white;\n"
+            "border-right-color:white;\n"
+            "border: 1px;\n"
+            "border-bottom-color: #C2C7CB; /* same as pane color */\n"
+            "}\n"
+            "QTabBar::tab:!selected {\n"
+            "margin-top: 2px; /* make non-selected tabs look smaller */\n"
+            "}"
+        )
         self.parser_selector.setTabPosition(QtWidgets.QTabWidget.North)
         self.parser_selector.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.parser_selector.setTabsClosable(False)
@@ -373,14 +382,16 @@ class Ui_MainWindow(object):
         self.jg_profile_list = QtWidgets.QListWidget(self.jg_tab)
         self.jg_profile_list.setEnabled(True)
         self.jg_profile_list.setGeometry(QtCore.QRect(20, 171, 351, 211))
-        self.jg_profile_list.setStyleSheet("QListView::item {\n"
-"color: white\n"
-"}\n"
-"\n"
-"QListView::item:selected {\n"
-"background: #007acc;\n"
-"color: white\n"
-"}")
+        self.jg_profile_list.setStyleSheet(
+            "QListView::item {\n"
+            "color: white\n"
+            "}\n"
+            "\n"
+            "QListView::item:selected {\n"
+            "background: #007acc;\n"
+            "color: white\n"
+            "}"
+        )
         self.jg_profile_list.setAlternatingRowColors(False)
         self.jg_profile_list.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.jg_profile_list.setObjectName("jg_profile_list")
@@ -400,8 +411,7 @@ class Ui_MainWindow(object):
         self.jg_available_profiles_label.setObjectName("jg_available_profiles_label")
         self.jg_select_profile_button = QtWidgets.QPushButton(self.jg_tab)
         self.jg_select_profile_button.setGeometry(QtCore.QRect(20, 60, 261, 23))
-        self.jg_select_profile_button.setStyleSheet("color:white;\n"
-"border: 1px solid white;")
+        self.jg_select_profile_button.setStyleSheet("color:white;\n" "border: 1px solid white;")
         self.jg_select_profile_button.setObjectName("jg_select_profile_button")
         self.label = QtWidgets.QLabel(self.jg_tab)
         self.label.setGeometry(QtCore.QRect(20, 29, 221, 20))
@@ -418,7 +428,7 @@ class Ui_MainWindow(object):
         self.label_11.setStyleSheet("color:white")
         self.label_11.setObjectName("label_11")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("./qt_ui\\images/3rd_party/jg.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("/ui/main_widow/images/3rd_party/jg.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.parser_selector.addTab(self.jg_tab, icon1, "")
         self.dcs_tab = QtWidgets.QWidget()
         self.dcs_tab.setObjectName("dcs_tab")
@@ -428,25 +438,25 @@ class Ui_MainWindow(object):
         self.dcs_world_label.setObjectName("dcs_world_label")
         self.dcs_directory_select_button = QtWidgets.QPushButton(self.dcs_tab)
         self.dcs_directory_select_button.setGeometry(QtCore.QRect(20, 80, 261, 23))
-        self.dcs_directory_select_button.setStyleSheet("color:white;\n"
-"border: 1px solid white;")
+        self.dcs_directory_select_button.setStyleSheet("color:white;\n" "border: 1px solid white;")
         self.dcs_directory_select_button.setObjectName("dcs_directory_select_button")
         self.dcs_saved_games_label = QtWidgets.QLabel(self.dcs_tab)
         self.dcs_saved_games_label.setGeometry(QtCore.QRect(20, 50, 261, 20))
-        self.dcs_saved_games_label.setStyleSheet("font-size: 11px;\n"
-"color:white;")
+        self.dcs_saved_games_label.setStyleSheet("font-size: 11px;\n" "color:white;")
         self.dcs_saved_games_label.setObjectName("dcs_saved_games_label")
         self.dcs_profiles_list = QtWidgets.QListWidget(self.dcs_tab)
         self.dcs_profiles_list.setEnabled(True)
         self.dcs_profiles_list.setGeometry(QtCore.QRect(20, 180, 351, 201))
-        self.dcs_profiles_list.setStyleSheet("QListView::item {\n"
-"color: white\n"
-"}\n"
-"\n"
-"QListView::item:selected {\n"
-"background: #007acc;\n"
-"color: white\n"
-"}")
+        self.dcs_profiles_list.setStyleSheet(
+            "QListView::item {\n"
+            "color: white\n"
+            "}\n"
+            "\n"
+            "QListView::item:selected {\n"
+            "background: #007acc;\n"
+            "color: white\n"
+            "}"
+        )
         self.dcs_profiles_list.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.dcs_profiles_list.setObjectName("dcs_profiles_list")
         item = QtWidgets.QListWidgetItem()
@@ -471,8 +481,7 @@ class Ui_MainWindow(object):
         self.dcs_easy_mode_checkbox.setObjectName("dcs_easy_mode_checkbox")
         self.dcs_selected_directory_label = QtWidgets.QLabel(self.dcs_tab)
         self.dcs_selected_directory_label.setGeometry(QtCore.QRect(20, 150, 261, 20))
-        self.dcs_selected_directory_label.setStyleSheet("font-size: 11px;\n"
-"color:white;")
+        self.dcs_selected_directory_label.setStyleSheet("font-size: 11px;\n" "color:white;")
         self.dcs_selected_directory_label.setObjectName("dcs_selected_directory_label")
         self.label_10 = QtWidgets.QLabel(self.dcs_tab)
         self.label_10.setEnabled(True)
@@ -490,13 +499,11 @@ class Ui_MainWindow(object):
         self.sc_label.setObjectName("sc_label")
         self.sc_description_label = QtWidgets.QLabel(self.sc_tab)
         self.sc_description_label.setGeometry(QtCore.QRect(30, 50, 261, 20))
-        self.sc_description_label.setStyleSheet("font-size: 11px;\n"
-"color:white;")
+        self.sc_description_label.setStyleSheet("font-size: 11px;\n" "color:white;")
         self.sc_description_label.setObjectName("sc_description_label")
         self.sc_select_button = QtWidgets.QPushButton(self.sc_tab)
         self.sc_select_button.setGeometry(QtCore.QRect(30, 80, 261, 23))
-        self.sc_select_button.setStyleSheet("color:white;\n"
-"border: 1px solid white;")
+        self.sc_select_button.setStyleSheet("color:white;\n" "border: 1px solid white;")
         self.sc_select_button.setObjectName("sc_select_button")
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap("./qt_ui\\images/3rd_party/sc.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -516,8 +523,7 @@ class Ui_MainWindow(object):
         self.title_label = QtWidgets.QLabel(self.centralwidget)
         self.title_label.setGeometry(QtCore.QRect(20, 10, 221, 41))
         self.title_label.setAutoFillBackground(False)
-        self.title_label.setStyleSheet("color: white;\n"
-"font-size: 20px")
+        self.title_label.setStyleSheet("color: white;\n" "font-size: 20px")
         self.title_label.setTextFormat(QtCore.Qt.RichText)
         self.title_label.setObjectName("title_label")
         self.export_button = QtWidgets.QPushButton(self.centralwidget)
@@ -529,19 +535,27 @@ class Ui_MainWindow(object):
         font.setItalic(False)
         font.setWeight(75)
         self.export_button.setFont(font)
-        self.export_button.setStyleSheet("QPushButton { color: white; font-weight: bold; background-color: #007acc };\n"
-"background-color: #007acc;\n"
-"\n"
-"QAbstractButton::text {\n"
-"color=white;\n"
-"}")
+        self.export_button.setStyleSheet(
+            "QPushButton { color: white; font-weight: bold; background-color: #007acc };\n"
+            "background-color: #007acc;\n"
+            "\n"
+            "QAbstractButton::text {\n"
+            "color=white;\n"
+            "}"
+        )
         self.export_button.setCheckable(False)
         self.export_button.setChecked(False)
         self.export_button.setFlat(False)
         self.export_button.setObjectName("export_button")
         self.application_information_textbrowser = QtWidgets.QTextBrowser(self.centralwidget)
         self.application_information_textbrowser.setGeometry(QtCore.QRect(40, 550, 521, 71))
-        self.application_information_textbrowser.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.application_information_textbrowser.setTextInteractionFlags(
+            QtCore.Qt.LinksAccessibleByKeyboard
+            | QtCore.Qt.LinksAccessibleByMouse
+            | QtCore.Qt.TextBrowserInteraction
+            | QtCore.Qt.TextSelectableByKeyboard
+            | QtCore.Qt.TextSelectableByMouse
+        )
         self.application_information_textbrowser.setObjectName("application_information_textbrowser")
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
         self.label_8.setGeometry(QtCore.QRect(10, 580, 31, 16))
@@ -562,12 +576,14 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.donate_button.setFont(font)
         self.donate_button.setAutoFillBackground(False)
-        self.donate_button.setStyleSheet("QPushButton { color: white; font-weight: bold; font-size: 10pt; background-color: #229954 };\n"
-"background-color: #2ECC71;\n"
-"\n"
-"QAbstractButton::text {\n"
-"color=white;\n"
-"}")
+        self.donate_button.setStyleSheet(
+            "QPushButton { color: white; font-weight: bold; font-size: 10pt; background-color: #229954 };\n"
+            "background-color: #2ECC71;\n"
+            "\n"
+            "QAbstractButton::text {\n"
+            "color=white;\n"
+            "}"
+        )
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap("./qt_ui\\images/donate.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.donate_button.setIcon(icon4)
@@ -583,12 +599,14 @@ class Ui_MainWindow(object):
         font.setItalic(False)
         font.setWeight(75)
         self.discord_button.setFont(font)
-        self.discord_button.setStyleSheet("QPushButton { color: white; font-weight: bold; font-size: 10pt; background-color: #7289DA };\n"
-"background-color: #007acc;\n"
-"\n"
-"QAbstractButton::text {\n"
-"color=white;\n"
-"}")
+        self.discord_button.setStyleSheet(
+            "QPushButton { color: white; font-weight: bold; font-size: 10pt; background-color: #7289DA };\n"
+            "background-color: #007acc;\n"
+            "\n"
+            "QAbstractButton::text {\n"
+            "color=white;\n"
+            "}"
+        )
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap("./qt_ui\\images/discord.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.discord_button.setIcon(icon5)
@@ -626,7 +644,9 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Select your .XML profile "))
         self.jg_option_inherit_checkbox.setText(_translate("MainWindow", "Inherit Joystick Binds from Parents"))
         self.label_11.setText(_translate("MainWindow", "Settings"))
-        self.parser_selector.setTabText(self.parser_selector.indexOf(self.jg_tab), _translate("MainWindow", "Joystick Gremlin"))
+        self.parser_selector.setTabText(
+            self.parser_selector.indexOf(self.jg_tab), _translate("MainWindow", "Joystick Gremlin")
+        )
         self.dcs_world_label.setText(_translate("MainWindow", "DCS World Directory"))
         self.dcs_directory_select_button.setText(_translate("MainWindow", "Select your installation"))
         self.dcs_saved_games_label.setText(_translate("MainWindow", "This should be your Saved Games/DCS folder"))
@@ -644,25 +664,39 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "F-14B_Rio"))
         self.dcs_profiles_list.setSortingEnabled(__sortingEnabled)
         self.label_7.setText(_translate("MainWindow", "Available DCS Profiles"))
-        self.dcs_easy_mode_checkbox.setText(_translate("MainWindow", "Exclude \"Easy\" Mode Profiles"))
+        self.dcs_easy_mode_checkbox.setText(_translate("MainWindow", 'Exclude "Easy" Mode Profiles'))
         self.dcs_selected_directory_label.setText(_translate("MainWindow", "c:test"))
         self.label_10.setText(_translate("MainWindow", "Settings"))
-        self.parser_selector.setTabText(self.parser_selector.indexOf(self.dcs_tab), _translate("MainWindow", "DCS World"))
+        self.parser_selector.setTabText(
+            self.parser_selector.indexOf(self.dcs_tab), _translate("MainWindow", "DCS World")
+        )
         self.sc_label.setText(_translate("MainWindow", "Star Citizen Config"))
         self.sc_description_label.setText(_translate("MainWindow", "Select your .XML config for Star Citizen"))
         self.sc_select_button.setText(_translate("MainWindow", "Select your config file"))
-        self.parser_selector.setTabText(self.parser_selector.indexOf(self.sc_tab), _translate("MainWindow", "Star Citizen"))
+        self.parser_selector.setTabText(
+            self.parser_selector.indexOf(self.sc_tab), _translate("MainWindow", "Star Citizen")
+        )
         self.label_2.setText(_translate("MainWindow", "Do you have a game/tool you want to see included?"))
-        self.label_3.setText(_translate("MainWindow", "<html><head/><body><p>Raise an issue on Github - <a href=\"https://github.com/Rexeh/joystick-diagrams\"><span style=\" text-decoration: underline; color:#0000ff;\">https://github.com/Rexeh/joystick-diagrams</span></a></p></body></html>"))
+        self.label_3.setText(
+            _translate(
+                "MainWindow",
+                '<html><head/><body><p>Raise an issue on Github - <a href="https://github.com/Rexeh/joystick-diagrams"><span style=" text-decoration: underline; color:#0000ff;">https://github.com/Rexeh/joystick-diagrams</span></a></p></body></html>',
+            )
+        )
         self.parser_selector.setTabText(self.parser_selector.indexOf(self.tab), _translate("MainWindow", "+"))
         self.title_label.setText(_translate("MainWindow", "Joystick Diagrams"))
         self.export_button.setText(_translate("MainWindow", "Export Joystick Profiles"))
         self.application_information_textbrowser.setDocumentTitle(_translate("MainWindow", "Testsd"))
-        self.application_information_textbrowser.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><title>Testsd</title><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Arial\'; font-size:12pt; font-weight:72; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">If you\'re seeing this something has gone wrong</span></p></body></html>"))
+        self.application_information_textbrowser.setHtml(
+            _translate(
+                "MainWindow",
+                '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n'
+                '<html><head><meta name="qrichtext" content="1" /><title>Testsd</title><style type="text/css">\n'
+                "p, li { white-space: pre-wrap; }\n"
+                "</style></head><body style=\" font-family:'Arial'; font-size:12pt; font-weight:72; font-style:normal;\">\n"
+                '<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-weight:600;">If you\'re seeing this something has gone wrong</span></p></body></html>',
+            )
+        )
         self.label_8.setText(_translate("MainWindow", "Info"))
         self.label_9.setText(_translate("MainWindow", "1.1.0"))
         self.donate_button.setText(_translate("MainWindow", "Donate"))

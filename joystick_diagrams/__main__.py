@@ -15,7 +15,7 @@ from joystick_diagrams.classes.version import version
 from joystick_diagrams.config import settings
 from joystick_diagrams.devices import device_manager
 from joystick_diagrams.plugin_manager import ParserPluginManager
-from joystick_diagrams.ui.main_widow.main_window import MainWindow
+from joystick_diagrams.ui.main_window.main_window import MainWindow
 
 _logger = logging.getLogger(__name__)
 
