@@ -8,17 +8,21 @@ _logger = logging.getLogger("__name__")
 class Device_:
     def __init__(self, guid: str, name: str):
         self.guid = guid.strip().lower()
-        self.name = name.strip().lower()
+        self.name = name.strip()
         self.inputs: dict[str, Input_] = {}
 
     def create_input(self, input_id: str, command: str) -> None:
-        input = self.inputs.get(input_id)
+        input = self.get_input(input_id)
 
         if input:
             input.command = command
-            _logger.debug(f"Input {input_id} already exists and will be overwritten")
+            _logger.debug(f"Input {input_id} already exists on {self} and will be overwritten")
         else:
+            _logger.debug(f"Input {input_id} added to  {self}")
             self.inputs[input_id] = Input_(input_id, command)
+
+    def get_input(self, input_id: str) -> Input_ | None:
+        return self.inputs.get(input_id)
 
     def add_modifier_to_input(self, input_id, modifier: set, command: str) -> None:
         """
@@ -26,7 +30,7 @@ class Device_:
         """
 
         _logger.debug(f"Adding modifier {modifier} to input {input_id}")
-        input = self.inputs.get(input_id)
+        input = self.get_input(input_id)
 
         if input is None:
             _logger.warning(f"Modifier attempted to be added to {input_id} but input does not exist")

@@ -1,5 +1,3 @@
-import unittest
-
 import joystick_diagrams.adaptors.dcs.dcs_world as dcs
 
 

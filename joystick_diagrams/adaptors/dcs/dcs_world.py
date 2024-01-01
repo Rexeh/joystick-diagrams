@@ -6,8 +6,11 @@ from pathlib import Path
 
 from ply import lex, yacc  # type: ignore
 
+# Required by PLY
 import joystick_diagrams.adaptors.dcs.dcs_world_lex  # pylint: disable=unused-import
 import joystick_diagrams.adaptors.dcs.dcs_world_yacc  # pylint: disable=unused-import
+
+#################
 import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
 from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.profile_collection import ProfileCollection
@@ -15,11 +18,13 @@ from joystick_diagrams.input.profile_collection import ProfileCollection
 _logger = logging.getLogger(__name__)
 
 EASY_MODES = "_easy"
+CONFIG_DIR = "Config"
+INPUT_DIR = "Input"
+JOYSTICK_DIR = "joystick"
 
 
-class DCSWorldParser(jdi.JDinterface):
+class DCSWorldParser:
     def __init__(self, path, easy_modes=True):
-        jdi.JDinterface.__init__(self)
         self.path = path
         self.remove_easy_modes = easy_modes
         self.__easy_mode = EASY_MODES
@@ -32,9 +37,9 @@ class DCSWorldParser(jdi.JDinterface):
 
     def __validate_base_directory(self) -> list:
         """validate the base directory structure, make sure there are files."""
-        if "Config" in os.listdir(self.path):
+        if CONFIG_DIR in os.listdir(self.path):
             try:
-                return os.listdir(os.path.join(self.path, "Config", "Input"))
+                return os.listdir(os.path.join(self.path, CONFIG_DIR, INPUT_DIR))
             except FileNotFoundError:
                 raise FileNotFoundError("DCS: No input directory found") from None
         else:
@@ -63,10 +68,10 @@ class DCSWorldParser(jdi.JDinterface):
         Return Valid Profile
         """
 
-        if os.path.isdir(os.path.join(self.path, "Config", "Input", item)) and "joystick" in os.listdir(
-            os.path.join(self.path, "Config", "Input", item)
+        if os.path.isdir(os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item)) and JOYSTICK_DIR in os.listdir(
+            os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item)
         ):
-            return os.listdir(os.path.join(self.path, "Config", "Input", item, "joystick"))
+            return os.listdir(os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item, JOYSTICK_DIR))
 
         return False
 
@@ -81,21 +86,25 @@ class DCSWorldParser(jdi.JDinterface):
             )
         return self.valid_profiles
 
-    def convert_button_format(self, button) -> str:
+    def convert_button_format(self, button: str) -> str:
         """Convert DCS Buttons to match expected "BUTTON_X" format"""
         split = button.split("_")
 
         match len(split):
             case 2:
                 if split[1][0:3] == "BTN":
+                    # Standard Button
                     return f"{split[1].replace('BTN', 'BUTTON_')}"
                 elif split[1].isalpha():
+                    # Standard Axis
                     return f"AXIS_{split[1]}"
                 elif split[1][0:6] == "SLIDER":
+                    # Slider Axis
                     return f"AXIS_SLIDER_{split[1][6:]}"
                 else:
                     return f"{split[1]}"
             case 4:
+                # POV Slider control
                 return f"{split[1].replace('BTN', 'POV')}_{split[2][3]}_{split[3]}"
             case _:
                 _logger.warning(f"Button format not found for {split}")
@@ -107,17 +116,17 @@ class DCSWorldParser(jdi.JDinterface):
         else:
             self.profiles_to_process = self.get_validated_profiles()
 
-        assert (
-            len(self.profiles_to_process) != 0
-        ), "DCS: There are no valid profiles to process"  ## Replace with exception type
-
         collection = ProfileCollection()
+
+        if len(self.profiles_to_process) == 0:
+            _logger.warning("No profiles were found, so nothing to process.")
+            return collection
 
         for profile in self.profiles_to_process:
             prof = collection.create_profile(profile_name=profile)
-            self.fq_path = os.path.join(self.path, "Config", "Input", profile, "joystick")
+            self.fq_path = os.path.join(self.path, CONFIG_DIR, INPUT_DIR, profile, JOYSTICK_DIR)
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
-            self.joystick_listing = {}
+
             for item in self.profile_devices:
                 guid, name = item[-46:-11], item[:-48]
                 active_profile = prof.add_device(guid, name)
@@ -149,64 +158,34 @@ class DCSWorldParser(jdi.JDinterface):
 
                         self.assign_to_inputs(parsed_config, active_profile)
 
-                        button_map = self.create_joystick_map(parsed_config)
-
-                        #self.update_joystick_dictionary(name, profile, False, button_map)
-
         return collection
-        # return self.joystick_dictionary
 
     def assign_to_inputs(self, config: dict, profile: Device_):
-        if "keyDiffs" in config.keys():
-            for data in config["keyDiffs"].values():
-                operation = data["name"]
-                if data.get("added"):
-                    for binding in data["added"].values():
-                        profile.create_input(binding["key"], operation)
+        searchKeys = ["keyDiffs", "axisDiffs"]
 
-                        if binding.get("reformers"):
-                            reform_set = self.reformers_to_set(binding.get("reformers"))
-                            profile.add_modifier_to_input(binding["key"], reform_set, operation)
+        for key in searchKeys:
+            if key in config.keys():
+                for data in config[key].values():
+                    operation = data["name"]
+                    if data.get("added"):
+                        for binding in data["added"].values():
+                            input_identifier = self.convert_button_format(binding["key"])
+                            profile.create_input(input_identifier, operation)
+
+                            if binding.get("reformers"):
+                                reform_set = self.reformers_to_set(binding.get("reformers"))
+                                profile.add_modifier_to_input(input_identifier, reform_set, operation)
 
     def reformers_to_set(self, reformers: dict) -> set:
         return {x for x in reformers.values()}
 
-    def parse_config(self, file: str):
+    def parse_config(self, file: str) -> dict | None:
         try:
             return self.parse_file(file)
         except Exception as error:
             _logger.error("There was a parsing issue with the text data, this could mean an unhandled character.")
             _logger.error(error)
             return None
-
-    def create_joystick_map(self, data) -> dict:
-        write_val = False
-        button_array = {}
-
-        if "keyDiffs" in data.keys():
-            for value in data["keyDiffs"].values():
-                for item, attribute in value.items():
-                    if item == "name":
-                        name = attribute
-                    if item == "added":
-                        button = self.convert_button_format(attribute[1]["key"])
-                        write_val = True
-                if write_val:
-                    button_array.update({button: name})
-                    write_val = False
-
-        if "axisDiffs" in data.keys():
-            for value in data["axisDiffs"].values():
-                for item, attribute in value.items():
-                    if item == "name":
-                        name = attribute
-                    if item in ["added", "changed"]:
-                        axis = self.convert_button_format(attribute[1]["key"])
-                        write_val = True
-                if write_val:
-                    button_array.update({axis: name})
-                    write_val = False
-        return button_array
 
     def parse_file(self, file: str) -> dict:
         # pylint: disable=unused-variable
