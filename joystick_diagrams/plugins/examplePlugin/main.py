@@ -1,8 +1,6 @@
 import logging
 from pathlib import Path
 
-from dynaconf import Dynaconf, Validator
-
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
 from .config import settings

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from dynaconf import Dynaconf, Validator
+from dynaconf import Dynaconf, Validator  # type: ignore
 
 print(f"{Path(__file__).parent}")
 settings = Dynaconf(
