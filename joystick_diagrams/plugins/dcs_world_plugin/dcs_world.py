@@ -6,14 +6,13 @@ from pathlib import Path
 
 from ply import lex, yacc  # type: ignore
 
-# Required by PLY
-import joystick_diagrams.adaptors.dcs.dcs_world_lex  # pylint: disable=unused-import
-import joystick_diagrams.adaptors.dcs.dcs_world_yacc  # pylint: disable=unused-import
-
 #################
 import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
 from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.profile_collection import ProfileCollection
+
+# Required by PLY
+from . import dcs_world_lex, dcs_world_yacc  # pylint: disable=unused-import
 
 _logger = logging.getLogger(__name__)
 

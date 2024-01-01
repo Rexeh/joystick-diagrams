@@ -7,7 +7,6 @@ from pathlib import Path
 from PyQt5 import QtWidgets
 from qt_material import apply_stylesheet
 
-from joystick_diagrams.adaptors.dcs.dcs_world import DCSWorldParser
 from joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin import JoystickGremlin
 from joystick_diagrams.adaptors.star_citizen.star_citizen import StarCitizen
 from joystick_diagrams.classes import export
@@ -63,8 +62,8 @@ if __name__ == "__main__":
     setup_logging()
     try:
         app = QtWidgets.QApplication(sys.argv)
-        window = MainWindow()
-        window.show()
+        # window = MainWindow()
+        # window.show()
 
         # Load Plugins
         plugins = initialise_plugins()

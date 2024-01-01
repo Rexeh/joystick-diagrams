@@ -3,6 +3,8 @@ from pathlib import Path
 
 from dynaconf import Dynaconf, Validator
 
+from joystick_diagrams.input.profile_collection import ProfileCollection
+from joystick_diagrams.plugins.dcs_world_plugin.dcs_world import DCSWorldParser
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
 from .config import settings
@@ -16,11 +18,15 @@ class ParserPlugin(PluginInterface):
         self.settings = settings
         self.settings.validators.register()
 
-    def process(self):
-        return None
+    def process(self) -> ProfileCollection:
+        return self.instance.process_profiles()
 
     def set_path(self, path: Path) -> bool:
         self.path = path
+        try:
+            self.instance = DCSWorldParser(self.path)
+        except:
+            return False
         return True
 
     @property

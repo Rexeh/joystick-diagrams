@@ -3,7 +3,6 @@ import os
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from joystick_diagrams.adaptors.dcs.dcs_world import DCSWorldParser
 from joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin import JoystickGremlin
 from joystick_diagrams.adaptors.star_citizen.star_citizen import StarCitizen
 from joystick_diagrams.classes import export

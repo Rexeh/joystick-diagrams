@@ -4,6 +4,7 @@ from pathlib import Path
 import dynaconf
 
 import joystick_diagrams.exceptions as JDException
+from joystick_diagrams.input.profile_collection import ProfileCollection
 
 
 class PluginInterface(ABC):
@@ -19,7 +20,7 @@ class PluginInterface(ABC):
         return JDException.FileTypeInvalid(value=exceptionMessage)
 
     @abstractmethod
-    def process(self) -> int:
+    def process(self) -> ProfileCollection:
         """
         Runs the relevant processes to return an InputCollection
 
