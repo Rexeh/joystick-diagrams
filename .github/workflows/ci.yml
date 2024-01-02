@@ -11,7 +11,6 @@ jobs:
         os : [ubuntu-latest]
     env:
       DISPLAY: ':99.0'
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -20,7 +19,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: setup ${{ matrix.os }}
       run: |
-        sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
+        sudo apt install xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
+        sudo /usr/bin/Xvfb $DISPLAY -screen 0 1280x1024x24 &
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
