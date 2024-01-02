@@ -24,7 +24,7 @@ def test_profile_device(profile_obj):
     obj = profile_obj("profile1")
     new_device = obj.add_device(guid, device_name)
 
-    assert guid in obj.devices
+    assert guid.lower() in obj.devices
     assert isinstance(new_device, Device_)
 
 
