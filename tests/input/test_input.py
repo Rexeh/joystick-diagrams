@@ -1,8 +1,4 @@
-import pstats
-
 import pytest
-
-from build.lib.classes.input import Modifier
 from joystick_diagrams.input.input import Input_
 
 
