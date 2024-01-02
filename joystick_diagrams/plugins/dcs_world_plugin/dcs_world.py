@@ -305,4 +305,3 @@ class DCSWorldParser:
 if __name__ == "__main__":
     instance = DCSWorldParser("D:\\Git Repos\\joystick-diagrams\\notebooks\\DCS")
     data = instance.process_profiles(["AV8BNA"])
-    print(data)

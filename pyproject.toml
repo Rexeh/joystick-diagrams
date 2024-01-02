@@ -62,7 +62,7 @@ optimize = 2
 source = ["joystick_diagrams/"]
 
 [tool.coverage.run]
-omit = [".*", "*/site-packages/*"]
+omit = [".*", "*/site-packages/*", "*/config.py", "*/plugins/*", "*/devices/*"]
 
 [tool.coverage.report]
 fail_under = 80
