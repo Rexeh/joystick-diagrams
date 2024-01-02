@@ -1,9 +1,11 @@
+import pytest
 from PyQt5 import QtCore
 
 import joystick_diagrams.classes.version.version as version
 from joystick_diagrams.ui.main_window import main_window
 
 
+@pytest.mark.uitest
 def test_title(qtbot):
     window = main_window.MainWindow()
     qtbot.addWidget(window)
@@ -12,6 +14,7 @@ def test_title(qtbot):
     assert window.windowTitle() == f"{title}{version_text}"
 
 
+@pytest.mark.uitest
 def test_default_main_window(qtbot):
     window = main_window.MainWindow()
     window.show()
@@ -19,6 +22,7 @@ def test_default_main_window(qtbot):
     assert not window.export_button.isEnabled()
 
 
+@pytest.mark.uitest
 def test_jg_file_load(qtbot):
     window = main_window.MainWindow()
     window.show()
@@ -29,6 +33,7 @@ def test_jg_file_load(qtbot):
     assert window.jg_profile_list.count() == 4
 
 
+@pytest.mark.uitest
 def test_sc_file_load_success(qtbot):
     window = main_window.MainWindow()
     window.show()
@@ -39,6 +44,7 @@ def test_sc_file_load_success(qtbot):
     assert window.application_information_textbrowser.toPlainText() == "Succesfully loaded Star Citizen profile"
 
 
+@pytest.mark.uitest
 def test_sc_file_load_failure(qtbot):
     window = main_window.MainWindow()
     window.show()
