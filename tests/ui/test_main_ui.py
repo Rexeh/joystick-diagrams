@@ -1,28 +1,28 @@
 import pytest
 from PyQt5 import QtCore
 
-import joystick_diagrams.__main__ as ui
 import joystick_diagrams.classes.version.version as version
+from joystick_diagrams.ui.main_window import main_window
 
 
 def test_title(qtbot):
-    window = ui.MainWindow()
+    window = main_window.MainWindow()
     qtbot.addWidget(window)
     title = "Joystick Diagrams - V"
     version_text = version.VERSION
     assert window.windowTitle() == f"{title}{version_text}"
 
 
-def test_default_ui(qtbot):
-    window = ui.MainWindow()
+def test_default_main_window(qtbot):
+    window = main_window.MainWindow()
     window.show()
     qtbot.addWidget(window)
     assert not window.export_button.isEnabled()
 
 
-@pytest.mark.skip(reason="No longer used in new UI")
+@pytest.mark.skip(reason="No longer used in new main_window")
 def test_dcs_file_load_success(qtbot):
-    window = ui.MainWindow()
+    window = main_window.MainWindow()
     window.show()
     qtbot.addWidget(window)
     window.dcs_directory = "./tests/data/dcs_world/valid_dcs_world_directory"
@@ -35,9 +35,9 @@ def test_dcs_file_load_success(qtbot):
     assert not window.dcs_easy_mode_checkbox.isChecked()
 
 
-@pytest.mark.skip(reason="No longer used in new UI")
+@pytest.mark.skip(reason="No longer used in new main_window")
 def test_dcs_file_load_failure_config(qtbot):
-    window = ui.MainWindow()
+    window = main_window.MainWindow()
     window.show()
     qtbot.addWidget(window)
     window.dcs_directory = "./tests/data/dcs_world/invalid_dcs_world_no_config"
@@ -47,9 +47,9 @@ def test_dcs_file_load_failure_config(qtbot):
         assert e.args[0] == "DCS: No Config Folder found in DCS Folder."
 
 
-@pytest.mark.skip(reason="No longer used in new UI")
+@pytest.mark.skip(reason="No longer used in new main_window")
 def test_dcs_file_load_failure_input(qtbot):
-    window = ui.MainWindow()
+    window = main_window.MainWindow()
     window.show()
     qtbot.addWidget(window)
     window.dcs_directory = "./tests/data/dcs_world/invalid_dcs_world_no_input"
@@ -61,7 +61,7 @@ def test_dcs_file_load_failure_input(qtbot):
 
 
 def test_jg_file_load(qtbot):
-    window = ui.MainWindow()
+    window = main_window.MainWindow()
     window.show()
     qtbot.addWidget(window)
     assert window.jg_profile_list.count() == 0
@@ -71,7 +71,7 @@ def test_jg_file_load(qtbot):
 
 
 def test_sc_file_load_success(qtbot):
-    window = ui.MainWindow()
+    window = main_window.MainWindow()
     window.show()
     qtbot.addWidget(window)
     assert window.application_information_textbrowser.toPlainText() == ""
@@ -81,7 +81,7 @@ def test_sc_file_load_success(qtbot):
 
 
 def test_sc_file_load_failure(qtbot):
-    window = ui.MainWindow()
+    window = main_window.MainWindow()
     window.show()
     qtbot.addWidget(window)
     assert window.application_information_textbrowser.toPlainText() == ""
