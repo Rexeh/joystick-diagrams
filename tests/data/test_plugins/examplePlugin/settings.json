@@ -1,0 +1,5 @@
+{
+    "PLUGIN_NAME": "test plugin",
+    "PLUGIN_ICON": "./img/logo.ico",
+    "VERSION": "1.0.5"
+}
