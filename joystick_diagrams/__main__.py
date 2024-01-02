@@ -66,7 +66,7 @@ if __name__ == "__main__":
         # window.show()
 
         # Load Plugins
-        plugins = initialise_plugins()
+        plugin_manager = initialise_plugins()
 
         # Device Manager
         # _device_manager = threading.Thread(target=device_manager.run, daemon=True)

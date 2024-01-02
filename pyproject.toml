@@ -117,3 +117,8 @@ warn_return_any = false
 warn_unused_configs = true
 warn_annotation_unchecked = false
 show_error_codes = true
+
+[tool.pytest.ini_options]
+markers = [
+    "uitest",
+]
