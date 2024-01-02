@@ -8,6 +8,7 @@ diagrams/*.pdf
 *.bat
 debug.txt
 poetry.lock
+coverage.xml
 
 # Tests
 tests/__pycache__

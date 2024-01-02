@@ -59,7 +59,7 @@ excludes  = ["tkinter", "test", "distutils", "asyncio", "concurrent", "pyqt5"]
 optimize = 2
 
 [tool.coverage.paths]
-source = ["joystick_diagrams/", "*/site-packages/"]
+source = ["joystick_diagrams/"]
 
 [tool.coverage.run]
 omit = [".*", "*/site-packages/*"]

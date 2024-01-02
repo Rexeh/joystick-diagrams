@@ -12,7 +12,10 @@ from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
 # Required by PLY
-from . import dcs_world_lex, dcs_world_yacc  # pylint: disable=unused-import
+# from joystick_diagrams.plugins.dcs_world_plugin import (  # pylint: disable=unused-import
+# dcs_world_lex,
+# dcs_world_yacc,
+# )
 
 _logger = logging.getLogger(__name__)
 
@@ -169,11 +172,16 @@ class DCSWorldParser:
                     if data.get("added"):
                         for binding in data["added"].values():
                             input_identifier = self.convert_button_format(binding["key"])
-                            profile.create_input(input_identifier, operation)
 
+                            # Create Reforms first
                             if binding.get("reformers"):
+                                # Initialise base button if not exists
+                                if not profile.get_input(input_identifier):
+                                    profile.create_input(input_identifier, "")
                                 reform_set = self.reformers_to_set(binding.get("reformers"))
                                 profile.add_modifier_to_input(input_identifier, reform_set, operation)
+                            else:
+                                profile.create_input(input_identifier, operation)
 
     def reformers_to_set(self, reformers: dict) -> set:
         return {x for x in reformers.values()}
@@ -208,6 +216,7 @@ class DCSWorldParser:
         t_RBRACE = r"\]"  # pylint: disable=invalid-name
         t_COMMA = r"\,"  # pylint: disable=invalid-name
         t_EQUALS = r"\="  # pylint: disable=invalid-name
+        t_ESCAPED_QUOTE = r"\\\""
 
         def t_DOUBLE_VAL(t):  # pylint: disable=invalid-name
             r"(\+|\-)?[0-9]+\.[0-9]+"
@@ -220,7 +229,7 @@ class DCSWorldParser:
             return t
 
         def t_STRING(t):  # pylint: disable=invalid-name
-            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\<|\>|\s]+\" "
+            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\<|\>|\\\"|\s]+\" "
             t.value = t.value[1:-1]
             return t
 
@@ -294,6 +303,6 @@ class DCSWorldParser:
 
 
 if __name__ == "__main__":
-    instance = DCSWorldParser("C:\\Users\\RCox\\Saved Games\\DCS.openbeta")
-    data = instance.process_profiles()
+    instance = DCSWorldParser("D:\\Git Repos\\joystick-diagrams\\notebooks\\DCS")
+    data = instance.process_profiles(["AV8BNA"])
     print(data)

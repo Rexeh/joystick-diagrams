@@ -24,7 +24,7 @@ jobs:
       run: |
         poetry run pylint --rcfile pyproject.toml joystick_diagrams/ tests/ || poetry run pylint-exit $?
     - name: Run tests
-      run: poetry run pytest -m "not uitest" --cov-report=term-missing --cov=./  --cov-report=xml
+      run: poetry run pytest -m "not uitest" --cov-report=term-missing --cov=joystick_diagrams ./tests  --cov-report=xml
     - name: Run Upload coverage
       uses: codecov/codecov-action@v3
       with:
