@@ -1,6 +1,6 @@
 import unittest
 
-import joystick_diagrams.adaptors.dcs.dcs_world as dcs
+import joystick_diagrams.plugins.dcs_world_plugin.dcs_world as dcs
 
 
 class TestDCSParseTest(unittest.TestCase):
