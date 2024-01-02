@@ -1,4 +1,6 @@
+import pytest
 from PyQt5 import QtCore
+
 import joystick_diagrams.__main__ as ui
 import joystick_diagrams.classes.version.version as version
 
@@ -18,6 +20,7 @@ def test_default_ui(qtbot):
     assert not window.export_button.isEnabled()
 
 
+@pytest.mark.skip(reason="No longer used in new UI")
 def test_dcs_file_load_success(qtbot):
     window = ui.MainWindow()
     window.show()
@@ -32,6 +35,7 @@ def test_dcs_file_load_success(qtbot):
     assert not window.dcs_easy_mode_checkbox.isChecked()
 
 
+@pytest.mark.skip(reason="No longer used in new UI")
 def test_dcs_file_load_failure_config(qtbot):
     window = ui.MainWindow()
     window.show()
@@ -43,6 +47,7 @@ def test_dcs_file_load_failure_config(qtbot):
         assert e.args[0] == "DCS: No Config Folder found in DCS Folder."
 
 
+@pytest.mark.skip(reason="No longer used in new UI")
 def test_dcs_file_load_failure_input(qtbot):
     window = ui.MainWindow()
     window.show()
