@@ -55,7 +55,7 @@ def fetch_local_manifest() -> str | None:
     return None
 
 
-def performn_version_check() -> bool:
+def perform_version_check() -> bool:
     """Checks the local version against the latest release#
 
     Returns True for Matched Versions

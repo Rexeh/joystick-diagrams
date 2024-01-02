@@ -18,6 +18,10 @@ def test_profile_creation(profile_obj):
     assert profile_obj("profile1").name == "profile1"
 
 
+def test_profile_repr(profile_obj):
+    assert profile_obj("profile1").__repr__() == "(Profile Object: profile1)"
+
+
 def test_profile_device(profile_obj):
     guid = "DEVICE_GUID_1"
     device_name = "DEVICE 1"

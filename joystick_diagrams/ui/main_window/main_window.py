@@ -58,7 +58,7 @@ class MainWindow(QtWidgets.QMainWindow, main_UI.Ui_MainWindow):  # Refactor pyli
         return {0: self.dcs_parser_instance, 1: self.jg_parser_instance, 2: self.sc_parser_instance}
 
     def version_check(self):
-        check = version.performn_version_check()
+        check = version.perform_version_check()
 
         if not check:
             self.open_version_window()
