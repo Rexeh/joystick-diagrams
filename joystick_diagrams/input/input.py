@@ -24,7 +24,7 @@ class Modifier:
 class Input_:
     def __init__(self, identifier: str, command: str) -> None:
         self.identifier = identifier.lower()
-        self.command = command.lower()
+        self.command = command
         self.modifiers: list[Modifier] = []
 
     def add_modifier(self, modifier: set, command: str):
