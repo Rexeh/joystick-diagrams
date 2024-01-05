@@ -11,30 +11,28 @@ import os
 from importlib import import_module
 from json import JSONDecodeError
 from pathlib import Path
-from types import ModuleType
 
-import dynaconf
 from dynaconf import ValidationError
 
 import joystick_diagrams.exceptions as JDException
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
 _logger = logging.getLogger(__name__)
-PLUGINS_DIRECTORY = "plugins"
-PLUGIN_REL_PATH = ".plugins."
+PLUGINS_DIRECTORY: str = "plugins"
+PLUGIN_REL_PATH: str = ".plugins."
 
 
 class ParserPluginManager:
-    def __init__(self):
-        self.plugins = find_plugins(PLUGINS_DIRECTORY)
-        self.loaded_plugins = []
+    def __init__(self) -> None:
+        self.plugins: list[Path] = find_plugins(PLUGINS_DIRECTORY)
+        self.loaded_plugins: list[PluginInterface] = []
 
         if self.plugins:
             for plugin in self.plugins:
                 try:
                     # Try initiate the plugin
                     loaded = load_plugin(plugin_package_name=plugin.name)
-                    self.validate_plugin(loaded)
+                    self.validate_plugin_settings(loaded)
                     self.loaded_plugins.append(loaded)
 
                 except (JDException.PluginNotValid, JSONDecodeError, AttributeError, ValidationError) as e:
@@ -43,17 +41,17 @@ class ParserPluginManager:
         else:
             raise JDException.NoPluginsExist()
 
-    def validate_plugin(self, plugin: PluginInterface) -> None | ValidationError:
+    def validate_plugin_settings(self, plugin: PluginInterface) -> None | ValidationError:
         return plugin.settings.validators.validate_all()
 
 
-def load_plugin(plugin_package_directory: str = PLUGIN_REL_PATH, plugin_package_name: str = "") -> ModuleType:
+def load_plugin(plugin_package_directory: str = PLUGIN_REL_PATH, plugin_package_name: str = "") -> PluginInterface:
     """Attempt to load the plugin"""
     try:
         _logger.debug(f"Loading plugin at module path: {plugin_package_name}")
-
+        print(f"Package is {__package__}")
         return import_module(
-            f"{plugin_package_directory}{plugin_package_name}.main", package=__package__
+            f"{plugin_package_directory}{plugin_package_name}.main", package="joystick_diagrams"
         ).ParserPlugin()
     except TypeError as e:
         _logger.error(f"{e} - {plugin_package_name}")
@@ -67,7 +65,7 @@ def find_plugins(directory) -> list[Path]:
     """
     Find python modules in given directory
 
-    Returns list of module names
+    Returns list of Paths with valid plugins contained within them.
 
     """
     _expected_files = ["__init__.py", "config.py", "main.py", "settings.json"]
@@ -95,4 +93,6 @@ def find_plugins(directory) -> list[Path]:
 
 if __name__ == "__main__":
     app = ParserPluginManager()
-    print(app)
+
+    [print(f"Available Plugins: {x}") for x in app.plugins]
+    [print(f"Loaded Plugins: {x}") for x in app.loaded_plugins]
