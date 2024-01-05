@@ -118,6 +118,13 @@ warn_unused_configs = true
 warn_annotation_unchecked = false
 show_error_codes = true
 
+[[tool.mypy.overrides]]
+module = [
+    "dynaconf.*",
+    "qt_material.*"
+]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 markers = [
     "uitest",
