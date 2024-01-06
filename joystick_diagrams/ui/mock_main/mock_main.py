@@ -6,7 +6,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from qt_material import apply_stylesheet
 
 from joystick_diagrams.plugin_manager import ParserPluginManager
-from joystick_diagrams.ui.mock_main import embed_UI
+from joystick_diagrams.ui.mock_main import embed_UI, setting_page
 from joystick_diagrams.ui.mock_main.qt_designer import main_window
 
 
@@ -27,10 +27,25 @@ class MainWindow(
         super().__init__(*args, **kwargs)
         self.setupUi(self)
         # self.initalise_plugin_menu()
-
         # self.tab_2_content = embed_UI.EmbedWidget(self.tab_2)
+        # self.pluginRemove.setProperty("class", "danger")
+        self.setupSectionButton.clicked.connect(self.load_setting_widget)
+        self.customiseSectionButton.clicked.connect(self.load_other_widget)
+        self.window_content = None
 
-        self.pluginRemove.setProperty("class", "danger")
+    def load_setting_widget(self):
+        if self.window_content:
+            self.window_content.hide()
+        self.window_content = setting_page.settingPage()
+        self.window_content.setParent(self.activeMainWindowWidget)
+        self.window_content.show()
+
+    def load_other_widget(self):
+        if self.window_content:
+            self.window_content.hide()
+        self.window_content = embed_UI.EmbedWidget()
+        self.window_content.setParent(self.activeMainWindowWidget)
+        self.window_content.show()
 
     def initalise_plugin_menu(self):
         for plugin in _plugins_list.loaded_plugins:
