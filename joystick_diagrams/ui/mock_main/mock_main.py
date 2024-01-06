@@ -2,15 +2,12 @@ import logging
 import sys
 from pathlib import Path
 
-import PyQt5.QtQuick
-import PyQt5.QtQuick.Controls
-import PyQt5.QtQuick.Controls.Material
 from PyQt5 import QtCore, QtGui, QtWidgets
 from qt_material import apply_stylesheet
 
 from joystick_diagrams.plugin_manager import ParserPluginManager
 from joystick_diagrams.ui.mock_main import embed_UI
-from joystick_diagrams.ui.mock_main.qt_designer import mock_UI
+from joystick_diagrams.ui.mock_main.qt_designer import main_window
 
 
 def initialise_plugins() -> ParserPluginManager | None:
@@ -23,26 +20,17 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # type: ignore
 
 
-def initialise_ui() -> None:
-    pass
-
-
-def get_log_level():
-    try:
-        return logging.getLevelNamesMapping()[config.debugLevel]
-    except KeyError:
-        return logging.getLevelNamesMapping()["INFO"]
-
-
-class MainWindow(QtWidgets.QMainWindow, mock_UI.Ui_MainWindow):  # Refactor pylint: disable=too-many-instance-attributes
+class MainWindow(
+    QtWidgets.QMainWindow, main_window.Ui_MainWindow
+):  # Refactor pylint: disable=too-many-instance-attributes
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
         # self.initalise_plugin_menu()
 
-        self.tab_2_content = embed_UI.EmbedWidget(self.tab_2)
+        # self.tab_2_content = embed_UI.EmbedWidget(self.tab_2)
 
-        self.pushButton.setProperty("class", "danger")
+        self.pluginRemove.setProperty("class", "danger")
 
     def initalise_plugin_menu(self):
         for plugin in _plugins_list.loaded_plugins:

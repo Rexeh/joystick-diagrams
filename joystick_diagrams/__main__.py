@@ -10,7 +10,9 @@ from qt_material import apply_stylesheet
 from joystick_diagrams.config import settings
 from joystick_diagrams.devices import device_manager
 from joystick_diagrams.plugin_manager import ParserPluginManager
-from joystick_diagrams.ui.main_window.main_window import MainWindow
+
+# from joystick_diagrams.ui.main_window.main_window import MainWindow
+from joystick_diagrams.ui.mock_main.mock_main import MainWindow
 
 _logger = logging.getLogger(__name__)
 
@@ -58,8 +60,8 @@ if __name__ == "__main__":
     setup_logging()
     try:
         app = QtWidgets.QApplication(sys.argv)
-        # window = MainWindow()
-        # window.show()
+        window = MainWindow()
+        window.show()
 
         # Load Plugins
         plugin_manager = initialise_plugins()
@@ -68,7 +70,7 @@ if __name__ == "__main__":
         # _device_manager = threading.Thread(target=device_manager.run, daemon=True)
         # _device_manager.start()
 
-        apply_stylesheet(app, theme="dark_lightgreen.xml")
+        apply_stylesheet(app, theme="light_blue.xml", invert_secondary=True)
 
         app.exec()
     except Exception as error:  # pylint: disable=broad-except
