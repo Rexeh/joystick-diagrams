@@ -1,6 +1,8 @@
 import logging
 from pathlib import Path
 
+from dynaconf.loaders.json_loader import write
+
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.dcs_world_plugin.dcs_world import DCSWorldParser
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
@@ -13,6 +15,7 @@ _logger = logging.getLogger("__name__")
 class ParserPlugin(PluginInterface):
     def __init__(self):
         self.path = None
+        self.path_type = self.FolderPath("A test title", "\\%%USERPROFILE%%\\Saved Games")
         self.settings = settings
         self.settings.validators.register()
 

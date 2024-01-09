@@ -4,9 +4,11 @@ import sys
 import threading
 from pathlib import Path
 
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 from qt_material import apply_stylesheet
 
+from joystick_diagrams import app_init
+from joystick_diagrams.app_state import appState
 from joystick_diagrams.config import settings
 from joystick_diagrams.devices import device_manager
 from joystick_diagrams.plugin_manager import ParserPluginManager
@@ -59,12 +61,12 @@ def get_log_level():
 if __name__ == "__main__":
     setup_logging()
     try:
+        # Initiate pre-loading
+        app_init
+
         app = QtWidgets.QApplication(sys.argv)
         window = MainWindow()
         window.show()
-
-        # Load Plugins
-        plugin_manager = initialise_plugins()
 
         # Device Manager
         # _device_manager = threading.Thread(target=device_manager.run, daemon=True)

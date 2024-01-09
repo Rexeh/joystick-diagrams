@@ -8,13 +8,14 @@ readme = "readme.md"
 repository = "https://github.com/Rexeh/joystick-diagrams"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11, <3.13"
 PyQt5 = "^5.15.8"
 PyQt5-Qt5 = "5.15.2"
 ply = "^3.11"
 requests = "^2.31.0"
 qt-material = "^2.14"
 dynaconf = "^3.2.4"
+pyside6 = "^6.6.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"

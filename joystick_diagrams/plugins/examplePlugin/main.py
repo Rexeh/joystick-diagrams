@@ -11,6 +11,7 @@ _logger = logging.getLogger("__name__")
 class ParserPlugin(PluginInterface):
     def __init__(self):
         self.path = None
+        self.path_type = self.FolderPath("A test title", "/%USERPROFILE%/Saved Games")
         self.settings = settings
         self.settings.validators.register()
 

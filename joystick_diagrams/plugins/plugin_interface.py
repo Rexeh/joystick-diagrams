@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from enum import Enum, auto
 from pathlib import Path
+from typing import Type
 
 import dynaconf
 
@@ -8,7 +10,19 @@ from joystick_diagrams.input.profile_collection import ProfileCollection
 
 
 class PluginInterface(ABC):
+    class FolderPath:
+        def __init__(self, dialog_title: str, default_path: str):
+            self.dialog_title = dialog_title
+            self.default_path = default_path
+
+    class FilePath:
+        def __init__(self, dialog_title: str, default_path: str, supported_extensions: list[str]):
+            self.dialog_title = dialog_title
+            self.supported_extensions = supported_extensions
+            self.default_path = default_path
+
     settings: dynaconf.LazySettings
+    path_type: FolderPath | FilePath
 
     def file_not_valid_exception(self, exceptionMessage: str):
         return JDException.FileNotValid(value=exceptionMessage)
@@ -22,9 +36,9 @@ class PluginInterface(ABC):
     @abstractmethod
     def process(self) -> ProfileCollection:
         """
-        Runs the relevant processes to return an InputCollection
+        Runs the relevant processes to return an ProfileCollection object
 
-        Returns InputCollection()
+        Returns ProfileCollection()
         """
         ...
 

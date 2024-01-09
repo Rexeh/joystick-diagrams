@@ -6,7 +6,12 @@ _logger = logging.getLogger("__name__")
 
 
 class ProfileCollection:
-    """Contains profiles for grouping devices and their input functionality"""
+    """
+    ProfileCollection is the primary exchange format between ParserPlugins and the Main Application
+
+    Groups PROFILE objects which comprise of other Input objects
+
+    """
 
     def __init__(self):
         self.profiles: dict[str, Profile_] = {}

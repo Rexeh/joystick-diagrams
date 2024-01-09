@@ -2,20 +2,16 @@ import logging
 import sys
 from pathlib import Path
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from qt_material import apply_stylesheet
 
+from joystick_diagrams.app_state import appState
 from joystick_diagrams.plugin_manager import ParserPluginManager
 from joystick_diagrams.ui.mock_main import embed_UI, setting_page
 from joystick_diagrams.ui.mock_main.qt_designer import main_window
 
-
-def initialise_plugins() -> ParserPluginManager | None:
-    return ParserPluginManager() or None
-
-
 _logger = logging.getLogger(__name__)
-_plugins_list = initialise_plugins()
+
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # type: ignore
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # type: ignore
 
@@ -29,6 +25,8 @@ class MainWindow(
         # self.initalise_plugin_menu()
         # self.tab_2_content = embed_UI.EmbedWidget(self.tab_2)
         # self.pluginRemove.setProperty("class", "danger")
+        self.appState = appState()
+
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
         self.customiseSectionButton.clicked.connect(self.load_other_widget)
         self.window_content = None
@@ -46,15 +44,6 @@ class MainWindow(
         self.window_content = embed_UI.EmbedWidget()
         self.window_content.setParent(self.activeMainWindowWidget)
         self.window_content.show()
-
-    def initalise_plugin_menu(self):
-        for plugin in _plugins_list.loaded_plugins:
-            self.pushButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
-            self.pushButton.setFlat(False)
-            self.pushButton.setObjectName(plugin.name)
-            self.pushButton.setText(plugin.name)
-            self.pushButton.setIcon(QtGui.QIcon(plugin.icon))
-            self.pluginListContainer.addWidget(self.pushButton)
 
 
 if __name__ == "__main__":

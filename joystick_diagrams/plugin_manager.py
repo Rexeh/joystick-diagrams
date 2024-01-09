@@ -18,6 +18,7 @@ import joystick_diagrams.exceptions as JDException
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
 _logger = logging.getLogger(__name__)
+
 PLUGINS_DIRECTORY: str = "plugins"
 PLUGIN_REL_PATH: str = ".plugins."
 
@@ -39,10 +40,14 @@ class ParserPluginManager:
                     _logger.error(f"Error with Plugin: {plugin} - {e}")
 
         else:
+            _logger.error(f"No valid plugins exist to load")
             raise JDException.NoPluginsExist()
 
     def validate_plugin_settings(self, plugin: PluginInterface) -> None | ValidationError:
         return plugin.settings.validators.validate_all()
+
+    def get_available_plugins(self) -> list[PluginInterface]:
+        return [x for x in self.loaded_plugins]
 
 
 def load_plugin(plugin_package_directory: str = PLUGIN_REL_PATH, plugin_package_name: str = "") -> PluginInterface:
