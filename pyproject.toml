@@ -100,7 +100,6 @@ exclude = '''
             # the root of the project
 )
 '''
-
 [tool.pylint.format]
 max-line-length = 120
 
@@ -119,7 +118,7 @@ warn_unused_configs = true
 warn_annotation_unchecked = false
 show_error_codes = true
 
-[[tool.mypy.overrides]]
+[tool.mypy.overrides]
 module = [
     "dynaconf.*",
     "qt_material.*"
@@ -129,4 +128,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 markers = [
     "uitest",
+]
+env = [
+    "qt_api=pyqt5"
 ]

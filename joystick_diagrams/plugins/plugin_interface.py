@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-from enum import Enum, auto
 from pathlib import Path
-from typing import Type
 
 import dynaconf
+from click import File
 
 import joystick_diagrams.exceptions as JDException
 from joystick_diagrams.input.profile_collection import ProfileCollection
@@ -22,7 +21,11 @@ class PluginInterface(ABC):
             self.default_path = default_path
 
     settings: dynaconf.LazySettings
-    path_type: FolderPath | FilePath
+
+    @property
+    @abstractmethod
+    def path_type(self) -> FolderPath | FilePath:
+        ...
 
     def file_not_valid_exception(self, exceptionMessage: str):
         return JDException.FileNotValid(value=exceptionMessage)

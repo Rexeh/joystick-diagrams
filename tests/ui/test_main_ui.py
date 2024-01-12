@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from PyQt5 import QtCore
 
@@ -8,6 +10,7 @@ from joystick_diagrams.ui.main_window import main_window
 @pytest.mark.uitest
 def test_title(qtbot):
     window = main_window.MainWindow()
+    window.show()
     qtbot.addWidget(window)
     title = "Joystick Diagrams - V"
     version_text = version.VERSION

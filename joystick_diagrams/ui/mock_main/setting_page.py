@@ -1,6 +1,5 @@
 import logging
 import sys
-from pathlib import Path
 
 from PySide6.QtCore import QDir, QMetaMethod, QObject, Qt, Signal, Slot
 from PySide6.QtGui import QIcon
@@ -9,7 +8,7 @@ from qt_material import apply_stylesheet
 
 from joystick_diagrams import app_init
 from joystick_diagrams.app_state import appState
-from joystick_diagrams.plugin_manager import ParserPluginManager
+from joystick_diagrams.plugins.dcs_world_plugin.main import ParserPlugin
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 from joystick_diagrams.ui.mock_main import embed_UI
 from joystick_diagrams.ui.mock_main.qt_designer import setting_page_ui
@@ -18,7 +17,7 @@ _logger = logging.getLogger(__name__)
 
 
 class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: disable=too-many-instance-attributes
-    pathTypeSignal = Signal(object)
+    pluginPathSet = Signal(object)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,6 +27,7 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
         self.initialise_plugins_list()
         print(f"Plugins are: {self.appState.plugin_manager}")
         self.parserPluginList.itemClicked.connect(self.plugin_selected)
+        self.pluginPathSet.connect(self.set_plugin_path)
 
     def remove_defaults(self):
         self.parserPluginList.clear()
@@ -40,10 +40,25 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
 
     @Slot()
     def plugin_selected(self, item):
-        self.load_plugin_settings(item.data(Qt.UserRole))
+        self.load_plugin_settings(self.get_selected_plugin_object())
+
+    @Slot()
+    def set_plugin_path(self, data):
+        print(f"Data is {data}")
+        try:
+            currentPlugin = self.get_selected_plugin_object()
+            success = currentPlugin.set_path(data)
+            # Plugin module needs improving to give better information?
+            if success:
+                print("worked")
+            else:
+                print("didnt work")
+        except:
+            print("Bang")
 
     def load_plugin_settings(self, data):
-        self.pluginVersionInfo.setText(data.version)
+        self.pluginVersionInfo.setText(f"Version {data.version}")
+        self.pluginName.setText(f"{data.name} Settings")
 
         # Path Setup
         self.pluginPath.setText(data.path)
@@ -53,26 +68,30 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
             self.pluginPathButton.clicked.disconnect()
 
         # Clean up
+        # Additional validation to be added to PluginInterface/Plugin loading
         if isinstance(data.path_type, PluginInterface.FilePath):
             self.pluginPathButton.clicked.connect(lambda: self.file_dialog(data.path_type))
 
         if isinstance(data.path_type, PluginInterface.FolderPath):
             self.pluginPathButton.clicked.connect(lambda: self.folder_dialog(data.path_type))
 
+    def get_selected_plugin_object(self) -> PluginInterface:
+        return self.parserPluginList.currentItem().data(Qt.UserRole)
+
     def file_dialog(self, data):
         exts = " ".join(f"*{ext}" for ext in data.supported_extensions)
-        print(f"Default path is {data.default_path}")
+
         _file = QFileDialog.getOpenFileName(
             self,
             caption=data.dialog_title,
             dir=data.default_path,
             filter=(f"All Files ({exts})"),
         )
-        print(_file)
+        self.pluginPathSet.emit(_file)
 
     def folder_dialog(self, data):
         _folder = QFileDialog.getExistingDirectory(self, "Select Directory", data.default_path)
-        print(_folder)
+        self.pluginPathSet.emit(_folder)
 
 
 if __name__ == "__main__":

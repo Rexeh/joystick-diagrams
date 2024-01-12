@@ -11,7 +11,6 @@ _logger = logging.getLogger("__name__")
 class ParserPlugin(PluginInterface):
     def __init__(self):
         self.path = None
-        self.path_type = self.FolderPath("A test title", "/%USERPROFILE%/Saved Games")
         self.settings = settings
         self.settings.validators.register()
 
@@ -21,6 +20,10 @@ class ParserPlugin(PluginInterface):
     def set_path(self, path: Path) -> bool:
         self.path = path
         return True
+
+    @property
+    def path_type(self):
+        return self.FilePath("A test title", "/%USERPROFILE%/Saved Games", [".xml"])
 
     @property
     def name(self) -> str:
@@ -41,3 +44,4 @@ class ParserPlugin(PluginInterface):
 
 if __name__ == "__main__":
     plugin = ParserPlugin()
+    print(plugin)

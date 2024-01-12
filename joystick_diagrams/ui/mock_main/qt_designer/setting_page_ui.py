@@ -24,7 +24,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1141, 647)
+        Form.resize(1053, 651)
         self.activeScreenWidget = QWidget(Form)
         self.activeScreenWidget.setObjectName(u"activeScreenWidget")
         self.activeScreenWidget.setGeometry(QRect(0, 0, 1041, 631))
@@ -42,11 +42,6 @@ class Ui_Form(object):
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.verticalLayout_3 = QVBoxLayout()
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-
-        self.horizontalLayout_2.addLayout(self.verticalLayout_3)
-
         self.parserPluginList = QListWidget(self.activeScreenWidget)
         icon = QIcon()
         icon.addFile(u"../joystick_diagrams/ui/main_window/images/3rd_party/dcs.ico", QSize(), QIcon.Normal, QIcon.Off)
@@ -84,6 +79,9 @@ class Ui_Form(object):
 
         self.horizontalLayout_2.addWidget(self.parserPluginList)
 
+        self.verticalLayout_3 = QVBoxLayout()
+        self.verticalLayout_3.setSpacing(10)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.pluginOptionsWidget = QWidget(self.activeScreenWidget)
         self.pluginOptionsWidget.setObjectName(u"pluginOptionsWidget")
         sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -112,23 +110,40 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addWidget(self.line_2)
 
-        self.pluginVersionInfo = QLabel(self.verticalLayoutWidget_4)
-        self.pluginVersionInfo.setObjectName(u"pluginVersionInfo")
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.pluginName = QLabel(self.verticalLayoutWidget_4)
+        self.pluginName.setObjectName(u"pluginName")
         sizePolicy3 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.pluginVersionInfo.sizePolicy().hasHeightForWidth())
-        self.pluginVersionInfo.setSizePolicy(sizePolicy3)
+        sizePolicy3.setHeightForWidth(self.pluginName.sizePolicy().hasHeightForWidth())
+        self.pluginName.setSizePolicy(sizePolicy3)
         font2 = QFont()
         font2.setPointSize(12)
         font2.setBold(True)
+        self.pluginName.setFont(font2)
+        self.pluginName.setTextFormat(Qt.RichText)
+        self.pluginName.setScaledContents(False)
+        self.pluginName.setAlignment(Qt.AlignRight|Qt.AlignTop|Qt.AlignTrailing)
+        self.pluginName.setWordWrap(False)
+
+        self.horizontalLayout.addWidget(self.pluginName)
+
+        self.pluginVersionInfo = QLabel(self.verticalLayoutWidget_4)
+        self.pluginVersionInfo.setObjectName(u"pluginVersionInfo")
+        sizePolicy3.setHeightForWidth(self.pluginVersionInfo.sizePolicy().hasHeightForWidth())
+        self.pluginVersionInfo.setSizePolicy(sizePolicy3)
         self.pluginVersionInfo.setFont(font2)
         self.pluginVersionInfo.setTextFormat(Qt.RichText)
         self.pluginVersionInfo.setScaledContents(False)
         self.pluginVersionInfo.setAlignment(Qt.AlignRight|Qt.AlignTop|Qt.AlignTrailing)
         self.pluginVersionInfo.setWordWrap(False)
 
-        self.verticalLayout_4.addWidget(self.pluginVersionInfo)
+        self.horizontalLayout.addWidget(self.pluginVersionInfo)
+
+
+        self.verticalLayout_4.addLayout(self.horizontalLayout)
 
         self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
 
@@ -171,13 +186,28 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addItem(self.verticalSpacer)
 
-        self.pluginRemove = QPushButton(self.verticalLayoutWidget_4)
-        self.pluginRemove.setObjectName(u"pluginRemove")
 
-        self.verticalLayout_4.addWidget(self.pluginRemove)
+        self.verticalLayout_3.addWidget(self.pluginOptionsWidget)
+
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.pushButton_2 = QPushButton(self.activeScreenWidget)
+        self.pushButton_2.setObjectName(u"pushButton_2")
+
+        self.horizontalLayout_4.addWidget(self.pushButton_2)
+
+        self.pushButton = QPushButton(self.activeScreenWidget)
+        self.pushButton.setObjectName(u"pushButton")
+        sizePolicy4.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
+        self.pushButton.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_4.addWidget(self.pushButton)
 
 
-        self.horizontalLayout_2.addWidget(self.pluginOptionsWidget)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_4)
+
+
+        self.horizontalLayout_2.addLayout(self.verticalLayout_3)
 
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
@@ -219,10 +249,12 @@ class Ui_Form(object):
         ___qlistwidgetitem2.setText(QCoreApplication.translate("Form", u"Star Citizen", None));
         self.parserPluginList.setSortingEnabled(__sortingEnabled)
 
-        self.pluginVersionInfo.setText(QCoreApplication.translate("Form", u"12111211221211221", None))
+        self.pluginName.setText(QCoreApplication.translate("Form", u"PLUGIN NAME", None))
+        self.pluginVersionInfo.setText(QCoreApplication.translate("Form", u"PLUGIN VERSION", None))
         self.pluginPath.setText(QCoreApplication.translate("Form", u"Path to <file/folder>", None))
         self.pluginPathButton.setText(QCoreApplication.translate("Form", u"Select File/Folder", None))
-        self.pluginRemove.setText(QCoreApplication.translate("Form", u"Delete Plugin", None))
+        self.pushButton_2.setText(QCoreApplication.translate("Form", u"PushButton", None))
+        self.pushButton.setText(QCoreApplication.translate("Form", u"PushButton", None))
         self.addParserPlugin.setText(QCoreApplication.translate("Form", u"Add Plugin", None))
     # retranslateUi
 

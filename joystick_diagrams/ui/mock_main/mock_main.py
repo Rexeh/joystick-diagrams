@@ -7,7 +7,7 @@ from qt_material import apply_stylesheet
 
 from joystick_diagrams.app_state import appState
 from joystick_diagrams.plugin_manager import ParserPluginManager
-from joystick_diagrams.ui.mock_main import embed_UI, setting_page
+from joystick_diagrams.ui.mock_main import configure_page, embed_UI, setting_page
 from joystick_diagrams.ui.mock_main.qt_designer import main_window
 
 _logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class MainWindow(
     def load_other_widget(self):
         if self.window_content:
             self.window_content.hide()
-        self.window_content = embed_UI.EmbedWidget()
+        self.window_content = configure_page.configurePage()
         self.window_content.setParent(self.activeMainWindowWidget)
         self.window_content.show()
 
