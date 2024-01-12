@@ -10,7 +10,6 @@ This module operates on FIFO basis, and is designed to be used by a single threa
 
 import logging
 from dataclasses import dataclass
-from enum import Enum, auto
 
 _logger = logging.getLogger(__name__)
 

@@ -2,7 +2,6 @@ import pathlib
 import sys
 
 from cx_Freeze import Executable, setup
-from setuptools import find_packages
 
 HERE = pathlib.Path(__file__).parent.resolve()
 TARGET_NAME: str = "joystick_diagrams"

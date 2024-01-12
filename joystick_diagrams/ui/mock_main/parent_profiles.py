@@ -1,12 +1,11 @@
 import logging
 import sys
 
-from PySide6.QtCore import QDir, QMetaMethod, QObject, Qt, Signal, Slot
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QFileDialog, QListWidgetItem, QMainWindow
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QApplication, QMainWindow
 from qt_material import apply_stylesheet
 
-from joystick_diagrams.app_state import appState
+from joystick_diagrams.app_state import AppState
 from joystick_diagrams.ui.mock_main.qt_designer import parent_profile_management_ui
 
 _logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ class parent_profile_ui(
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
-        self.appState = appState()
+        self.appState = AppState()
         self.availableParentsComboBox.clear()
         self.listWidget.clear()
         self.addParentItem.clicked.connect(self.add_parent_profile)

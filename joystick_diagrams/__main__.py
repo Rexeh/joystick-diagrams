@@ -1,16 +1,12 @@
 import logging
-import os
 import sys
-import threading
 from pathlib import Path
 
 from PySide6 import QtWidgets
 from qt_material import apply_stylesheet
 
 from joystick_diagrams import app_init
-from joystick_diagrams.app_state import appState
 from joystick_diagrams.config import settings
-from joystick_diagrams.devices import device_manager
 from joystick_diagrams.plugin_manager import ParserPluginManager
 
 # from joystick_diagrams.ui.main_window.main_window import MainWindow

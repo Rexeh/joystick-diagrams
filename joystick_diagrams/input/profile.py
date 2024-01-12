@@ -1,7 +1,5 @@
 import logging
 from copy import deepcopy
-from typing import Optional
-from uuid import UUID
 
 from joystick_diagrams.input.device import Device_
 

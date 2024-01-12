@@ -1,31 +1,27 @@
 import logging
 import sys
 
-from PySide6.QtCore import QDir, QMetaMethod, QObject, Qt, Signal, Slot
-from PySide6.QtGui import QIcon
+from PySide6.QtCore import Slot
 from PySide6.QtWidgets import (
     QApplication,
-    QFileDialog,
-    QListWidgetItem,
     QMainWindow,
     QTreeWidgetItem,
 )
 from qt_material import apply_stylesheet
 
 from joystick_diagrams import app_init
-from joystick_diagrams.app_state import appState
+from joystick_diagrams.app_state import AppState
 from joystick_diagrams.ui.mock_main import parent_profiles
 from joystick_diagrams.ui.mock_main.qt_designer import configure_page_ui
 
 _logger = logging.getLogger(__name__)
-5
 
 
 class configurePage(QMainWindow, configure_page_ui.Ui_Form):  # Refactor pylint: disable=too-many-instance-attributes
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
-        self.appState = appState()
+        self.appState = AppState()
         self.treeWidget.header().setVisible(True)
         self.initialise_available_profiles()
         self.initialise_customise_binds()

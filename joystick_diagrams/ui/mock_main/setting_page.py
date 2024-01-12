@@ -1,16 +1,14 @@
 import logging
 import sys
 
-from PySide6.QtCore import QDir, QMetaMethod, QObject, Qt, Signal, Slot
+from PySide6.QtCore import QMetaMethod, Qt, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QFileDialog, QListWidgetItem, QMainWindow
 from qt_material import apply_stylesheet
 
 from joystick_diagrams import app_init
-from joystick_diagrams.app_state import appState
-from joystick_diagrams.plugins.dcs_world_plugin.main import ParserPlugin
+from joystick_diagrams.app_state import AppState
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
-from joystick_diagrams.ui.mock_main import embed_UI
 from joystick_diagrams.ui.mock_main.qt_designer import setting_page_ui
 
 _logger = logging.getLogger(__name__)
@@ -22,7 +20,7 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
-        self.appState = appState()
+        self.appState = AppState()
         self.remove_defaults()
         self.initialise_plugins_list()
         print(f"Plugins are: {self.appState.plugin_manager}")

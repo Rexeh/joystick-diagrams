@@ -1,9 +1,7 @@
-import profile
 
 import pytest
 
 from joystick_diagrams.input.device import Device_
-from joystick_diagrams.input.profile import Profile_
 
 
 @pytest.fixture()
@@ -95,4 +93,4 @@ def test_new_modifier_no_input(device_obj, caplog):
     obj = device_obj("guid", "name")
     obj.add_modifier_to_input("non_existing_input", {"alt"}, "press")
 
-    assert f"Modifier attempted to be added to non_existing_input but input does not exist" in caplog.text
+    assert "Modifier attempted to be added to non_existing_input but input does not exist" in caplog.text

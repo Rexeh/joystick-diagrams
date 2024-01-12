@@ -1,4 +1,4 @@
-""" 
+"""
 Versioning for Joystick Diagrams
 
 Author: https://github.com/Rexeh

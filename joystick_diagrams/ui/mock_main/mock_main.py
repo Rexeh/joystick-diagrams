@@ -2,12 +2,11 @@ import logging
 import sys
 from pathlib import Path
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtWidgets
 from qt_material import apply_stylesheet
 
-from joystick_diagrams.app_state import appState
-from joystick_diagrams.plugin_manager import ParserPluginManager
-from joystick_diagrams.ui.mock_main import configure_page, embed_UI, setting_page
+from joystick_diagrams.app_state import AppState
+from joystick_diagrams.ui.mock_main import configure_page, setting_page
 from joystick_diagrams.ui.mock_main.qt_designer import main_window
 
 _logger = logging.getLogger(__name__)
@@ -25,7 +24,7 @@ class MainWindow(
         # self.initalise_plugin_menu()
         # self.tab_2_content = embed_UI.EmbedWidget(self.tab_2)
         # self.pluginRemove.setProperty("class", "danger")
-        self.appState = appState()
+        self.appState = AppState()
 
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
         self.customiseSectionButton.clicked.connect(self.load_other_widget)

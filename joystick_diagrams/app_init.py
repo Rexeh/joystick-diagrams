@@ -1,8 +1,8 @@
-from joystick_diagrams.app_state import appState
+from joystick_diagrams.app_state import AppState
 from joystick_diagrams.plugin_manager import ParserPluginManager
 
 # Get global state object
-_state = appState()
+_state = AppState()
 
 # Initialise Plugins System
 plugins = ParserPluginManager()

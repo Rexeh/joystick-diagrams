@@ -1,15 +1,14 @@
 import logging
 from copy import deepcopy
-from profile import Profile
 
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.input.profile_collection import ProfileCollection
-from joystick_diagrams.plugin_manager import ParserPluginManager, PluginInterface
+from joystick_diagrams.plugin_manager import ParserPluginManager
 
 _logger = logging.getLogger(__name__)
 
 
-class appState:
+class AppState:
     """
 
     appState for managing shared data for application.
@@ -20,13 +19,13 @@ class appState:
 
     def __new__(cls, *args, **kwargs):
         if not cls._inst:
-            cls._inst = super(appState, cls).__new__(cls, *args, **kwargs)
+            cls._inst = super(AppState, cls).__new__(cls, *args, **kwargs)
             cls._inst._init()
         return cls._inst
 
     def _init(self) -> None:
         self.plugin_manager: ParserPluginManager | None = None
-        self.raw_profiles: list = self.profile_mock()
+        self.raw_profiles: list = self.profile_mock()  # TODO repalce with parsed profiles from Plugins
         self.profileObjectMapping = {x.name: x for x in self.raw_profiles}
         self.profileParentMapping: dict[str, list[str]] = {
             "profile1": ["profile2", "profile3"],
@@ -40,16 +39,40 @@ class appState:
         self.plugin_manager = plugin_manager
 
     def get_processed_profile(self, profile_identifier: str) -> Profile_:
+        """
+        Returns fully formed inherited profile for a given Profile Identifier.
+
+        Returns Profile_ object
+
+        """
         return self.processedProfileObjectMapping[profile_identifier]
 
     def get_processed_profiles(self) -> dict[str, Profile_]:
+        """
+        Returns all fully formed inherited profile
+
+        Returns Profile_ object
+
+        """
         return self.processedProfileObjectMapping
 
-    def update_parent_profile_map(self, key: str, values: list):
+    def update_parent_profile_map(self, key: str, values: list) -> None:
+        """
+        Updates the global map of Profiles -> Profile Parents. Parents form the basis for inheritance of profiles.
+
+        Returns None
+
+        """
         self.profileParentMapping[key] = values
         self.update_procssed_profiles()
 
-    def update_procssed_profiles(self):
+    def update_procssed_profiles(self) -> None:
+        """
+        Updates the processedProfileObjectMapping [dict], which is a core component for Template generation
+
+        Returns None
+
+        """
         for profile, parents in self.profileParentMapping.items():
             profile_copy = deepcopy(self.profileObjectMapping[profile])
 
@@ -110,9 +133,6 @@ class appState:
 
 
 if __name__ == "__main__":
-    _appState = appState()
-
+    _appState = AppState()
     _appState.update_procssed_profiles()
     print(_appState)
-
-    # profile1.merge_profiles(profile2)

@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 import dynaconf
-from click import File
 
 import joystick_diagrams.exceptions as JDException
 from joystick_diagrams.input.profile_collection import ProfileCollection

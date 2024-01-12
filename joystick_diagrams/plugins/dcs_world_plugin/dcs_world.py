@@ -7,7 +7,6 @@ from pathlib import Path
 from ply import lex, yacc  # type: ignore
 
 #################
-import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
 from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.profile_collection import ProfileCollection
 

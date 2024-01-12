@@ -97,7 +97,7 @@ class JoystickGremlin(jdi.JDinterface):
         if isinstance(self.profiles, list) and len(self.profiles) > 0:
             for key, value in self.joystick_dictionary.items():
                 for item in value.copy():
-                    if not item in self.profiles:
+                    if item not in self.profiles:
                         self.joystick_dictionary[key].pop(item, None)
         return self.joystick_dictionary
 

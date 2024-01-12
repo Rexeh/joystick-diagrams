@@ -8,14 +8,10 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFormLayout, QFrame, QHBoxLayout,
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect,
+    QSize, Qt)
+from PySide6.QtGui import (QBrush, QColor, QFont, QIcon)
+from PySide6.QtWidgets import (QFormLayout, QFrame, QHBoxLayout,
     QLabel, QLayout, QListWidget, QListWidgetItem,
     QPushButton, QSizePolicy, QSpacerItem, QVBoxLayout,
     QWidget)
@@ -52,14 +48,14 @@ class Ui_Form(object):
         font.setPointSize(12)
         font.setBold(True)
         __qlistwidgetitem = QListWidgetItem(self.parserPluginList)
-        __qlistwidgetitem.setFont(font);
-        __qlistwidgetitem.setBackground(brush);
-        __qlistwidgetitem.setIcon(icon);
+        __qlistwidgetitem.setFont(font)
+        __qlistwidgetitem.setBackground(brush)
+        __qlistwidgetitem.setIcon(icon)
         icon1 = QIcon()
         icon1.addFile(u"../joystick_diagrams/ui/main_window/images/3rd_party/jg.ico", QSize(), QIcon.Normal, QIcon.Off)
         __qlistwidgetitem1 = QListWidgetItem(self.parserPluginList)
-        __qlistwidgetitem1.setFont(font);
-        __qlistwidgetitem1.setIcon(icon1);
+        __qlistwidgetitem1.setFont(font)
+        __qlistwidgetitem1.setIcon(icon1)
         icon2 = QIcon()
         icon2.addFile(u"../joystick_diagrams/ui/main_window/images/3rd_party/sc.png", QSize(), QIcon.Normal, QIcon.Off)
         font1 = QFont()
@@ -67,8 +63,8 @@ class Ui_Form(object):
         font1.setPointSize(11)
         font1.setBold(True)
         __qlistwidgetitem2 = QListWidgetItem(self.parserPluginList)
-        __qlistwidgetitem2.setFont(font1);
-        __qlistwidgetitem2.setIcon(icon2);
+        __qlistwidgetitem2.setFont(font1)
+        __qlistwidgetitem2.setIcon(icon2)
         self.parserPluginList.setObjectName(u"parserPluginList")
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -236,17 +232,17 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Configure</span></p></body></html>", None))
+        self.label.setText(QCoreApplication.translate("Form", u'<html><head/><body><p><span style=" font-size:14pt; font-weight:600;">Configure</span></p></body></html>', None))
         self.label_2.setText(QCoreApplication.translate("Form", u"Setup your things... in order to customise stuff", None))
 
         __sortingEnabled = self.parserPluginList.isSortingEnabled()
         self.parserPluginList.setSortingEnabled(False)
         ___qlistwidgetitem = self.parserPluginList.item(0)
-        ___qlistwidgetitem.setText(QCoreApplication.translate("Form", u"DCS World", None));
+        ___qlistwidgetitem.setText(QCoreApplication.translate("Form", u"DCS World", None))
         ___qlistwidgetitem1 = self.parserPluginList.item(1)
-        ___qlistwidgetitem1.setText(QCoreApplication.translate("Form", u"Joystick Gremlin", None));
+        ___qlistwidgetitem1.setText(QCoreApplication.translate("Form", u"Joystick Gremlin", None))
         ___qlistwidgetitem2 = self.parserPluginList.item(2)
-        ___qlistwidgetitem2.setText(QCoreApplication.translate("Form", u"Star Citizen", None));
+        ___qlistwidgetitem2.setText(QCoreApplication.translate("Form", u"Star Citizen", None))
         self.parserPluginList.setSortingEnabled(__sortingEnabled)
 
         self.pluginName.setText(QCoreApplication.translate("Form", u"PLUGIN NAME", None))

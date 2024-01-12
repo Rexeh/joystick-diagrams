@@ -40,7 +40,7 @@ class ParserPluginManager:
                     _logger.error(f"Error with Plugin: {plugin} - {e}")
 
         else:
-            _logger.error(f"No valid plugins exist to load")
+            _logger.error("No valid plugins exist to load")
             raise JDException.NoPluginsExist()
 
     def validate_plugin_settings(self, plugin: PluginInterface) -> None | ValidationError:
