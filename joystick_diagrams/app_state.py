@@ -1,5 +1,6 @@
 import logging
 from copy import deepcopy
+from profile import Profile
 
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.input.profile_collection import ProfileCollection
@@ -33,12 +34,20 @@ class appState:
             "profile3": [],
         }  # TODO correctly initialise these
         self.processedProfileObjectMapping: dict[str, Profile_] = {}  # TODO Think here about name colissions
+        self.update_procssed_profiles()
 
     def init_plugins(self, plugin_manager: ParserPluginManager):
         self.plugin_manager = plugin_manager
 
+    def get_processed_profile(self, profile_identifier: str) -> Profile_:
+        return self.processedProfileObjectMapping[profile_identifier]
+
+    def get_processed_profiles(self) -> dict[str, Profile_]:
+        return self.processedProfileObjectMapping
+
     def update_parent_profile_map(self, key: str, values: list):
         self.profileParentMapping[key] = values
+        self.update_procssed_profiles()
 
     def update_procssed_profiles(self):
         for profile, parents in self.profileParentMapping.items():
@@ -49,14 +58,15 @@ class appState:
                 continue
 
             if parents:
-                parents.reverse()
-                merged_profiles = self.profileObjectMapping[parents[0]]
+                parents.reverse()  # Reverse list to flip obj >> parent
+                merged_profiles = deepcopy(self.profileObjectMapping[parents[0]])
 
                 for parent in parents[:1]:
-                    obj = self.profileObjectMapping[parent]
+                    obj = deepcopy(self.profileObjectMapping[parent])
                     merged_profiles = merged_profiles.merge_profiles(obj)
 
             self.processedProfileObjectMapping[profile] = merged_profiles.merge_profiles(profile_copy)
+        print(f"Updatedd processed profiles {self.processedProfileObjectMapping}")
 
     def profile_mock(self):
         collection1 = ProfileCollection()

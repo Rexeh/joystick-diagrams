@@ -16,7 +16,6 @@ class parent_profile_ui(
     QMainWindow, parent_profile_management_ui.Ui_Form
 ):  # Refactor pylint: disable=too-many-instance-attributes
     parentProfileChange = Signal()
-    parentProfileChange = Signal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,7 +51,6 @@ class parent_profile_ui(
         current_row = self.listWidget.currentRow()
         current_item = self.listWidget.takeItem(current_row)
         self.listWidget.insertItem(current_row + 1, current_item)
-
         self.parentProfileChange.emit()
 
     def filter_available_parents(self, target_key: str, available_keys: list[str], used_keys: list[str]):
@@ -60,7 +58,9 @@ class parent_profile_ui(
 
     def save_profile_parent_maps(self):
         parent_profiles = [self.listWidget.item(x).text() for x in range(self.listWidget.count())]
-        self.appState.profileParentMapping[self.get_current_active_profile()] = parent_profiles
+
+        self.appState.update_parent_profile_map(self.get_current_active_profile(), parent_profiles)
+
         _logger.debug(f"Current profile parent mappings: {self.appState.profileParentMapping}")
 
     def load_profile_parent_maps(self, profile_identifier: str):
