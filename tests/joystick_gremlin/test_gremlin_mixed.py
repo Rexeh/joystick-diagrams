@@ -1,5 +1,6 @@
 import unittest
-import joystick_diagrams.adaptors.joystick_gremlin.joystick_gremlin as gremlin
+
+import joystick_diagrams.plugins.joystick_gremlin_plugin.joystick_gremlin as gremlin
 
 
 class TestGremlinMixed(unittest.TestCase):

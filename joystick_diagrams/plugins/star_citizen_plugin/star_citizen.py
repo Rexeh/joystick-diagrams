@@ -4,14 +4,11 @@ import os
 from pathlib import Path
 from xml.dom import minidom
 
-import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
-
 _logger = logging.getLogger(__name__)
 
 
-class StarCitizen(jdi.JDinterface):
+class StarCitizen:
     def __init__(self, file_path):
-        jdi.JDinterface.__init__(self)
         self.file_path = file_path
         self.data = self.__load_file()
         self.hat_formats = {"up": "U", "down": "D", "left": "L", "right": "R"}

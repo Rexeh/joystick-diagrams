@@ -2,15 +2,13 @@
 import logging
 from xml.dom import minidom
 
-import joystick_diagrams.adaptors.joystick_diagram_interface as jdi
-
 _logger = logging.getLogger(__name__)
 
 
-class JoystickGremlin(jdi.JDinterface):
+class JoystickGremlin:
     def __init__(self, filepath):
         ## TRY FIND PATH
-        jdi.JDinterface.__init__(self)
+
         self.file = self.parse_xml_file(filepath)
 
         # New Attributes

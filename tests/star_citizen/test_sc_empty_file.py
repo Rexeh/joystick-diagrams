@@ -1,5 +1,6 @@
 import unittest
-import joystick_diagrams.adaptors.star_citizen.star_citizen as sc
+
+import joystick_diagrams.plugins.star_citizen_plugin.star_citizen as sc
 
 
 class TestSCFileErrors(unittest.TestCase):
