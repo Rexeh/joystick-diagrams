@@ -6,8 +6,6 @@ from datetime import datetime
 from os import path
 from pathlib import Path
 
-from PyQt5 import QtWidgets
-
 from joystick_diagrams.config import settings
 from joystick_diagrams.functions import helper
 
@@ -36,10 +34,6 @@ class Export:
         _logger.debug(f"Export Started with {joystick_count} joysticks")
         _logger.debug(f"Export Data: {self.joystick_listing}")
 
-        if isinstance(progress_bar, QtWidgets.QProgressBar):
-            progress_bar.setValue(0)
-            progress_increment = int(100 / joystick_count)
-
         for joystick in self.joystick_listing:
             base_template = self.get_template(joystick)
             if base_template:
@@ -56,18 +50,10 @@ class Export:
                     completed_template = self.date_template(completed_template)
                     _logger.info(f"Saving: {joystick}")
                     self.save_template(joystick, mode, completed_template)
-                    if isinstance(progress_bar, QtWidgets.QProgressBar):
-                        progress_bar.setValue(
-                            int(progress_bar.value() + (progress_increment / progress_increment_modes))
-                        )
+
             else:
                 self.error_bucket.append(f"No Template file found for: {joystick}")
 
-            if isinstance(progress_bar, QtWidgets.QProgressBar):
-                progress_bar.setValue(int(progress_bar.value() + progress_increment))
-
-        if isinstance(progress_bar, QtWidgets.QProgressBar):
-            progress_bar.setValue(100)
         return self.error_bucket
 
     def get_template(self, joystick):
