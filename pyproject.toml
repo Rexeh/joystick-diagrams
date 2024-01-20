@@ -98,17 +98,6 @@ exclude = '''
             # the root of the project
 )
 '''
-[tool.pylint.format]
-max-line-length = 120
-
-[tool.pylint.basic]
-variable-rgx = "[a-z_][a-z0-9_]{0,30}$"
-
-[tool.pylint.global]
-extension-pkg-whitelist = ["PyQt5"]
-# ignoring missing module and missing class docstring errors
-disable = ["C0114", "C0115","W1201","W1202","logging-fstring-interpolation","missing-function-docstring"]
-output-format = "colorized"
 
 [tool.mypy]
 warn_return_any = false
@@ -126,9 +115,6 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 markers = [
     "uitest",
-]
-env = [
-    "qt_api=pyqt5",
 ]
 
 [tool.ruff]
