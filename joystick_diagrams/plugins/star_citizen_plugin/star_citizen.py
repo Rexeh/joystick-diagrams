@@ -520,16 +520,6 @@ class StarCitizen:
         else:
             return (" ".join(name_parts[1:])).capitalize()
 
-    def convert_hat_format(self, hat) -> str:
-        _logger.debug(f"Convert Hat: {hat}")
-        return self.hat_formats[hat]
-
-    def extract_device_information(self, option) -> dict:
-        """Accepts parsed OPTION from Star Citizen XML"""
-        name = (option.getAttribute("Product")[0 : (len(option.getAttribute("Product")) - 38)]).strip()
-        guid = option.getAttribute("Product")[-37:-2]  # GUID Fixed
-        return {"name": name, "guid": guid}
-
     def process_name(self, name: str) -> str:
         _logger.debug(f"Bind Name: {name}")
 
@@ -539,7 +529,8 @@ class StarCitizen:
         return minidom.parseString(data)
 
     def create_device_lookup(self, options) -> None:
-        PREFIXES = {"joystick": "js", "keyboard": "kb", "mouse": "mo"}
+        """Create lookup table for bind strings to resolve easier."""
+        _prefixes = {"joystick": "js", "keyboard": "kb", "mouse": "mo"}
 
         def parse_product(product_str: str) -> tuple[str, str]:
             product_name = product_str[0:-38].strip()
@@ -554,10 +545,10 @@ class StarCitizen:
 
             _name, _guid = parse_product(_product)
 
-            device_identifier = f"{PREFIXES[_type]}{_inst}"
+            device_identifier = f"{_prefixes[_type]}{_inst}"
             self.devices[device_identifier] = {"name": _name, "guid": _guid}
 
-        print(self.devices)
+        _logger.debug(f"Created device lookups: {self.devices} ")
 
     def parse(self) -> ProfileCollection:
         # Get XML Data
