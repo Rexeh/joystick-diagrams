@@ -1,10 +1,6 @@
 import logging
 from pathlib import Path
 
-from dynaconf.loaders.json_loader import write
-
-from joystick_diagrams.input.profile_collection import ProfileCollection
-from joystick_diagrams.plugins.dcs_world_plugin.dcs_world import DCSWorldParser
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
 from .config import settings
@@ -14,28 +10,20 @@ _logger = logging.getLogger("__name__")
 
 class ParserPlugin(PluginInterface):
     def __init__(self):
+        self.path = None
         self.settings = settings
         self.settings.validators.register()
-        self.path = self.settings.path or None
 
-    def process(self) -> ProfileCollection:
-        return self.instance.process_profiles()
+    def process(self):
+        return None
 
     def set_path(self, path: Path) -> bool:
-        try:
-            self.instance = DCSWorldParser(path)
-            # Requires abstraction / better experience
-            write(self.settings.settings_module[0], {"path": path})
-        except Exception as e:
-            print(e)
-            return False
-
         self.path = path
         return True
 
     @property
     def path_type(self):
-        return self.FolderPath("Select your DCS World directory", "\\%%USERPROFILE%%\\Saved Games")
+        return self.FilePath("Select your Star Citizen ", "/%USERPROFILE%/Saved Games", [".xml"])
 
     @property
     def name(self) -> str:
@@ -56,3 +44,4 @@ class ParserPlugin(PluginInterface):
 
 if __name__ == "__main__":
     plugin = ParserPlugin()
+    print(plugin)

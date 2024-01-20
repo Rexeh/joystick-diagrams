@@ -11,9 +11,6 @@ from joystick_diagrams.ui.mock_main.qt_designer import main_window
 
 _logger = logging.getLogger(__name__)
 
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # type: ignore
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # type: ignore
-
 
 class MainWindow(
     QtWidgets.QMainWindow, main_window.Ui_MainWindow
@@ -29,6 +26,7 @@ class MainWindow(
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
         self.customiseSectionButton.clicked.connect(self.load_other_widget)
         self.window_content = None
+        self.setWindowTitle("Joystick Diagrams")
 
     def load_setting_widget(self):
         if self.window_content:

@@ -27,6 +27,7 @@ temp/
 htmlcov
 .mypy*
 .pytest*
+/data
 
 # IDE
 *.code-workspace

@@ -1,5 +1,4 @@
-"""
-Plugin Manager for Joystick Diagrams
+"""Plugin Manager for Joystick Diagrams.
 
 Plugin manager serves as the main interface between the GUI and the rest of the application.
 
@@ -21,6 +20,8 @@ _logger = logging.getLogger(__name__)
 
 PLUGINS_DIRECTORY: str = "plugins"
 PLUGIN_REL_PATH: str = ".plugins."
+EXPECTED_PLUGIN_FILES = ["__init__.py", "config.py", "main.py", "settings.json"]
+EXCLUDED_PLUGIN_DIRS = ["__pycache__"]
 
 
 class ParserPluginManager:
@@ -54,7 +55,6 @@ def load_plugin(plugin_package_directory: str = PLUGIN_REL_PATH, plugin_package_
     """Attempt to load the plugin"""
     try:
         _logger.debug(f"Loading plugin at module path: {plugin_package_name}")
-        print(f"Package is {__package__}")
         return import_module(
             f"{plugin_package_directory}{plugin_package_name}.main", package="joystick_diagrams"
         ).ParserPlugin()
@@ -67,20 +67,18 @@ def load_plugin(plugin_package_directory: str = PLUGIN_REL_PATH, plugin_package_
 
 
 def find_plugins(directory) -> list[Path]:
-    """
-    Find python modules in given directory
+    """Find python modules in given directory.
 
     Returns list of Paths with valid plugins contained within them.
 
     """
-    _expected_files = ["__init__.py", "config.py", "main.py", "settings.json"]
     _folders = [folder for folder in Path(os.path.join(Path(__file__).resolve().parent, directory)).iterdir()]
     _logger.debug(f"Folders detected: {_folders}")
 
     def _check_expected_files(directory: Path):
         directory_files = [f.name for f in directory.iterdir() if f.is_file()]
 
-        for _file in _expected_files:
+        for _file in EXPECTED_PLUGIN_FILES:
             if _file not in directory_files:
                 return False
 
@@ -92,7 +90,9 @@ def find_plugins(directory) -> list[Path]:
 
         return False
 
-    folders = [folder for folder in _folders if _check_folder_validity(folder) and folder.name != "__pycache__"]
+    folders = [
+        folder for folder in _folders if _check_folder_validity(folder) and folder.name not in EXCLUDED_PLUGIN_DIRS
+    ]
     return folders
 
 

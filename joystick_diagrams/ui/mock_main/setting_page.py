@@ -46,7 +46,7 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
         try:
             currentPlugin = self.get_selected_plugin_object()
             success = currentPlugin.set_path(data)
-            # Plugin module needs improving to give better information?
+            # TODO Plugin module needs improving to give better information?
             if success:
                 print("worked")
             else:
@@ -76,7 +76,7 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
     def get_selected_plugin_object(self) -> PluginInterface:
         return self.parserPluginList.currentItem().data(Qt.UserRole)
 
-    def file_dialog(self, data):
+    def file_dialog(self, data) -> None:
         exts = " ".join(f"*{ext}" for ext in data.supported_extensions)
 
         _file = QFileDialog.getOpenFileName(
@@ -85,11 +85,15 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
             dir=data.default_path,
             filter=(f"All Files ({exts})"),
         )
-        self.pluginPathSet.emit(_file)
+
+        if _file[0]:
+            self.pluginPathSet.emit(_file)
 
     def folder_dialog(self, data):
-        _folder = QFileDialog.getExistingDirectory(self, "Select Directory", data.default_path)
-        self.pluginPathSet.emit(_folder)
+        _folder = QFileDialog.getExistingDirectory(self, data.dialog_title, data.default_path)
+
+        if _folder:
+            self.pluginPathSet.emit(_folder)
 
 
 if __name__ == "__main__":

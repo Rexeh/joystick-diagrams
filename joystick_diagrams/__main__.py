@@ -23,7 +23,7 @@ def setup_logging() -> None:
     """
 
     log_dir = Path("logs")
-    log_file = Path("jv.log")
+    log_file = Path("app.log")
     log_file_location = Path.joinpath(log_dir, log_file)
 
     logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
@@ -47,7 +47,7 @@ def initialise_ui() -> None:
     pass
 
 
-def get_log_level():
+def get_log_level() -> int:
     try:
         return logging.getLevelNamesMapping()[settings.logLevel]
     except KeyError:
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         # _device_manager = threading.Thread(target=device_manager.run, daemon=True)
         # _device_manager.start()
 
-        apply_stylesheet(app, theme="light_blue.xml", invert_secondary=True)
+        apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
 
         app.exec()
     except Exception as error:  # pylint: disable=broad-except

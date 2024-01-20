@@ -39,21 +39,11 @@ class AppState:
         self.plugin_manager = plugin_manager
 
     def get_processed_profile(self, profile_identifier: str) -> Profile_:
-        """
-        Returns fully formed inherited profile for a given Profile Identifier.
-
-        Returns Profile_ object
-
-        """
+        """Return inherited profile for given Profile Identifier."""
         return self.processedProfileObjectMapping[profile_identifier]
 
     def get_processed_profiles(self) -> dict[str, Profile_]:
-        """
-        Returns all fully formed inherited profile
-
-        Returns Profile_ object
-
-        """
+        """Return all inherited profiles."""
         return self.processedProfileObjectMapping
 
     def update_parent_profile_map(self, key: str, values: list) -> None:
@@ -89,7 +79,7 @@ class AppState:
                     merged_profiles = merged_profiles.merge_profiles(obj)
 
             self.processedProfileObjectMapping[profile] = merged_profiles.merge_profiles(profile_copy)
-        print(f"Updatedd processed profiles {self.processedProfileObjectMapping}")
+        print(f"Updated processed profiles {self.processedProfileObjectMapping}")
 
     def profile_mock(self):
         collection1 = ProfileCollection()
