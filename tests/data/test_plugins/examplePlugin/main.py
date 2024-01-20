@@ -22,6 +22,10 @@ class ParserPlugin(PluginInterface):
         return True
 
     @property
+    def path_type(self):
+        return self.FolderPath("Select your DCS World directory", "\\%%USERPROFILE%%\\Saved Games")
+
+    @property
     def name(self) -> str:
         return f"{self.settings.PLUGIN_NAME}"
 

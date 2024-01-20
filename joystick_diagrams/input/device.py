@@ -33,7 +33,16 @@ class Device_:
         input = self.get_input(input_id)
 
         if input is None:
-            _logger.warning(f"Modifier attempted to be added to {input_id} but input does not exist")
+            _logger.warning(
+                f"Modifier attempted to be added to {input_id} but input does not exist. So a shell will be created"
+            )
+            self.create_input(input_id, "")
+
+            shell_input = self.get_input(input_id)
+
+            if shell_input:
+                shell_input.add_modifier(modifier, command)
+
         else:
             input.add_modifier(modifier, command)
 

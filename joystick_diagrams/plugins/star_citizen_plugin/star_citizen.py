@@ -4,14 +4,18 @@ import os
 from pathlib import Path
 from xml.dom import minidom
 
+from joystick_diagrams.input.profile_collection import ProfileCollection
+
 _logger = logging.getLogger(__name__)
+
+
+HAT_FORMAT_LOOKUP = {"up": "U", "down": "D", "left": "L", "right": "R"}
 
 
 class StarCitizen:
     def __init__(self, file_path):
         self.file_path = file_path
         self.data = self.__load_file()
-        self.hat_formats = {"up": "U", "down": "D", "left": "L", "right": "R"}
         self.hat = None
         self.devices = {}
         self.button_array = {}
@@ -503,43 +507,6 @@ class StarCitizen:
 
             raise Exception
 
-    def parse_map(self, bind_map) -> tuple:
-        segments = bind_map.split("_")
-        _logger.debug(f"Bind Information: {segments}")
-        bind_device = segments[0]
-        device_object = self.get_stored_device(bind_device)
-        _logger.debug(f"Device: {device_object}")
-        if device_object is None:
-            c_map = None
-            return (device_object, c_map)
-        if segments[1] == "":
-            c_map = None
-            return (device_object, c_map)
-        elif segments[1][0:6] == "button":
-            button_id = segments[1][6:]
-            c_map = f"BUTTON_{button_id}"
-            return (device_object, c_map)
-        elif segments[1][0:3] == "hat":
-            pov_id = segments[1][3:]
-            pov_dir = self.convert_hat_format(segments[2])
-            c_map = f"POV_{pov_id}_{pov_dir}"
-            return (device_object, c_map)
-        elif segments[1][0] in ("x", "y", "z"):
-            axis = segments[1][0]
-            c_map = f"AXIS_{axis}"
-            return (device_object, c_map)
-        elif segments[1][0:3] == "rot":
-            axis = segments[1][3:]
-            c_map = f"AXIS_R{axis}"
-            return (device_object, c_map)
-        elif segments[1][0:6] == "slider":
-            slider_id = segments[1][6:]
-            c_map = f"AXIS_SLIDER_{slider_id}"
-            return (device_object, c_map)
-        else:
-            c_map = None
-            return (device_object, c_map)
-
     def get_human_readable_name(self, name) -> str:
         if name in self.custom_labels:
             return self.name_format(self.custom_labels.get(name))
@@ -563,81 +530,171 @@ class StarCitizen:
         guid = option.getAttribute("Product")[-37:-2]  # GUID Fixed
         return {"name": name, "guid": guid}
 
-    def get_stored_device(self, device) -> dict:
-        if device in self.devices:
-            return self.devices[device]
-        else:
-            return None
-
-    def add_device(self, option) -> None:
-        """Accepts parsed OPTION from Star Citizen XML"""
-        self.devices.update(
-            {
-                self.device_id(
-                    option.getAttribute("type"), option.getAttribute("instance")
-                ): self.extract_device_information(option)
-            }
-        )
-        _logger.debug(f"Device List: {self.devices}")
-
     def process_name(self, name: str) -> str:
         _logger.debug(f"Bind Name: {name}")
 
         return self.get_human_readable_name(name)
 
-    def build_button_map(self, device, button, name) -> dict:
-        if device in self.button_array:
-            self.button_array[device].update({button: name})
-        else:
-            self.button_array.update({device: {button: name}})
+    def parse_file_data(self, data: str):
+        return minidom.parseString(data)
 
-    def device_id(self, device_type, instance) -> str:
-        if device_type == "keyboard":
-            device_code = "kb"
-        elif device_type == "joystick":
-            device_code = "js"
-        else:
-            device_code = "mo"  ## Catch all for now
-        return f"{device_code}{instance}"
+    def create_device_lookup(self, options) -> None:
+        PREFIXES = {"joystick": "js", "keyboard": "kb", "mouse": "mo"}
 
-    def parse(self) -> dict:
-        parse = minidom.parseString(self.data)
-        joysticks = parse.getElementsByTagName("options")
-        for j in joysticks:
-            self.add_device(j)
-        actions = parse.getElementsByTagName("actionmap")
+        def parse_product(product_str: str) -> tuple[str, str]:
+            product_name = product_str[0:-38].strip()
+            product_guid = product_str[-37:-1].strip()
+            return (product_name, product_guid)
 
-        for i in actions:
-            _logger.debug(f"Bind Category: {self.process_name(i.getAttribute('name'))}")
-            single_actions = i.getElementsByTagName("action")
-            for action in single_actions:
+        for option in options:
+            _type = option.getAttribute("type")
+            _inst = option.getAttribute("instance")
+
+            _product = option.getAttribute("Product")
+
+            _name, _guid = parse_product(_product)
+
+            device_identifier = f"{PREFIXES[_type]}{_inst}"
+            self.devices[device_identifier] = {"name": _name, "guid": _guid}
+
+        print(self.devices)
+
+    def parse(self) -> ProfileCollection:
+        # Get XML Data
+        parse = self.parse_file_data(self.data)
+
+        profile_collection = ProfileCollection()
+
+        # Get Joystick Information to aid device creation
+        self.create_device_lookup(parse.getElementsByTagName("options"))
+
+        # Get the ActionMaps (Profiles)
+        profiles = parse.getElementsByTagName("actionmap")
+
+        # For each Profile get the binds for the devices
+        for profile in profiles:
+            profile_obj = profile_collection.create_profile(profile.getAttribute("name"))
+
+            # Get all the action nodes for a profile
+            actions = profile.getElementsByTagName("action")
+
+            # Look through the actions for a given profile
+            for action in actions:
+                # Command for action STR
                 name = self.process_name(action.getAttribute("name"))
+
+                # Get the binds for the ACTION
                 binds = action.getElementsByTagName("rebind")
-                _logger.debug("Binds in group: {binds}")
+
+                # iterate each bind
                 for bind in binds:
                     bind_input = bind.getAttribute("input")
-                    button = self.parse_map(bind_input)
-                    _logger.debug("Parsed Control: {button}")
-                    if button and button[1] is not None:
-                        _logger.debug("Valid button, adding to map")
-                        # Check if the Device exist is already Mapped
-                        if button[0]["name"] in self.button_array:
-                            # Check if the Button is already Mapped for this Device
-                            if button[1] not in self.button_array[button[0]["name"]]:
-                                # Add Mapping
-                                self.build_button_map(button[0]["name"], button[1], name)
-                            else:
-                                # Check if the current Binding bypass existing one
-                                if name in self.action_map_bypass:
-                                    self.build_button_map(button[0]["name"], button[1], name)
-                        else:
-                            # Add Mapping
-                            self.build_button_map(button[0]["name"], button[1], name)
-                        _logger.debug("Button Map is now: {self.button_array}")
+
+                    if bind_input == "js1_rctrl+button15":
+                        print("")
+                    resolved_input = resolve_input(bind_input)
+
+                    if not resolved_input:  # No binding available
+                        continue
+
+                    device_id, input, modifiers = resolved_input
+
+                    # Resolve the devices and create in the profile if needed
+                    device_lookup = self.devices.get(device_id)
+
+                    if not device_lookup:
+                        _logger.error("A device with a bind was not found in the list of devices.")
+                        continue
+
+                    _active_device = profile_obj.add_device(device_lookup.get("guid"), device_lookup.get("name"))
+
+                    if modifiers:
+                        _active_device.add_modifier_to_input(input, {modifiers}, name)
                     else:
-                        _logger.debug("Button not valid, skipping")
+                        _active_device.create_input(input, name)
 
-        for item in self.button_array:
-            self.update_joystick_dictionary(item, "Default", False, self.button_array[item])
+        return profile_collection
 
-        return self.joystick_dictionary
+
+def extract_modifiers(bind_str: str) -> str | None:
+    """Extract modifiers from an input string.
+
+    Assumes only one modifier can exist before a + symbol.
+    """
+    if "+" in bind_str:
+        return bind_str.split("+")[0]
+
+    return None
+
+
+def resolve_bind(bind_str: str) -> list[str | None, str]:
+    """Determine bind type and return."""
+    _modifiers = extract_modifiers(bind_str)
+
+    if _modifiers:
+        _control_input = bind_str.split("+")[1]
+    else:
+        _control_input = bind_str
+
+    control = find_control_type(_control_input)
+
+    return [_modifiers, control]
+
+
+def find_control_type(control_input: str) -> str:
+    """Determine the type of input from given string.
+
+    - rotz > AXIS
+    - buttonX > BUTTON
+    - hat_down > HAT SWITCH
+    - y > AXISD
+
+    Returns formatted string
+
+    """
+    # Buttons
+    if "button" in control_input:
+        return f"BUTTON_{control_input[6:]}"
+
+    # Hats
+    if "hat" in control_input:
+        _id = control_input[3]  # Assumes no more than 9 hats on a device - should be ok
+        _direction = HAT_FORMAT_LOOKUP[control_input[5:]]
+        return f"POV_{_id}_{_direction}"
+
+    # Rotation Axis
+    if "rot" in control_input:
+        return f"AXIS_R{control_input[3]}"
+
+    # Slider Controls
+    if "slider" in control_input:
+        return f"AXIS_SLIDER_{control_input[6:]}"
+
+    # Standard AXIS
+    if len(control_input) == 1:
+        return f"AXIS_{control_input.upper()}"
+
+    _logger.error("No control type found for {control_input}")
+    return control_input
+
+
+def resolve_input(input_str: str) -> tuple[str, str, str | None] | None:
+    """Resolve an INPUT string to the a device/binding."""
+    input_str = input_str.strip()
+
+    _device_id, _binding = input_str[0:3], input_str[4:]
+
+    if not _binding:  # Handles "jsX_ " scenario no mapping
+        return None
+
+    _modifiers, _resolved_bind = resolve_bind(_binding)
+
+    return (_device_id, _resolved_bind, _modifiers)
+
+
+if __name__ == "__main__":
+    inst = StarCitizen("C:\\Users\\RCox\\Downloads\\layout_BK_DualVKB_3-22_exported.xml")
+
+    # resolve_input("js2_hat1_up")
+    profiles = inst.parse()
+    print(profiles)

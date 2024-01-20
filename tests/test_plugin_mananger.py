@@ -1,4 +1,3 @@
-
 import pytest
 
 from joystick_diagrams import exceptions, plugin_manager
@@ -12,7 +11,6 @@ def test_instance_creation():
     plugin_manager.PLUGINS_DIRECTORY = TEST_PLUGIN_PATH
 
     inst = plugin_manager.ParserPluginManager()
-    print(inst)
 
     assert isinstance(inst, plugin_manager.ParserPluginManager)
     assert len(inst.loaded_plugins) > 0
