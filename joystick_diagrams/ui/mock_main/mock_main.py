@@ -77,7 +77,5 @@ if __name__ == "__main__":
         "font_family": "Windings",
     }
 
-    css_override = open((Path(__file__).parent).joinpath("./custom.css"), "r").read()
-
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False, extra=extra, css_file=css_override)
+    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False, extra=extra)
     app.exec()

@@ -2,11 +2,7 @@ import logging
 import sys
 
 from PySide6.QtCore import Slot
-from PySide6.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QTreeWidgetItem,
-)
+from PySide6.QtWidgets import QApplication, QMainWindow, QTreeWidgetItem
 from qt_material import apply_stylesheet
 
 from joystick_diagrams import app_init
