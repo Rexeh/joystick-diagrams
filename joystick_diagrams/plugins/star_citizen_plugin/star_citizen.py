@@ -1,7 +1,8 @@
-"""Star Citizen XML Parser for use with Joystick Diagrams"""
+"""Star Citizen XML Parser for use with Joystick Diagrams."""
 import logging
 import os
 from pathlib import Path
+from typing import Union
 from xml.dom import minidom
 
 from joystick_diagrams.input.profile_collection import ProfileCollection
@@ -10,6 +11,49 @@ _logger = logging.getLogger(__name__)
 
 
 HAT_FORMAT_LOOKUP = {"up": "U", "down": "D", "left": "L", "right": "R"}
+
+PROFILE_MAPPINGS = {
+    "seat_general": "Spaceship",
+    "spaceship_general": "Spaceship",
+    "spaceship_view": "Spaceship",
+    "spaceship_movement": "Spaceship",
+    "spaceship_quantum": "Spaceship",
+    "spaceship_docking": "Spaceship",
+    "spaceship_targeting": "Weapons",
+    "spaceship_targeting_advanced": "Weapons",
+    "spaceship_target_hailing": "Weapons",
+    "spaceship_radar": "Spaceship Scanning",
+    "spaceship_scanning": "Spaceship Scanning",
+    "spaceship_mining": "Spaceship Mining",
+    "spaceship_salvage": "Spaceship Salavage",
+    "turret_movement": "Weapons",
+    "turret_advanced": "Weapons",
+    "spaceship_weapons": "Weapons",
+    "spaceship_missiles": "Weapons",
+    "spaceship_defensive": "Weapons",
+    "vehicle_capacitor_assignment": "Spaceship",
+    "spaceship_auto_weapons": "Weapons",
+    "spaceship_power": "Spaceship",
+    "spaceship_hud": "Spaceship",
+    "lights_controller": "Spaceship",
+    "stopwatch": "Spaceship",
+    "player": "Spaceship",
+    "prone": "Spaceship",
+    "mapui": "Spaceship",
+    "tractor_beam": "Spaceship",
+    "zero_gravity_eva": "Spaceship",
+    "zero_gravity_traversal": "Spaceship",
+    "vehicle_general": "Spaceship",
+    "vehicle_driver": "Spaceship",
+    "spectator": "Spaceship",
+    "default": "Spaceship",
+    "player_emotes": "Spaceship",
+    "player_input_optical_tracking": "Spaceship",
+    "player_choice": "Spaceship",
+    "view_director_mode": "Spaceship",
+    "remoterigidentitycontroller": "Spaceship",
+    "server_renderer": "Spaceship",
+}
 
 
 class StarCitizen:
@@ -484,11 +528,11 @@ class StarCitizen:
                 try:
                     self.__validate_file(data)
                 except Exception:
-                    raise Exception("File is not a valid Star Citizen XML")
+                    raise Exception("File is not a valid Star Citizen XML")  # TODO remove base exception
                 else:
                     return data
             else:
-                raise Exception("File must be an XML file")
+                raise Exception("File must be an XML file")  # TODO remove base exception
         else:
             raise FileNotFoundError("File not found")
 
@@ -496,7 +540,7 @@ class StarCitizen:
         try:
             parsed_xml = minidom.parseString(data)
         except ValueError:
-            raise Exception("File is not a valid Star Citizen XML")
+            raise Exception("File is not a valid Star Citizen XML")  # TODO remove base exception
         else:
             if (
                 len(parsed_xml.getElementsByTagName("ActionMaps")) == 1
@@ -564,7 +608,8 @@ class StarCitizen:
 
         # For each Profile get the binds for the devices
         for profile in profiles:
-            profile_obj = profile_collection.create_profile(profile.getAttribute("name"))
+            profile_name = get_profile_name_map(profile.getAttribute("name"))
+            profile_obj = profile_collection.create_profile(profile_name)
 
             # Get all the action nodes for a profile
             actions = profile.getElementsByTagName("action")
@@ -581,8 +626,6 @@ class StarCitizen:
                 for bind in binds:
                     bind_input = bind.getAttribute("input")
 
-                    if bind_input == "js1_rctrl+button15":
-                        print("")
                     resolved_input = resolve_input(bind_input)
 
                     if not resolved_input:  # No binding available
@@ -607,6 +650,21 @@ class StarCitizen:
         return profile_collection
 
 
+def get_profile_name_map(name: str) -> str:
+    """Return a mapped profile name  for a given name.
+
+    Allows multiple profiles to be grouped into one
+    """
+    _name = PROFILE_MAPPINGS.get(name)
+
+    # Handle unexpected new mappings with default
+    if _name is None:
+        _logger.warning("No map found for a Star Citizen profile {name}. This should be raised as a bug.")
+        _name = "Spaceship"
+
+    return _name
+
+
 def extract_modifiers(bind_str: str) -> str | None:
     """Extract modifiers from an input string.
 
@@ -618,7 +676,7 @@ def extract_modifiers(bind_str: str) -> str | None:
     return None
 
 
-def resolve_bind(bind_str: str) -> list[str | None, str]:
+def resolve_bind(bind_str: str) -> tuple[Union[str, None], str]:
     """Determine bind type and return."""
     _modifiers = extract_modifiers(bind_str)
 
@@ -629,7 +687,7 @@ def resolve_bind(bind_str: str) -> list[str | None, str]:
 
     control = find_control_type(_control_input)
 
-    return [_modifiers, control]
+    return (_modifiers, control)
 
 
 def find_control_type(control_input: str) -> str:
@@ -670,7 +728,10 @@ def find_control_type(control_input: str) -> str:
 
 
 def resolve_input(input_str: str) -> tuple[str, str, str | None] | None:
-    """Resolve an INPUT string to the a device/binding."""
+    """Resolve an INPUT string to the a device/binding.
+
+    Returns (device id, bind string, modifiers)
+    """
     input_str = input_str.strip()
 
     _device_id, _binding = input_str[0:3], input_str[4:]
@@ -684,8 +745,4 @@ def resolve_input(input_str: str) -> tuple[str, str, str | None] | None:
 
 
 if __name__ == "__main__":
-    inst = StarCitizen("C:\\Users\\RCox\\Downloads\\layout_BK_DualVKB_3-22_exported.xml")
-
-    # resolve_input("js2_hat1_up")
-    profiles = inst.parse()
-    print(profiles)
+    pass
