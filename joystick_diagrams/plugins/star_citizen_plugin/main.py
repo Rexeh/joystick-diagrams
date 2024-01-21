@@ -2,8 +2,12 @@ import logging
 from pathlib import Path
 
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
-
-from .config import settings
+from joystick_diagrams.plugins.star_citizen_plugin.config import (
+    settings,  # TODO Move out plugins to separate package
+)
+from joystick_diagrams.plugins.star_citizen_plugin.star_citizen import (
+    StarCitizen,  # TODO Move out plugins to separate package
+)
 
 _logger = logging.getLogger("__name__")
 
@@ -15,11 +19,17 @@ class ParserPlugin(PluginInterface):
         self.settings.validators.register()
 
     def process(self):
-        return None
+        return self.instance.parse()
 
     def set_path(self, path: Path) -> bool:
-        self.path = path
-        return True
+        inst = StarCitizen(path)
+
+        if inst:
+            self.path = path
+            self.instance = inst
+            return True
+
+        return False
 
     @property
     def path_type(self):
@@ -44,4 +54,3 @@ class ParserPlugin(PluginInterface):
 
 if __name__ == "__main__":
     plugin = ParserPlugin()
-    print(plugin)

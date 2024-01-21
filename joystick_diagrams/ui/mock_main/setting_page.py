@@ -45,7 +45,7 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
         print(f"Data is {data}")
         try:
             currentPlugin = self.get_selected_plugin_object()
-            success = currentPlugin.set_path(data)
+            success = currentPlugin.set_path(data[0])
             # TODO Plugin module needs improving to give better information?
             if success:
                 print("worked")

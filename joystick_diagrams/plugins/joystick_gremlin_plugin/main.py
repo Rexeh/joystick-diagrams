@@ -1,6 +1,9 @@
 import logging
 from pathlib import Path
 
+from joystick_diagrams.plugins.joystick_gremlin_plugin.joystick_gremlin import (
+    JoystickGremlinParser,
+)
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
 from .config import settings
@@ -15,15 +18,21 @@ class ParserPlugin(PluginInterface):
         self.settings.validators.register()
 
     def process(self):
-        return None
+        return self.instance.create_dictionary()
 
     def set_path(self, path: Path) -> bool:
-        self.path = path
-        return True
+        inst = JoystickGremlinParser(path)
+
+        if inst:
+            self.instance = inst
+            self.path = path
+            return True
+
+        return False
 
     @property
     def path_type(self):
-        return self.FilePath("Select your Joystick Diagrams .XML file", "/%USERPROFILE%/Saved Games", [".xml"])
+        return self.FilePath("Select your Joystick Gremlin .XML file", "/%USERPROFILE%/Saved Games", [".xml"])
 
     @property
     def name(self) -> str:
