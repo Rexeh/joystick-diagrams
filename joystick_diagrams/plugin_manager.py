@@ -10,10 +10,12 @@ import os
 from importlib import import_module
 from json import JSONDecodeError
 from pathlib import Path
+from typing import Union
 
 from dynaconf import ValidationError
 
 import joystick_diagrams.exceptions as JDException
+from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
 _logger = logging.getLogger(__name__)
@@ -49,6 +51,15 @@ class ParserPluginManager:
 
     def get_available_plugins(self) -> list[PluginInterface]:
         return [x for x in self.loaded_plugins]
+
+    def process_loaded_plugins(self) -> list[Union[str, ProfileCollection]]:
+        processed_plugin_data = []
+        for plugin in self.loaded_plugins:
+            # TODO path is not proper way to check, add in some way of knowing if a plugin has been initialised i.e. path set/instance created
+            if plugin.path:
+                processed_plugin_data.append([plugin.name, plugin.process()])
+
+        return processed_plugin_data
 
 
 def load_plugin(plugin_package_directory: str = PLUGIN_REL_PATH, plugin_package_name: str = "") -> PluginInterface:

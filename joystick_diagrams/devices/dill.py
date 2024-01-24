@@ -31,20 +31,19 @@ _DILL_PATH = "./dill.dll"
 
 
 class DILLError(Exception):
-
     """Exception raised when an error occurs within the DILL module."""
 
     def __init__(self, value: str):
         """Creates a new error instance with the given message.
 
         Args:
+        ----
             value: the error message to use
         """
         super().__init__(value)
 
 
 class _GUID(ctypes.Structure):
-
     """Strcture mapping C information into a set of Python readable values."""
 
     _fields_ = [
@@ -109,7 +108,6 @@ _GUID_Invalid.Data4[7] = 0x00
 
 
 class _JoystickInputData(ctypes.Structure):
-
     """Mapping for the JoystickInputData C structure."""
 
     _fields_ = [
@@ -121,14 +119,12 @@ class _JoystickInputData(ctypes.Structure):
 
 
 class _AxisMap(ctypes.Structure):
-
     """Mapping for the AxisMap C structure."""
 
     _fields_ = [("linear_index", ctwt.DWORD), ("axis_index", ctwt.DWORD)]
 
 
 class _DeviceSummary(ctypes.Structure):
-
     """Mapping for the DeviceSummary C structure."""
 
     _fields_ = [
@@ -145,13 +141,13 @@ class _DeviceSummary(ctypes.Structure):
 
 
 class GUID:
-
     """Python GUID class."""
 
     def __init__(self, guid: _GUID):
         """Creates a new instance.
 
         Args:
+        ----
             guid: Mapping of a C struct representing a device GUID
         """
         assert isinstance(guid, _GUID)
@@ -173,7 +169,8 @@ class GUID:
     def ctypes(self) -> _GUID:
         """Returns the object mapping the C structure.
 
-        Returns:
+        Returns
+        -------
             Mapping of a C GUID structure
         """
         return self._ctypes_guid
@@ -182,7 +179,8 @@ class GUID:
     def uuid(self) -> uuid.UUID:
         """Returns a UUID representation of this GUID.
 
-        Returns:
+        Returns
+        -------
             UUID object representation of this GUID instance.
         """
         return uuid.UUID(str(self))
@@ -190,7 +188,8 @@ class GUID:
     def __str__(self) -> str:
         """Returns a string representation of the GUID.
 
-        Returns:
+        Returns
+        -------
             GUID string representation in hexadecimal
         """
         return "{:08X}-{:04X}-{:04X}-{:04X}-{:012X}".format(
@@ -201,9 +200,11 @@ class GUID:
         """Returns whether or not two GUID instances are identical.
 
         Args:
+        ----
             other: Instance with which to perform the equality comparison
 
         Returns:
+        -------
             True if the two GUIDs are equal, False otherwise
         """
         return hash(self) == hash(other)
@@ -212,9 +213,11 @@ class GUID:
         """Returns the result of the < operator.
 
         Args:
+        ----
             other: Instance with which to perform the equality comparison
 
         Returns:
+        -------
             True if this instance is < other, False otherwise
         """
         return str(self) < str(other)
@@ -222,7 +225,8 @@ class GUID:
     def __hash__(self) -> int:
         """Returns the hash of this GUID.
 
-        Returns:
+        Returns
+        -------
             The has computed from this GUID
         """
         return hash(
@@ -250,7 +254,6 @@ GUID_Invalid = GUID(_GUID_Invalid)
 
 
 class InputType(Enum):
-
     """Enumeration of valid input types that can be reported."""
 
     Axis = (1,)
@@ -262,9 +265,11 @@ class InputType(Enum):
         """Returns the enum type corresponding to the provided value.
 
         Args:
+        ----
             value: int value representing the input type according to DILL
 
         Returns:
+        -------
             Enum value representing the correct InputType
         """
         if value == 1:
@@ -278,7 +283,6 @@ class InputType(Enum):
 
 
 class DeviceActionType(Enum):
-
     """Represents the state change of a device."""
 
     Connected = 1
@@ -289,9 +293,11 @@ class DeviceActionType(Enum):
         """Returns the enum type corresponding to the provided value.
 
         Args:
+        ----
             value: int value representing the action type according to DILL
 
         Returns:
+        -------
             Enum value representing the correct DeviceAction
         """
         if value == 1:
@@ -303,7 +309,6 @@ class DeviceActionType(Enum):
 
 
 class InputEvent:
-
     """Holds information about a single event.
 
     An event is an axis, button, or hat changing its state. The type of
@@ -314,6 +319,7 @@ class InputEvent:
         """Creates a new instance.
 
         Args:
+        ----
             data: data received from DILL and to be held by this instance
         """
         self.device_guid = GUID(data.device_guid)
@@ -323,7 +329,6 @@ class InputEvent:
 
 
 class AxisMap:
-
     """Holds information about a single axis map entry.
 
     An AxisMap holds a mapping from an axis' sequential index to the actual
@@ -334,6 +339,7 @@ class AxisMap:
         """Creates a new instance.
 
         Args:
+        ----
             data: data received from DILL and to be held by this instance
         """
         self.linear_index = data.linear_index
@@ -341,7 +347,6 @@ class AxisMap:
 
 
 class DeviceSummary:
-
     """Holds information about a single device.
 
     This summary holds static information about a single device's layout.
@@ -351,6 +356,7 @@ class DeviceSummary:
         """Creates a new instance.
 
         Args:
+        ----
             data: data received from DILL and to be held by this instance
         """
         self.device_guid = GUID(data.device_guid)
@@ -373,7 +379,8 @@ class DeviceSummary:
     def is_virtual(self) -> bool:
         """Returns if a device is virtual.
 
-        Returns:
+        Returns
+        -------
             True if the device is a virtual vJoy device, False otherwise
         """
         return self.vendor_id == 0x1234 and self.product_id == 0xBEAD
@@ -386,6 +393,7 @@ class DeviceSummary:
         vJoy devices are linked.
 
         Args:
+        ----
             vjoy_id: index of the vJoy device corresponding to this
                 DirectInput device
         """
@@ -404,7 +412,6 @@ _di_listener_dll.get_device_information_by_index.restype = _DeviceSummary
 
 
 class DILL:
-
     """Exposes functions of the DILL library in an easy to use manner."""
 
     # Attempt to find the correct location of the dll for development
@@ -455,6 +462,7 @@ class DILL:
         callback.
 
         Args:
+        ----
             callback: function to execute when an event occurs
         """
         DILL.input_event_callback_fn = C_EVENT_CALLBACK(callback)
@@ -468,6 +476,7 @@ class DILL:
         device changes, providing a DeviceSummary object to the callback.
 
         Args:
+        ----
             callback: function to execute when an event occurs
         """
         DILL.device_change_callback_fn = C_DEVICE_CHANGE_CALLBACK(callback)
@@ -477,7 +486,8 @@ class DILL:
     def get_device_count() -> int:
         """Returns the number of connected devices.
 
-        Returns:
+        Returns
+        -------
             The number of devices connected
         """
         return DILL._dll.get_device_count()
@@ -487,9 +497,11 @@ class DILL:
         """Returns device information for the given index.
 
         Args:
+        ----
             index: index of the device for which to return information
 
         Returns:
+        -------
             Structure containing detailed information about the desired device
         """
         return DeviceSummary(DILL._dll.get_device_information_by_index(index))
@@ -499,9 +511,11 @@ class DILL:
         """Returns device information for the given GUID.
 
         Args:
+        ----
             guid: GUID of the device for which to return information
 
         Returns:
+        -------
             Structure containing detailed information about the desired device
         """
         return DeviceSummary(DILL._dll.get_device_information_by_guid(guid.ctypes))
@@ -511,10 +525,12 @@ class DILL:
         """Returns the state of the specified axis for a specific device.
 
         Args:
+        ----
             guid: GUID of the device of interest
             index: Index of the axis to return the value of
 
         Returns:
+        -------
             Current value of the specific axis for the desired device
         """
         return DILL._dll.get_axis(guid.ctypes, index)
@@ -524,10 +540,12 @@ class DILL:
         """Returns the state of the specified button for a specific device.
 
         Args:
+        ----
             guid: GUID of the device of interest
             index: Index of the button to return the value of
 
         Returns:
+        -------
             Current value of the specific button for the desired device
         """
         return DILL._dll.get_button(guid.ctypes, index)
@@ -537,10 +555,12 @@ class DILL:
         """Returns the state of the specified hat for a specific device.
 
         Args:
+        ----
             guid: GUID of the device of interest
             index: Index of the hat to return the value of
 
         Returns:
+        -------
             Current value of the specific hat for the desired device
         """
         return DILL._dll.get_hat(guid.ctypes, index)
@@ -550,9 +570,11 @@ class DILL:
         """Returns the name of the device specified by the provided GUID.
 
         Args:
+        ----
             guid: GUID of the device of which to return the name
 
         Returns:
+        -------
             Name of the specified device
         """
         info = DeviceSummary(DILL._dll.get_device_information_by_guid(guid.ctypes))
@@ -563,9 +585,11 @@ class DILL:
         """Returns whether or not a specific device is connected.
 
         Args:
+        ----
             guid: GUID of the device to check whether or not it is connected
 
         Returns:
+        -------
             True if the device is connected, False otherwise
         """
         return DILL._dll.device_exists(guid.ctypes)

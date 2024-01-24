@@ -121,7 +121,7 @@ markers = [
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["A","E","C90","I","W","F","B","Q","D","N","PL"]
+select = ["A","E","C90","I","W","F","B","Q","N","PL"]
 
 ignore = ["E501"]
 

@@ -1,4 +1,4 @@
 {
     "noBindText": "No Bind",
-    "logLevel": "INFO"
+    "logLevel": "DEBUG"
 }

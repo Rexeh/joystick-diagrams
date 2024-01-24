@@ -1,5 +1,4 @@
-"""
-Joystick Diagrams Input Module
+"""Joystick Diagrams Input Module
 
 This module contains access to the creation and tracking of devices and their inputs
 
@@ -9,27 +8,32 @@ This module operates on FIFO basis, and is designed to be used by a single threa
 """
 
 import logging
-from dataclasses import dataclass
+
+from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
+from joystick_diagrams.input.button import Button
+from joystick_diagrams.input.hat import Hat
+from joystick_diagrams.input.modifier import Modifier
 
 _logger = logging.getLogger(__name__)
 
-
-@dataclass
-class Modifier:
-    modifiers: set[str]
-    command: str
+CONTROL_TYPES = (Axis, Button, Hat, AxisSlider)
 
 
 class Input_:
-    def __init__(self, identifier: str, command: str) -> None:
-        self.identifier = identifier.lower()
+    def __init__(self, control: Axis | Button | Hat | AxisSlider, command: str) -> None:
+        self.identifier = control
         self.command = command
         self.modifiers: list[Modifier] = []
 
+    def __repr__(self):
+        return f"{self.identifier} - {self.command} - {self.modifiers}"
+
+    def __post_init__(self):
+        if not isinstance(self.identifier, CONTROL_TYPES):
+            raise ValueError("Input identifier must be a valid type ")
+
     def add_modifier(self, modifier: set, command: str):
-        """
-        Adds a modifier to an existing input, or amends an existing modifier
-        """
+        """Adds a modifier to an existing input, or amends an existing modifier"""
         existing = self._check_existing_modifier(modifier)
 
         _logger.info(f"Existing modifier check is {existing}")
@@ -52,4 +56,6 @@ class Input_:
 
 
 if __name__ == "__main__":
-    pass
+    input = Input_(Axis(AxisDirection.X), "Fly up")
+
+    print(input)

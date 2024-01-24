@@ -9,11 +9,7 @@ _logger = logging.getLogger(__name__)
 
 
 class AppState:
-    """
-
-    appState for managing shared data for application.
-
-    """
+    """appState for managing shared data for application."""
 
     _inst = None
 
@@ -25,18 +21,31 @@ class AppState:
 
     def _init(self) -> None:
         self.plugin_manager: ParserPluginManager | None = None
-        self.raw_profiles: list = self.profile_mock()  # TODO repalce with parsed profiles from Plugins
-        self.profileObjectMapping = {x.name: x for x in self.raw_profiles}
-        self.profileParentMapping: dict[str, list[str]] = {
-            "profile1": ["profile2", "profile3"],
-            "profile2": [],
-            "profile3": [],
-        }  # TODO correctly initialise these
+        self.plugin_profile_collections: list
+        self.raw_profiles: list = []  # TODO repalce with parsed profiles from Plugins
+        self.profileObjectMapping = self.update_profile_object_mapping()
+        self.profileParentMapping: dict[str, list[str]] = {}  # TODO correctly initialise these
         self.processedProfileObjectMapping: dict[str, Profile_] = {}  # TODO Think here about name colissions
-        self.update_procssed_profiles()
+        self.update_processed_profiles()
 
     def init_plugins(self, plugin_manager: ParserPluginManager):
         self.plugin_manager = plugin_manager
+
+    def process_loaded_plugins(self):
+        self.plugin_profile_collections = self.plugin_manager.process_loaded_plugins()
+        # TODO clean up
+        self.raw_profiles.clear()
+        for pc in self.plugin_profile_collections:
+            name = pc[0]
+            for profile in pc[1].profiles.values():
+                # TODO tidy up and push up
+                profile.name = f"{profile.name} - {name}"
+                self.raw_profiles.append(profile)
+        self.profileObjectMapping = self.update_profile_object_mapping()
+        self.update_processed_profiles()
+
+    def update_profile_object_mapping(self):
+        return {x.name: x for x in self.raw_profiles}
 
     def get_processed_profile(self, profile_identifier: str) -> Profile_:
         """Return inherited profile for given Profile Identifier."""
@@ -47,22 +56,23 @@ class AppState:
         return self.processedProfileObjectMapping
 
     def update_parent_profile_map(self, key: str, values: list) -> None:
-        """
-        Updates the global map of Profiles -> Profile Parents. Parents form the basis for inheritance of profiles.
+        """Updates the global map of Profiles -> Profile Parents. Parents form the basis for inheritance of profiles.
 
         Returns None
 
         """
         self.profileParentMapping[key] = values
-        self.update_procssed_profiles()
+        self.update_processed_profiles()
 
-    def update_procssed_profiles(self) -> None:
-        """
-        Updates the processedProfileObjectMapping [dict], which is a core component for Template generation
+    def update_processed_profiles(self) -> None:
+        """Updates the processedProfileObjectMapping [dict], which is a core component for Template generation
 
         Returns None
 
         """
+        for profile_key, profile_obj in self.profileObjectMapping.items():
+            self.processedProfileObjectMapping[profile_key] = deepcopy(profile_obj)
+
         for profile, parents in self.profileParentMapping.items():
             profile_copy = deepcopy(self.profileObjectMapping[profile])
 
@@ -79,7 +89,7 @@ class AppState:
                     merged_profiles = merged_profiles.merge_profiles(obj)
 
             self.processedProfileObjectMapping[profile] = merged_profiles.merge_profiles(profile_copy)
-        print(f"Updated processed profiles {self.processedProfileObjectMapping}")
+        _logger.debug(f"Updated processed profiles {self.processedProfileObjectMapping}")
 
     def profile_mock(self):
         collection1 = ProfileCollection()
@@ -124,5 +134,5 @@ class AppState:
 
 if __name__ == "__main__":
     _appState = AppState()
-    _appState.update_procssed_profiles()
+    _appState.update_processed_profiles()
     print(_appState)

@@ -6,8 +6,7 @@ _logger = logging.getLogger("__name__")
 
 
 class ProfileCollection:
-    """
-    ProfileCollection is the primary exchange format between ParserPlugins and the Main Application
+    """ProfileCollection is the primary exchange format between ParserPlugins and the Main Application
 
     Groups PROFILE objects which comprise of other Input objects
 
@@ -27,14 +26,6 @@ class ProfileCollection:
     def get_profile(self, profile_name) -> Profile_ | None:
         return self.profiles.get(profile_name.lower())
 
-
-# Profile Collection
-#   -> Profile
-#       -> Device
-#           -> Input
-#               -> Command
-#               -> Modifiers
-#                   -> Command
 
 if __name__ == "__main__":
     collection = ProfileCollection()

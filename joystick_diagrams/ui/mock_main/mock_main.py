@@ -1,8 +1,7 @@
 import logging
 import sys
-from pathlib import Path
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtWidgets
 from qt_material import apply_stylesheet
 
 from joystick_diagrams.app_state import AppState
@@ -18,9 +17,6 @@ class MainWindow(
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
-        # self.initalise_plugin_menu()
-        # self.tab_2_content = embed_UI.EmbedWidget(self.tab_2)
-        # self.pluginRemove.setProperty("class", "danger")
         self.appState = AppState()
 
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
@@ -31,7 +27,7 @@ class MainWindow(
     def load_setting_widget(self):
         if self.window_content:
             self.window_content.hide()
-        self.window_content = setting_page.settingPage()
+        self.window_content = setting_page.PluginsPage()
         self.window_content.setParent(self.activeMainWindowWidget)
         self.window_content.show()
 

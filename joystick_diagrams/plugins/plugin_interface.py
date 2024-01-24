@@ -20,25 +20,25 @@ class PluginInterface(ABC):
             self.default_path = default_path
 
     settings: dynaconf.LazySettings
+    path: str
 
     @property
     @abstractmethod
     def path_type(self) -> FolderPath | FilePath:
         ...
 
-    def file_not_valid_exception(self, exceptionMessage: str):
-        return JDException.FileNotValid(value=exceptionMessage)
+    def file_not_valid_exception(self, exception_message: str):
+        return JDException.FileNotValid(value=exception_message)
 
-    def directory_not_valid_exception(self, exceptionMessage: str):
-        return JDException.DirectoryNotValid(value=exceptionMessage)
+    def directory_not_valid_exception(self, exception_message: str):
+        return JDException.DirectoryNotValid(value=exception_message)
 
-    def FileTypeInvalid(self, exceptionMessage: str):
-        return JDException.FileTypeInvalid(value=exceptionMessage)
+    def file_type_invalid(self, exception_message: str):
+        return JDException.FileTypeInvalid(value=exception_message)
 
     @abstractmethod
     def process(self) -> ProfileCollection:
-        """
-        Runs the relevant processes to return an ProfileCollection object
+        """Runs the relevant processes to return an ProfileCollection object
 
         Returns ProfileCollection()
         """
@@ -46,8 +46,7 @@ class PluginInterface(ABC):
 
     @abstractmethod
     def set_path(self, path: Path) -> bool:
-        """
-        Sets the file/directory path for plugin. Plugin is responsibile for validation of Path.
+        """Sets the file/directory path for plugin. Plugin is responsibile for validation of Path.
 
         Returns Bool for success state of path set.
         """

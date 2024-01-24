@@ -34,5 +34,21 @@ def add_update_device_template_path(guid: str, template_path: str):
     connection.commit()
 
 
+def get_device_template_path(guid: str):
+    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
+    connection = connect(path)
+    cur = connection.cursor()
+
+    query = "SELECT template_path from devices WHERE guid = ?"
+    params = [guid]
+
+    cur.execute(query, params)
+    result = cur.fetchone()
+
+    return result if result else None
+
+
 if __name__ == "__main__":
     add_update_device_template_path("123", "2322323")
+    data = get_device_template_path("1234")
+    print(data)

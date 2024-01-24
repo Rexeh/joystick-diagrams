@@ -19,9 +19,9 @@ def setup_logging() -> None:
     """Setup basic logging
 
     Args:
+    ----
       loglevel (int): minimum loglevel for emitting messages
     """
-
     log_dir = Path("logs")
     log_file = Path("app.log")
     log_file_location = Path.joinpath(log_dir, log_file)

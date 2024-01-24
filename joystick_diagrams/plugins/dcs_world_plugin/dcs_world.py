@@ -37,7 +37,7 @@ class DCSWorldParser:
         self.fq_path = None
 
     def __validate_base_directory(self) -> list:
-        """validate the base directory structure, make sure there are files."""
+        """Validate the base directory structure, make sure there are files."""
         if CONFIG_DIR in os.listdir(self.path):
             try:
                 return os.listdir(os.path.join(self.path, CONFIG_DIR, INPUT_DIR))
@@ -47,9 +47,7 @@ class DCSWorldParser:
             raise FileNotFoundError("DCS: No Config Folder found in DCS Folder.")
 
     def __validate_profiles(self) -> list[str]:
-        """
-        Validate Profiles Routine
-        """
+        """Validate Profiles Routine"""
         if len(self.base_directory) == 0:
             raise FileExistsError("DCS: No profiles exist in Input directory!")
 
@@ -64,11 +62,9 @@ class DCSWorldParser:
         return valid_items
 
     def __validate_profile(self, item: str) -> list | bool:
-        """
-        Validate Inidividual Profile
+        """Validate Inidividual Profile
         Return Valid Profile
         """
-
         if os.path.isdir(os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item)) and JOYSTICK_DIR in os.listdir(
             os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item)
         ):
@@ -162,9 +158,9 @@ class DCSWorldParser:
         return collection
 
     def assign_to_inputs(self, config: dict, profile: Device_):
-        searchKeys = ["keyDiffs", "axisDiffs"]
+        search_keys = ["keyDiffs", "axisDiffs"]
 
-        for key in searchKeys:
+        for key in search_keys:
             if key in config.keys():
                 for data in config[key].values():
                     operation = data["name"]
@@ -193,9 +189,9 @@ class DCSWorldParser:
             _logger.error(error)
             return None
 
-    def parse_file(self, file: str) -> dict:
-        # pylint: disable=unused-variable
-        tokens = (
+    def parse_file(self, file: str) -> dict:  # noqa
+        # Linter disabled for this function, this is the format required by PLY
+        tokens = (  # noqa
             "LCURLY",
             "RCURLY",
             "STRING",
@@ -209,83 +205,86 @@ class DCSWorldParser:
             "DOUBLE_VAL",
         )
 
-        t_LCURLY = r"\{"  # pylint: disable=invalid-name
-        t_RCURLY = r"\}"  # pylint: disable=invalid-name
-        t_LBRACE = r"\["  # pylint: disable=invalid-name
-        t_RBRACE = r"\]"  # pylint: disable=invalid-name
-        t_COMMA = r"\,"  # pylint: disable=invalid-name
-        t_EQUALS = r"\="  # pylint: disable=invalid-name
-        t_ESCAPED_QUOTE = r"\\\""
+        t_LCURLY = r"\{"  # noqa
+        t_RCURLY = r"\}"  # noqa
+        t_LBRACE = r"\["  # noqa
+        t_RBRACE = r"\]"  # noqa
+        t_COMMA = r"\,"  # noqa
+        t_EQUALS = r"\="  # noqa
+        t_ESCAPED_QUOTE = r"\\\""  # noqa
 
-        def t_DOUBLE_VAL(t):  # pylint: disable=invalid-name
+        def t_DOUBLE_VAL(t):  # noqa
             r"(\+|\-)?[0-9]+\.[0-9]+"
             t.value = float(t.value)
             return t
 
-        def t_NUMBER(t):  # pylint: disable=invalid-name
+        def t_NUMBER(t):  # noqa
             r"[0-9]+"
             t.value = int(t.value)
             return t
 
-        def t_STRING(t):  # pylint: disable=invalid-name
+        def t_STRING(t):  # noqa
             r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\<|\>|\\\"|\s]+\" "
             t.value = t.value[1:-1]
             return t
 
-        def t_TRUE(t):  # pylint: disable=invalid-name
+        def t_TRUE(t):  # noqa
             r"(true)"
             t.value = True
             return t
 
-        def t_FALSE(t):  # pylint: disable=invalid-name
+        def t_FALSE(t):  # noqa
             r"(false)"
             t.value = False
             return t
 
-        t_ignore = " \t\n"
+        t_ignore = " \t\n"  # noqa
 
-        def t_error(t):  # pylint: disable=invalid-name
+        def t_error(t):  # noqa
             _logger.error(f"Illegal character '{t.value[0]}'")
             t.lexer.skip(1)
 
         # Parsing rules
 
-        def p_dict(t):  # pylint: disable=invalid-name
-            """dict : LCURLY dvalues RCURLY"""
+        def p_dict(t):  # noqa
+            """Dict : LCURLY dvalues RCURLY"""
             t[0] = t[2]
 
-        def p_dvalues(t):  # pylint: disable=invalid-name
-            """dvalues : dvalue
+        def p_dvalues(t):  # noqa
+            """Dvalues : dvalue
             | dvalue COMMA
-            | dvalue COMMA dvalues"""
+            | dvalue COMMA dvalues
+            """
             t[0] = t[1]
-            if len(t) == 4:
+            if len(t) == 4:  # noqa
                 t[0].update(t[3])
 
-        def p_key_expression(t):  # pylint: disable=invalid-name
-            """key : LBRACE NUMBER RBRACE
-            | LBRACE STRING RBRACE"""
+        def p_key_expression(t):  # noqa
+            """Key : LBRACE NUMBER RBRACE
+            | LBRACE STRING RBRACE
+            """
             t[0] = t[2]
 
-        def p_value_expression(t):  # pylint: disable=invalid-name
-            """dvalue : key EQUALS STRING
+        def p_value_expression(t):  # noqa
+            """Dvalue : key EQUALS STRING
             | key EQUALS boolean
             | key EQUALS DOUBLE_VAL
             | key EQUALS NUMBER
-            | key EQUALS dict"""
+            | key EQUALS dict
+            """
             t[0] = {t[1]: t[3]}
 
-        def p_boolean(p):  # pylint: disable=invalid-name
-            """boolean : TRUE
+        def p_boolean(p):  # noqa
+            """Boolean : TRUE
             | FALSE
             """
             p[0] = p[1]
 
-        def p_error(t):  # pylint: disable=invalid-name
+        def p_error(t):  # noqa
             _logger.error(f"Syntax error at '{ (t.value)}'")
 
         # Build the lexer
-        lexer = lex.lex(
+        lexer = lex.lex(  # noqa
             debug=False, optimize=1, lextab="dcs_world_lex", reflags=re.UNICODE | re.VERBOSE, errorlog=_logger
         )
 

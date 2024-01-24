@@ -25,12 +25,14 @@ class Profile_:
 
         return self.get_device(guid)  # type: ignore
 
+    def get_devices(self) -> dict[str, Device_] | None:
+        return self.devices
+
     def get_device(self, guid: str) -> Device_ | None:
         return self.devices.get(guid)
 
     def merge_profiles(self, profile: "Profile_"):
-        """
-        Merge Profiles
+        """Merge Profiles
 
         Merges the current OBJ with supplied Profile
 

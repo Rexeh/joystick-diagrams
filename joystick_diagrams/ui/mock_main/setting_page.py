@@ -3,7 +3,13 @@ import sys
 
 from PySide6.QtCore import QMetaMethod, Qt, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QFileDialog, QListWidgetItem, QMainWindow
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QListWidgetItem,
+    QMainWindow,
+    QMessageBox,
+)
 from qt_material import apply_stylesheet
 
 from joystick_diagrams import app_init
@@ -14,8 +20,9 @@ from joystick_diagrams.ui.mock_main.qt_designer import setting_page_ui
 _logger = logging.getLogger(__name__)
 
 
-class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: disable=too-many-instance-attributes
+class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: disable=too-many-instance-attributes
     pluginPathSet = Signal(object)
+    parsePlugins = Signal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,6 +33,7 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
         print(f"Plugins are: {self.appState.plugin_manager}")
         self.parserPluginList.itemClicked.connect(self.plugin_selected)
         self.pluginPathSet.connect(self.set_plugin_path)
+        self.parsePlugins.connect(self.execute_plugin_parsers)
 
     def remove_defaults(self):
         self.parserPluginList.clear()
@@ -45,14 +53,25 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
         print(f"Data is {data}")
         try:
             currentPlugin = self.get_selected_plugin_object()
-            success = currentPlugin.set_path(data[0])
+            success = currentPlugin.set_path(data)
             # TODO Plugin module needs improving to give better information?
             if success:
-                print("worked")
+                self.parsePlugins.emit()
             else:
-                print("didnt work")
-        except:
+                QMessageBox.warning(
+                    self,
+                    "Plugin failure",
+                    "Something went very wrong.",
+                    buttons=QMessageBox.Discard,
+                    defaultButton=QMessageBox.Discard,
+                )
+        except FileExistsError:  # Fix up
             print("Bang")
+
+    @Slot()
+    def execute_plugin_parsers(self):
+        print("Executing plugin parsers")
+        self.appState.process_loaded_plugins()
 
     def load_plugin_settings(self, data):
         self.pluginVersionInfo.setText(f"Version {data.version}")
@@ -87,7 +106,7 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
         )
 
         if _file[0]:
-            self.pluginPathSet.emit(_file)
+            self.pluginPathSet.emit(_file[0])
 
     def folder_dialog(self, data):
         _folder = QFileDialog.getExistingDirectory(self, data.dialog_title, data.default_path)
@@ -99,7 +118,7 @@ class settingPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app_init
-    window = settingPage()
+    window = PluginsPage()
     window.show()
     apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
     app.exec()

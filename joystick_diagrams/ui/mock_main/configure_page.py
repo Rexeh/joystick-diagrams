@@ -71,6 +71,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):  # Refactor pylint:
     def handle_clicked_profile(self, item):
         value = self.profileList.currentItem().text()
         self.profileParentWidget.set_profile_parent_map(value)
+        self.initialise_customise_binds()
 
 
 if __name__ == "__main__":

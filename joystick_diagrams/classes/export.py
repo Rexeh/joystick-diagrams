@@ -24,8 +24,7 @@ class Export:
         self.error_bucket = []
 
     def export_config(self, progress_bar=None) -> list:
-        """
-        Manipulates stored templates, and replaces strings with actual values.
+        """Manipulates stored templates, and replaces strings with actual values.
 
         Returns a list of errors.
         """
@@ -37,7 +36,6 @@ class Export:
         for joystick in self.joystick_listing:
             base_template = self.get_template(joystick)
             if base_template:
-                progress_increment_modes = len(self.joystick_listing[joystick])
                 for mode in self.joystick_listing[joystick]:
                     write_template = base_template
                     _logger.info("Replacing Strings")

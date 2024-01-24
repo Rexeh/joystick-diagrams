@@ -1,5 +1,4 @@
-"""
-Versioning for Joystick Diagrams
+"""Versioning for Joystick Diagrams.
 
 Author: https://github.com/Rexeh
 """
@@ -56,12 +55,11 @@ def fetch_local_manifest() -> str | None:
 
 
 def perform_version_check() -> bool:
-    """Checks the local version against the latest release#
+    """Checks the local version against the latest release.
 
     Returns True for Matched Versions
     Returns False for Unmatched Versions
     """
-
     remote_manifest = fetch_remote_manifest()
     local_manifest = fetch_local_manifest()
 

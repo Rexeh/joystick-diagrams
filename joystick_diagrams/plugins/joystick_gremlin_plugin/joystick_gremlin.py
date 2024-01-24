@@ -68,7 +68,7 @@ class JoystickGremlinParser:
                                 for hat_id, hat_action in hats:
                                     _device_obj.create_input(hat_id, hat_action)
                         case _:
-                            _logger.warning("Unknown bind type ({bind_type}) detected while processing {_device_guid}")
+                            _logger.warning(f"Unknown bind type ({bind_type}) detected while processing {_device_guid}")
 
         return profile_collection
 
