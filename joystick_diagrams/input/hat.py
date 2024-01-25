@@ -16,6 +16,10 @@ class Hat:
         if not isinstance(self.direction, HatDirection):
             raise ValueError("Invalid HatDirection used for hat switch")
 
+    @property
+    def hat_id(self):
+        return f"{self.id}{self.direction.name}"
+
 
 class HatDirection(Enum):
     U = auto()

@@ -1,13 +1,17 @@
+"""Handles representation of a Device in the context of a Profile.
+
+- Devices are responsible for keeping track of their Inputs
+"""
+
 import logging
 from typing import Union
 
 from joystick_diagrams.input.axis import Axis, AxisSlider
 from joystick_diagrams.input.button import Button
-from joystick_diagrams.input.hat import Hat
+from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.input import Input_
 
 _logger = logging.getLogger("__name__")
-
 
 INPUT_BUTTON_KEY = "buttons"
 INPUT_AXIS_KEY = "axis"
@@ -20,7 +24,7 @@ INPUT_TYPE_IDENTIFIERS = {
     INPUT_BUTTON_KEY: "id",
     INPUT_AXIS_KEY: "id",
     INPUT_AXIS_SLIDER_KEY: "id",
-    INPUT_HAT_KEY: "id",
+    INPUT_HAT_KEY: "hat_id",
 }
 
 
@@ -37,6 +41,7 @@ class Device_:
         }
 
     def resolve_type(self, control: Axis | Button | Hat | AxisSlider) -> str:
+        """Resolves a given input control to its identifying key"""
         resolved_type = CLASS_MAP.get(type(control))
 
         if not resolved_type:
@@ -44,7 +49,13 @@ class Device_:
 
         return resolved_type
 
-    def create_input(self, control: Union[Axis, Button, Hat, AxisSlider], command: str):
+    def create_input(self, control: Union[Axis, Button, Hat, AxisSlider], command: str) -> None:
+        """Creates an input in the Device inputs dictionary where one does not exist.
+
+        Where input already exists, the input command is updated
+
+        Returns None | ValueError
+        """
         control_key = self.resolve_type(control)
 
         input_obj = self.get_input(
@@ -56,15 +67,25 @@ class Device_:
             self.inputs[control_key][getattr(control, INPUT_TYPE_IDENTIFIERS[control_key])] = Input_(control, command)
 
     def get_input(self, input_type: str, input_id: str | int) -> Input_ | None:
+        """Get an input for a specific input type.
+
+        Returns None | Input_
+        """
         return self.inputs[input_type].get(input_id)
 
     def get_inputs(self) -> dict[str, dict[str | int, Input_]]:
+        """Returns input dictionary
+
+        Returns dict
+        """
         return self.inputs
 
     def add_modifier_to_input(self, control: Axis | Button | Hat | AxisSlider, modifier: set, command: str) -> None:
         """Adds a modifier to a respective control type supplied.
 
-        Creates an input if it  does not exist, otherwise attaches a modifier
+        Creates an input if it does not exist, otherwise attaches a modifier
+
+        Returns:  None
         """
         _logger.debug(f"Adding modifier {modifier} to input {control}")
 
@@ -97,16 +118,10 @@ class Device_:
 
 
 if __name__ == "__main__":
-    dev = Device_("guid1", "Potato")
+    dev = Device_("123", "test")
 
-    dev.create_input(Button(1), "shoot")
+    dev.create_input(Hat(1, HatDirection["U"]), "Up")
+    dev.create_input(Hat(1, HatDirection["D"]), "Down")
+    dev.create_input(Hat(1, HatDirection["L"]), "Left")
 
-    dev.create_input(Button(2), "shoot")
-
-    dev.create_input(Button(1), "potato")
-
-    print(dev.inputs["buttons"])
-
-    dev.add_modifier_to_input(Button(6), {"ctrl"}, "modifier")
-
-    print(dev.inputs["buttons"])
+    print(dev)
