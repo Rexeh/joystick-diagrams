@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Union
 from xml.dom import minidom
 
+from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
+from joystick_diagrams.input.button import Button
+from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
 _logger = logging.getLogger(__name__)
@@ -572,9 +575,43 @@ class StarCitizen:
     def parse_file_data(self, data: str):
         return minidom.parseString(data)
 
+    def resolve_input(
+        self, input_str: str
+    ) -> tuple[dict[str, str], Union[Axis, Button, Hat, AxisSlider], str | None] | None:
+        """Resolve an INPUT string to the a device/binding.
+
+        Returns (device id, bind string, modifiers)
+        """
+        input_str = input_str.strip()
+
+        _device_id, _binding = input_str[0:3], input_str[4:]
+
+        # Resolve the devices and create in the profile if needed
+        device_lookup = self.devices.get(_device_id)
+
+        if not device_lookup:
+            _logger.error("A device was not found in the valid list of devices.")
+            return None
+
+        if not _binding:  # Handles "jsX_ " scenario no mapping
+            return None
+
+        _modifiers, _resolved_bind = resolve_bind(_binding)
+
+        if not _resolved_bind:
+            _logger.error("Bind could not be resolved for {_binding}")
+            return None
+
+        return (device_lookup, _resolved_bind, _modifiers)
+
     def create_device_lookup(self, options) -> None:
         """Create lookup table for bind strings to resolve easier."""
-        _prefixes = {"joystick": "js", "keyboard": "kb", "mouse": "mo"}
+        _prefixes = {
+            "joystick": "js",
+            # "keyboard": "kb", - Not Supported
+            # "mouse": "mo", - Not Supported
+            # "gamepad": "gp" - Not Supported
+        }
 
         def parse_product(product_str: str) -> tuple[str, str]:
             product_name = product_str[0:-38].strip()
@@ -589,6 +626,11 @@ class StarCitizen:
 
             _name, _guid = parse_product(_product)
 
+            # Only get valid prefixes
+            prefix = _prefixes.get(_type)
+
+            if not prefix:
+                continue
             device_identifier = f"{_prefixes[_type]}{_inst}"
             self.devices[device_identifier] = {"name": _name, "guid": _guid}
 
@@ -626,26 +668,28 @@ class StarCitizen:
                 for bind in binds:
                     bind_input = bind.getAttribute("input")
 
-                    resolved_input = resolve_input(bind_input)
+                    resolved_input = self.resolve_input(bind_input)
 
                     if not resolved_input:  # No binding available
                         continue
 
-                    device_id, input, modifiers = resolved_input
+                    device_data, input_control, modifiers = resolved_input
 
-                    # Resolve the devices and create in the profile if needed
-                    device_lookup = self.devices.get(device_id)
+                    device_guid = device_data.get("guid")
+                    device_name = device_data.get("name")
 
-                    if not device_lookup:
-                        _logger.error("A device with a bind was not found in the list of devices.")
+                    if not device_guid or not device_name:
+                        _logger.error(
+                            "Expected to find device data for {device_guid} but could not. This was bind {bind_input} with state of devices {self.devices}"
+                        )
                         continue
 
-                    _active_device = profile_obj.add_device(device_lookup.get("guid"), device_lookup.get("name"))
+                    _active_device = profile_obj.add_device(device_guid, device_name)
 
                     if modifiers:
-                        _active_device.add_modifier_to_input(input, {modifiers}, name)
+                        _active_device.add_modifier_to_input(input_control, {modifiers}, name)
                     else:
-                        _active_device.create_input(input, name)
+                        _active_device.create_input(input_control, name)
 
         return profile_collection
 
@@ -676,7 +720,7 @@ def extract_modifiers(bind_str: str) -> str | None:
     return None
 
 
-def resolve_bind(bind_str: str) -> tuple[Union[str, None], str]:
+def resolve_bind(bind_str: str) -> tuple[Union[str, None], Union[Axis, Button, Hat, AxisSlider, None]]:
     """Determine bind type and return."""
     _modifiers = extract_modifiers(bind_str)
 
@@ -690,7 +734,7 @@ def resolve_bind(bind_str: str) -> tuple[Union[str, None], str]:
     return (_modifiers, control)
 
 
-def find_control_type(control_input: str) -> str:
+def find_control_type(control_input: str) -> Union[Axis, Button, Hat, AxisSlider, None]:
     """Determine the type of input from given string.
 
     - rotz > AXIS
@@ -703,45 +747,32 @@ def find_control_type(control_input: str) -> str:
     """
     # Buttons
     if "button" in control_input:
-        return f"BUTTON_{control_input[6:]}"
+        button_id: int = int(control_input[6:])
+        return Button(button_id)
 
     # Hats
     if "hat" in control_input:
-        _id = control_input[3]  # Assumes no more than 9 hats on a device - should be ok
+        _id = int(control_input[3])  # Assumes no more than 9 hats on a device - should be ok
         _direction = HAT_FORMAT_LOOKUP[control_input[5:]]
-        return f"POV_{_id}_{_direction}"
+        return Hat(_id, HatDirection[_direction])
 
     # Rotation Axis
     if "rot" in control_input:
-        return f"AXIS_R{control_input[3]}"
+        axis_string = control_input[3].upper()
+        return Axis(AxisDirection[axis_string])
 
     # Slider Controls
     if "slider" in control_input:
-        return f"AXIS_SLIDER_{control_input[6:]}"
+        slider_id = int(control_input[6:])
+        return AxisSlider(slider_id)
 
     # Standard AXIS
     if len(control_input) == 1:
-        return f"AXIS_{control_input.upper()}"
+        axis_string = control_input.upper()
+        return Axis(AxisDirection[axis_string])
 
     _logger.error("No control type found for {control_input}")
-    return control_input
-
-
-def resolve_input(input_str: str) -> tuple[str, str, str | None] | None:
-    """Resolve an INPUT string to the a device/binding.
-
-    Returns (device id, bind string, modifiers)
-    """
-    input_str = input_str.strip()
-
-    _device_id, _binding = input_str[0:3], input_str[4:]
-
-    if not _binding:  # Handles "jsX_ " scenario no mapping
-        return None
-
-    _modifiers, _resolved_bind = resolve_bind(_binding)
-
-    return (_device_id, _resolved_bind, _modifiers)
+    return None
 
 
 if __name__ == "__main__":
