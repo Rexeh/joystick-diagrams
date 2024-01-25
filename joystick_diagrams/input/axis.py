@@ -15,6 +15,10 @@ class Axis:
         if not isinstance(self.id, AxisDirection):
             raise ValueError("Invalid direction used for AXIS")
 
+    @property
+    def identifier(self):
+        return f"AXIS_{self.id.name}"
+
 
 class AxisDirection(Enum):
     X = auto()

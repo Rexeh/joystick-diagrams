@@ -21,16 +21,21 @@ CONTROL_TYPES = (Axis, Button, Hat, AxisSlider)
 
 class Input_:
     def __init__(self, control: Axis | Button | Hat | AxisSlider, command: str) -> None:
-        self.identifier = control
+        self.input_control = control
         self.command = command
         self.modifiers: list[Modifier] = []
 
     def __repr__(self):
-        return f"{self.identifier} - {self.command} - {self.modifiers}"
+        return f"{self.input_control} - {self.command} - {self.modifiers}"
 
     def __post_init__(self):
-        if not isinstance(self.identifier, CONTROL_TYPES):
+        if not isinstance(self.input_control, CONTROL_TYPES):
             raise ValueError("Input identifier must be a valid type ")
+
+    @property
+    def identifier(self):
+        "Returns the child control identifier"
+        return self.input_control.identifier
 
     def add_modifier(self, modifier: set, command: str):
         """Adds a modifier to an existing input, or amends an existing modifier"""
@@ -39,10 +44,10 @@ class Input_:
         _logger.info(f"Existing modifier check is {existing}")
 
         if existing is None:
-            _logger.info(f"Modifier {modifier} for input {self.identifier} not found so adding")
+            _logger.info(f"Modifier {modifier} for input {self.input_control} not found so adding")
             self.modifiers.append(Modifier(modifier, command))
         else:
-            _logger.info(f"Modifier {modifier} already exists for {self.identifier} and command has been overidden")
+            _logger.info(f"Modifier {modifier} already exists for {self.input_control} and command has been overidden")
             existing.command = command
 
     def _check_existing_modifier(self, modifier: set) -> Modifier | None:

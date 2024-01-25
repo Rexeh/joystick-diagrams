@@ -55,7 +55,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):  # Refactor pylint:
             device_item.setText(0, device_name)  # Set device name in the first column
             self.treeWidget.addTopLevelItem(device_item)
 
-            for input_obj in device_obj.inputs.values():
+            for input_obj in device_obj.get_combined_inputs().values():
                 input_item = QTreeWidgetItem(device_item)
                 input_item.setText(0, "Input")
                 input_item.setText(1, input_obj.identifier)

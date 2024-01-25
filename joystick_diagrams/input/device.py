@@ -21,10 +21,10 @@ INPUT_HAT_KEY = "hats"
 CLASS_MAP = {Button: INPUT_BUTTON_KEY, Axis: INPUT_AXIS_KEY, AxisSlider: INPUT_AXIS_SLIDER_KEY, Hat: INPUT_HAT_KEY}
 
 INPUT_TYPE_IDENTIFIERS = {
-    INPUT_BUTTON_KEY: "id",
-    INPUT_AXIS_KEY: "id",
-    INPUT_AXIS_SLIDER_KEY: "id",
-    INPUT_HAT_KEY: "hat_id",
+    INPUT_BUTTON_KEY: "identifier",
+    INPUT_AXIS_KEY: "identifier",
+    INPUT_AXIS_SLIDER_KEY: "identifier",
+    INPUT_HAT_KEY: "identifier",
 }
 
 
@@ -80,6 +80,16 @@ class Device_:
         """
         return self.inputs
 
+    def get_combined_inputs(self) -> dict:
+        """Returns a flattened input dictionary
+
+        Returns dict
+        """
+        flattened_dict_ = {}
+        for value in self.inputs.values():
+            flattened_dict_.update(value)
+        return flattened_dict_
+
     def add_modifier_to_input(self, control: Axis | Button | Hat | AxisSlider, modifier: set, command: str) -> None:
         """Adds a modifier to a respective control type supplied.
 
@@ -118,4 +128,9 @@ class Device_:
 
 
 if __name__ == "__main__":
-    pass
+    inputs = {
+        INPUT_BUTTON_KEY: {"abs": "x"},
+        INPUT_AXIS_KEY: {"abd": "x"},
+        INPUT_AXIS_SLIDER_KEY: {},
+        INPUT_HAT_KEY: {},
+    }

@@ -17,8 +17,8 @@ class Hat:
             raise ValueError("Invalid HatDirection used for hat switch")
 
     @property
-    def hat_id(self):
-        return f"{self.id}{self.direction.name}"
+    def identifier(self):
+        return f"POV_{self.id}_{self.direction.name}"
 
 
 class HatDirection(Enum):
