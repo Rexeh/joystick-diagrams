@@ -118,10 +118,4 @@ class Device_:
 
 
 if __name__ == "__main__":
-    dev = Device_("123", "test")
-
-    dev.create_input(Hat(1, HatDirection["U"]), "Up")
-    dev.create_input(Hat(1, HatDirection["D"]), "Down")
-    dev.create_input(Hat(1, HatDirection["L"]), "Left")
-
-    print(dev)
+    pass
