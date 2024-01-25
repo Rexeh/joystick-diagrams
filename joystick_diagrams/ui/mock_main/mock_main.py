@@ -5,7 +5,7 @@ from PySide6 import QtWidgets
 from qt_material import apply_stylesheet
 
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.ui.mock_main import configure_page, setting_page
+from joystick_diagrams.ui.mock_main import configure_page, export_page, setting_page
 from joystick_diagrams.ui.mock_main.qt_designer import main_window
 
 _logger = logging.getLogger(__name__)
@@ -21,8 +21,10 @@ class MainWindow(
 
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
         self.customiseSectionButton.clicked.connect(self.load_other_widget)
+        self.exportSectionButton.clicked.connect(self.load_export_page)
         self.window_content = None
         self.setWindowTitle("Joystick Diagrams")
+        _logger.info("Testing In main")
 
     def load_setting_widget(self):
         if self.window_content:
@@ -35,6 +37,13 @@ class MainWindow(
         if self.window_content:
             self.window_content.hide()
         self.window_content = configure_page.configurePage()
+        self.window_content.setParent(self.activeMainWindowWidget)
+        self.window_content.show()
+
+    def load_export_page(self):
+        if self.window_content:
+            self.window_content.hide()
+        self.window_content = export_page.ExportPage()
         self.window_content.setParent(self.activeMainWindowWidget)
         self.window_content.show()
 

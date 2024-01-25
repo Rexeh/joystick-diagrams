@@ -17,6 +17,7 @@ class ParserPlugin(PluginInterface):
         self.settings = settings
         self.settings.validators.register()
         self.path = self.settings.path or None
+        self.instance: DCSWorldParser = None
 
     def process(self) -> ProfileCollection:
         return self.instance.process_profiles()
@@ -25,9 +26,8 @@ class ParserPlugin(PluginInterface):
         try:
             self.instance = DCSWorldParser(path)
             # Requires abstraction / better experience
-            write(self.settings.settings_module[0], {"path": path})
+            # write(self.settings.settings_module[0], {"path": path})
         except Exception as e:
-            print(e)
             return False
 
         self.path = path

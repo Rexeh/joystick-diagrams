@@ -14,3 +14,7 @@ class Modifier:
 
         if not isinstance(self.command, str):
             raise ValueError("A modifier command must be a string")
+
+    def __str__(self):
+        flattened_mods = "+".join(list(self.modifiers))
+        return f"{self.command} - {str(flattened_mods)}"

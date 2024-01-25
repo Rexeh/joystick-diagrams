@@ -64,8 +64,8 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):  # Refactor pylint:
                 for modifier_obj in input_obj.modifiers:
                     mod_item = QTreeWidgetItem(input_item)
                     mod_item.setText(0, "Modifier")
-                    mod_item.setText(1, modifier_obj.command)
-                    mod_item.setText(2, ", ".join(modifier_obj.modifiers))
+                    mod_item.setText(1, ", ".join(modifier_obj.modifiers))
+                    mod_item.setText(2, modifier_obj.command)
 
     @Slot()
     def handle_clicked_profile(self, item):

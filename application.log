@@ -1,0 +1,36 @@
+2024-01-25 19:00:37,597 - DEBUG - Updated processed profiles {}
+2024-01-25 19:00:37,598 - DEBUG - Folders detected: [WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/dcs_world_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/Example'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/joystick_gremlin_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/plugin_interface.py'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/star_citizen_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/__init__.py'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/__pycache__')]
+2024-01-25 19:00:37,600 - DEBUG - Loading plugin D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\dcs_world_plugin
+2024-01-25 19:00:37,600 - DEBUG - Loading plugin at module path: dcs_world_plugin
+2024-01-25 19:00:37,690 - DEBUG - Loading plugin D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\joystick_gremlin_plugin
+2024-01-25 19:00:37,691 - DEBUG - Loading plugin at module path: joystick_gremlin_plugin
+2024-01-25 19:00:37,732 - DEBUG - Loading plugin D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\star_citizen_plugin
+2024-01-25 19:00:37,732 - DEBUG - Loading plugin at module path: star_citizen_plugin
+2024-01-25 19:00:38,011 - INFO - Testing In main
+2024-01-25 19:31:22,231 - DEBUG - Updated processed profiles {}
+2024-01-25 19:31:22,233 - DEBUG - CWD for __file__ resolve: D:\Git Repos\joystick-diagrams\joystick_diagrams\plugin_manager.py
+2024-01-25 19:31:22,233 - DEBUG - Folders detected: [WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/dcs_world_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/Example'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/joystick_gremlin_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/plugin_interface.py'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/star_citizen_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/__init__.py'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/__pycache__')]
+2024-01-25 19:31:22,234 - DEBUG - Loading plugin D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\dcs_world_plugin
+2024-01-25 19:31:22,234 - DEBUG - Loading plugin at module path: dcs_world_plugin
+2024-01-25 19:31:22,325 - DEBUG - Loading plugin D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\joystick_gremlin_plugin
+2024-01-25 19:31:22,325 - DEBUG - Loading plugin at module path: joystick_gremlin_plugin
+2024-01-25 19:31:22,367 - DEBUG - Loading plugin D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\star_citizen_plugin
+2024-01-25 19:31:22,367 - DEBUG - Loading plugin at module path: star_citizen_plugin
+2024-01-25 19:31:22,678 - INFO - Testing In main
+2024-01-25 20:25:38,362 - DEBUG - Updated processed profiles {}
+2024-01-25 20:25:38,363 - DEBUG - CWD for __file__ resolve: D:\Git Repos\joystick-diagrams\joystick_diagrams\plugin_manager.py
+2024-01-25 20:25:38,363 - DEBUG - Folders detected: [WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/dcs_world_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/Example'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/joystick_gremlin_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/plugin_interface.py'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/star_citizen_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/__init__.py'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/__pycache__')]
+2024-01-25 20:25:38,364 - DEBUG - Valid Plugins were detected: [WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/dcs_world_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/joystick_gremlin_plugin'), WindowsPath('D:/Git Repos/joystick-diagrams/joystick_diagrams/plugins/star_citizen_plugin')]
+2024-01-25 20:25:38,365 - DEBUG - Loading plugin D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\dcs_world_plugin
+2024-01-25 20:25:38,365 - DEBUG - Loading plugin at module path: dcs_world_plugin
+2024-01-25 20:25:38,457 - ERROR - Can't instantiate abstract class PluginInterface with abstract methods icon, name, path_type, process, set_path, version - dcs_world_plugin
+2024-01-25 20:25:38,457 - ERROR - Error with Plugin: D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\dcs_world_plugin - "Plugin dcs_world_plugin loaded was invalid: Can't instantiate abstract class PluginInterface with abstract methods icon, name, path_type, process, set_path, version"
+2024-01-25 20:25:38,458 - DEBUG - Loading plugin D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\joystick_gremlin_plugin
+2024-01-25 20:25:38,458 - DEBUG - Loading plugin at module path: joystick_gremlin_plugin
+2024-01-25 20:25:38,500 - ERROR - Can't instantiate abstract class PluginInterface with abstract methods icon, name, path_type, process, set_path, version - joystick_gremlin_plugin
+2024-01-25 20:25:38,500 - ERROR - Error with Plugin: D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\joystick_gremlin_plugin - "Plugin joystick_gremlin_plugin loaded was invalid: Can't instantiate abstract class PluginInterface with abstract methods icon, name, path_type, process, set_path, version"
+2024-01-25 20:25:38,500 - DEBUG - Loading plugin D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\star_citizen_plugin
+2024-01-25 20:25:38,501 - DEBUG - Loading plugin at module path: star_citizen_plugin
+2024-01-25 20:25:38,543 - ERROR - Can't instantiate abstract class PluginInterface with abstract methods icon, name, path_type, process, set_path, version - star_citizen_plugin
+2024-01-25 20:25:38,543 - ERROR - Error with Plugin: D:\Git Repos\joystick-diagrams\joystick_diagrams\plugins\star_citizen_plugin - "Plugin star_citizen_plugin loaded was invalid: Can't instantiate abstract class PluginInterface with abstract methods icon, name, path_type, process, set_path, version"
+2024-01-25 20:25:38,787 - INFO - Testing In main

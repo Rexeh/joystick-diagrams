@@ -21,6 +21,7 @@ class PluginInterface(ABC):
 
     settings: dynaconf.LazySettings
     path: str
+    instance: object
 
     @property
     @abstractmethod

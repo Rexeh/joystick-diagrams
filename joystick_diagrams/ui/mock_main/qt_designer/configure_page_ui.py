@@ -8,22 +8,17 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, Qt
-from PySide6.QtWidgets import (
-    QAbstractItemView,
-    QComboBox,
-    QHBoxLayout,
-    QLabel,
-    QListView,
-    QListWidget,
-    QListWidgetItem,
-    QTabWidget,
-    QTreeWidget,
-    QTreeWidgetItem,
-    QVBoxLayout,
-    QWidget,
-)
-
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox, QHBoxLayout,
+    QHeaderView, QLabel, QListView, QListWidget,
+    QListWidgetItem, QSizePolicy, QTabWidget, QTreeWidget,
+    QTreeWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -102,9 +97,9 @@ class Ui_Form(object):
         self.treeWidget = QTreeWidget(self.verticalLayoutWidget_2)
         QTreeWidgetItem(self.treeWidget)
         __qtreewidgetitem = QTreeWidgetItem(self.treeWidget)
-        __qtreewidgetitem.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEditable|Qt.ItemIsDragEnabled|Qt.ItemIsUserCheckable|Qt.ItemIsEnabled)
+        __qtreewidgetitem.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEditable|Qt.ItemIsDragEnabled|Qt.ItemIsUserCheckable|Qt.ItemIsEnabled);
         __qtreewidgetitem1 = QTreeWidgetItem(__qtreewidgetitem)
-        __qtreewidgetitem1.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEditable|Qt.ItemIsDragEnabled|Qt.ItemIsUserCheckable|Qt.ItemIsEnabled)
+        __qtreewidgetitem1.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEditable|Qt.ItemIsDragEnabled|Qt.ItemIsUserCheckable|Qt.ItemIsEnabled);
         QTreeWidgetItem(__qtreewidgetitem)
         __qtreewidgetitem2 = QTreeWidgetItem(self.treeWidget)
         QTreeWidgetItem(__qtreewidgetitem2)
@@ -135,7 +130,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -143,21 +138,21 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label.setText(QCoreApplication.translate("Form", u'<html><head/><body><p><span style=" font-size:14pt; font-weight:600;">Configure</span></p></body></html>', None))
+        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Configure</span></p></body></html>", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"... setup your profiles/binds", None))
 
         __sortingEnabled = self.profileList.isSortingEnabled()
         self.profileList.setSortingEnabled(False)
         ___qlistwidgetitem = self.profileList.item(0)
-        ___qlistwidgetitem.setText(QCoreApplication.translate("Form", u"DCS World - A10C2", None))
+        ___qlistwidgetitem.setText(QCoreApplication.translate("Form", u"DCS World - A10C2", None));
         ___qlistwidgetitem1 = self.profileList.item(1)
-        ___qlistwidgetitem1.setText(QCoreApplication.translate("Form", u"DCS World - FA18", None))
+        ___qlistwidgetitem1.setText(QCoreApplication.translate("Form", u"DCS World - FA18", None));
         ___qlistwidgetitem2 = self.profileList.item(2)
-        ___qlistwidgetitem2.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - Base", None))
+        ___qlistwidgetitem2.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - Base", None));
         ___qlistwidgetitem3 = self.profileList.item(3)
-        ___qlistwidgetitem3.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - A10C", None))
+        ___qlistwidgetitem3.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - A10C", None));
         ___qlistwidgetitem4 = self.profileList.item(4)
-        ___qlistwidgetitem4.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - FA18", None))
+        ___qlistwidgetitem4.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - FA18", None));
         self.profileList.setSortingEnabled(__sortingEnabled)
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("Form", u"Profile Setup", None))
@@ -165,36 +160,36 @@ class Ui_Form(object):
         self.comboBox.setItemText(1, QCoreApplication.translate("Form", u"A10-C", None))
 
         ___qtreewidgetitem = self.treeWidget.headerItem()
-        ___qtreewidgetitem.setText(2, QCoreApplication.translate("Form", u"Action", None))
-        ___qtreewidgetitem.setText(1, QCoreApplication.translate("Form", u"Control", None))
-        ___qtreewidgetitem.setText(0, QCoreApplication.translate("Form", u"Device", None))
+        ___qtreewidgetitem.setText(2, QCoreApplication.translate("Form", u"Action", None));
+        ___qtreewidgetitem.setText(1, QCoreApplication.translate("Form", u"Control", None));
+        ___qtreewidgetitem.setText(0, QCoreApplication.translate("Form", u"Device", None));
 
         __sortingEnabled1 = self.treeWidget.isSortingEnabled()
         self.treeWidget.setSortingEnabled(False)
         ___qtreewidgetitem1 = self.treeWidget.topLevelItem(0)
-        ___qtreewidgetitem1.setText(2, QCoreApplication.translate("Form", u"Go Fast", None))
-        ___qtreewidgetitem1.setText(1, QCoreApplication.translate("Form", u"AXIS X", None))
-        ___qtreewidgetitem1.setText(0, QCoreApplication.translate("Form", u"Throttle 1", None))
+        ___qtreewidgetitem1.setText(2, QCoreApplication.translate("Form", u"Go Fast", None));
+        ___qtreewidgetitem1.setText(1, QCoreApplication.translate("Form", u"AXIS X", None));
+        ___qtreewidgetitem1.setText(0, QCoreApplication.translate("Form", u"Throttle 1", None));
         ___qtreewidgetitem2 = self.treeWidget.topLevelItem(1)
-        ___qtreewidgetitem2.setText(2, QCoreApplication.translate("Form", u"Fire Guns", None))
-        ___qtreewidgetitem2.setText(1, QCoreApplication.translate("Form", u"BUTTON 1", None))
-        ___qtreewidgetitem2.setText(0, QCoreApplication.translate("Form", u"Joystick_1", None))
+        ___qtreewidgetitem2.setText(2, QCoreApplication.translate("Form", u"Fire Guns", None));
+        ___qtreewidgetitem2.setText(1, QCoreApplication.translate("Form", u"BUTTON 1", None));
+        ___qtreewidgetitem2.setText(0, QCoreApplication.translate("Form", u"Joystick_1", None));
         ___qtreewidgetitem3 = ___qtreewidgetitem2.child(0)
-        ___qtreewidgetitem3.setText(2, QCoreApplication.translate("Form", u"Drop Ordnance", None))
-        ___qtreewidgetitem3.setText(1, QCoreApplication.translate("Form", u"+CTRL", None))
-        ___qtreewidgetitem3.setText(0, QCoreApplication.translate("Form", u"Modifier", None))
+        ___qtreewidgetitem3.setText(2, QCoreApplication.translate("Form", u"Drop Ordnance", None));
+        ___qtreewidgetitem3.setText(1, QCoreApplication.translate("Form", u"+CTRL", None));
+        ___qtreewidgetitem3.setText(0, QCoreApplication.translate("Form", u"Modifier", None));
         ___qtreewidgetitem4 = ___qtreewidgetitem2.child(1)
-        ___qtreewidgetitem4.setText(2, QCoreApplication.translate("Form", u"Drop something else", None))
-        ___qtreewidgetitem4.setText(1, QCoreApplication.translate("Form", u"+CTRL ALT", None))
-        ___qtreewidgetitem4.setText(0, QCoreApplication.translate("Form", u"Modifier", None))
+        ___qtreewidgetitem4.setText(2, QCoreApplication.translate("Form", u"Drop something else", None));
+        ___qtreewidgetitem4.setText(1, QCoreApplication.translate("Form", u"+CTRL ALT", None));
+        ___qtreewidgetitem4.setText(0, QCoreApplication.translate("Form", u"Modifier", None));
         ___qtreewidgetitem5 = self.treeWidget.topLevelItem(2)
-        ___qtreewidgetitem5.setText(2, QCoreApplication.translate("Form", u"Fire the lasers", None))
-        ___qtreewidgetitem5.setText(1, QCoreApplication.translate("Form", u"BUTTON 2", None))
-        ___qtreewidgetitem5.setText(0, QCoreApplication.translate("Form", u"Joystick_1", None))
+        ___qtreewidgetitem5.setText(2, QCoreApplication.translate("Form", u"Fire the lasers", None));
+        ___qtreewidgetitem5.setText(1, QCoreApplication.translate("Form", u"BUTTON 2", None));
+        ___qtreewidgetitem5.setText(0, QCoreApplication.translate("Form", u"Joystick_1", None));
         ___qtreewidgetitem6 = ___qtreewidgetitem5.child(0)
-        ___qtreewidgetitem6.setText(2, QCoreApplication.translate("Form", u"Reload", None))
-        ___qtreewidgetitem6.setText(1, QCoreApplication.translate("Form", u"+ ALT", None))
-        ___qtreewidgetitem6.setText(0, QCoreApplication.translate("Form", u"Modifier", None))
+        ___qtreewidgetitem6.setText(2, QCoreApplication.translate("Form", u"Reload", None));
+        ___qtreewidgetitem6.setText(1, QCoreApplication.translate("Form", u"+ ALT", None));
+        ___qtreewidgetitem6.setText(0, QCoreApplication.translate("Form", u"Modifier", None));
         self.treeWidget.setSortingEnabled(__sortingEnabled1)
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("Form", u"Customise Binds", None))

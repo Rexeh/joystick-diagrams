@@ -17,6 +17,7 @@ class ParserPlugin(PluginInterface):
         self.path = None
         self.settings = settings
         self.settings.validators.register()
+        self.instance: StarCitizen = None
 
     def process(self):
         return self.instance.parse()

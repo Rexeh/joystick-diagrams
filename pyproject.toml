@@ -42,20 +42,33 @@ name = "Joystick_Diagrams"
 description = "Automatically create diagrams for your throttles, joysticks and custom HID devices"
 dynamic = ["version", "readme"]
 
-[tool.setuptools.dynamic]
-version = {attr = "joystick_diagrams.classes.version.version.VERSION"}
-readme =  {file = "readme.md"}
-
 [tool.setuptools.packages.find]
 where = ["joystick_diagrams"]
 namespaces = false
 
+[tool.setuptools.dynamic]
+version = { attr = "joystick_diagrams.classes.version.version.VERSION" }
+readme = { file = "readme.md" }
+
 [tool.distutils.build_exe]
-includes = ["joystick_diagrams.plugins","joystick_diagrams.plugins.plugin1"]
-packages = ["joystick_diagrams.plugins","joystick_diagrams.plugins.plugin1"]
-include_files =  ["./images", "./templates", "./config.cfg", "./readme.md", "version_manifest.json"]
-excludes  = ["tkinter", "test", "distutils", "asyncio", "concurrent", "pyqt5"]
-optimize = 2
+includes = ["joystick_diagrams.plugins.dcs_world_plugin"]
+packages = ["joystick_diagrams.plugins.dcs_world_plugin"]
+include_files = [
+    "./templates",
+    "./settings.json",
+    "./readme.md",
+    "version_manifest.json",
+]
+zip_include_packages = ["encodings", "PySide6"]
+excludes = [
+    "tkinter",
+    "test",
+    "distutils",
+    "asyncio",
+    "concurrent",
+    "black",
+    "IPython",
+]
 
 [tool.coverage.paths]
 source = ["joystick_diagrams/"]
@@ -75,7 +88,8 @@ exclude_lines = [
 
     # Don't complain if non-runnable code isn't run:
     "if 0:",
-    'if __name__ == "__main__":']
+    'if __name__ == "__main__":',
+]
 
 [tool.black]
 line-length = 120
@@ -102,26 +116,20 @@ exclude = '''
 [tool.mypy]
 warn_return_any = false
 warn_unused_configs = true
-warn_annotation_unchecked = false
 show_error_codes = true
 
 [tool.mypy.overrides]
-module = [
-    "dynaconf.*",
-    "qt_material.*"
-]
+module = ["dynaconf.*", "qt_material.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-markers = [
-    "uitest",
-]
+markers = ["uitest"]
 
 [tool.ruff]
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["A","E","C90","I","W","F","B","Q","N","PL"]
+select = ["A", "E", "C90", "I", "W", "F", "B", "Q", "N", "PL"]
 
 ignore = ["E501"]
 

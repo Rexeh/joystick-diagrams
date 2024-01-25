@@ -30,7 +30,6 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
         self.appState = AppState()
         self.remove_defaults()
         self.initialise_plugins_list()
-        print(f"Plugins are: {self.appState.plugin_manager}")
         self.parserPluginList.itemClicked.connect(self.plugin_selected)
         self.pluginPathSet.connect(self.set_plugin_path)
         self.parsePlugins.connect(self.execute_plugin_parsers)

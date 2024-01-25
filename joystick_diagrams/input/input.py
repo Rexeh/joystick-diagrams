@@ -28,6 +28,10 @@ class Input_:
     def __repr__(self):
         return f"{self.input_control} - {self.command} - {self.modifiers}"
 
+    def __str__(self):
+        mod_to_string = [x.__str__() for x in self.modifiers]
+        return f"{self.command} - {str(mod_to_string)}"
+
     def __post_init__(self):
         if not isinstance(self.input_control, CONTROL_TYPES):
             raise ValueError("Input identifier must be a valid type ")
@@ -37,7 +41,7 @@ class Input_:
         "Returns the child control identifier"
         return self.input_control.identifier
 
-    def add_modifier(self, modifier: set, command: str):
+    def add_modifier(self, modifier: set, command: str) -> None:
         """Adds a modifier to an existing input, or amends an existing modifier"""
         existing = self._check_existing_modifier(modifier)
 

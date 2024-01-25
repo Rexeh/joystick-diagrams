@@ -16,6 +16,7 @@ class ParserPlugin(PluginInterface):
         self.path = None
         self.settings = settings
         self.settings.validators.register()
+        self.instance: JoystickGremlinParser = None
 
     def process(self):
         return self.instance.create_dictionary()
