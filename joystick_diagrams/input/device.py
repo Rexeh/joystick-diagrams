@@ -1,4 +1,3 @@
-import functools
 import logging
 from typing import Union
 
@@ -48,9 +47,11 @@ class Device_:
     def create_input(self, control: Union[Axis, Button, Hat, AxisSlider], command: str):
         control_key = self.resolve_type(control)
 
-        input = self.get_input(input_type=control_key, input_id=getattr(control, INPUT_TYPE_IDENTIFIERS[control_key]))
-        if input:
-            input.command = command
+        input_obj = self.get_input(
+            input_type=control_key, input_id=getattr(control, INPUT_TYPE_IDENTIFIERS[control_key])
+        )
+        if input_obj:
+            input_obj.command = command
         else:
             self.inputs[control_key][getattr(control, INPUT_TYPE_IDENTIFIERS[control_key])] = Input_(control, command)
 
@@ -70,12 +71,12 @@ class Device_:
         # Magic
         type_key = self.resolve_type(control)
 
-        input = self.get_input(
+        input_obj = self.get_input(
             type_key,
             getattr(control, INPUT_TYPE_IDENTIFIERS[type_key]),
         )
 
-        if input is None:
+        if input_obj is None:
             _logger.warning(
                 f"Modifier attempted to be added to {control} but input does not exist. So a shell will be created"
             )
@@ -92,7 +93,7 @@ class Device_:
                 shell_input.add_modifier(modifier, command)
 
         else:
-            input.add_modifier(modifier, command)
+            input_obj.add_modifier(modifier, command)
 
 
 if __name__ == "__main__":
