@@ -1,8 +1,7 @@
-
 import pytest
 
-from joystick_diagrams.input.device import Device_
-from joystick_diagrams.input.profile import Profile_
+from joystick_diagrams.input_.device import Device_
+from joystick_diagrams.input_.profile import Profile_
 
 
 @pytest.fixture()

@@ -4,17 +4,21 @@ import os
 import re
 from pathlib import Path
 
-from ply import lex, yacc  # type: ignore
+from ply import lex, yacc
+
+from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
+from joystick_diagrams.input.button import Button  # type: ignore
 
 #################
 from joystick_diagrams.input.device import Device_
+from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
 # Required by PLY
-# from joystick_diagrams.plugins.dcs_world_plugin import (  # pylint: disable=unused-import
-# dcs_world_lex,
-# dcs_world_yacc,
-# )
+from joystick_diagrams.plugins.dcs_world_plugin import (
+    dcs_world_lex,  # noqa
+    dcs_world_yacc,  # noqa
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -83,29 +87,37 @@ class DCSWorldParser:
             )
         return self.valid_profiles
 
-    def convert_button_format(self, button: str) -> str:
+    def convert_button_format(self, button: str) -> Axis | Hat | Button | AxisSlider | None:
         """Convert DCS Buttons to match expected "BUTTON_X" format"""
-        split = button.split("_")
-
+        split: list = button.split("_")
+        _logger.debug(f"Converting button {button}")
         match len(split):
             case 2:
                 if split[1][0:3] == "BTN":
                     # Standard Button
-                    return f"{split[1].replace('BTN', 'BUTTON_')}"
+                    button_number: int = int(split[1][3:])
+                    _logger.debug(f"Parsing button {button_number}")
+                    return Button(button_number)
                 elif split[1].isalpha():
                     # Standard Axis
-                    return f"AXIS_{split[1]}"
+                    axis_id: str = split[1]
+                    _logger.debug(f"Parsing AXIS {axis_id}")
+                    return Axis(AxisDirection[axis_id])
                 elif split[1][0:6] == "SLIDER":
                     # Slider Axis
-                    return f"AXIS_SLIDER_{split[1][6:]}"
-                else:
-                    return f"{split[1]}"
+                    slider_id: int = int(split[1][6:])
+                    _logger.debug(f"Parsing Slider Axis {slider_id}")
+                    return AxisSlider(slider_id)
             case 4:
                 # POV Slider control
-                return f"{split[1].replace('BTN', 'POV')}_{split[2][3]}_{split[3]}"
+                pov_id: int = int(split[2][3])
+                pov_direction: str = split[3]
+                _logger.debug(f"Parsing Hat ID {pov_id} direction {pov_direction}")
+                return Hat(pov_id, HatDirection[pov_direction])
             case _:
                 _logger.warning(f"Button format not found for {split}")
-                return f"{button}"
+
+        return None
 
     def process_profiles(self, profile_list: list | None = None) -> ProfileCollection:
         if isinstance(profile_list, list) and len(profile_list) > 0:
@@ -168,11 +180,13 @@ class DCSWorldParser:
                         for binding in data["added"].values():
                             input_identifier = self.convert_button_format(binding["key"])
 
+                            if not input_identifier:
+                                continue
+
                             # Create Reforms first
                             if binding.get("reformers"):
                                 # Initialise base button if not exists
-                                if not profile.get_input(input_identifier):
-                                    profile.create_input(input_identifier, "")
+
                                 reform_set = self.reformers_to_set(binding.get("reformers"))
                                 profile.add_modifier_to_input(input_identifier, reform_set, operation)
                             else:
@@ -303,3 +317,4 @@ class DCSWorldParser:
 if __name__ == "__main__":
     instance = DCSWorldParser("D:\\Git Repos\\joystick-diagrams\\notebooks\\DCS")
     data = instance.process_profiles(["AV8BNA"])
+    print(data)

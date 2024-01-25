@@ -1,5 +1,6 @@
 import pytest
-from joystick_diagrams.input.input import Input_
+
+from joystick_diagrams.input_.input import Input_
 
 
 @pytest.fixture()
