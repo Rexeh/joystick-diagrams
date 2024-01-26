@@ -9,6 +9,7 @@ diagrams/*.pdf
 debug.txt
 poetry.lock
 coverage.xml
+*.log
 
 # Tests
 tests/__pycache__
@@ -29,6 +30,7 @@ htmlcov
 .pytest*
 /data
 .ruff*
+/local_test_data
 
 # IDE
 *.code-workspace

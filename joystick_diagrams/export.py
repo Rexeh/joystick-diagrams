@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -28,7 +29,8 @@ _logger = logging.getLogger(__name__)
 # Dating template re.sub("\\bCURRENT_DATE\\b", datetime.now().strftime("%d/%m/%Y"), template)
 # Branding template  re.sub("\\bTEMPLATE_NAME\\b", title, template)
 
-EXPORT_DIRECTORY = Path.joinpath(Path(os.path.dirname(__file__)).parent, "test_export")
+ROOT_DIR = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(__package__)
+EXPORT_DIRECTORY = Path.joinpath(Path(ROOT_DIR, "test_export"))
 ENCODING_TYPE = "utf8"
 
 
@@ -78,7 +80,7 @@ def create_directory_if_not_exists(directory: Path):
 
 
 def save_template(template_data, file_name):
-    create_(EXPORT_DIRECTORY)
+    create_directory_if_not_exists(EXPORT_DIRECTORY)
     with open(EXPORT_DIRECTORY.joinpath(file_name), "w", encoding="UTF-8") as f:
         f.write(template_data)
 
@@ -112,7 +114,7 @@ def populate_template(template_data: str, device: Device_, profile_name: str) ->
 def read_template(template_path: Path) -> str | None:
     try:
         _logger.debug(f"Reading template data for {template_path}")
-        return template_path.read_text(encoding=ENCODING_TYPE)
+        return Path(template_path).read_text(encoding=ENCODING_TYPE)
 
     except OSError:
         _logger.debug(f"Error reading file data for {template_path}")
@@ -130,42 +132,59 @@ def get_profile_device_templates(devices: dict[str, Device_]) -> dict[str, Devic
 
         filtered_devices[device_name] = {"Object": device_obj, "Template": lookup}
 
+    _logger.debug(f"Filtered devices are {filtered_devices}")
     return filtered_devices
 
 
 def get_template_for_device(guid: str) -> Path | None:
     # result = get_device_template_path(guid=guid)
+    import sys
 
-    TEST_FILE_LOC = Path.joinpath(Path(os.path.dirname(__file__)).parent, "test_devices.json")
+    if getattr(sys, "frozen", False):
+        # The application is frozen
+        datadir = os.path.dirname(sys.executable)
+        _logger.debug(f"Frozen Template config file in {datadir}")
+    else:
+        # The application is not frozen
+        # Change this bit to match where you store your data files:
+        datadir = os.path.dirname(__package__)
+        _logger.debug(f"Template config file in {datadir}")
+    # TESTING NOTES
+    #
+    TEST_FILE_LOC = os.path.join(datadir, "test_devices.json")
+    _logger.debug(f"Full path to config {TEST_FILE_LOC}")
 
-    json_data = TEST_FILE_LOC.read_text()
+    json_data = Path(TEST_FILE_LOC).read_text()
 
     test_config = dict(json.loads(json_data))
 
     template = test_config.get(guid)
 
     if template:
-        return Path(template)
+        return template
 
     return None
 
 
 if __name__ == "__main__":
-    # data = read_template(Path("D:\\Git Repos\\joystick-diagrams\\templates\\CH Fighterstick USB.svg"))
+    from joystick_diagrams.input.button import Button
+    from joystick_diagrams.input.profile_collection import ProfileCollection
 
-    # logging.basicConfig(level=logging.DEBUG)
+    collection1 = ProfileCollection()
+    profile1 = collection1.create_profile("Profile1")
 
-    # collection1 = ProfileCollection()
-    # profile1 = collection1.create_profile("Profile1")
+    dev1 = profile1.add_device("dev_1", "dev_1")
 
-    # dev1 = profile1.add_device("dev_1", "dev_1")
-    # dev2 = profile1.add_device("dev_2", "dev_2")
+    dev1.create_input(Button(3), "Wheel Brake - ON/OFF")
 
-    # dev1.create_input(Button(1), "shoot")
-    # dev2.create_input(Button(2), "fly")
+    # Modifier(modifiers={'LCtrl'}, command='UFC Function Selector Pushbutton - A/P')
+    # Modifier(modifiers={'LShift'}, command='UFC Option Select Pushbutton 1')
+    # Modifier(modifiers={'LCtrl', 'LShift'}, command='UFC Option Select Pushbutton 3')
+    # Modifier(modifiers={'LAlt'}, command='UFC Option Select Pushbutton 5')
 
-    # dev1.add_modifier_to_input(Button(1), {"ctrl"}, "bang")
-    # dev1.add_modifier_to_input(Button(1), {"alt"}, "bang again")
+    dev1.add_modifier_to_input(Button(3), {"LCtrl"}, "UFC Function Selector Pushbutton - A/P")
+    dev1.add_modifier_to_input(Button(3), {"LShift"}, "UFC Option Select Pushbutton 1")
+    dev1.add_modifier_to_input(Button(3), {"LCtrl", "LShift"}, "UFC Option Select Pushbutton 3")
+    dev1.add_modifier_to_input(Button(3), {"LAlt"}, "UFC Option Select Pushbutton 5")
 
-    # export(profile1, Path("D:\\Git Repos\\joystick-diagrams\\diagrams"))
-    get_template_for_device("abd")
+    populate_template("", dev1, "potato")

@@ -314,6 +314,4 @@ class DCSWorldParser:
 
 
 if __name__ == "__main__":
-    instance = DCSWorldParser("D:\\Git Repos\\joystick-diagrams\\tests\\data\\dcs_world\\toasty_test")
-    data = instance.process_profiles()
-    print(data)
+    pass

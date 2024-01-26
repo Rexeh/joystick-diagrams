@@ -37,3 +37,7 @@ class AxisSlider:
     def __post_init__(self):
         if not isinstance(self.id, int):
             raise ValueError("A slider must have an id of INT")
+
+    @property
+    def identifier(self):
+        return f"AXIS_SLIDER{self.id}"
