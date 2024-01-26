@@ -98,12 +98,12 @@ def populate_template(template_data: str, device: Device_, profile_name: str) ->
         # Create Modifier Strings
         mod_string = ""
         for modifier in input_object.modifiers:
-            mod_string = mod_string + "<br />" + html.escape(modifier.__str__())
+            mod_string = mod_string + "<br></br>" + html.escape(modifier.__str__())
 
-        modifiers = input_object.modifiers.__str__()
         final_template_string = primary_action + mod_string
 
         regex_search = "\\b" + template_key + "\\b"
+
         modified_template_data = re.sub(
             regex_search, final_template_string, modified_template_data, flags=re.IGNORECASE
         )
@@ -167,24 +167,26 @@ def get_template_for_device(guid: str) -> Path | None:
 
 
 if __name__ == "__main__":
-    from joystick_diagrams.input.button import Button
-    from joystick_diagrams.input.profile_collection import ProfileCollection
+    pass
+    # from joystick_diagrams.input.button import Button
+    # from joystick_diagrams.input.profile_collection import ProfileCollection
 
-    collection1 = ProfileCollection()
-    profile1 = collection1.create_profile("Profile1")
+    # collection1 = ProfileCollection()
+    # profile1 = collection1.create_profile("Profile1")
 
-    dev1 = profile1.add_device("dev_1", "dev_1")
+    # dev1 = profile1.add_device("dev_1", "dev_1")
 
-    dev1.create_input(Button(3), "Wheel Brake - ON/OFF")
+    # dev1.create_input(Button(3), "Wheel Brake - ON/OFF")
 
     # Modifier(modifiers={'LCtrl'}, command='UFC Function Selector Pushbutton - A/P')
     # Modifier(modifiers={'LShift'}, command='UFC Option Select Pushbutton 1')
     # Modifier(modifiers={'LCtrl', 'LShift'}, command='UFC Option Select Pushbutton 3')
     # Modifier(modifiers={'LAlt'}, command='UFC Option Select Pushbutton 5')
 
-    dev1.add_modifier_to_input(Button(3), {"LCtrl"}, "UFC Function Selector Pushbutton - A/P")
-    dev1.add_modifier_to_input(Button(3), {"LShift"}, "UFC Option Select Pushbutton 1")
-    dev1.add_modifier_to_input(Button(3), {"LCtrl", "LShift"}, "UFC Option Select Pushbutton 3")
-    dev1.add_modifier_to_input(Button(3), {"LAlt"}, "UFC Option Select Pushbutton 5")
+    # dev1.add_modifier_to_input(Button(3), {"LCtrl"}, "UFC Function Selector Pushbutton - A/P")
+    # dev1.add_modifier_to_input(Button(3), {"LShift"}, "UFC Option Select Pushbutton 1")
+    # dev1.add_modifier_to_input(Button(3), {"LCtrl", "LShift"}, "UFC Option Select Pushbutton 3")
+    # dev1.add_modifier_to_input(Button(3), {"LAlt"}, "UFC Option Select Pushbutton 5")
 
-    populate_template("", dev1, "potato")
+    # data = read_template(Path("D:\\Git Repos\\joystick-diagrams\\templates\\CH Fighterstick USB.svg"))
+    # populate_template(data, dev1, "potato")
