@@ -15,10 +15,8 @@ from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
 # Required by PLY
-from joystick_diagrams.plugins.dcs_world_plugin import (
-    dcs_world_lex,  # noqa
-    dcs_world_yacc,  # noqa
-)
+from joystick_diagrams.plugins.dcs_world_plugin import dcs_world_lex  # noqa
+from joystick_diagrams.plugins.dcs_world_plugin import dcs_world_yacc  # noqa
 
 _logger = logging.getLogger(__name__)
 
@@ -137,7 +135,7 @@ class DCSWorldParser:
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
 
             for item in self.profile_devices:
-                guid, name = item[-46:-11], item[:-48]
+                guid, name = item[-46:-10], item[:-48]
                 active_profile = prof.add_device(guid, name)
 
                 if os.path.isdir(os.path.join(self.fq_path, item)):
@@ -163,6 +161,7 @@ class DCSWorldParser:
                         parsed_config = self.parse_config(file_data)  ##Better handling - decompose
 
                         if parsed_config is None:
+                            _logger.debug(f"Parsing failed for {item}")
                             break
 
                         self.assign_to_inputs(parsed_config, active_profile)
@@ -315,6 +314,6 @@ class DCSWorldParser:
 
 
 if __name__ == "__main__":
-    instance = DCSWorldParser("D:\\Git Repos\\joystick-diagrams\\notebooks\\DCS")
-    data = instance.process_profiles(["AV8BNA"])
+    instance = DCSWorldParser("D:\\Git Repos\\joystick-diagrams\\tests\\data\\dcs_world\\toasty_test")
+    data = instance.process_profiles()
     print(data)
