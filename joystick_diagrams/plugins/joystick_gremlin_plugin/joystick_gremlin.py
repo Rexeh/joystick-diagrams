@@ -3,6 +3,7 @@
 Author: Robert Cox
 """
 import logging
+from pathlib import Path
 from typing import Union
 from xml.dom import minidom
 
@@ -25,12 +26,13 @@ HAT_POSITIONS = {
 
 
 class JoystickGremlinParser:
-    def __init__(self, filepath):
+    def __init__(self, filepath: Path):
         self.file = self.parse_xml_file(filepath)
 
-    def parse_xml_file(self, xml_file) -> minidom.Document:
-        ## Improve loading of file, checks for validity etc
-        return minidom.parse(xml_file)
+    def parse_xml_file(self, xml_file: Path) -> minidom.Document:
+        file_path = xml_file.__str__()
+        ## TODO Improve loading of file, checks for validity etc
+        return minidom.parse(file_path)
 
     def create_dictionary(self) -> ProfileCollection:
         """Creates a valid ProfileCollection from Joystick Gremlin XML
