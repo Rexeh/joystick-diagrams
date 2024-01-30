@@ -23,3 +23,7 @@ build-exe:
 make-version:
 	@echo "Making version manifest"
 	@poetry run python joystick_diagrams/classes/version/version.py
+
+ui:
+	@echo "Generating UI python"
+	@cmd /C ".\scripts\convert_ui.bat"
