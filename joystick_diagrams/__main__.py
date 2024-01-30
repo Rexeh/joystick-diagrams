@@ -12,7 +12,7 @@ from joystick_diagrams.ui.mock_main.mock_main import MainWindow
 
 logging.basicConfig(
     level=logging.DEBUG,
-    format="%(asctime)s - %(levelname)s - %(message)s",
+    format="%(module)s %(filename)s - %(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(), logging.FileHandler("application.log", mode="a")],
 )
 _logger = logging.getLogger(__name__)
