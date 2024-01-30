@@ -23,6 +23,8 @@ This will build the standalone binary package, as well as the installer package 
 >  [!NOTE]
 >  Note that the build will need to take place on the target OS for deployment which for Joystick Diagrams is Windows. While the tool does support cross-platform, no need has yet come up to compile for Linux/Mac
 
-## Developer Documentation
+# Developer Documentation
+This is still work in progress, if you have any questions get in touch on Discord.
 
-- Plugins [(LINK)](./plugins.md)
+- Plugins Development [(LINK)](./plugins.md)
+- Input library  [(LINK)](./profiles.md)

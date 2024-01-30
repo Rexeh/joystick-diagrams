@@ -3,7 +3,11 @@ from pathlib import Path
 
 import dynaconf
 
-import joystick_diagrams.exceptions as JDException
+from joystick_diagrams.exceptions import (
+    DirectoryNotValid,
+    FileNotValid,
+    FileTypeInvalid,
+)
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
 
@@ -28,13 +32,13 @@ class PluginInterface(ABC):
         ...
 
     def file_not_valid_exception(self, exception_message: str):
-        return JDException.FileNotValid(value=exception_message)
+        return FileNotValid(value=exception_message)
 
     def directory_not_valid_exception(self, exception_message: str):
-        return JDException.DirectoryNotValid(value=exception_message)
+        return DirectoryNotValid(value=exception_message)
 
     def file_type_invalid(self, exception_message: str):
-        return JDException.FileTypeInvalid(value=exception_message)
+        return FileTypeInvalid(value=exception_message)
 
     @abstractmethod
     def process(self) -> ProfileCollection:
