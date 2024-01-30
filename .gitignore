@@ -31,6 +31,7 @@ htmlcov
 /data
 .ruff*
 /local_test_data
+test_export/
 
 # IDE
 *.code-workspace
