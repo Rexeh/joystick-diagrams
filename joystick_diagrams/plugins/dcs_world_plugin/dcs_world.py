@@ -14,10 +14,6 @@ from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
-# Required by PLY
-from joystick_diagrams.plugins.dcs_world_plugin import dcs_world_lex  # noqa
-from joystick_diagrams.plugins.dcs_world_plugin import dcs_world_yacc  # noqa
-
 _logger = logging.getLogger(__name__)
 
 EASY_MODES = "_easy"
@@ -237,7 +233,7 @@ class DCSWorldParser:
             return t
 
         def t_STRING(t):  # noqa
-            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\<|\>|\\\"|\s]+\" "
+            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\<|\\\%|\>|\\\"|\s]+\" "
             t.value = t.value[1:-1]
             return t
 
@@ -297,9 +293,9 @@ class DCSWorldParser:
             _logger.error(f"Syntax error at '{ (t.value)}'")
 
         # Build the lexer
-        lexer = lex.lex(  # noqa
-            debug=False, optimize=1, lextab="dcs_world_lex", reflags=re.UNICODE | re.VERBOSE, errorlog=_logger
-        )
+        lexer = lex.lex(
+            debug=False, optimize=1, lextab="lextab", reflags=re.UNICODE | re.VERBOSE, errorlog=_logger
+        )  # noqa
 
         # Build the parser
         parser = yacc.yacc(debug=False, optimize=1, tabmodule="dcs_world_yacc", errorlog=_logger)
@@ -314,4 +310,8 @@ class DCSWorldParser:
 
 
 if __name__ == "__main__":
-    pass
+    dci = DCSWorldParser("D:\\Git Repos\\joystick-diagrams\\local_test_data\\toasty_test")
+
+    dta = dci.process_profiles()
+
+    print(dta)
