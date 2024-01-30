@@ -31,25 +31,16 @@ class ParserPlugin(PluginInterface):
 
         return False
 
+    def load_settings(self) -> None:
+        pass
+
     @property
     def path_type(self):
         return self.FilePath("Select your Joystick Gremlin .XML file", "/%USERPROFILE%/Saved Games", [".xml"])
 
     @property
-    def name(self) -> str:
-        return f"{self.settings.PLUGIN_NAME}"
-
-    @property
-    def version(self) -> str:
-        return f"{self.settings.VERSION}"
-
-    @property
-    def icon(self) -> str:
+    def icon(self):
         return f"{Path.joinpath(Path(__file__).parent,self.settings.PLUGIN_ICON)}"
-
-    @property
-    def get_path(self) -> bool:
-        return self.path
 
 
 if __name__ == "__main__":

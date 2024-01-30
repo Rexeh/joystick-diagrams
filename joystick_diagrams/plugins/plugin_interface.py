@@ -20,8 +20,7 @@ class PluginInterface(ABC):
             self.default_path = default_path
 
     settings: dynaconf.LazySettings
-    path: str
-    instance: object
+    path: Path
 
     @property
     @abstractmethod
@@ -53,17 +52,28 @@ class PluginInterface(ABC):
         """
         ...
 
-    @property
     @abstractmethod
-    def name(self) -> str:
+    def load_settings(self) -> None:
+        """Loads a plugins settings"""
         ...
 
     @property
-    @abstractmethod
+    def name(self) -> str:
+        """Returns a plugins name property"""
+        return f"{self.settings.PLUGIN_NAME}"
+
+    @property
     def version(self) -> str:
-        ...
+        """Returns a version property"""
+        return f"{self.settings.VERSION}"
 
     @property
     @abstractmethod
     def icon(self) -> str:
+        """Returns a path string to plugins icon file"""
         ...
+
+    @property
+    def get_path(self) -> Path | None:
+        """Returns a plugins current path"""
+        return Path(self.path) if self.path else None

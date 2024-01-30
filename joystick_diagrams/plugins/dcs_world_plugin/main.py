@@ -25,33 +25,23 @@ class ParserPlugin(PluginInterface):
     def set_path(self, path: Path) -> bool:
         try:
             self.instance = DCSWorldParser(path)
-            # Requires abstraction / better experience
-            # write(self.settings.settings_module[0], {"path": path})
+
         except Exception as e:
             return False
 
         self.path = path
         return True
 
+    def load_settings(self) -> None:
+        pass
+
     @property
     def path_type(self):
         return self.FolderPath("Select your DCS World directory", "\\%%USERPROFILE%%\\Saved Games")
 
     @property
-    def name(self) -> str:
-        return f"{self.settings.PLUGIN_NAME}"
-
-    @property
-    def version(self) -> str:
-        return f"{self.settings.VERSION}"
-
-    @property
-    def icon(self) -> str:
+    def icon(self):
         return f"{Path.joinpath(Path(__file__).parent,self.settings.PLUGIN_ICON)}"
-
-    @property
-    def get_path(self) -> bool:
-        return self.path
 
 
 if __name__ == "__main__":
