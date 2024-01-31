@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -9,6 +10,8 @@ from joystick_diagrams.exceptions import (
     FileTypeInvalid,
 )
 from joystick_diagrams.input.profile_collection import ProfileCollection
+
+_logger = logging.getLogger(__name__)
 
 
 class PluginInterface(ABC):
@@ -24,7 +27,7 @@ class PluginInterface(ABC):
             self.default_path = default_path
 
     settings: dynaconf.LazySettings
-    path: Path
+    path: Path | None
 
     @property
     @abstractmethod

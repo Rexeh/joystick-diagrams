@@ -1,3 +1,4 @@
+import json
 import logging
 from pathlib import Path
 
@@ -10,6 +11,8 @@ from joystick_diagrams.plugins.plugin_interface import PluginInterface
 from .config import settings
 
 _logger = logging.getLogger("__name__")
+
+CONFIG_FILE = "data.json"
 
 
 class ParserPlugin(PluginInterface):
@@ -25,15 +28,25 @@ class ParserPlugin(PluginInterface):
     def set_path(self, path: Path) -> bool:
         try:
             self.instance = DCSWorldParser(path)
+            self.path = path
+            self.save_plugin_state()
 
         except Exception as e:
             return False
 
-        self.path = path
         return True
 
+    def save_plugin_state(self):
+        with open(Path.joinpath(Path(__file__).parent, CONFIG_FILE), "w", encoding="UTF8") as f:
+            f.write(json.dumps({"path": self.path.__str__()}))
+
     def load_settings(self) -> None:
-        pass
+        try:
+            with open(Path.joinpath(Path(__file__).parent, CONFIG_FILE), "r", encoding="UTF8") as f:
+                data = json.loads(f.read())
+                self.path = Path(data["path"]) if data["path"] else None
+        except FileNotFoundError:
+            pass
 
     @property
     def path_type(self):
