@@ -8,7 +8,7 @@ from typing import Union
 
 from joystick_diagrams.input.axis import Axis, AxisSlider
 from joystick_diagrams.input.button import Button
-from joystick_diagrams.input.hat import Hat, HatDirection
+from joystick_diagrams.input.hat import Hat
 from joystick_diagrams.input.input import Input_
 
 _logger = logging.getLogger("__name__")
@@ -41,7 +41,7 @@ class Device_:
         }
 
     def resolve_type(self, control: Axis | Button | Hat | AxisSlider) -> str:
-        """Resolves a given input control to its identifying key"""
+        """Resolves a given input control to its corresponding dictionary key"""
         resolved_type = CLASS_MAP.get(type(control))
 
         if not resolved_type:

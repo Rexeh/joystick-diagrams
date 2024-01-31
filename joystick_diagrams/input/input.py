@@ -2,9 +2,7 @@
 
 This module contains access to the creation and tracking of devices and their inputs
 
-This module is designed to be used by Plugins, to share devices and inputs between them.
-
-This module operates on FIFO basis, and is designed to be used by a single thread. Only one instance of a device can exist at a time.
+Not intended to be used directly, but via the Device class helper methods
 """
 
 import logging
@@ -34,7 +32,7 @@ class Input_:
 
     def __post_init__(self):
         if not isinstance(self.input_control, CONTROL_TYPES):
-            raise ValueError("Input identifier must be a valid type ")
+            raise ValueError("Input identifier must be a valid control type.")
 
     @property
     def identifier(self):
