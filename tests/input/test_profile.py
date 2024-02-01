@@ -1,7 +1,7 @@
 import pytest
 
-from joystick_diagrams.input_.device import Device_
-from joystick_diagrams.input_.profile import Profile_
+from joystick_diagrams.input.device import Device_
+from joystick_diagrams.input.profile import Profile_
 
 
 @pytest.fixture()
@@ -41,3 +41,19 @@ def test_duplicate_device(profile_obj, caplog):
 
     assert len(profile.devices) == 1
     assert f"Device {guid_1.lower()} already exists and will not be re-added" in caplog.text
+
+
+def test_get_devices(profile_obj):
+    guid_1 = "guid1"
+    guid_2 = "guid2"
+
+    profile = profile_obj("profile1")
+
+    profile.add_device(guid_1, "")
+    profile.add_device(guid_2, "")
+
+    assert len(profile.devices) == 2
+
+    device_list = profile.get_devices()
+
+    assert isinstance(device_list, dict)

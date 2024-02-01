@@ -22,6 +22,7 @@ class Input_:
         self.input_control = control
         self.command = command
         self.modifiers: list[Modifier] = []
+        self.__post_init__()  # I wish normal classes had this... so now it does
 
     def __repr__(self):
         return f"{self.input_control} - {self.command} - {self.modifiers}"
@@ -63,6 +64,6 @@ class Input_:
 
 
 if __name__ == "__main__":
-    input = Input_(Axis(AxisDirection.X), "Fly up")
+    input = Input_("A", "Fly up")
 
     print(input)

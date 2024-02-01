@@ -40,4 +40,4 @@ class AxisSlider:
 
     @property
     def identifier(self):
-        return f"AXIS_SLIDER{self.id}"
+        return f"AXIS_SLIDER_{self.id}"
