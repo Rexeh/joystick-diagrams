@@ -1,6 +1,5 @@
 import pytest
 
-from build.lib.input.hat import HatDirection
 from joystick_diagrams.input.button import Button
 from joystick_diagrams.input.device import Device_
 
@@ -91,7 +90,7 @@ def test_new_modifier_no_input(caplog):
 def test_resolve_type():
     with pytest.raises(ValueError):
         obj = Device_("guid", "name")
-        obj.resolve_type(control=HatDirection)
+        obj.resolve_type(control=Button)
 
 
 def test_combined_inputs():
