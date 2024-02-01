@@ -86,3 +86,23 @@ def test_merge_device_into_profile_with_modifier_from_target():
     assert merged_instance.devices["guid1"].inputs["buttons"]["BUTTON_1"].modifiers.__len__() == 1
     assert merged_instance.devices["guid1"].inputs["buttons"]["BUTTON_1"].modifiers[0].command == "Modifier"
     assert merged_instance.devices["guid1"].inputs["buttons"]["BUTTON_1"].modifiers[0].modifiers == {"ctrl"}
+
+
+def test_merge_device_into_profile_with_existing_merged_with_target():
+    """Checks that the primary instance existing input can inherit a new modifier from target"""
+    # Profile 1 Setup
+    profile_1 = Profile_("Profile_1")
+    profile_1_dev = profile_1.add_device("guid1", "guid")
+    profile_1_dev.create_input(Button(1), "First")
+    profile_1_dev.add_modifier_to_input(Button(1), {"ctrl"}, "Modifier")
+
+    #  Profile 2  Setup
+    profile_2 = Profile_("Profile_1")
+    profile_2_dev = profile_2.add_device("guid1", "guid")
+    profile_2_dev.create_input(Button(1), "Second")
+    profile_2_dev.add_modifier_to_input(Button(1), {"ctrl"}, "OtherModifier")
+
+    merged_instance = profile_1.merge_profiles(profile_2)
+
+    assert merged_instance.devices["guid1"].inputs["buttons"]["BUTTON_1"].modifiers[0].command == "Modifier"
+    assert merged_instance.devices["guid1"].inputs["buttons"]["BUTTON_1"].modifiers[0].modifiers == {"ctrl"}
