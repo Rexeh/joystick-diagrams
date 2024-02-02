@@ -2,8 +2,6 @@ import json
 import logging
 from pathlib import Path
 
-from dynaconf.loaders.json_loader import write
-
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.dcs_world_plugin.dcs_world import DCSWorldParser
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
