@@ -2,7 +2,7 @@ import os
 from sqlite3 import connect
 
 DB_DIR = "data"
-DB_NAME = "values.db"
+DB_NAME = "joystick_diagrams.db"
 
 
 def create_new_db_if_not_exist():

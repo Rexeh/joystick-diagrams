@@ -2,7 +2,7 @@ import os
 from sqlite3 import connect
 
 DB_DIR = "data"
-DB_NAME = "plugins.db"
+DB_NAME = "joystick_diagrams.db"
 TABLE_NAME = "plugins"
 
 
