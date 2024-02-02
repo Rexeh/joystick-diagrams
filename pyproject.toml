@@ -27,6 +27,7 @@ pylint = "^3.0.0"
 cx-Freeze = "^6.15.0"
 mypy = "^1.7.1"
 isort = "^5.12.0"
+ruff = "^0.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pyuic5-tool = "^0.0.1"
@@ -89,7 +90,6 @@ omit = [
     "*/site-packages/*",
     "*/config.py",
     "*/plugins/*",
-    "*/devices/*",
     "*/ui*",
     "*/db*",
 ]
