@@ -213,7 +213,7 @@ def find_plugins(directory) -> list[Path]:
 
 def check_expected_files(directory: Path):
     # Stem added to handle frozen pyc compilation - Now checks only filenames
-    directory_files = [f.stem for f in directory.iterdir() if f.is_file()]
+    directory_files = {f.stem for f in directory.iterdir() if f.is_file()}
 
     for _file in EXPECTED_PLUGIN_FILES:
         if _file not in directory_files:
