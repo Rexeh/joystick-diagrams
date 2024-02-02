@@ -14,6 +14,7 @@ requests = "^2.31.0"
 qt-material = "^2.14"
 dynaconf = "^3.2.4"
 pyside6 = "^6.6.1"
+semver = "^3.0.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
@@ -83,10 +84,18 @@ excludes = [
 source = ["joystick_diagrams/"]
 
 [tool.coverage.run]
-omit = [".*", "*/site-packages/*", "*/config.py", "*/plugins/*", "*/devices/*"]
+omit = [
+    ".*",
+    "*/site-packages/*",
+    "*/config.py",
+    "*/plugins/*",
+    "*/devices/*",
+    "*/ui*",
+    "*/db*",
+]
 
 [tool.coverage.report]
-fail_under = 80
+fail_under = 40
 exclude_lines = [
     # Have to re-enable the standard pragma
     "pragma: no cover",

@@ -1,15 +1,18 @@
 """Versioning for Joystick Diagrams.
 
+Used to generate and compare version manifests in order to facilitate update checking.
+
 Author: https://github.com/Rexeh
 """
 import json
 import logging
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 
 import requests
+import semver
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,13 +27,17 @@ ENCODING = "UTF8"
 @dataclass(eq=False)
 class JoystickDiagramVersion:
     version: str
-    template_hashes: dict
+    template_hashes: dict[str, str]
+    semantic_version: semver.Version = field(init=False)
 
-    # Temporary EQ override as templates are not yet integrated to avoid incorrect version checks
-    def __eq__(self, other):
-        me = float(self.version.split()[0])
-        other = float(other.version.split()[0])
-        return me >= other
+    def __post_init__(self):
+        if not isinstance(self.version, str):
+            raise ValueError("Version must be a string")
+
+        try:
+            self.semantic_version = semver.Version.parse(self.version, optional_minor_and_patch=True)
+        except ValueError as e:
+            raise ValueError(f"Error creating version from provided string: {e}") from e
 
 
 class VersionEncode(json.JSONEncoder):
@@ -41,14 +48,15 @@ class VersionEncode(json.JSONEncoder):
 def fetch_remote_manifest() -> str | None:
     try:
         return requests.get(VERSION_SERVER + MANIFEST_FILE, timeout=3).text
-    except requests.Timeout as timeout:
-        _LOGGER.error(f"Unable to reach server for version check: {timeout}")
+    except requests.exceptions.RequestException as request_exp:
+        _LOGGER.error(f"Unable to reach server for version check: {request_exp}")
     return None
 
 
 def fetch_local_manifest() -> str | None:
     try:
-        return open(os.path.join(MANIFEST_DIR, MANIFEST_FILE), "r", encoding=ENCODING).read()
+        with open(os.path.join(MANIFEST_DIR, MANIFEST_FILE), "r", encoding=ENCODING) as file:
+            return file.read()
     except OSError as error:
         _LOGGER.error(f"Unable to find local manifest. {error}")
     return None
@@ -64,7 +72,7 @@ def perform_version_check() -> bool:
     local_manifest = fetch_local_manifest()
 
     if not remote_manifest or not local_manifest:
-        _LOGGER.error("Unable to perform version check due to an error")
+        _LOGGER.error(f"Unable to perform version check due to one or more manifests not being present.")
         return True
 
     running_version = __convert_json_to_object(local_manifest)
@@ -97,11 +105,13 @@ def generate_version(version_number: str = VERSION) -> JoystickDiagramVersion:
 
 
 def generate_template_manifest() -> dict[str, str]:
+    """Generates a list of hashes for each templatein the package"""
     templates = Path(TEMPLATE_DIR)
     manifest: dict[str, str] = {}
 
     # Generate Template Manifest
     for template in templates.iterdir():
+        # For now no traversal supported
         if template.is_dir():
             continue
         if template.suffix != ".svg":
@@ -113,11 +123,11 @@ def generate_template_manifest() -> dict[str, str]:
 
 
 def compare_versions(running_version: JoystickDiagramVersion, latest_version: JoystickDiagramVersion) -> bool:
-    """Compares versions based on object __eq__
+    """Compares versions based on the running version being less than the latest remote
 
     Returns TRUE for MATCH
     """
-    return running_version == latest_version
+    return running_version.semantic_version >= latest_version.semantic_version
 
 
 def get_current_version() -> str:
@@ -125,4 +135,9 @@ def get_current_version() -> str:
 
 
 if __name__ == "__main__":
-    generate_version()
+    ver = JoystickDiagramVersion("2.1.1", {})
+    ver2 = JoystickDiagramVersion("2.0.1", {})
+
+    check = compare_versions(ver, ver2)
+
+    print(check)
