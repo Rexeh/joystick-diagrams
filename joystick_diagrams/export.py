@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from joystick_diagrams import utils
 from joystick_diagrams.db.db_device_management import get_device_template_path
 from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.profile import Profile_
@@ -72,15 +73,9 @@ def export_devices_to_templates(devices: dict[str, dict[str, Any]], profile_name
         save_template(result, file_name)
 
 
-def create_directory_if_not_exists(directory: Path):
-    if directory.exists():
-        return
-
-    Path.mkdir(directory)
-
-
 def save_template(template_data, file_name):
-    create_directory_if_not_exists(EXPORT_DIRECTORY)
+    utils.create_directory(EXPORT_DIRECTORY)
+
     with open(EXPORT_DIRECTORY.joinpath(file_name), "w", encoding="UTF-8") as f:
         f.write(template_data)
 
