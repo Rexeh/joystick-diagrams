@@ -21,9 +21,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setEnabled(True)
         self.tabWidget.setGeometry(QtCore.QRect(10, 60, 1111, 621))
         self.tabWidget.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.tabWidget.setStyleSheet("QTabWidget::tab-bar {\n"
-" alignment: center;\n"
-"}")
+        self.tabWidget.setStyleSheet("QTabWidget::tab-bar {\n" " alignment: center;\n" "}")
         self.tabWidget.setTabPosition(QtWidgets.QTabWidget.North)
         self.tabWidget.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.tabWidget.setElideMode(QtCore.Qt.ElideLeft)
