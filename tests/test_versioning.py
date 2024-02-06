@@ -4,7 +4,7 @@ from unittest.mock import mock_open, patch
 import pytest
 import requests
 
-from joystick_diagrams.classes.version import version
+import joystick_diagrams.version as version
 
 
 # Object creation
@@ -159,7 +159,7 @@ def test_generate_version(monkeypatch):
     monkeypatch.setattr(version, "generate_template_manifest", mock_generate_template_manifest)
 
     m = mock_open(read_data="foo bar")
-    with patch("joystick_diagrams.classes.version.version.open", m):
+    with patch("joystick_diagrams.version.open", m):
         generated = version.generate_version()
 
     assert isinstance(generated, version.JoystickDiagramVersion)
