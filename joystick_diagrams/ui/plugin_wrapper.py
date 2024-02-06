@@ -1,10 +1,21 @@
+""" Wrapper functionality for Plugins for the UI
+
+
+"""
+
+import functools
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from db import db_plugin_data
+from utils import handle_bare_exception
 
+from joystick_diagrams.exceptions import JoystickDiagramsException
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -18,28 +29,43 @@ class PluginWrapper:
         self.plugin_profile_collection = None
         self.setup_plugin()
 
+    @handle_bare_exception
     def process(self):
-        if self.path:
-            self.plugin_profile_collection = self.plugin.process()
+        """Runs a specific plugin, attaching the result to the wrapper"""
+        try:
+            if self.path:
+                self.plugin_profile_collection = self.plugin.process()
+        except JoystickDiagramsException as e:
+            _logger.error(e)
 
+    @handle_bare_exception
     def set_path(self, path: Path) -> bool:
-        set = self.plugin.set_path(path)
-        return set
+        """Sets the path for a given plugin"""
+        try:
+            return self.plugin.set_path(path)
+        except JoystickDiagramsException as e:
+            _logger.error(e)
 
+        return False
+
+    @handle_bare_exception
     def setup_plugin(self):
-        """Sets up a pluginf or first use or restores existing state"""
+        """Sets up a pluging on first use or restores existing state"""
 
-        existing_configuration = self.get_plugin_configuration(self.plugin.name)
+        try:
+            existing_configuration = self.get_plugin_configuration(self.plugin.name)
 
-        if existing_configuration:
-            self.enabled = existing_configuration[1]
-        else:
-            self.store_plugin_configuration()
+            if existing_configuration:
+                self.enabled = existing_configuration[1]
+            else:
+                self.store_plugin_configuration()
 
-        self.plugin.load_settings()
+            self.plugin.load_settings()
 
-        if self.plugin.path:
-            self.set_path(self.plugin.path)
+            if self.plugin.path:
+                self.set_path(self.plugin.path)
+        except JoystickDiagramsException as e:
+            _logger.error(e)
 
     def get_plugin_configuration(self, plugin_name: str):
         return db_plugin_data.get_plugin_configuration(plugin_name)
