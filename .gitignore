@@ -17,6 +17,7 @@ tests/*/__pycache__/
 
 # Folders
 *__pycache__/
+*/plugins/*/*.json
 /build/
 /dist/
 .env

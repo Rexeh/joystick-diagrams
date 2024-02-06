@@ -1,9 +1,8 @@
 """ Wrapper functionality for Plugins for the UI
 
-
+Primarily handles passthrough plugin_interface concrete implementations.
 """
 
-import functools
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -102,6 +101,7 @@ class PluginWrapper:
 
         self._enabled = False if isinstance(value, property) else bool(value)
 
+        # TODO process the plugins syncronously on enable
         if self._enabled is True:
             self.process()
         return self.enabled

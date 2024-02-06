@@ -15,6 +15,7 @@ qt-material = "^2.14"
 dynaconf = "^3.2.4"
 pyside6 = "^6.6.1"
 semver = "^3.0.2"
+sphinx = "^7.2.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
@@ -49,7 +50,7 @@ where = ["joystick_diagrams"]
 namespaces = false
 
 [tool.setuptools.dynamic]
-version = { attr = "joystick_diagrams.classes.version.version.VERSION" }
+version = { attr = "joystick_diagrams.version.VERSION" }
 readme = { file = "readme.md" }
 
 [tool.distutils.build_exe]
@@ -90,7 +91,7 @@ omit = [
     "*/site-packages/*",
     "*/config.py",
     "*/plugins/*",
-    "*/ui*",
+    "*/ui/*/",
     "*/db*",
 ]
 
