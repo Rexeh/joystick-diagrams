@@ -67,17 +67,6 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
             item.setData(Qt.UserRole, plugin_data)
             self.parserPluginList.addItem(item)
 
-        self.pre_intiialise_plugin_wrappers()
-
-    def pre_intiialise_plugin_wrappers(self):
-        """Sets up the wrappers in the UI, so that users don't need to click on them individually
-
-        This could be done better but for now it works
-        """
-        for item in range(self.parserPluginList.count()):
-            self.parserPluginList.setCurrentRow(item)
-            self.plugin_selected()
-
     @Slot()
     def plugin_selected(self):
         if self.window_content:

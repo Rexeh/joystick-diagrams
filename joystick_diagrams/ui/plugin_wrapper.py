@@ -38,7 +38,8 @@ class PluginWrapper:
 
         self.plugin.load_settings()
 
-        print(self.plugin.path)
+        if self.plugin.path:
+            self.set_path(self.plugin.path)
 
     def get_plugin_configuration(self, plugin_name: str):
         return db_plugin_data.get_plugin_configuration(plugin_name)
@@ -48,7 +49,6 @@ class PluginWrapper:
 
     @property
     def path(self):
-        print(f"Getting path for {self.name} which is {self.plugin.path}")
         return self.plugin.path
 
     @property
@@ -78,5 +78,4 @@ class PluginWrapper:
 
         if self._enabled is True:
             self.process()
-            print("Processed the plugin on enabling")
         return self.enabled

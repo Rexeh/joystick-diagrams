@@ -59,11 +59,6 @@ class PluginSettings(QMainWindow, plugin_settings_ui.Ui_Form):  # Refactor pylin
             self.configureLink.setText(self.get_plugin_path_type().dialog_title)
             self.configureLink.setDescription("")
 
-        # Handle plugin procesing depending on its enabled state
-        self.handle_plugin_enabled_state()
-
-        self.plugin.plugin_loaded = True
-
     def handle_plugin_enabled_state(self):
         """Setup the plugin based on the enabled state. Only fully load enabled plugins for safety"""
         state = self.plugin.enabled
@@ -83,8 +78,13 @@ class PluginSettings(QMainWindow, plugin_settings_ui.Ui_Form):  # Refactor pylin
 
     @Slot()
     def handle_enabled_change(self, data):
-        # Set the enabled state based on data
-        self.plugin.enabled = data if data == 0 else 1
+
+        # If the data is the same as the state do nothing
+        if self.plugin.enabled == data:
+            return
+
+        # Set plugin state to new UI state
+        self.plugin.enabled = data
 
         # Process based on the new state
         self.handle_plugin_enabled_state()
