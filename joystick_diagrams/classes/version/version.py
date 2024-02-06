@@ -4,6 +4,7 @@ Used to generate and compare version manifests in order to facilitate update che
 
 Author: https://github.com/Rexeh
 """
+
 import json
 import logging
 import os
@@ -24,7 +25,7 @@ MANIFEST_FILE = "version_manifest.json"
 ENCODING = "UTF8"
 
 
-@dataclass(eq=False)
+@dataclass()
 class JoystickDiagramVersion:
     version: str
     template_hashes: dict[str, str]
