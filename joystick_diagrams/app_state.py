@@ -21,9 +21,7 @@ class AppState:
 
     def _init(self) -> None:
         self.plugin_manager: ParserPluginManager | None = None
-        self.plugin_profile_collections: list
-        self.raw_profiles: list = []  # TODO repalce with parsed profiles from Plugins
-        self.profileObjectMapping = self.update_profile_object_mapping()
+        self.profileObjectMapping: dict[str, Profile_] = {}
         self.profileParentMapping: dict[str, list[str]] = {}  # TODO correctly initialise these
         self.processedProfileObjectMapping: dict[str, Profile_] = {}  # TODO Think here about name colissions
         self.update_processed_profiles()
@@ -31,21 +29,18 @@ class AppState:
     def init_plugins(self, plugin_manager: ParserPluginManager):
         self.plugin_manager = plugin_manager
 
-    def process_loaded_plugins(self):
-        self.plugin_profile_collections = self.plugin_manager.process_loaded_plugins()
-        # TODO clean up
-        self.raw_profiles.clear()
-        for pc in self.plugin_profile_collections:
-            name = pc[0]
-            for profile in pc[1].profiles.values():
-                # TODO tidy up and push up
-                profile.name = f"{profile.name} - {name}"
-                self.raw_profiles.append(profile)
-        self.profileObjectMapping = self.update_profile_object_mapping()
-        self.update_processed_profiles()
+    def process_loaded_plugins(self, profile_collections: dict[str, ProfileCollection]):
+        # Clear existing processed profiles
+        self.profileObjectMapping.clear()
 
-    def update_profile_object_mapping(self):
-        return {x.name: x for x in self.raw_profiles}
+        for profile_source, profiles in profile_collections.items():
+            for profile_name, profile_obj in profiles.profiles.items():
+                combined_name = f"{profile_source} - {profile_name}"
+                self.profileObjectMapping[combined_name] = profile_obj
+
+        _logger.debug(f"Loaded plugins resulted in the following profiles being detected {self.profileObjectMapping}")
+
+        self.update_processed_profiles()
 
     def get_processed_profile(self, profile_identifier: str) -> Profile_:
         """Return inherited profile for given Profile Identifier."""
@@ -133,6 +128,4 @@ class AppState:
 
 
 if __name__ == "__main__":
-    _appState = AppState()
-    _appState.update_processed_profiles()
-    print(_appState)
+    pass

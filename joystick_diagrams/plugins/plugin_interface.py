@@ -32,6 +32,7 @@ class PluginInterface(ABC):
     @property
     @abstractmethod
     def path_type(self) -> FolderPath | FilePath:
+        """Returns a valid path type object to specify the plugins path sourcing method."""
         ...
 
     def file_not_valid_exception(self, exception_message: str):
@@ -71,7 +72,7 @@ class PluginInterface(ABC):
 
     @property
     def version(self) -> str:
-        """Returns a version property"""
+        """Returns a valid path type object""" """Returns a version property"""
         return f"{self.settings.VERSION}"
 
     @property

@@ -15,6 +15,7 @@ CONFIG_FILE = "data.json"
 
 class ParserPlugin(PluginInterface):
     def __init__(self):
+        super().__init__()
         self.settings = settings
         self.settings.validators.register()
         self.path = None

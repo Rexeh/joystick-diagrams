@@ -33,8 +33,8 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):  # Refactor pylint:
     def initialise_available_profiles(self):
         self.profileList.clear()
         profiles = self.get_profiles()
-        for i in profiles.values():
-            self.profileList.addItem(i.name)
+        for key in profiles.keys():
+            self.profileList.addItem(key)
 
     def initialise_customise_binds(self):
         profiles = self.appState.get_processed_profiles()

@@ -35,54 +35,81 @@ class PluginSettings(QMainWindow, plugin_settings_ui.Ui_Form):  # Refactor pylin
         self.plugin = None
 
         # Attributes
-
         # Connections
         self.pluginEnabled.stateChanged.connect(self.handle_enabled_change)
         self.configureLink.clicked.connect(self.open_file_dialog)
+        self.pluginModified.connect(self.trigger_plugin_save)
 
         # Setup
-
         # Style Overrides
-        self.configureLink.setStyleSheet("color: white !important;")
 
     def setup(self):
         """Initialise the widget configuration"""
 
         # Setup labels
         self.pluginEnabled.setChecked(self.plugin.enabled)
-        self.plugin_name_label.setText(self.plugin.plugin_name)
-        self.plugin_version_label.setText(self.plugin.plugin_version)
+        self.plugin_name_label.setText(self.plugin.name)
+        self.plugin_version_label.setText(self.plugin.version)
 
         # Setup file selection
-        self.configureLink.setText(self.get_plugin_path_type().dialog_title)
-        self.configureLink.setDescription("")
+        if self.plugin.path:
+            self.configureLink.setText(RECONFIGURE_TEXT)
+            self.configureLink.setDescription(self.plugin.path.__str__())
+        else:
+            self.configureLink.setText(self.get_plugin_path_type().dialog_title)
+            self.configureLink.setDescription("")
 
-        if self.plugin.plugin.path:
-            self.set_plugin_path(self.plugin.plugin.path)
+        # Handle plugin procesing depending on its enabled state
+        self.handle_plugin_enabled_state()
 
-        # TODO if file already set from storage...
+        self.plugin.plugin_loaded = True
 
+    def handle_plugin_enabled_state(self):
+        """Setup the plugin based on the enabled state. Only fully load enabled plugins for safety"""
+        state = self.plugin.enabled
+
+        match state:
+            case 0:
+                self.configureLink.setDisabled(1)
+
+            case 1:
+                self.configureLink.setDisabled(0)
+
+            case _:
+                self.configureLink.setDisabled(1)
+
+    def trigger_plugin_save(self):
+        self.plugin.store_plugin_configuration()
+
+    @Slot()
     def handle_enabled_change(self, data):
+        # Set the enabled state based on data
         self.plugin.enabled = data if data == 0 else 1
-        print(f"Plugin enabled state is now  {self.plugin.enabled}")
+
+        # Process based on the new state
+        self.handle_plugin_enabled_state()
+
+        _logger.debug(f"Plugin enabled state is now  {self.plugin.enabled}")
+
         self.pluginModified.emit(self.plugin)
 
-    def get_plugin_file_extensions(self):
-        return []
-
     def get_plugin_path_type(self) -> PluginInterface.FilePath | PluginInterface.FolderPath:
-        return self.plugin.plugin.path_type
+        return self.plugin.path_type
 
     def set_plugin_path(self, path: Path):
         if not isinstance(path, Path):
+            _logger.error(f"Plugin path for {self.plugin.name} was not a Path object")
             return
 
         try:
-            load = self.plugin.plugin.set_path(path)
+            _logger.debug(f"Atempting path set for plugin {self.plugin.name}")
+            load = self.plugin.set_path(path)
 
             if not load:
+                _logger.error(f"An error occured seting the path for {self.plugin.name}")
                 raise JoystickDiagramsException("Error loading plugin")
             if load:
+                _logger.info(f"Path successfully set for {self.plugin.name}")
                 self.configureLink.setText(RECONFIGURE_TEXT)
                 self.configureLink.setDescription(path.__str__())
                 self.pluginPathConfigured.emit(self.plugin)
@@ -117,27 +144,6 @@ class PluginSettings(QMainWindow, plugin_settings_ui.Ui_Form):  # Refactor pylin
                     self.set_plugin_path(Path(_folder))
             case _:
                 _logger.error("Unexpected plugin path type given.")
-
-    # def load_plugin_settings(self, data):
-
-
-#     self.pluginVersionInfo.setText(f"Version {data.version}")
-#     self.pluginName.setText(f"{data.name} Settings")
-
-#     # Path Setup
-#     self.pluginPath.setText(data.path)
-
-#     # Prevents duplicate signals from being connected
-#     if self.pluginPathButton.isSignalConnected(QMetaMethod.fromSignal(self.pluginPathButton.clicked)):
-#         self.pluginPathButton.clicked.disconnect()
-
-#     # Clean up
-#     # Additional validation to be added to PluginInterface/Plugin loading
-#     if isinstance(data.path_type, PluginInterface.FilePath):
-#         self.pluginPathButton.clicked.connect(lambda: self.file_dialog(data.path_type))
-
-#     if isinstance(data.path_type, PluginInterface.FolderPath):
-#         self.pluginPathButton.clicked.connect(lambda: self.folder_dialog(data.path_type))
 
 
 if __name__ == "__main__":

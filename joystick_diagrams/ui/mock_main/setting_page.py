@@ -16,6 +16,7 @@ from joystick_diagrams import app_init
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db import db_init, db_plugin_data
 from joystick_diagrams.exceptions import JoystickDiagramsException
+from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 from joystick_diagrams.ui.mock_main.plugin_settings import PluginSettings
 from joystick_diagrams.ui.mock_main.qt_designer import setting_page_ui
@@ -25,7 +26,7 @@ _logger = logging.getLogger(__name__)
 
 
 class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: disable=too-many-instance-attributes
-    parsePlugins = Signal()
+    profileCollectionChange = Signal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -33,12 +34,13 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
         self.appState = AppState()
 
         # Attributes
-        self.plugin_wrappers = []
+        self.plugin_wrappers: list[PluginWrapper] = []
         self.window_content = None
 
         # Connections
         self.parserPluginList.itemClicked.connect(self.plugin_selected)
-        self.parsePlugins.connect(self.execute_plugin_parsers)
+        self.parserPluginList.itemChanged.connect(self.plugin_selected)
+        self.profileCollectionChange.connect(self.update_profile_collections)
 
         # Setup
         self.remove_defaults()
@@ -50,71 +52,71 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
     def remove_defaults(self):
         self.parserPluginList.clear()
 
-    def get_plugin_configuration(self, plugin_name: str):
-        return db_plugin_data.get_plugin_configuration(plugin_name)
-
-    @Slot()
-    def store_plugin_configuration(self, plugin_object: PluginWrapper):
-        db_plugin_data.add__update_plugin_configuration(plugin_object.plugin_name, plugin_object.enabled)
-
     def initialise_plugins(self):
         """Initialise the available plugins into wrapper objects for use in UI.
 
         PluginWrapper enriches the Plugin model with UI specific data
         """
         for plugin in self.appState.plugin_manager.get_available_plugins():
-            plugin_lookup = self.get_plugin_configuration(plugin.name)
 
-            if plugin_lookup:
-                enabled_flag = plugin_lookup[1]
-                self.plugin_wrappers.append(
-                    PluginWrapper(plugin.name, plugin.version, plugin.icon, plugin, enabled=enabled_flag)
-                )
-            else:
-                # Create Wrapper
-                wrapper = PluginWrapper(plugin.name, plugin.version, plugin.icon, plugin, enabled=False)
-                # Store the plugin with default of FALSE for enabled
-                self.store_plugin_configuration(wrapper)
-
-                self.plugin_wrappers.append(wrapper)
+            self.plugin_wrappers.append(PluginWrapper(plugin))
 
     def populate_available_plugin_list(self):
         for plugin_data in self.plugin_wrappers:
-            item = QListWidgetItem(QIcon(plugin_data.plugin_icon), plugin_data.plugin_name)
+            item = QListWidgetItem(QIcon(plugin_data.icon), plugin_data.name)
             item.setData(Qt.UserRole, plugin_data)
             self.parserPluginList.addItem(item)
 
+        self.pre_intiialise_plugin_wrappers()
+
+    def pre_intiialise_plugin_wrappers(self):
+        """Sets up the wrappers in the UI, so that users don't need to click on them individually
+
+        This could be done better but for now it works
+        """
+        for item in range(self.parserPluginList.count()):
+            self.parserPluginList.setCurrentRow(item)
+            self.plugin_selected()
+
     @Slot()
-    def plugin_selected(self, item):
+    def plugin_selected(self):
         if self.window_content:
             self.window_content.hide()
 
         self.window_content = PluginSettings()
 
+        # Signals/Slots
+        self.window_content.pluginPathConfigured.connect(self.handle_plugin_path_load)
+
         # Page Setup For now
         self.window_content.plugin = self.get_selected_plugin_object()
-        self.window_content.setup()
 
-        # Signals/Slots
-        self.window_content.pluginModified.connect(self.store_plugin_configuration)
-        self.window_content.pluginPathConfigured.connect(self.handle_plugin_path_load)
+        self.window_content.setup()
 
         self.window_content.setParent(self.pluginOptionsWidget)
         self.window_content.show()
 
     @Slot()
     def handle_plugin_path_load(self, plugin: PluginWrapper):
-        print(f"Data is {plugin}")
+        _logger.debug(f"Plugin path changed for {plugin}, attempting to process plugin")
         try:
             plugin.plugin_profile_collection = plugin.plugin.process()
-            print(f"Data is {plugin.plugin_profile_collection}")
+            self.profileCollectionChange.emit()
         except JoystickDiagramsException:
             pass
 
+    def get_plugin_wrapper_collections(self) -> dict[str, ProfileCollection]:
+        """Returns a list of Profile Collections that are tagged with the Plugin Name where the plugin is enabled"""
+        return {
+            x.name: x.plugin_profile_collection
+            for x in self.plugin_wrappers
+            if x.enabled and x.plugin_profile_collection
+        }
+
     @Slot()
-    def execute_plugin_parsers(self):
-        print("Executing plugin parsers")
-        self.appState.process_loaded_plugins()
+    def update_profile_collections(self):
+        _logger.debug(f"Updating profile collections from all plugins")
+        self.appState.process_loaded_plugins(self.get_plugin_wrapper_collections())
 
     def get_selected_plugin_object(self) -> PluginInterface:
         return self.parserPluginList.currentItem().data(Qt.UserRole)
