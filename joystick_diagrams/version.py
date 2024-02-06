@@ -73,7 +73,7 @@ def perform_version_check() -> bool:
     local_manifest = fetch_local_manifest()
 
     if not remote_manifest or not local_manifest:
-        _LOGGER.error(f"Unable to perform version check due to one or more manifests not being present.")
+        _LOGGER.error("Unable to perform version check due to one or more manifests not being present.")
         return True
 
     running_version = __convert_json_to_object(local_manifest)

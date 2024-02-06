@@ -4,7 +4,7 @@ from unittest.mock import mock_open, patch
 import pytest
 import requests
 
-import joystick_diagrams.version as version
+from joystick_diagrams import version
 
 
 # Object creation
@@ -45,12 +45,19 @@ def test_version_creation_int_failure():
 ## Json deserialise
 
 
-def test_json_to_object():
+def test_json_to_object_valid():
     json_string = '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
     returned_ver = version.__convert_json_to_object(json_string)
     assert isinstance(returned_ver, version.JoystickDiagramVersion)
     assert returned_ver.version == "2.0"
     assert "hash_item_one" in returned_ver.template_hashes
+
+
+def test_json_to_object_invalid(caplog):
+    json_string = "{}"
+    with pytest.raises(TypeError):
+        version.__convert_json_to_object(json_string)
+        assert caplog.text is not None
 
 
 ## Remote/Local manifest retrieval and comparisons
@@ -92,6 +99,14 @@ def test_remote_manifest_request_fail(request_exception_mock, caplog):
 
 
 @pytest.fixture
+def fetch_local_mock_none_found(monkeypatch):
+    def mock():
+        return None
+
+    monkeypatch.setattr(version, "fetch_local_manifest", mock)
+
+
+@pytest.fixture
 def fetch_local_mock(monkeypatch):
     def mock():
         return '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
@@ -99,14 +114,24 @@ def fetch_local_mock(monkeypatch):
     monkeypatch.setattr(version, "fetch_local_manifest", mock)
 
 
-def test_local_manifest(fetch_local_mock):
-    data = version.fetch_local_manifest()
+def test_local_manifest_read():
+
+    m = mock_open(read_data='{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}')
+    with patch("joystick_diagrams.version.open", m):
+        data = version.fetch_local_manifest()
 
     assert data == '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
 
 
-def test_perform_version_check(fetch_local_mock, fetch_remote_mock):
+def test_perform_version_check_success(fetch_local_mock, fetch_remote_mock, caplog):
     check = version.perform_version_check()
+    assert check is True
+
+
+def test_perform_version_check_failure(fetch_local_mock_none_found, fetch_remote_mock, caplog):
+    check = version.perform_version_check()
+
+    assert "Unable to perform version check" in caplog.text
     assert check is True
 
 
