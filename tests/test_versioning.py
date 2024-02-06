@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from unittest.mock import mock_open, patch
 
 import pytest
 import requests
@@ -54,6 +55,16 @@ def test_json_to_object():
 
 ## Remote/Local manifest retrieval and comparisons
 @pytest.fixture
+def request_exception_mock(monkeypatch):
+
+    def mock(*args, **kwargs):
+        raise requests.exceptions.RequestException
+
+    monkeypatch.setattr(requests, "get", mock)
+
+
+## Remote/Local manifest retrieval and comparisons
+@pytest.fixture
 def fetch_remote_mock(monkeypatch):
     @dataclass
     class MockRequestObject:
@@ -66,18 +77,26 @@ def fetch_remote_mock(monkeypatch):
     monkeypatch.setattr(requests, "get", mock)
 
 
+def test_remote_manifest(fetch_remote_mock):
+    data = version.fetch_remote_manifest()
+
+    assert data == '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
+
+
+def test_remote_manifest_request_fail(request_exception_mock, caplog):
+
+    data = version.fetch_remote_manifest()
+
+    assert data is None
+    assert "Unable to reach server for version check" in caplog.text
+
+
 @pytest.fixture
 def fetch_local_mock(monkeypatch):
     def mock():
         return '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
 
     monkeypatch.setattr(version, "fetch_local_manifest", mock)
-
-
-def test_remote_manifest(fetch_remote_mock):
-    data = version.fetch_remote_manifest()
-
-    assert data == '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
 
 
 def test_local_manifest(fetch_local_mock):
@@ -119,3 +138,37 @@ def test_check_local_less_than_remote():
     check = version.compare_versions(local_version, remote_version)
 
     assert check is False
+
+
+def test_version_object_json_encode():
+
+    version_string = "1.0.0"
+    temp_dict = {"hash_one": "one"}
+    ver = version.JoystickDiagramVersion(version_string, temp_dict)
+
+    encode = version.VersionEncode().default(ver)
+
+    assert encode == {"version": version_string, "template_hashes": {"hash_one": "one"}}
+
+
+def test_generate_version(monkeypatch):
+
+    def mock_generate_template_manifest():
+        return {}
+
+    monkeypatch.setattr(version, "generate_template_manifest", mock_generate_template_manifest)
+
+    m = mock_open(read_data="foo bar")
+    with patch("joystick_diagrams.classes.version.version.open", m):
+        generated = version.generate_version()
+
+    assert isinstance(generated, version.JoystickDiagramVersion)
+
+
+def test_get_current_version():
+
+    ver_const = version.VERSION
+
+    ver = version.get_current_version()
+
+    assert ver_const == ver
