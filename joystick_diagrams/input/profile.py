@@ -62,9 +62,7 @@ class Profile_:
                                 existing_modifier = existing_input._check_existing_modifier(modifier.modifiers)
                                 if existing_modifier is None:
                                     existing_input.modifiers.append(deepcopy(modifier))
-                                else:
-                                    # If the modifier exists, update the command with the supplied profile value
-                                    existing_modifier.command = modifier.command
+                                # Don't merge upstream modifier command into current
 
         return src_profile
 
