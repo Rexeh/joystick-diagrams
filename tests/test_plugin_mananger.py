@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 import pytest
-from click import Path
 
 from joystick_diagrams import exceptions, plugin_manager
 from joystick_diagrams.plugin_manager import (

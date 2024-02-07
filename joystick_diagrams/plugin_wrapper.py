@@ -7,12 +7,11 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from db import db_plugin_data
-from utils import handle_bare_exception
-
+from joystick_diagrams.db import db_plugin_data
 from joystick_diagrams.exceptions import JoystickDiagramsException
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.utils import handle_bare_exception
 
 _logger = logging.getLogger(__name__)
 
