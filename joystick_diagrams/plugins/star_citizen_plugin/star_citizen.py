@@ -1,4 +1,5 @@
 """Star Citizen XML Parser for use with Joystick Diagrams."""
+
 import logging
 import os
 from pathlib import Path
@@ -702,7 +703,7 @@ def get_profile_name_map(name: str) -> str:
 
     # Handle unexpected new mappings with default
     if _name is None:
-        _logger.warning("No map found for a Star Citizen profile {name}. This should be raised as a bug.")
+        _logger.warning(f"No map found for a Star Citizen profile {name}. This should be raised as a bug.")
         _name = "Spaceship"
 
     return _name
