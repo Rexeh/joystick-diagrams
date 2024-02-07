@@ -13,6 +13,15 @@ def create_new_db_if_not_exist():
     cur.execute(f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(guid TEXT PRIMARY KEY, template_path TEXT)")
 
 
+def get_device_templates() -> list:
+    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
+    connection = connect(path)
+    cur = connection.cursor()
+
+    cur.execute("SELECT * from devices")
+    return cur.fetchall()
+
+
 def add_update_device_template_path(guid: str, template_path: str) -> bool:
     path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
     connection = connect(path)

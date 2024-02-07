@@ -81,11 +81,15 @@ def save_template(template_data, file_name):
 
 
 def populate_template(template_data: str, device: Device_, profile_name: str) -> str:
+    """Manipulates template_data to replace known keys with data"""
     modified_template_data = template_data
+
+    # Do the inputs
+    # Do the modifiers
+    # Do date strings, template name
 
     # TODO improve boilerplate for test
     for input_key, input_object in device.get_combined_inputs().items():
-        template_key = input_key
 
         # Escape the primary action
         primary_action = html.escape(input_object.command)
@@ -97,7 +101,7 @@ def populate_template(template_data: str, device: Device_, profile_name: str) ->
 
         final_template_string = primary_action + mod_string
 
-        regex_search = "\\b" + template_key + "\\b"
+        regex_search = "\\b" + input_key + "\\b"
 
         modified_template_data = re.sub(
             regex_search, final_template_string, modified_template_data, flags=re.IGNORECASE
@@ -132,31 +136,12 @@ def get_profile_device_templates(devices: dict[str, Device_]) -> dict[str, Devic
 
 
 def get_template_for_device(guid: str) -> Path | None:
-    # result = get_device_template_path(guid=guid)
-    import sys
+    """Get the latest template file mapping for a GUID"""
 
-    if getattr(sys, "frozen", False):
-        # The application is frozen
-        datadir = os.path.dirname(sys.executable)
-        _logger.debug(f"Frozen Template config file in {datadir}")
-    else:
-        # The application is not frozen
-        # Change this bit to match where you store your data files:
-        datadir = os.path.dirname(__package__)
-        _logger.debug(f"Template config file in {datadir}")
-    # TESTING NOTES
-    #
-    TEST_FILE_LOC = os.path.join(datadir, "test_devices.json")
-    _logger.debug(f"Full path to config {TEST_FILE_LOC}")
-
-    json_data = Path(TEST_FILE_LOC).read_text()
-
-    test_config = dict(json.loads(json_data))
-
-    template = test_config.get(guid)
+    template = get_device_template_path(guid)
 
     if template:
-        return template
+        return template[0]
 
     return None
 

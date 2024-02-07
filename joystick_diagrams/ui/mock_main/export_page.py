@@ -3,27 +3,20 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from PySide6.QtCore import QMetaMethod, Qt, Signal, Slot
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
-    QHBoxLayout,
     QHeaderView,
-    QListWidgetItem,
     QMainWindow,
-    QMessageBox,
-    QPushButton,
-    QSizePolicy,
-    QStyle,
     QTableWidgetItem,
-    QWidget,
 )
 from qt_material import apply_stylesheet
 
-from joystick_diagrams import app_init
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.db.db_device_management import add_update_device_template_path
+from joystick_diagrams.db.db_device_management import (
+    add_update_device_template_path,
+    get_device_templates,
+)
 from joystick_diagrams.export import export
 from joystick_diagrams.ui.mock_main.qt_designer import export_ui
 
@@ -33,8 +26,7 @@ _logger = logging.getLogger(__name__)
 @dataclass
 class DeviceTemplate:
     guid: str
-    name: str
-    path: Path
+    path: Path | None
 
 
 class ExportPage(QMainWindow, export_ui.Ui_Form):  # Refactor pylint: disable=too-many-instance-attributes
@@ -59,24 +51,21 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):  # Refactor pylint: disable=to
         self.add_device_templates_to_widget()
 
     def add_device_templates_to_widget(self):
+
+        devices = get_unique_devices()
+
         ## Show the devices / mix of stored and new devices
-        widgets = [
-            DeviceTemplate(
-                "666ec0a0-556b-11ee-8002-44455354000", "My Long Joystick Name (ABS)", "wwwwwwwwwwwwwwwwwwwwwwwwwww"
-            ),
-            DeviceTemplate("666ec0a0-556b-11ee-8002-44455354000", "2222", "wwwwwwwwwwwwwwwwwwwwwwwwwww"),
-            DeviceTemplate("666ec0a0-556b-11ee-8002-44455354000", "3333", None),
-        ]
+
         self.tableWidget.clear()
         self.tableWidget.setColumnCount(3)
 
         self.tableWidget.setHorizontalHeaderLabels(["Device ID", "Device Name", "Template"])
 
-        for index, item in enumerate(widgets):
+        for index, item in enumerate(devices):
             self.tableWidget.insertRow(index)
 
             self.tableWidget.setItem(index, 0, QTableWidgetItem(item.guid))
-            self.tableWidget.setItem(index, 1, QTableWidgetItem(item.name))
+
             self.tableWidget.setItem(index, 2, QTableWidgetItem(item.path))
 
         self.pushButton.setText("Select Item")
@@ -128,10 +117,52 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):  # Refactor pylint: disable=to
             export(profile)
 
 
+def get_unique_devices() -> list[DeviceTemplate]:
+    "Gets the unique device list from stored device configurations and new device configurations"
+
+    # Get stored devices
+    stored_devices = get_device_template_configurations()
+
+    # Get the devices active from profiles
+    active_profile_devices = get_devices_from_profiles()
+
+    # Remove items from new profiles where intersect with stored
+    active_profile_devices.difference_update({x[0] for x in stored_devices})
+
+    # Create wrapper objects
+    stored_objs = [DeviceTemplate(x[0], x[1]) for x in stored_devices]
+    new_objs = [DeviceTemplate(x, None) for x in active_profile_devices]
+
+    return stored_objs + new_objs
+
+
+def get_device_template_configurations() -> list:
+    "Gets the stored device template configurations from datastore"
+
+    return get_device_templates()
+
+
+def get_devices_from_profiles():
+    "Retreives a unique set of devices from all processed profiles"
+
+    all_profiles = AppState().get_processed_profiles().values()
+
+    merge_set = set()
+    for profile in all_profiles:
+        merge_set.update(profile.get_all_device_guids())
+
+    return merge_set
+
+
 if __name__ == "__main__":
+    # print(get_unique_devices())
+
     app = QApplication(sys.argv)
 
     window = ExportPage()
+    window.show()
+    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
+    app.exec()
     window.show()
     apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
     app.exec()

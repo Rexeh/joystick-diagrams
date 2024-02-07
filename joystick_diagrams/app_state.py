@@ -27,6 +27,7 @@ class AppState:
         self.update_processed_profiles()
 
     def init_plugins(self, plugin_manager: ParserPluginManager):
+        """Injects a plugin manager instance to be managed by AppState"""
         self.plugin_manager = plugin_manager
         self.process_profile_collection_updates()
 
@@ -43,10 +44,16 @@ class AppState:
         }
 
     def process_loaded_plugins(self, profile_collections: dict[str, ProfileCollection]):
+        """Processes the **raw** profilee collections from all loaded and enabled plugins, into a new dictionary mapping
+
+        Key = Plugin Name - Profile Name
+        Value = Profile Object
+
+        The keys are used to denote profiles from different sources potentially with the same name
+        """
+
         # Clear existing processed profiles
         self.profileObjectMapping.clear()
-
-        print("Processing loaded plugins")
 
         for profile_source, profiles in profile_collections.items():
             for profile_name, profile_obj in profiles.profiles.items():
@@ -75,11 +82,7 @@ class AppState:
         self.update_processed_profiles()
 
     def update_processed_profiles(self) -> None:
-        """Updates the processedProfileObjectMapping [dict], which is a core component for Template generation
-
-        Returns None
-
-        """
+        """Applies any PARENT relationships on top of profiles"""
         for profile_key, profile_obj in self.profileObjectMapping.items():
             self.processedProfileObjectMapping[profile_key] = deepcopy(profile_obj)
 
@@ -100,46 +103,6 @@ class AppState:
 
             self.processedProfileObjectMapping[profile] = merged_profiles.merge_profiles(profile_copy)
         _logger.debug(f"Updated processed profiles {self.processedProfileObjectMapping}")
-
-    def profile_mock(self):
-        collection1 = ProfileCollection()
-        profile1 = collection1.create_profile("Profile1")
-
-        dev1 = profile1.add_device("dev_1", "dev_1")
-        dev2 = profile1.add_device("dev_2", "dev_2")
-
-        dev1.create_input("input1", "shoot")
-        dev2.create_input("input2", "fly")
-
-        dev1.add_modifier_to_input("input1", {"ctrl"}, "bang")
-        dev1.add_modifier_to_input("input1", {"alt"}, "bang again")
-
-        collection2 = ProfileCollection()
-        profile2 = collection2.create_profile("Profile2")
-
-        dev3 = profile2.add_device("dev_1", "dev_1")
-        dev4 = profile2.add_device("dev_2", "dev_2")
-
-        dev3.create_input("input1", "potato")
-
-        dev3.add_modifier_to_input("input1", {"ctrl"}, "hello")
-        dev1.add_modifier_to_input("input1", {"ctrl", "alt", "space"}, "bang again again")
-
-        dev4.create_input("input4", "another")
-
-        collection3 = ProfileCollection()
-        profile3 = collection3.create_profile("Profile3")
-
-        dev3 = profile3.add_device("dev_3", "dev_3")
-        dev4 = profile3.add_device("dev_4", "dev_4")
-
-        dev3.create_input("input100", "potato")
-
-        dev3.add_modifier_to_input("input100", {"ctrl"}, "input 100 modifier")
-
-        dev4.create_input("input4 dev4", "dev4input4")
-
-        return [profile1, profile2, profile3]
 
 
 if __name__ == "__main__":

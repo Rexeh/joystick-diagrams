@@ -29,6 +29,9 @@ class Profile_:
     def get_devices(self) -> dict[str, Device_] | None:
         return self.devices
 
+    def get_all_device_guids(self) -> set[str]:
+        return {x for x in self.devices.keys()}
+
     def get_device(self, guid: str) -> Device_ | None:
         return self.devices.get(guid)
 
