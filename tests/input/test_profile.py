@@ -21,7 +21,7 @@ def test_profile_repr(profile_obj):
 
 
 def test_profile_device(profile_obj):
-    guid = "DEVICE_GUID_1"
+    guid = "666ec0a0-556b-11ee-8002-444553540000"
     device_name = "DEVICE 1"
     obj = profile_obj("profile1")
     new_device = obj.add_device(guid, device_name)
@@ -31,8 +31,8 @@ def test_profile_device(profile_obj):
 
 
 def test_duplicate_device(profile_obj, caplog):
-    guid_1 = "ABC"
-    guid_2 = "abc"
+    guid_1 = "666EC0A0-556B-11EE-8002-444553540000"
+    guid_2 = "666ec0a0-556b-11ee-8002-444553540000"
 
     profile = profile_obj("profile1")
 
@@ -44,8 +44,8 @@ def test_duplicate_device(profile_obj, caplog):
 
 
 def test_get_devices(profile_obj):
-    guid_1 = "guid1"
-    guid_2 = "guid2"
+    guid_1 = "666ec0a0-556b-11ee-8002-444553540000"
+    guid_2 = "666ec0a0-556b-11ee-8002-444553540001"
 
     profile = profile_obj("profile1")
 

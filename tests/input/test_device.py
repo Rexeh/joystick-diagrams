@@ -3,17 +3,27 @@ import pytest
 from joystick_diagrams.input.button import Button
 from joystick_diagrams.input.device import Device_
 
+# VALID_GUID = "666EC0A0-556B-11EE-8002-444553540000"
+
 
 def test_new_device():
-    guid = "guid1"
+    guid = "666ec0a0-556b-11ee-8002-444553540000"
     name = "device name"
     obj = Device_(guid, name)
     assert obj.guid == guid
     assert obj.name == name
 
 
+def test_new_device_invalid_guid():
+    guid = "11ee-8002-444553540000"
+    name = "device name"
+
+    with pytest.raises(ValueError, match="Could not create device as invalid GUID used"):
+        obj = Device_(guid, name)
+
+
 def test_new_device_whitespace():
-    guid = "   guid     1    "
+    guid = "  666ec0a0-556b-11ee-8002-444553540000  "
     name = "   device name  2  "
     obj = Device_(guid, name)
     assert obj.guid == guid.strip()
@@ -21,7 +31,7 @@ def test_new_device_whitespace():
 
 
 def test_new_device_casing():
-    guid = "GUID-1"
+    guid = "666EC0A0-556B-11EE-8002-444553540000"
     name = "DEVICE name"
     obj = Device_(guid, name)
     assert obj.guid == guid.lower()
@@ -29,7 +39,7 @@ def test_new_device_casing():
 
 
 def test_device_new_input():
-    obj = Device_("guid", "name")
+    obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
     input_id = Button(1)
     operation = "Press"
 
@@ -40,7 +50,7 @@ def test_device_new_input():
 
 
 def test_new_modifier():
-    obj = Device_("guid", "name")
+    obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
     input_id = Button(1)
     operation = "Press"
     obj.create_input(input_id, operation)
@@ -53,7 +63,7 @@ def test_new_modifier():
 
 
 def test_existing_modifier():
-    obj = Device_("guid", "name")
+    obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
     input_id = Button(1)
     operation = "Press"
     obj.create_input(input_id, operation)
@@ -68,7 +78,7 @@ def test_existing_modifier():
 
 
 def test_device_existing_input(caplog):
-    obj = Device_("guid", "name")
+    obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
     input_id = Button(1)
     operation = "Press"
     obj.create_input(input_id, operation)
@@ -81,20 +91,21 @@ def test_device_existing_input(caplog):
 
 
 def test_new_modifier_no_input(caplog):
-    obj = Device_("guid", "name")
+    obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
     obj.add_modifier_to_input(Button(1), {"alt"}, "press")
 
     assert "Modifier attempted to be added to Button(id=1) but input does not exist" in caplog.text
 
 
 def test_resolve_type():
+
+    obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
     with pytest.raises(ValueError):
-        obj = Device_("guid", "name")
         obj.resolve_type(control=Button)
 
 
 def test_combined_inputs():
-    obj = Device_("guid", "name")
+    obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
 
     button_1 = Button(1)
     obj.create_input(button_1, "Shoot")
@@ -107,7 +118,7 @@ def test_combined_inputs():
 
 
 def test_get_inputs():
-    obj = Device_("guid", "name")
+    obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
 
     obj.create_input(Button(1), "Shoot")
     obj.create_input(Button(44), "Shoot")

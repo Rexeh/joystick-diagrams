@@ -31,7 +31,7 @@ INPUT_TYPE_IDENTIFIERS = {
 
 class Device_:
     def __init__(self, guid: str, name: str):
-        self.guid = self.validate_guid(guid.strip())
+        self.guid = self.validate_guid(guid)
         self.name = name.strip()
 
         self.inputs: dict[str, dict[str | int, Input_]] = {
@@ -42,14 +42,14 @@ class Device_:
         }
 
     @staticmethod
-    def validate_guid(guid) -> str:
+    def validate_guid(guid: str) -> str:
         """Validates a guid using UUID library, returning str representation
 
         Automatically handles wrapped GUIDs {}
         """
 
         try:
-            return UUID(guid).__str__()
+            return UUID(guid.strip()).__str__()
         except ValueError as e:
             raise ValueError(f"Could not create device as invalid GUID used: {e}") from e
 
