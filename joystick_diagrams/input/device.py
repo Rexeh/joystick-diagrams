@@ -5,6 +5,7 @@
 
 import logging
 from typing import Union
+from uuid import UUID
 
 from joystick_diagrams.input.axis import Axis, AxisSlider
 from joystick_diagrams.input.button import Button
@@ -30,7 +31,7 @@ INPUT_TYPE_IDENTIFIERS = {
 
 class Device_:
     def __init__(self, guid: str, name: str):
-        self.guid = guid.strip().lower()
+        self.guid = self.validate_guid(guid.strip())
         self.name = name.strip()
 
         self.inputs: dict[str, dict[str | int, Input_]] = {
@@ -39,6 +40,18 @@ class Device_:
             INPUT_AXIS_SLIDER_KEY: {},
             INPUT_HAT_KEY: {},
         }
+
+    @staticmethod
+    def validate_guid(guid) -> str:
+        """Validates a guid using UUID library, returning str representation
+
+        Automatically handles wrapped GUIDs {}
+        """
+
+        try:
+            return UUID(guid).__str__()
+        except ValueError as e:
+            raise ValueError(f"Could not create device as invalid GUID used: {e}") from e
 
     def resolve_type(self, control: Axis | Button | Hat | AxisSlider) -> str:
         """Resolves a given input control to its corresponding dictionary key"""

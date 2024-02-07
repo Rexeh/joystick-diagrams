@@ -16,7 +16,7 @@ class Profile_:
         return f"(Profile Object: {self.name})"
 
     def add_device(self, guid: str, name: str) -> Device_:
-        guid = guid.lower()
+        guid = Device_.validate_guid(guid)
 
         if self.get_device(guid) is None:
             self.devices.update({guid: Device_(guid, name)})
