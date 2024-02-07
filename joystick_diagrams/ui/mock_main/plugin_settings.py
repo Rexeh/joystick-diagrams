@@ -16,9 +16,9 @@ from qt_material import apply_stylesheet
 from joystick_diagrams import app_init
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.exceptions import JoystickDiagramsException
+from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 from joystick_diagrams.ui.mock_main.qt_designer import plugin_settings_ui
-from joystick_diagrams.ui.plugin_wrapper import PluginWrapper
 
 _logger = logging.getLogger(__name__)
 

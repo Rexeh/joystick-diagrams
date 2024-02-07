@@ -28,10 +28,25 @@ class AppState:
 
     def init_plugins(self, plugin_manager: ParserPluginManager):
         self.plugin_manager = plugin_manager
+        self.process_profile_collection_updates()
+
+    ## Temp code for handling Plugin Wrapper changes > TODO REFACTOR
+    def process_profile_collection_updates(self):
+        self.process_loaded_plugins(self.get_plugin_wrapper_collections())
+
+    def get_plugin_wrapper_collections(self) -> dict[str, ProfileCollection]:
+        """Returns a list of Profile Collections that are tagged with the Plugin Name where the plugin is enabled"""
+        return {
+            x.name: x.plugin_profile_collection
+            for x in self.plugin_manager.plugin_wrappers
+            if x.enabled and x.plugin_profile_collection
+        }
 
     def process_loaded_plugins(self, profile_collections: dict[str, ProfileCollection]):
         # Clear existing processed profiles
         self.profileObjectMapping.clear()
+
+        print("Processing loaded plugins")
 
         for profile_source, profiles in profile_collections.items():
             for profile_name, profile_obj in profiles.profiles.items():

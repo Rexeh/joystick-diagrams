@@ -19,9 +19,9 @@ def init():
     # -------------------------------
 
     # -- Initialise Plugins System --
-
     plugins = ParserPluginManager()
     plugins.load_discovered_plugins()
+    plugins.create_plugin_wrappers()
     _state.init_plugins(plugins)
 
     # -------------------------------

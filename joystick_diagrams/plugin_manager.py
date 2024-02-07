@@ -5,6 +5,7 @@ Plugin manager serves as the main interface between the GUI and the rest of the 
 - It is responsible for loading and unloading plugins
 
 """
+
 import logging
 import os
 import shutil
@@ -19,6 +20,7 @@ from dynaconf import ValidationError
 
 from joystick_diagrams.exceptions import JoystickDiagramsException, PluginNotValid
 from joystick_diagrams.input.profile_collection import ProfileCollection
+from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
 _logger = logging.getLogger(__name__)
@@ -33,6 +35,11 @@ class ParserPluginManager:
     def __init__(self) -> None:
         self.plugins: list[Path] = find_plugins(PLUGINS_DIRECTORY)
         self.loaded_plugins: list[PluginInterface] = []
+        self.plugin_wrappers: list[PluginWrapper] = []
+
+    def create_plugin_wrappers(self):
+        for plugin in self.get_available_plugins():
+            self.plugin_wrappers.append(PluginWrapper(plugin))
 
     def load_discovered_plugins(self) -> None:
         """Load and validate the plugins that were found during iniitalisation.
@@ -65,16 +72,6 @@ class ParserPluginManager:
 
     def get_available_plugins(self) -> list[PluginInterface]:
         return [x for x in self.loaded_plugins]
-
-    def process_loaded_plugins(self) -> list[Union[str, ProfileCollection]]:
-        processed_plugin_data = []
-        for plugin in self.loaded_plugins:
-            # TODO path is not proper way to check, add in some way of knowing if a plugin has been initialised i.e. path set/instance created
-            if plugin.path:
-                if plugin.instance:  # TODO needs to go into main pattern for plugin
-                    processed_plugin_data.append([plugin.name, plugin.process()])
-
-        return processed_plugin_data
 
 
 def install_plugin(plugin_package: Path):

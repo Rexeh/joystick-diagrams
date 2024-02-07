@@ -26,9 +26,10 @@ class PluginWrapper:
 
     def __post_init__(self):
         self.plugin_profile_collection = None
+        self._enabled = False
         self.setup_plugin()
 
-    @handle_bare_exception
+    # @handle_bare_exception
     def process(self):
         """Runs a specific plugin, attaching the result to the wrapper"""
         try:
@@ -37,7 +38,7 @@ class PluginWrapper:
         except JoystickDiagramsException as e:
             _logger.error(e)
 
-    @handle_bare_exception
+    # @handle_bare_exception
     def set_path(self, path: Path) -> bool:
         """Sets the path for a given plugin"""
         try:
@@ -47,11 +48,20 @@ class PluginWrapper:
 
         return False
 
-    @handle_bare_exception
+    # @handle_bare_exception
     def setup_plugin(self):
         """Sets up a pluging on first use or restores existing state"""
 
         try:
+
+            # Load the plugins own settings
+            self.plugin.load_settings()
+
+            # Call the set_path to initialise the plugin correctly
+            if self.plugin.path:
+                self.set_path(self.plugin.path)
+
+            # Retrieve stored state for the PluginWrapper
             existing_configuration = self.get_plugin_configuration(self.plugin.name)
 
             if existing_configuration:
@@ -59,10 +69,6 @@ class PluginWrapper:
             else:
                 self.store_plugin_configuration()
 
-            self.plugin.load_settings()
-
-            if self.plugin.path:
-                self.set_path(self.plugin.path)
         except JoystickDiagramsException as e:
             _logger.error(e)
 
@@ -100,7 +106,7 @@ class PluginWrapper:
     def enabled(self, value):
 
         self._enabled = False if isinstance(value, property) else bool(value)
-
+        print("Setter triggered")
         # TODO process the plugins syncronously on enable
         if self._enabled is True:
             self.process()
