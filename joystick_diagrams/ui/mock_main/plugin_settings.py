@@ -79,8 +79,9 @@ class PluginSettings(QMainWindow, plugin_settings_ui.Ui_Form):  # Refactor pylin
     @Slot()
     def handle_enabled_change(self, data):
 
+        check_state = False if data == 0 else True
         # If the data is the same as the state do nothing
-        if self.plugin.enabled == data:
+        if self.plugin.enabled == check_state:
             return
 
         # Set plugin state to new UI state
