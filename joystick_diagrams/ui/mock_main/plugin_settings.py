@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox
-from qt_material import apply_stylesheet
+from qt_material import apply_stylesheet  # type: ignore
 
 from joystick_diagrams import app_init
 from joystick_diagrams.exceptions import JoystickDiagramsError

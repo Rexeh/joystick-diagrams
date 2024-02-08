@@ -39,7 +39,7 @@ def test_template_hat_property(get_template_path_valid):
     setup_template = Template(get_template_path_valid)
 
     assert setup_template.hat_count == 12
-    assert setup_template.hats == expected_hats
+    assert setup_template.get_template_hats() == expected_hats
 
 
 def test_template_axis_property(get_template_path_valid):
@@ -47,7 +47,7 @@ def test_template_axis_property(get_template_path_valid):
     setup_template = Template(get_template_path_valid)
 
     assert setup_template.axis_count == 5
-    assert setup_template.axis == expected_axis
+    assert setup_template.get_template_axis() == expected_axis
 
 
 def test_template_button_property(get_template_path_valid):
@@ -55,7 +55,7 @@ def test_template_button_property(get_template_path_valid):
     setup_template = Template(get_template_path_valid)
 
     assert setup_template.button_count == 3
-    assert setup_template.buttons == expected_buttons
+    assert setup_template.get_template_buttons() == expected_buttons
 
 
 def test_template_modifiers_property(get_template_path_valid):
@@ -63,7 +63,7 @@ def test_template_modifiers_property(get_template_path_valid):
     setup_template = Template(get_template_path_valid)
 
     assert setup_template.modifier_count == 3
-    assert setup_template.modifiers == expected_modifiers
+    assert setup_template.get_template_mndifiers() == expected_modifiers
 
 
 def test_template_template_name_exists(get_template_path_valid):
@@ -76,10 +76,7 @@ def test_template_template_name_missing(get_template_path_valid):
     import re
 
     setup_template.raw_data = re.sub(
-        Template.TEMPLATE_NAMING_KEY,
-        "",
-        setup_template.raw_data,
-        flags=re.IGNORECASE,
+        Template.TEMPLATE_NAMING_KEY, "", setup_template.raw_data
     )
     assert setup_template.template_name is False
 
@@ -94,9 +91,6 @@ def test_template_template_date_missing(get_template_path_valid):
     import re
 
     setup_template.raw_data = re.sub(
-        Template.TEMPLATE_DATE_KEY,
-        "",
-        setup_template.raw_data,
-        flags=re.IGNORECASE,
+        Template.TEMPLATE_DATE_KEY, "", setup_template.raw_data
     )
     assert setup_template.date is False
