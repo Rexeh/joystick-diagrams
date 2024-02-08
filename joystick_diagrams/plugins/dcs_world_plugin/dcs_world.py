@@ -5,7 +5,7 @@ import os
 import re
 from pathlib import Path
 
-from ply import lex, yacc
+from ply import lex, yacc  # type: ignore
 
 from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
 from joystick_diagrams.input.button import Button  # type: ignore
