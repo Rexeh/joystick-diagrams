@@ -73,7 +73,7 @@ class PluginsPage(
     def handle_plugin_path_load(self, plugin: PluginWrapper):
         _logger.debug(f"Plugin path changed for {plugin}, attempting to process plugin")
         try:
-            plugin.plugin_profile_collection = plugin.process()
+            plugin.process()
             self.profileCollectionChange.emit()
         except JoystickDiagramsError:
             pass

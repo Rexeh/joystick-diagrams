@@ -84,6 +84,8 @@ class PluginSettings(
 
         _logger.debug(f"Plugin enabled state is now  {self.plugin.enabled}")
 
+        if check_state:
+            self.pluginPathConfigured.emit(self.plugin)
         self.pluginModified.emit(self.plugin)
 
     def get_plugin_path_type(
