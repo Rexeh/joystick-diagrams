@@ -10,38 +10,18 @@
 
 from PySide6.QtCore import (
     QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
     QMetaObject,
-    QObject,
-    QPoint,
     QRect,
     QSize,
-    QTime,
-    QUrl,
     Qt,
 )
 from PySide6.QtGui import (
     QBrush,
     QColor,
-    QConicalGradient,
-    QCursor,
     QFont,
-    QFontDatabase,
-    QGradient,
     QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
 )
 from PySide6.QtWidgets import (
-    QApplication,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -89,7 +69,9 @@ class Ui_Form(object):
 
         self.pageDescription = QLabel(self.verticalLayoutWidget)
         self.pageDescription.setObjectName("pageDescription")
-        sizePolicy1.setHeightForWidth(self.pageDescription.sizePolicy().hasHeightForWidth())
+        sizePolicy1.setHeightForWidth(
+            self.pageDescription.sizePolicy().hasHeightForWidth()
+        )
         self.pageDescription.setSizePolicy(sizePolicy1)
 
         self.horizontalLayout.addWidget(self.pageDescription)
@@ -118,12 +100,22 @@ class Ui_Form(object):
         __qlistwidgetitem.setBackground(brush)
         __qlistwidgetitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         icon = QIcon()
-        icon.addFile("../joystick_diagrams/ui/main_window/images/3rd_party/jg.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(
+            "../joystick_diagrams/ui/main_window/images/3rd_party/jg.ico",
+            QSize(),
+            QIcon.Normal,
+            QIcon.Off,
+        )
         __qlistwidgetitem1 = QListWidgetItem(self.parserPluginList)
         __qlistwidgetitem1.setFont(font)
         __qlistwidgetitem1.setIcon(icon)
         icon1 = QIcon()
-        icon1.addFile("../joystick_diagrams/ui/main_window/images/3rd_party/sc.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(
+            "../joystick_diagrams/ui/main_window/images/3rd_party/sc.png",
+            QSize(),
+            QIcon.Normal,
+            QIcon.Off,
+        )
         font1 = QFont()
         font1.setFamilies(["Cascadia Code SemiBold"])
         font1.setPointSize(11)
@@ -135,14 +127,18 @@ class Ui_Form(object):
         sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.parserPluginList.sizePolicy().hasHeightForWidth())
+        sizePolicy2.setHeightForWidth(
+            self.parserPluginList.sizePolicy().hasHeightForWidth()
+        )
         self.parserPluginList.setSizePolicy(sizePolicy2)
         self.parserPluginList.setMaximumSize(QSize(1087, 16777215))
         self.parserPluginList.setBaseSize(QSize(1, 0))
         self.splitter.addWidget(self.parserPluginList)
         self.pluginOptionsWidget = QWidget(self.splitter)
         self.pluginOptionsWidget.setObjectName("pluginOptionsWidget")
-        sizePolicy.setHeightForWidth(self.pluginOptionsWidget.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.pluginOptionsWidget.sizePolicy().hasHeightForWidth()
+        )
         self.pluginOptionsWidget.setSizePolicy(sizePolicy)
         self.pluginOptionsWidget.setMinimumSize(QSize(600, 600))
         self.pluginOptionsWidget.setAutoFillBackground(False)
@@ -168,7 +164,9 @@ class Ui_Form(object):
         sizePolicy3 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.addParserPlugin.sizePolicy().hasHeightForWidth())
+        sizePolicy3.setHeightForWidth(
+            self.addParserPlugin.sizePolicy().hasHeightForWidth()
+        )
         self.addParserPlugin.setSizePolicy(sizePolicy3)
         self.splitter_2.addWidget(self.addParserPlugin)
         self.pushButton = QPushButton(self.splitter_2)
@@ -197,20 +195,32 @@ class Ui_Form(object):
             )
         )
         self.pageDescription.setText(
-            QCoreApplication.translate("Form", "Setup your things... in order to customise stuff", None)
+            QCoreApplication.translate(
+                "Form", "Setup your things... in order to customise stuff", None
+            )
         )
 
         __sortingEnabled = self.parserPluginList.isSortingEnabled()
         self.parserPluginList.setSortingEnabled(False)
         ___qlistwidgetitem = self.parserPluginList.item(0)
-        ___qlistwidgetitem.setText(QCoreApplication.translate("Form", "DCS World", None))
+        ___qlistwidgetitem.setText(
+            QCoreApplication.translate("Form", "DCS World", None)
+        )
         ___qlistwidgetitem1 = self.parserPluginList.item(1)
-        ___qlistwidgetitem1.setText(QCoreApplication.translate("Form", "Joystick Gremlin", None))
+        ___qlistwidgetitem1.setText(
+            QCoreApplication.translate("Form", "Joystick Gremlin", None)
+        )
         ___qlistwidgetitem2 = self.parserPluginList.item(2)
-        ___qlistwidgetitem2.setText(QCoreApplication.translate("Form", "Star Citizen PTOATO", None))
+        ___qlistwidgetitem2.setText(
+            QCoreApplication.translate("Form", "Star Citizen PTOATO", None)
+        )
         self.parserPluginList.setSortingEnabled(__sortingEnabled)
 
-        self.addParserPlugin.setText(QCoreApplication.translate("Form", "Add Plugin", None))
-        self.pushButton.setText(QCoreApplication.translate("Form", "Remove Plugin", None))
+        self.addParserPlugin.setText(
+            QCoreApplication.translate("Form", "Add Plugin", None)
+        )
+        self.pushButton.setText(
+            QCoreApplication.translate("Form", "Remove Plugin", None)
+        )
 
     # retranslateUi

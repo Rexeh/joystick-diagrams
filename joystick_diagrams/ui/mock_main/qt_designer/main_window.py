@@ -10,44 +10,21 @@
 
 from PySide6.QtCore import (
     QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
     QMetaObject,
-    QObject,
-    QPoint,
     QRect,
     QSize,
-    QTime,
-    QUrl,
     Qt,
 )
 from PySide6.QtGui import (
     QAction,
-    QBrush,
-    QColor,
-    QConicalGradient,
-    QCursor,
     QFont,
-    QFontDatabase,
-    QGradient,
     QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
 )
 from PySide6.QtWidgets import (
-    QApplication,
     QFrame,
     QGridLayout,
     QHBoxLayout,
     QLayout,
-    QMainWindow,
     QMenu,
     QMenuBar,
     QPushButton,
@@ -121,7 +98,12 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon = QIcon.fromTheme(iconThemeName)
         else:
-            icon.addFile("../../../PythonCode/qt-material/examples/full_features", QSize(), QIcon.Normal, QIcon.Off)
+            icon.addFile(
+                "../../../PythonCode/qt-material/examples/full_features",
+                QSize(),
+                QIcon.Normal,
+                QIcon.Off,
+            )
 
         self.actionsubmenu.setIcon(icon)
         self.actionsubmenu_2 = QAction(MainWindow)
@@ -131,7 +113,12 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon1 = QIcon.fromTheme(iconThemeName)
         else:
-            icon1.addFile("../../../PythonCode/qt-material/examples/full_features", QSize(), QIcon.Normal, QIcon.Off)
+            icon1.addFile(
+                "../../../PythonCode/qt-material/examples/full_features",
+                QSize(),
+                QIcon.Normal,
+                QIcon.Off,
+            )
 
         self.actionsubmenu_2.setIcon(icon1)
         self.actionsubmenu_3 = QAction(MainWindow)
@@ -141,7 +128,12 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon2 = QIcon.fromTheme(iconThemeName)
         else:
-            icon2.addFile("../../../PythonCode/qt-material/examples/full_features", QSize(), QIcon.Normal, QIcon.Off)
+            icon2.addFile(
+                "../../../PythonCode/qt-material/examples/full_features",
+                QSize(),
+                QIcon.Normal,
+                QIcon.Off,
+            )
 
         self.actionsubmenu_3.setIcon(icon2)
         self.actionsubmenu_4 = QAction(MainWindow)
@@ -151,7 +143,12 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon3 = QIcon.fromTheme(iconThemeName)
         else:
-            icon3.addFile("../../../PythonCode/qt-material/examples/full_features", QSize(), QIcon.Normal, QIcon.Off)
+            icon3.addFile(
+                "../../../PythonCode/qt-material/examples/full_features",
+                QSize(),
+                QIcon.Normal,
+                QIcon.Off,
+            )
 
         self.actionsubmenu_4.setIcon(icon3)
         self.actionSave_all = QAction(MainWindow)
@@ -163,7 +160,12 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon4 = QIcon.fromTheme(iconThemeName)
         else:
-            icon4.addFile("../../../PythonCode/qt-material/examples/full_features", QSize(), QIcon.Normal, QIcon.Off)
+            icon4.addFile(
+                "../../../PythonCode/qt-material/examples/full_features",
+                QSize(),
+                QIcon.Normal,
+                QIcon.Off,
+            )
 
         self.actionClose.setIcon(icon4)
         self.centralwidget = QWidget(MainWindow)
@@ -210,7 +212,9 @@ class Ui_MainWindow(object):
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.activeMainWindowWidget.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.activeMainWindowWidget.sizePolicy().hasHeightForWidth()
+        )
         self.activeMainWindowWidget.setSizePolicy(sizePolicy)
 
         self.verticalLayout.addWidget(self.activeMainWindowWidget)
@@ -241,36 +245,88 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", "Qt Material", None))
-        self.actionSubmenu_2.setText(QCoreApplication.translate("MainWindow", "Submenu", None))
-        self.actionSubmenu_3.setText(QCoreApplication.translate("MainWindow", "Submenu", None))
-        self.actionSUBSUB.setText(QCoreApplication.translate("MainWindow", "SUBSUB", None))
-        self.actionSUBSUB_2.setText(QCoreApplication.translate("MainWindow", "SUBSUB", None))
-        self.actionSUBSUB_3.setText(QCoreApplication.translate("MainWindow", "SUBSUB", None))
-        self.actiondissabled.setText(QCoreApplication.translate("MainWindow", "dissabled", None))
-        self.actionSubmenu.setText(QCoreApplication.translate("MainWindow", "Submenu", None))
-        self.actionSubmenu_4.setText(QCoreApplication.translate("MainWindow", "Submenu", None))
-        self.actionSubmenu_5.setText(QCoreApplication.translate("MainWindow", "Submenu", None))
-        self.actionToolbar.setText(QCoreApplication.translate("MainWindow", "Qt Material Theme", None))
+        MainWindow.setWindowTitle(
+            QCoreApplication.translate("MainWindow", "Qt Material", None)
+        )
+        self.actionSubmenu_2.setText(
+            QCoreApplication.translate("MainWindow", "Submenu", None)
+        )
+        self.actionSubmenu_3.setText(
+            QCoreApplication.translate("MainWindow", "Submenu", None)
+        )
+        self.actionSUBSUB.setText(
+            QCoreApplication.translate("MainWindow", "SUBSUB", None)
+        )
+        self.actionSUBSUB_2.setText(
+            QCoreApplication.translate("MainWindow", "SUBSUB", None)
+        )
+        self.actionSUBSUB_3.setText(
+            QCoreApplication.translate("MainWindow", "SUBSUB", None)
+        )
+        self.actiondissabled.setText(
+            QCoreApplication.translate("MainWindow", "dissabled", None)
+        )
+        self.actionSubmenu.setText(
+            QCoreApplication.translate("MainWindow", "Submenu", None)
+        )
+        self.actionSubmenu_4.setText(
+            QCoreApplication.translate("MainWindow", "Submenu", None)
+        )
+        self.actionSubmenu_5.setText(
+            QCoreApplication.translate("MainWindow", "Submenu", None)
+        )
+        self.actionToolbar.setText(
+            QCoreApplication.translate("MainWindow", "Qt Material Theme", None)
+        )
         # if QT_CONFIG(tooltip)
-        self.actionToolbar.setToolTip(QCoreApplication.translate("MainWindow", "Qt Material Theme", None))
+        self.actionToolbar.setToolTip(
+            QCoreApplication.translate("MainWindow", "Qt Material Theme", None)
+        )
         # endif // QT_CONFIG(tooltip)
-        self.actionSelected.setText(QCoreApplication.translate("MainWindow", "Selected", None))
-        self.actionaction.setText(QCoreApplication.translate("MainWindow", "action", None))
-        self.actionaction2.setText(QCoreApplication.translate("MainWindow", "action2", None))
-        self.actionaction3.setText(QCoreApplication.translate("MainWindow", "action3", None))
+        self.actionSelected.setText(
+            QCoreApplication.translate("MainWindow", "Selected", None)
+        )
+        self.actionaction.setText(
+            QCoreApplication.translate("MainWindow", "action", None)
+        )
+        self.actionaction2.setText(
+            QCoreApplication.translate("MainWindow", "action2", None)
+        )
+        self.actionaction3.setText(
+            QCoreApplication.translate("MainWindow", "action3", None)
+        )
         self.action111.setText(QCoreApplication.translate("MainWindow", "111", None))
         self.action222.setText(QCoreApplication.translate("MainWindow", "222", None))
         self.action333.setText(QCoreApplication.translate("MainWindow", "333", None))
-        self.actionsubmenu.setText(QCoreApplication.translate("MainWindow", "New...", None))
-        self.actionsubmenu_2.setText(QCoreApplication.translate("MainWindow", "Open...", None))
-        self.actionsubmenu_3.setText(QCoreApplication.translate("MainWindow", "Save as...", None))
-        self.actionsubmenu_4.setText(QCoreApplication.translate("MainWindow", "Save", None))
-        self.actionSave_all.setText(QCoreApplication.translate("MainWindow", "Save all", None))
-        self.actionClose.setText(QCoreApplication.translate("MainWindow", "Close", None))
-        self.setupSectionButton.setText(QCoreApplication.translate("MainWindow", "Setup", None))
-        self.customiseSectionButton.setText(QCoreApplication.translate("MainWindow", "Customise", None))
-        self.exportSectionButton.setText(QCoreApplication.translate("MainWindow", "Export", None))
-        self.menuStyles.setTitle(QCoreApplication.translate("MainWindow", "Menu1", None))
+        self.actionsubmenu.setText(
+            QCoreApplication.translate("MainWindow", "New...", None)
+        )
+        self.actionsubmenu_2.setText(
+            QCoreApplication.translate("MainWindow", "Open...", None)
+        )
+        self.actionsubmenu_3.setText(
+            QCoreApplication.translate("MainWindow", "Save as...", None)
+        )
+        self.actionsubmenu_4.setText(
+            QCoreApplication.translate("MainWindow", "Save", None)
+        )
+        self.actionSave_all.setText(
+            QCoreApplication.translate("MainWindow", "Save all", None)
+        )
+        self.actionClose.setText(
+            QCoreApplication.translate("MainWindow", "Close", None)
+        )
+        self.setupSectionButton.setText(
+            QCoreApplication.translate("MainWindow", "Setup", None)
+        )
+        self.customiseSectionButton.setText(
+            QCoreApplication.translate("MainWindow", "Customise", None)
+        )
+        self.exportSectionButton.setText(
+            QCoreApplication.translate("MainWindow", "Export", None)
+        )
+        self.menuStyles.setTitle(
+            QCoreApplication.translate("MainWindow", "Menu1", None)
+        )
 
     # retranslateUi

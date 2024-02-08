@@ -16,7 +16,7 @@ def test_load_plugin_not_valid(caplog):
     plugin_package = "tests.data.test_plugins."
     module_path = "notPlugin"
 
-    with pytest.raises(exceptions.PluginNotValid) as e:
+    with pytest.raises(exceptions.PluginNotValidError):
         load_plugin(plugin_package, module_path)
 
     assert "notPlugin.main" in caplog.text
@@ -52,7 +52,11 @@ def plugin_path_directory(request):
     return MockPathObject(path_items)
 
 
-@pytest.mark.parametrize("plugin_path_directory", [{"FileA": True, "FileB": True, "FolderC": False}], indirect=True)
+@pytest.mark.parametrize(
+    "plugin_path_directory",
+    [{"FileA": True, "FileB": True, "FolderC": False}],
+    indirect=True,
+)
 def test_check_expected_files_valid(monkeypatch, plugin_path_directory):
     _expected_files = ["FileA", "FileB"]
     monkeypatch.setattr(plugin_manager, "EXPECTED_PLUGIN_FILES", _expected_files)
@@ -63,7 +67,11 @@ def test_check_expected_files_valid(monkeypatch, plugin_path_directory):
     assert _check is True
 
 
-@pytest.mark.parametrize("plugin_path_directory", [{"FileA": True, "FileB": True, "FileC": False}], indirect=True)
+@pytest.mark.parametrize(
+    "plugin_path_directory",
+    [{"FileA": True, "FileB": True, "FileC": False}],
+    indirect=True,
+)
 def test_check_expected_files_invalid(monkeypatch, plugin_path_directory):
     _expected_files = ["FileC", "FileD"]
     monkeypatch.setattr(plugin_manager, "EXPECTED_PLUGIN_FILES", _expected_files)

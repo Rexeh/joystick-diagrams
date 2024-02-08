@@ -40,7 +40,10 @@ def test_duplicate_device(profile_obj, caplog):
     profile.add_device(guid_2, "")
 
     assert len(profile.devices) == 1
-    assert f"Device {guid_1.lower()} already exists and will not be re-added" in caplog.text
+    assert (
+        f"Device {guid_1.lower()} already exists and will not be re-added"
+        in caplog.text
+    )
 
 
 def test_get_devices(profile_obj):

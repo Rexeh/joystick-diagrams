@@ -9,7 +9,9 @@ def create_new_db_if_not_exist():
     path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
     connection = connect(path)
     cur = connection.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS bind_text(original_str TEXT PRIMARY KEY, replaced_str TEXT)")
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS bind_text(original_str TEXT PRIMARY KEY, replaced_str TEXT)"
+    )
     connection.commit()
 
 

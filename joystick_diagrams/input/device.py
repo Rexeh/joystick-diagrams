@@ -19,7 +19,12 @@ INPUT_AXIS_KEY = "axis"
 INPUT_AXIS_SLIDER_KEY = "axis_slider"
 INPUT_HAT_KEY = "hats"
 
-CLASS_MAP = {Button: INPUT_BUTTON_KEY, Axis: INPUT_AXIS_KEY, AxisSlider: INPUT_AXIS_SLIDER_KEY, Hat: INPUT_HAT_KEY}
+CLASS_MAP = {
+    Button: INPUT_BUTTON_KEY,
+    Axis: INPUT_AXIS_KEY,
+    AxisSlider: INPUT_AXIS_SLIDER_KEY,
+    Hat: INPUT_HAT_KEY,
+}
 
 INPUT_TYPE_IDENTIFIERS = {
     INPUT_BUTTON_KEY: "identifier",
@@ -29,7 +34,7 @@ INPUT_TYPE_IDENTIFIERS = {
 }
 
 
-class Device_:
+class Device_:  # noqa: N801
     def __init__(self, guid: str, name: str):
         self.guid = self.validate_guid(guid)
         self.name = name.strip()
@@ -51,18 +56,24 @@ class Device_:
         try:
             return UUID(guid.strip()).__str__()
         except ValueError as e:
-            raise ValueError(f"Could not create device as invalid GUID used: {e}") from e
+            raise ValueError(
+                f"Could not create device as invalid GUID used: {e}"
+            ) from e
 
     def resolve_type(self, control: Axis | Button | Hat | AxisSlider) -> str:
         """Resolves a given input control to its corresponding dictionary key"""
         resolved_type = CLASS_MAP.get(type(control))
 
         if not resolved_type:
-            raise ValueError(f"Only valid control types can be used - {CLASS_MAP.keys()}")
+            raise ValueError(
+                f"Only valid control types can be used - {CLASS_MAP.keys()}"
+            )
 
         return resolved_type
 
-    def create_input(self, control: Union[Axis, Button, Hat, AxisSlider], command: str) -> None:
+    def create_input(
+        self, control: Union[Axis, Button, Hat, AxisSlider], command: str
+    ) -> None:
         """Creates an input in the Device inputs dictionary where one does not exist.
 
         Where input already exists, the input command is updated
@@ -72,12 +83,15 @@ class Device_:
         control_key = self.resolve_type(control)
 
         input_obj = self.get_input(
-            input_type=control_key, input_id=getattr(control, INPUT_TYPE_IDENTIFIERS[control_key])
+            input_type=control_key,
+            input_id=getattr(control, INPUT_TYPE_IDENTIFIERS[control_key]),
         )
         if input_obj:
             input_obj.command = command
         else:
-            self.inputs[control_key][getattr(control, INPUT_TYPE_IDENTIFIERS[control_key])] = Input_(control, command)
+            self.inputs[control_key][
+                getattr(control, INPUT_TYPE_IDENTIFIERS[control_key])
+            ] = Input_(control, command)
 
     def get_input(self, input_type: str, input_id: str | int) -> Input_ | None:
         """Get an input for a specific input type.
@@ -103,7 +117,9 @@ class Device_:
             flattened_dict_.update(value)
         return flattened_dict_
 
-    def add_modifier_to_input(self, control: Axis | Button | Hat | AxisSlider, modifier: set, command: str) -> None:
+    def add_modifier_to_input(
+        self, control: Axis | Button | Hat | AxisSlider, modifier: set, command: str
+    ) -> None:
         """Adds a modifier to a respective control type supplied.
 
         Creates an input if it does not exist, otherwise attaches a modifier

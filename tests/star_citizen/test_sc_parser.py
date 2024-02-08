@@ -5,7 +5,9 @@ import joystick_diagrams.plugins.star_citizen_plugin.star_citizen as sc
 
 class TestSCParserCases(unittest.TestCase):
     def setUp(self):
-        self.file = sc.StarCitizen("./tests/data/star_citizen/layout_all_exported_valid.xml")
+        self.file = sc.StarCitizen(
+            "./tests/data/star_citizen/layout_all_exported_valid.xml"
+        )
 
     def test_bind_parse_button(self):
         # ("js1_button1")

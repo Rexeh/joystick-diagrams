@@ -1,7 +1,19 @@
 # lextab.py. This file automatically created by PLY (version 3.11). Don't edit!
 _tabversion = "3.10"
 _lextokens = set(
-    ("COMMA", "DOUBLE_VAL", "EQUALS", "FALSE", "LBRACE", "LCURLY", "NUMBER", "RBRACE", "RCURLY", "STRING", "TRUE")
+    (
+        "COMMA",
+        "DOUBLE_VAL",
+        "EQUALS",
+        "FALSE",
+        "LBRACE",
+        "LCURLY",
+        "NUMBER",
+        "RBRACE",
+        "RCURLY",
+        "STRING",
+        "TRUE",
+    )
 )
 _lexreflags = 96
 _lexliterals = ""

@@ -8,17 +8,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from joystick_diagrams.db import db_plugin_data
-from joystick_diagrams.exceptions import JoystickDiagramsException
+from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
-from joystick_diagrams.utils import handle_bare_exception
 
 _logger = logging.getLogger(__name__)
 
 
 @dataclass
 class PluginWrapper:
-
     plugin: PluginInterface
     _enabled: bool = field(init=False)
     plugin_profile_collection: ProfileCollection = field(init=False)
@@ -34,7 +32,7 @@ class PluginWrapper:
         try:
             if self.path:
                 self.plugin_profile_collection = self.plugin.process()
-        except JoystickDiagramsException as e:
+        except JoystickDiagramsError as e:
             _logger.error(e)
 
     # @handle_bare_exception
@@ -42,7 +40,7 @@ class PluginWrapper:
         """Sets the path for a given plugin"""
         try:
             return self.plugin.set_path(path)
-        except JoystickDiagramsException as e:
+        except JoystickDiagramsError as e:
             _logger.error(e)
 
         return False
@@ -52,7 +50,6 @@ class PluginWrapper:
         """Sets up a pluging on first use or restores existing state"""
 
         try:
-
             # Load the plugins own settings
             self.plugin.load_settings()
 
@@ -68,7 +65,7 @@ class PluginWrapper:
             else:
                 self.store_plugin_configuration()
 
-        except JoystickDiagramsException as e:
+        except JoystickDiagramsError as e:
             _logger.error(e)
 
     def get_plugin_configuration(self, plugin_name: str):
@@ -103,7 +100,6 @@ class PluginWrapper:
 
     @enabled.setter
     def enabled(self, value):
-
         self._enabled = False if isinstance(value, property) else bool(value)
         print("Setter triggered")
         # TODO process the plugins syncronously on enable

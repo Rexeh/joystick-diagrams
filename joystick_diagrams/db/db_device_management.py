@@ -10,7 +10,9 @@ def create_new_db_if_not_exist():
     path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
     connection = connect(path)
     cur = connection.cursor()
-    cur.execute(f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(guid TEXT PRIMARY KEY, template_path TEXT)")
+    cur.execute(
+        f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(guid TEXT PRIMARY KEY, template_path TEXT)"
+    )
 
 
 def get_device_templates() -> list:

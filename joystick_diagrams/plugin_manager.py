@@ -14,12 +14,10 @@ from importlib import import_module
 from json import JSONDecodeError
 from pathlib import Path
 from types import ModuleType
-from typing import Union
 
 from dynaconf import ValidationError
 
-from joystick_diagrams.exceptions import JoystickDiagramsException, PluginNotValid
-from joystick_diagrams.input.profile_collection import ProfileCollection
+from joystick_diagrams.exceptions import JoystickDiagramsError, PluginNotValidError
 from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
@@ -48,7 +46,9 @@ class ParserPluginManager:
         - Validates the plugin with further checks
         """
         if not self.plugins:
-            _logger.error("No valid plugins exist to load")  # raise JDException.NoPluginsExist()
+            _logger.error(
+                "No valid plugins exist to load"
+            )  # raise JDException.NoPluginsExist()
             return
 
         for plugin in self.plugins:
@@ -64,10 +64,17 @@ class ParserPluginManager:
                 self.validate_plugin_settings(loaded)
                 self.loaded_plugins.append(loaded)
 
-            except (JoystickDiagramsException, JSONDecodeError, AttributeError, ValidationError) as e:
+            except (
+                JoystickDiagramsError,
+                JSONDecodeError,
+                AttributeError,
+                ValidationError,
+            ) as e:
                 _logger.error(f"Error with Plugin: {plugin} - {e}")
 
-    def validate_plugin_settings(self, plugin: PluginInterface) -> None | ValidationError:
+    def validate_plugin_settings(
+        self, plugin: PluginInterface
+    ) -> None | ValidationError:
         return plugin.settings.validators.validate_all()
 
     def get_available_plugins(self) -> list[PluginInterface]:
@@ -98,10 +105,13 @@ def install_folder_plugin(plugin_path: Path):
         return
 
     try:
-        _move = shutil.copy(plugin_path, Path(os.path.join(Path(__file__).resolve().parent, PLUGINS_DIRECTORY)))
+        _move = shutil.copy(
+            plugin_path,
+            Path(os.path.join(Path(__file__).resolve().parent, PLUGINS_DIRECTORY)),
+        )
         _logger.info(f"Plugin installed to: {_move}")
     except shutil.Error as e:
-        raise JoystickDiagramsException(
+        raise JoystickDiagramsError(
             f"Error when installing plugin in target directory: {e}"
         ) from e  # Move to new Exception Type
 
@@ -111,7 +121,7 @@ def install_zip_plugin(plugin_path: Path):
 
     try:
         unpacked_zip = handle_zip_plugin(plugin_path)
-    except JoystickDiagramsException as e:
+    except JoystickDiagramsError as e:
         _logger.error(e)
         return
 
@@ -123,10 +133,13 @@ def install_zip_plugin(plugin_path: Path):
         return
 
     try:
-        _move = shutil.move(unpacked_zip, Path(os.path.join(Path(__file__).resolve().parent, PLUGINS_DIRECTORY)))
+        _move = shutil.move(
+            unpacked_zip,
+            Path(os.path.join(Path(__file__).resolve().parent, PLUGINS_DIRECTORY)),
+        )
         _logger.info(f"Unzipped plugin installed to: {_move}")
     except shutil.Error as e:
-        raise JoystickDiagramsException(
+        raise JoystickDiagramsError(
             f"Error when installing plugin in target directory: {e}"
         ) from e  # Move to new Exception Type
     finally:
@@ -147,7 +160,9 @@ def handle_zip_plugin(zip_file: Path) -> Path:
         zip_obj.testzip()
     except zipfile.BadZipFile as e:
         _logger.warning(f"Zip file was loaded from {zip_file} but invalid")
-        raise JoystickDiagramsException("Plugin zip file not valid") from e  # Move to new Exception Type
+        raise JoystickDiagramsError(
+            "Plugin zip file not valid"
+        ) from e  # Move to new Exception Type
 
     # Extract the ZIP
     zip_obj.extractall(extract_path)
@@ -156,12 +171,16 @@ def handle_zip_plugin(zip_file: Path) -> Path:
     items = os.listdir(extract_path)
 
     if not len(items) == 1:
-        raise JoystickDiagramsException("Plugin zip file not valid, more than one item unpacked from zip.")
+        raise JoystickDiagramsError(
+            "Plugin zip file not valid, more than one item unpacked from zip."
+        )
 
     unpacked_item = Path.joinpath(extract_path, items[0])
 
     if not unpacked_item.is_dir():
-        raise JoystickDiagramsException("Plugin zip file not valid, item unpacked is not a directory")
+        raise JoystickDiagramsError(
+            "Plugin zip file not valid, item unpacked is not a directory"
+        )
 
     return Path.joinpath(extract_path, items[0])
 
@@ -177,17 +196,22 @@ def verify_plugin_signature() -> bool:
     return True
 
 
-def load_plugin(plugin_package_directory: str = PLUGIN_REL_PATH, plugin_package_name: str = "") -> ModuleType:
+def load_plugin(
+    plugin_package_directory: str = PLUGIN_REL_PATH, plugin_package_name: str = ""
+) -> ModuleType:
     """Loads a plugin module at a given package directory"""
     try:
         _logger.debug(f"Loading plugin at module path: {plugin_package_name}")
-        return import_module(f"{plugin_package_directory}{plugin_package_name}.main", package="joystick_diagrams")
+        return import_module(
+            f"{plugin_package_directory}{plugin_package_name}.main",
+            package="joystick_diagrams",
+        )
     except TypeError as e:
         _logger.error(f"{e} - {plugin_package_name}")
-        raise PluginNotValid(error=e, value=plugin_package_name) from e
+        raise PluginNotValidError(error=e, value=plugin_package_name) from e
     except ModuleNotFoundError as e:
         _logger.error(e)
-        raise PluginNotValid(value=plugin_package_name, error=e) from e
+        raise PluginNotValidError(value=plugin_package_name, error=e) from e
 
 
 def find_plugins(directory) -> list[Path]:
@@ -196,12 +220,19 @@ def find_plugins(directory) -> list[Path]:
     Returns list of Paths with valid plugins contained within them.
 
     """
-    _folders = [folder for folder in Path(os.path.join(Path(__file__).resolve().parent, directory)).iterdir()]
+    _folders = [
+        folder
+        for folder in Path(
+            os.path.join(Path(__file__).resolve().parent, directory)
+        ).iterdir()
+    ]
     _logger.debug(f"CWD for __file__ resolve: {Path(__file__).resolve()}")
     _logger.debug(f"Folders detected: {_folders}")
 
     folders = [
-        folder for folder in _folders if check_folder_validity(folder) and folder.name not in EXCLUDED_PLUGIN_DIRS
+        folder
+        for folder in _folders
+        if check_folder_validity(folder) and folder.name not in EXCLUDED_PLUGIN_DIRS
     ]
 
     _logger.debug(f"Valid Plugins were detected: {folders}")
@@ -229,4 +260,6 @@ def check_folder_validity(folder: Path):
 if __name__ == "__main__":
     app = ParserPluginManager()
 
-    install_plugin(Path("D:\\Git Repos\\joystick-diagrams\\_DISABLED\\dcs_world_plugin_other.zip"))
+    install_plugin(
+        Path("D:\\Git Repos\\joystick-diagrams\\_DISABLED\\dcs_world_plugin_other.zip")
+    )

@@ -16,13 +16,13 @@ dynaconf = "^3.2.4"
 pyside6 = "^6.6.1"
 semver = "^3.0.2"
 sphinx = "^7.2.6"
+pre-commit = "^3.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
 pytest-qt = "^4.2.0"
 pytest-cov = "^4.0.0"
 black = "^23.0.0"
-pre-commit = "^2.15.0"
 coveralls = "^3.3.0"
 pylint = "^3.0.0"
 cx-Freeze = "^6.15.0"
@@ -145,18 +145,36 @@ ignore_missing_imports = true
 markers = ["uitest"]
 
 [tool.ruff]
+exclude = ["qt_ui/*", "docs/*"]
 target-version = "py311"
 
 [tool.ruff.lint]
 select = ["A", "E", "C90", "I", "W", "F", "B", "Q", "N", "PL"]
 
-ignore = ["E501"]
+ignore = [
+    "E501",
+    "W191",
+    "E111",
+    "E114",
+    "E117",
+    "D206",
+    "D300",
+    "Q000",
+    "Q001",
+    "Q002",
+    "Q003",
+    "COM812",
+    "COM819",
+    "ISC001",
+    "ISC002",
+]
 
 unfixable = ["B"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402"]
-"**/{tests,docs,tools}/*" = ["E402"]
+"**/{tests,docs,tools,qt_ui}/*" = ["E402", "PLR2004"]
+"**/{ui}/*" = ["N", "PLR"]
 
 [tool.ruff.format]
-quote-style = "single"
+quote-style = "double"

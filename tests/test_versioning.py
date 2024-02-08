@@ -63,7 +63,6 @@ def test_json_to_object_invalid(caplog):
 ## Remote/Local manifest retrieval and comparisons
 @pytest.fixture
 def request_exception_mock(monkeypatch):
-
     def mock(*args, **kwargs):
         raise requests.exceptions.RequestException
 
@@ -91,7 +90,6 @@ def test_remote_manifest(fetch_remote_mock):
 
 
 def test_remote_manifest_request_fail(request_exception_mock, caplog):
-
     data = version.fetch_remote_manifest()
 
     assert data is None
@@ -115,8 +113,9 @@ def fetch_local_mock(monkeypatch):
 
 
 def test_local_manifest_read():
-
-    m = mock_open(read_data='{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}')
+    m = mock_open(
+        read_data='{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
+    )
     with patch("joystick_diagrams.version.open", m):
         data = version.fetch_local_manifest()
 
@@ -128,7 +127,9 @@ def test_perform_version_check_success(fetch_local_mock, fetch_remote_mock, capl
     assert check is True
 
 
-def test_perform_version_check_failure(fetch_local_mock_none_found, fetch_remote_mock, caplog):
+def test_perform_version_check_failure(
+    fetch_local_mock_none_found, fetch_remote_mock, caplog
+):
     check = version.perform_version_check()
 
     assert "Unable to perform version check" in caplog.text
@@ -166,7 +167,6 @@ def test_check_local_less_than_remote():
 
 
 def test_version_object_json_encode():
-
     version_string = "1.0.0"
     temp_dict = {"hash_one": "one"}
     ver = version.JoystickDiagramVersion(version_string, temp_dict)
@@ -177,11 +177,12 @@ def test_version_object_json_encode():
 
 
 def test_generate_version(monkeypatch):
-
     def mock_generate_template_manifest():
         return {}
 
-    monkeypatch.setattr(version, "generate_template_manifest", mock_generate_template_manifest)
+    monkeypatch.setattr(
+        version, "generate_template_manifest", mock_generate_template_manifest
+    )
 
     m = mock_open(read_data="foo bar")
     with patch("joystick_diagrams.version.open", m):
@@ -191,7 +192,6 @@ def test_generate_version(monkeypatch):
 
 
 def test_get_current_version():
-
     ver_const = version.VERSION
 
     ver = version.get_current_version()

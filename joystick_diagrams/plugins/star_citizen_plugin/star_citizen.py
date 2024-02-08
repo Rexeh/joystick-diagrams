@@ -530,20 +530,26 @@ class StarCitizen:
                 data = Path(self.file_path).read_text(encoding="utf-8")
                 try:
                     self.__validate_file(data)
-                except Exception:
-                    raise Exception("File is not a valid Star Citizen XML")  # TODO remove base exception
+                except Exception as e:
+                    raise Exception(
+                        "File is not a valid Star Citizen XML"
+                    ) from e  # TODO remove base exception
                 else:
                     return data
             else:
-                raise Exception("File must be an XML file")  # TODO remove base exception
+                raise Exception(
+                    "File must be an XML file"
+                )  # TODO remove base exception
         else:
             raise FileNotFoundError("File not found")
 
     def __validate_file(self, data) -> bool:
         try:
             parsed_xml = minidom.parseString(data)
-        except ValueError:
-            raise Exception("File is not a valid Star Citizen XML")  # TODO remove base exception
+        except ValueError as e:
+            raise Exception(
+                "File is not a valid Star Citizen XML"
+            ) from e  # TODO remove base exception
         else:
             if (
                 len(parsed_xml.getElementsByTagName("ActionMaps")) == 1
@@ -687,7 +693,9 @@ class StarCitizen:
                     _active_device = profile_obj.add_device(device_guid, device_name)
 
                     if modifiers:
-                        _active_device.add_modifier_to_input(input_control, {modifiers}, name)
+                        _active_device.add_modifier_to_input(
+                            input_control, {modifiers}, name
+                        )
                     else:
                         _active_device.create_input(input_control, name)
 
@@ -703,7 +711,9 @@ def get_profile_name_map(name: str) -> str:
 
     # Handle unexpected new mappings with default
     if _name is None:
-        _logger.warning(f"No map found for a Star Citizen profile {name}. This should be raised as a bug.")
+        _logger.warning(
+            f"No map found for a Star Citizen profile {name}. This should be raised as a bug."
+        )
         _name = "Spaceship"
 
     return _name
@@ -720,7 +730,9 @@ def extract_modifiers(bind_str: str) -> str | None:
     return None
 
 
-def resolve_bind(bind_str: str) -> tuple[Union[str, None], Union[Axis, Button, Hat, AxisSlider, None]]:
+def resolve_bind(
+    bind_str: str,
+) -> tuple[Union[str, None], Union[Axis, Button, Hat, AxisSlider, None]]:
     """Determine bind type and return."""
     _modifiers = extract_modifiers(bind_str)
 
@@ -752,7 +764,9 @@ def find_control_type(control_input: str) -> Union[Axis, Button, Hat, AxisSlider
 
     # Hats
     if "hat" in control_input:
-        _id = int(control_input[3])  # Assumes no more than 9 hats on a device - should be ok
+        _id = int(
+            control_input[3]
+        )  # Assumes no more than 9 hats on a device - should be ok
         _direction = HAT_FORMAT_LOOKUP[control_input[5:]]
         return Hat(_id, HatDirection[_direction])
 

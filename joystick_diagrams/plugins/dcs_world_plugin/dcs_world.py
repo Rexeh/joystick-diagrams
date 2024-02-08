@@ -1,4 +1,5 @@
 """DCS World Lua Config Parser for use with Joystick Diagrams"""
+
 import logging
 import os
 import re
@@ -63,10 +64,14 @@ class DCSWorldParser:
         """Validate Inidividual Profile
         Return Valid Profile
         """
-        if os.path.isdir(os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item)) and JOYSTICK_DIR in os.listdir(
+        if os.path.isdir(
+            os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item)
+        ) and JOYSTICK_DIR in os.listdir(
             os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item)
         ):
-            return os.listdir(os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item, JOYSTICK_DIR))
+            return os.listdir(
+                os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item, JOYSTICK_DIR)
+            )
 
         return False
 
@@ -81,7 +86,9 @@ class DCSWorldParser:
             )
         return self.valid_profiles
 
-    def convert_button_format(self, button: str) -> Axis | Hat | Button | AxisSlider | None:
+    def convert_button_format(
+        self, button: str
+    ) -> Axis | Hat | Button | AxisSlider | None:
         """Convert DCS Buttons to match expected "BUTTON_X" format"""
         split: list = button.split("_")
         _logger.debug(f"Converting button {button}")
@@ -127,7 +134,9 @@ class DCSWorldParser:
 
         for profile in self.profiles_to_process:
             prof = collection.create_profile(profile_name=profile)
-            self.fq_path = os.path.join(self.path, CONFIG_DIR, INPUT_DIR, profile, JOYSTICK_DIR)
+            self.fq_path = os.path.join(
+                self.path, CONFIG_DIR, INPUT_DIR, profile, JOYSTICK_DIR
+            )
             self.profile_devices = os.listdir(os.path.join(self.fq_path))
 
             for item in self.profile_devices:
@@ -154,7 +163,9 @@ class DCSWorldParser:
                         raise
 
                     else:
-                        parsed_config = self.parse_config(file_data)  ##Better handling - decompose
+                        parsed_config = self.parse_config(
+                            file_data
+                        )  ##Better handling - decompose
 
                         if parsed_config is None:
                             _logger.debug(f"Parsing failed for {item}")
@@ -173,7 +184,9 @@ class DCSWorldParser:
                     operation = data["name"]
                     if data.get("added"):
                         for binding in data["added"].values():
-                            input_identifier = self.convert_button_format(binding["key"])
+                            input_identifier = self.convert_button_format(
+                                binding["key"]
+                            )
 
                             if not input_identifier:
                                 continue
@@ -182,8 +195,12 @@ class DCSWorldParser:
                             if binding.get("reformers"):
                                 # Initialise base button if not exists
 
-                                reform_set = self.reformers_to_set(binding.get("reformers"))
-                                profile.add_modifier_to_input(input_identifier, reform_set, operation)
+                                reform_set = self.reformers_to_set(
+                                    binding.get("reformers")
+                                )
+                                profile.add_modifier_to_input(
+                                    input_identifier, reform_set, operation
+                                )
                             else:
                                 profile.create_input(input_identifier, operation)
 
@@ -194,7 +211,9 @@ class DCSWorldParser:
         try:
             return self.parse_file(file)
         except Exception as error:
-            _logger.error("There was a parsing issue with the text data, this could mean an unhandled character.")
+            _logger.error(
+                "There was a parsing issue with the text data, this could mean an unhandled character."
+            )
             _logger.error(error)
             return None
 
@@ -293,12 +312,18 @@ class DCSWorldParser:
             _logger.error(f"Syntax error at '{ (t.value)}'")
 
         # Build the lexer
-        lexer = lex.lex(
-            debug=False, optimize=1, lextab="lextab", reflags=re.UNICODE | re.VERBOSE, errorlog=_logger
+        lex.lex(
+            debug=False,
+            optimize=1,
+            lextab="lextab",
+            reflags=re.UNICODE | re.VERBOSE,
+            errorlog=_logger,
         )  # noqa
 
         # Build the parser
-        parser = yacc.yacc(debug=False, optimize=1, tabmodule="dcs_world_yacc", errorlog=_logger)
+        parser = yacc.yacc(
+            debug=False, optimize=1, tabmodule="dcs_world_yacc", errorlog=_logger
+        )
 
         # Parse the data
         try:
@@ -310,7 +335,9 @@ class DCSWorldParser:
 
 
 if __name__ == "__main__":
-    dci = DCSWorldParser("D:\\Git Repos\\joystick-diagrams\\local_test_data\\toasty_test")
+    dci = DCSWorldParser(
+        "D:\\Git Repos\\joystick-diagrams\\local_test_data\\toasty_test"
+    )
 
     dta = dci.process_profiles()
 

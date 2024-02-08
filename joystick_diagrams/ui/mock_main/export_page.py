@@ -29,7 +29,9 @@ class DeviceTemplate:
     path: Path | None
 
 
-class ExportPage(QMainWindow, export_ui.Ui_Form):  # Refactor pylint: disable=too-many-instance-attributes
+class ExportPage(
+    QMainWindow, export_ui.Ui_Form
+):  # Refactor pylint: disable=too-many-instance-attributes
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
@@ -44,14 +46,19 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):  # Refactor pylint: disable=to
 
     # Devices WIdget
     def setup_device_table_widget(self):
-        self.tableWidget.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self.tableWidget.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        self.tableWidget.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.tableWidget.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.tableWidget.horizontalHeader().setSectionResizeMode(
+            2, QHeaderView.ResizeMode.Stretch
+        )
 
         self.add_device_templates_to_widget()
 
     def add_device_templates_to_widget(self):
-
         devices = get_unique_devices()
 
         ## Show the devices / mix of stored and new devices
@@ -59,7 +66,9 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):  # Refactor pylint: disable=to
         self.tableWidget.clear()
         self.tableWidget.setColumnCount(3)
 
-        self.tableWidget.setHorizontalHeaderLabels(["Device ID", "Device Name", "Template"])
+        self.tableWidget.setHorizontalHeaderLabels(
+            ["Device ID", "Device Name", "Template"]
+        )
 
         for index, item in enumerate(devices):
             self.tableWidget.insertRow(index)
@@ -74,7 +83,6 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):  # Refactor pylint: disable=to
     def device_template_item_clicked(self, item):
         item_row_index = item.row()
 
-        device_guid = self.tableWidget.item(item_row_index, 0).text()
         template_path = self.tableWidget.item(item_row_index, 2).text()
 
         self.pushButton.setDisabled(False)
@@ -110,7 +118,9 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):  # Refactor pylint: disable=to
         _save = add_update_device_template_path(device_guid, template_path.__str__())
 
         if _save:
-            self.tableWidget.setItem(row_to_modify, 2, QTableWidgetItem(template_path.__str__()))
+            self.tableWidget.setItem(
+                row_to_modify, 2, QTableWidgetItem(template_path.__str__())
+            )
 
     def run_exporter(self):
         for profile in self.appState.processedProfileObjectMapping.values():

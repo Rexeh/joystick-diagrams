@@ -8,7 +8,9 @@ from joystick_diagrams.input.hat import Hat
 
 class TestDCSParseTest(unittest.TestCase):
     def setUp(self):
-        self.dcs_instance = dcs.DCSWorldParser("./tests/data/dcs_world/valid_dcs_world_directory")
+        self.dcs_instance = dcs.DCSWorldParser(
+            "./tests/data/dcs_world/valid_dcs_world_directory"
+        )
 
     def test_no_profiles_parsed(self):
         pass

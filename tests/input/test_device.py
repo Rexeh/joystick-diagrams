@@ -18,8 +18,10 @@ def test_new_device_invalid_guid():
     guid = "11ee-8002-444553540000"
     name = "device name"
 
-    with pytest.raises(ValueError, match="Could not create device as invalid GUID used"):
-        obj = Device_(guid, name)
+    with pytest.raises(
+        ValueError, match="Could not create device as invalid GUID used"
+    ):
+        Device_(guid, name)
 
 
 def test_new_device_whitespace():
@@ -56,10 +58,10 @@ def test_new_modifier():
     obj.create_input(input_id, operation)
     obj.add_modifier_to_input(input_id, {"alt"}, "press")
 
-    input = obj.get_input("buttons", input_id.identifier)
-    assert len(input.modifiers) > 0
-    assert input.modifiers[0].modifiers == {"alt"}
-    assert input.modifiers[0].command == "press"
+    input_ = obj.get_input("buttons", input_id.identifier)
+    assert len(input_.modifiers) > 0
+    assert input_.modifiers[0].modifiers == {"alt"}
+    assert input_.modifiers[0].command == "press"
 
 
 def test_existing_modifier():
@@ -71,10 +73,10 @@ def test_existing_modifier():
     obj.add_modifier_to_input(input_id, {"ctrl"}, "One")
     obj.add_modifier_to_input(input_id, {"ctrl"}, "Two")
 
-    input = obj.get_input("buttons", input_id.identifier)
+    input_ = obj.get_input("buttons", input_id.identifier)
 
-    assert len(input.modifiers) == 1
-    assert input.modifiers[0].command == "Two"
+    assert len(input_.modifiers) == 1
+    assert input_.modifiers[0].command == "Two"
 
 
 def test_device_existing_input(caplog):
@@ -84,21 +86,23 @@ def test_device_existing_input(caplog):
     obj.create_input(input_id, operation)
     obj.create_input(input_id, "modified")
 
-    input = obj.get_input("buttons", input_id.identifier)
+    input_ = obj.get_input("buttons", input_id.identifier)
 
-    assert input.identifier == input_id.identifier
-    assert input.command == "modified"
+    assert input_.identifier == input_id.identifier
+    assert input_.command == "modified"
 
 
 def test_new_modifier_no_input(caplog):
     obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
     obj.add_modifier_to_input(Button(1), {"alt"}, "press")
 
-    assert "Modifier attempted to be added to Button(id=1) but input does not exist" in caplog.text
+    assert (
+        "Modifier attempted to be added to Button(id=1) but input does not exist"
+        in caplog.text
+    )
 
 
 def test_resolve_type():
-
     obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
     with pytest.raises(ValueError):
         obj.resolve_type(control=Button)
@@ -106,14 +110,14 @@ def test_resolve_type():
 
 def test_combined_inputs():
     obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
-
+    expected_len = 2
     button_1 = Button(1)
     obj.create_input(button_1, "Shoot")
     obj.create_input(Button(44), "Shoot")
 
     flattened = obj.get_combined_inputs()
 
-    assert flattened.__len__() == 2
+    assert flattened.__len__() == expected_len
     assert flattened["BUTTON_1"].input_control == button_1
 
 

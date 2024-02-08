@@ -32,7 +32,9 @@ class parent_profile_ui(
     def add_parent_profile(self):
         target_profile = self.availableParentsComboBox.currentText()
         self.listWidget.addItem(target_profile)
-        self.availableParentsComboBox.removeItem(self.availableParentsComboBox.currentIndex())
+        self.availableParentsComboBox.removeItem(
+            self.availableParentsComboBox.currentIndex()
+        )
         self.parentProfileChange.emit()
 
     def remove_parent_profile(self):
@@ -52,15 +54,23 @@ class parent_profile_ui(
         self.listWidget.insertItem(current_row + 1, current_item)
         self.parentProfileChange.emit()
 
-    def filter_available_parents(self, target_key: str, available_keys: list[str], used_keys: list[str]):
+    def filter_available_parents(
+        self, target_key: str, available_keys: list[str], used_keys: list[str]
+    ):
         return [x for x in available_keys if x not in used_keys and x != target_key]
 
     def save_profile_parent_maps(self):
-        parent_profiles = [self.listWidget.item(x).text() for x in range(self.listWidget.count())]
+        parent_profiles = [
+            self.listWidget.item(x).text() for x in range(self.listWidget.count())
+        ]
 
-        self.appState.update_parent_profile_map(self.get_current_active_profile(), parent_profiles)
+        self.appState.update_parent_profile_map(
+            self.get_current_active_profile(), parent_profiles
+        )
 
-        _logger.debug(f"Current profile parent mappings: {self.appState.profileParentMapping}")
+        _logger.debug(
+            f"Current profile parent mappings: {self.appState.profileParentMapping}"
+        )
 
     def load_profile_parent_maps(self, profile_identifier: str):
         mappings = self.appState.profileParentMapping.get(profile_identifier)
@@ -88,7 +98,9 @@ class parent_profile_ui(
 
         # Populate combo box with available parents
         filered_items = self.filter_available_parents(
-            profile_identifier, self.get_available_profile_names(), saved_profile_parent_map
+            profile_identifier,
+            self.get_available_profile_names(),
+            saved_profile_parent_map,
         )
         self.availableParentsComboBox.addItems(filered_items)
 

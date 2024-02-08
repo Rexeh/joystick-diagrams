@@ -4,17 +4,17 @@ from joystick_diagrams.input.button import Button
 
 
 def test_button_valid():
-    id = 1
-    button = Button(id)
+    button_id = 1
+    button = Button(button_id)
 
-    assert button.id == id
+    assert button.id == button_id
 
 
 def test_hat_string_id():
-    id = "1"
+    button_id = "1"
 
     with pytest.raises(ValueError):
-        Button(id)
+        Button(button_id)
 
 
 def test_hat_identifier_format():

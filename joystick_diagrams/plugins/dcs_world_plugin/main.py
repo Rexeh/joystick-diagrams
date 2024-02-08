@@ -30,18 +30,22 @@ class ParserPlugin(PluginInterface):
             self.path = path
             self.save_plugin_state()
 
-        except Exception as e:
+        except Exception:
             return False
 
         return True
 
     def save_plugin_state(self):
-        with open(Path.joinpath(Path(__file__).parent, CONFIG_FILE), "w", encoding="UTF8") as f:
+        with open(
+            Path.joinpath(Path(__file__).parent, CONFIG_FILE), "w", encoding="UTF8"
+        ) as f:
             f.write(json.dumps({"path": self.path.__str__()}))
 
     def load_settings(self) -> None:
         try:
-            with open(Path.joinpath(Path(__file__).parent, CONFIG_FILE), "r", encoding="UTF8") as f:
+            with open(
+                Path.joinpath(Path(__file__).parent, CONFIG_FILE), "r", encoding="UTF8"
+            ) as f:
                 data = json.loads(f.read())
                 self.path = Path(data["path"]) if data["path"] else None
         except FileNotFoundError:
@@ -49,7 +53,9 @@ class ParserPlugin(PluginInterface):
 
     @property
     def path_type(self):
-        return self.FolderPath("Select your DCS World directory", "\\%%USERPROFILE%%\\Saved Games")
+        return self.FolderPath(
+            "Select your DCS World directory", "\\%%USERPROFILE%%\\Saved Games"
+        )
 
     @property
     def icon(self):

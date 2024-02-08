@@ -7,7 +7,7 @@ from joystick_diagrams.input.device import Device_
 _logger = logging.getLogger("__name__")
 
 
-class Profile_:
+class Profile_:  # noqa: N801
     def __init__(self, profile_name: str):
         self.name: str = profile_name
         self.devices: dict[str, Device_] = {}
@@ -57,12 +57,20 @@ class Profile_:
                     for input_key, input_ in inputs.items():
                         if input_key not in existing_device.inputs[input_type]:
                             # If the input is not in the existing device, deepcopy the input
-                            existing_device.inputs[input_type][input_key] = deepcopy(input_)
+                            existing_device.inputs[input_type][input_key] = deepcopy(
+                                input_
+                            )
                         else:
                             # If the input exists, merge modifiers
-                            existing_input = existing_device.inputs[input_type][input_key]
+                            existing_input = existing_device.inputs[input_type][
+                                input_key
+                            ]
                             for modifier in input_.modifiers:
-                                existing_modifier = existing_input._check_existing_modifier(modifier.modifiers)
+                                existing_modifier = (
+                                    existing_input._check_existing_modifier(
+                                        modifier.modifiers
+                                    )
+                                )
                                 if existing_modifier is None:
                                     existing_input.modifiers.append(deepcopy(modifier))
                                 # Don't merge upstream modifier command into current

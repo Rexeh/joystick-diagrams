@@ -6,7 +6,6 @@ Author: Robert Cox
 """
 
 import html
-import json
 import logging
 import os
 import re
@@ -30,7 +29,11 @@ _logger = logging.getLogger(__name__)
 # Dating template re.sub("\\bCURRENT_DATE\\b", datetime.now().strftime("%d/%m/%Y"), template)
 # Branding template  re.sub("\\bTEMPLATE_NAME\\b", title, template)
 
-ROOT_DIR = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(__package__)
+ROOT_DIR = (
+    os.path.dirname(sys.executable)
+    if getattr(sys, "frozen", False)
+    else os.path.dirname(__package__)
+)
 EXPORT_DIRECTORY = Path.joinpath(Path(ROOT_DIR, "test_export"))
 ENCODING_TYPE = "utf8"
 
@@ -62,7 +65,9 @@ def export_devices_to_templates(devices: dict[str, dict[str, Any]], profile_name
         raw_template_data = read_template(_template)
 
         if raw_template_data is None:
-            _logger.error(f"There was an issue getting data for the current template: {_template}")
+            _logger.error(
+                f"There was an issue getting data for the current template: {_template}"
+            )
             continue
 
         # Replace strings in the template data with device data
@@ -90,7 +95,6 @@ def populate_template(template_data: str, device: Device_, profile_name: str) ->
 
     # TODO improve boilerplate for test
     for input_key, input_object in device.get_combined_inputs().items():
-
         # Escape the primary action
         primary_action = html.escape(input_object.command)
 
@@ -104,7 +108,10 @@ def populate_template(template_data: str, device: Device_, profile_name: str) ->
         regex_search = "\\b" + input_key + "\\b"
 
         modified_template_data = re.sub(
-            regex_search, final_template_string, modified_template_data, flags=re.IGNORECASE
+            regex_search,
+            final_template_string,
+            modified_template_data,
+            flags=re.IGNORECASE,
         )
 
     return modified_template_data
@@ -120,7 +127,9 @@ def read_template(template_path: Path) -> str | None:
         return None
 
 
-def get_profile_device_templates(devices: dict[str, Device_]) -> dict[str, Device_ | Path]:
+def get_profile_device_templates(
+    devices: dict[str, Device_],
+) -> dict[str, Device_ | Path]:
     filtered_devices: dict = {}
     for device_name, device_obj in devices.items():
         lookup = get_template_for_device(device_obj.guid)

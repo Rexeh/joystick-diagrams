@@ -10,7 +10,9 @@ def create_new_db_if_not_exist():
     path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
     connection = connect(path)
     cur = connection.cursor()
-    cur.execute(f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(plugin_name TEXT PRIMARY KEY, enabled BOOL)")
+    cur.execute(
+        f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(plugin_name TEXT PRIMARY KEY, enabled BOOL)"
+    )
 
 
 def add__update_plugin_configuration(plugin_name: str, enabled: bool):

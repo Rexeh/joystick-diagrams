@@ -47,6 +47,6 @@ A key part of load data should be setting your path attribute to any stored valu
 ### Dynaconf
 Core Plugin Configuration is provided by Dynaconf **config.py** and the chosen format is JSON for configuration store.
 
-Dynaconf can be used as a write store also, but this is down to individual plugins to decide, generally 
+Dynaconf can be used as a write store also, but this is down to individual plugins to decide, generally
 
 You can retrieve settings for your plugin using **settings.VARIABLE**, for further usage and validation see [Dynaconf Documentation](https://www.dynaconf.com/)

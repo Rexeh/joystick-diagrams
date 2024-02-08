@@ -21,7 +21,9 @@ class Ui_MainWindow(object):
         self.tabWidget.setEnabled(True)
         self.tabWidget.setGeometry(QtCore.QRect(10, 60, 1111, 621))
         self.tabWidget.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.tabWidget.setStyleSheet("QTabWidget::tab-bar {\n" " alignment: center;\n" "}")
+        self.tabWidget.setStyleSheet(
+            "QTabWidget::tab-bar {\n" " alignment: center;\n" "}"
+        )
         self.tabWidget.setTabPosition(QtWidgets.QTabWidget.North)
         self.tabWidget.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.tabWidget.setElideMode(QtCore.Qt.ElideLeft)
@@ -60,6 +62,10 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.pushButton.setText(_translate("MainWindow", "PushButton"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tab 1"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tab 1")
+        )
         self.pushButton_2.setText(_translate("MainWindow", "PushButton"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Tab 2"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Tab 2")
+        )

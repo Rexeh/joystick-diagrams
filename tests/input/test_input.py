@@ -58,7 +58,10 @@ def test_existing_modifier():
 def test_input_repr():
     new_input = Input_(Button(1), "created")
     new_input.add_modifier({"ctrl"}, "mod")
-    assert new_input.__repr__() == "Button(id=1) - created - [Modifier(modifiers={'ctrl'}, command='mod')]"
+    assert (
+        new_input.__repr__()
+        == "Button(id=1) - created - [Modifier(modifiers={'ctrl'}, command='mod')]"
+    )
 
 
 def test_input_str():

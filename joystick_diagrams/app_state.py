@@ -22,8 +22,12 @@ class AppState:
     def _init(self) -> None:
         self.plugin_manager: ParserPluginManager | None = None
         self.profileObjectMapping: dict[str, Profile_] = {}
-        self.profileParentMapping: dict[str, list[str]] = {}  # TODO correctly initialise these
-        self.processedProfileObjectMapping: dict[str, Profile_] = {}  # TODO Think here about name colissions
+        self.profileParentMapping: dict[
+            str, list[str]
+        ] = {}  # TODO correctly initialise these
+        self.processedProfileObjectMapping: dict[
+            str, Profile_
+        ] = {}  # TODO Think here about name colissions
         self.update_processed_profiles()
 
     def init_plugins(self, plugin_manager: ParserPluginManager):
@@ -60,7 +64,9 @@ class AppState:
                 combined_name = f"{profile_source} - {profile_name}"
                 self.profileObjectMapping[combined_name] = profile_obj
 
-        _logger.debug(f"Loaded plugins resulted in the following profiles being detected {self.profileObjectMapping}")
+        _logger.debug(
+            f"Loaded plugins resulted in the following profiles being detected {self.profileObjectMapping}"
+        )
 
         self.update_processed_profiles()
 
@@ -101,8 +107,12 @@ class AppState:
                     obj = deepcopy(self.profileObjectMapping[parent])
                     merged_profiles = merged_profiles.merge_profiles(obj)
 
-            self.processedProfileObjectMapping[profile] = merged_profiles.merge_profiles(profile_copy)
-        _logger.debug(f"Updated processed profiles {self.processedProfileObjectMapping}")
+            self.processedProfileObjectMapping[
+                profile
+            ] = merged_profiles.merge_profiles(profile_copy)
+        _logger.debug(
+            f"Updated processed profiles {self.processedProfileObjectMapping}"
+        )
 
 
 if __name__ == "__main__":

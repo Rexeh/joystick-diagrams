@@ -5,9 +5,9 @@ from pathlib import Path
 import dynaconf
 
 from joystick_diagrams.exceptions import (
-    DirectoryNotValid,
-    FileNotValid,
-    FileTypeInvalid,
+    DirectoryNotValidError,
+    FileNotValidError,
+    FileTypeInvalidError,
 )
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
@@ -21,7 +21,9 @@ class PluginInterface(ABC):
             self.default_path = default_path
 
     class FilePath:
-        def __init__(self, dialog_title: str, default_path: str, supported_extensions: list[str]):
+        def __init__(
+            self, dialog_title: str, default_path: str, supported_extensions: list[str]
+        ):
             self.dialog_title = dialog_title
             self.supported_extensions = supported_extensions
             self.default_path = default_path
@@ -36,13 +38,13 @@ class PluginInterface(ABC):
         ...
 
     def file_not_valid_exception(self, exception_message: str):
-        return FileNotValid(value=exception_message)
+        return FileNotValidError(value=exception_message)
 
     def directory_not_valid_exception(self, exception_message: str):
-        return DirectoryNotValid(value=exception_message)
+        return DirectoryNotValidError(value=exception_message)
 
     def file_type_invalid(self, exception_message: str):
-        return FileTypeInvalid(value=exception_message)
+        return FileTypeInvalidError(value=exception_message)
 
     @abstractmethod
     def process(self) -> ProfileCollection:

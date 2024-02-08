@@ -39,7 +39,3 @@ As part of these methods, there are a number of supported Control inputs which n
 - AxisSlider (Axis type for slider controls)
 
 The library will handle de-duplication automatically
-
-
-
-

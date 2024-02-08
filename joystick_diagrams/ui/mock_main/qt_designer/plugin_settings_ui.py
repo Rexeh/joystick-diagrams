@@ -10,38 +10,14 @@
 
 from PySide6.QtCore import (
     QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
     QMetaObject,
-    QObject,
-    QPoint,
     QRect,
     QSize,
-    QTime,
-    QUrl,
-    Qt,
 )
 from PySide6.QtGui import (
-    QBrush,
-    QColor,
-    QConicalGradient,
-    QCursor,
     QFont,
-    QFontDatabase,
-    QGradient,
-    QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
 )
 from PySide6.QtWidgets import (
-    QApplication,
     QCheckBox,
     QCommandLinkButton,
     QFrame,
@@ -90,7 +66,9 @@ class Ui_Form(object):
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pluginEnabled.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.pluginEnabled.sizePolicy().hasHeightForWidth()
+        )
         self.pluginEnabled.setSizePolicy(sizePolicy)
         font1 = QFont()
         font1.setPointSize(14)
@@ -98,7 +76,9 @@ class Ui_Form(object):
 
         self.horizontalLayout_2.addWidget(self.pluginEnabled)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Preferred, QSizePolicy.Minimum)
+        self.horizontalSpacer = QSpacerItem(
+            40, 20, QSizePolicy.Preferred, QSizePolicy.Minimum
+        )
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer)
 
@@ -107,9 +87,13 @@ class Ui_Form(object):
         sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.configureLink.sizePolicy().hasHeightForWidth())
+        sizePolicy1.setHeightForWidth(
+            self.configureLink.sizePolicy().hasHeightForWidth()
+        )
         self.configureLink.setSizePolicy(sizePolicy1)
-        self.configureLink.setStyleSheet("color: rgb(255, 255, 255);\n" "selection-color: rgb(255, 255, 255);")
+        self.configureLink.setStyleSheet(
+            "color: rgb(255, 255, 255);\n" "selection-color: rgb(255, 255, 255);"
+        )
 
         self.horizontalLayout_2.addWidget(self.configureLink)
 
@@ -138,11 +122,23 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", "Form", None))
-        self.plugin_name_label.setText(QCoreApplication.translate("Form", "Plugin_Name", None))
-        self.plugin_version_label.setText(QCoreApplication.translate("Form", "TextLabel", None))
-        self.pluginEnabled.setText(QCoreApplication.translate("Form", "Enable Plugin", None))
-        self.configureLink.setText(QCoreApplication.translate("Form", "Configure plugin", None))
-        self.configureLink.setDescription(QCoreApplication.translate("Form", "Select your file/folder", None))
-        self.label_3.setText(QCoreApplication.translate("Form", "No options available", None))
+        self.plugin_name_label.setText(
+            QCoreApplication.translate("Form", "Plugin_Name", None)
+        )
+        self.plugin_version_label.setText(
+            QCoreApplication.translate("Form", "TextLabel", None)
+        )
+        self.pluginEnabled.setText(
+            QCoreApplication.translate("Form", "Enable Plugin", None)
+        )
+        self.configureLink.setText(
+            QCoreApplication.translate("Form", "Configure plugin", None)
+        )
+        self.configureLink.setDescription(
+            QCoreApplication.translate("Form", "Select your file/folder", None)
+        )
+        self.label_3.setText(
+            QCoreApplication.translate("Form", "No options available", None)
+        )
 
     # retranslateUi

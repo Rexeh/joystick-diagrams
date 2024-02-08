@@ -46,7 +46,9 @@ class JoystickGremlinParser:
 
         for mode in modes:
             # Create a profile for the mode using NAME
-            _active_profile = profile_collection.create_profile(mode.getAttribute("name"))
+            _active_profile = profile_collection.create_profile(
+                mode.getAttribute("name")
+            )
 
             # Create DEVICE from PARENT node
             _device_guid = mode.parentNode.getAttribute("device-guid")
@@ -65,10 +67,14 @@ class JoystickGremlinParser:
                     match bind_type:
                         case "axis":
                             # TODO Axis Support requires DILL AxisMap to infer from identifiers to types
-                            _logger.info(f"AXIS binds not currently supported for {bind_type} {bind_identifier}")
+                            _logger.info(
+                                f"AXIS binds not currently supported for {bind_type} {bind_identifier}"
+                            )
                         case "button":
                             if bind_description:
-                                _device_obj.create_input(Button(bind_identifier), bind_description)
+                                _device_obj.create_input(
+                                    Button(bind_identifier), bind_description
+                                )
                         case "hat":
                             hats = self.extract_hats(bind)
 
@@ -76,7 +82,9 @@ class JoystickGremlinParser:
                                 for hat_control, hat_action in hats:
                                     _device_obj.create_input(hat_control, hat_action)
                         case _:
-                            _logger.warning(f"Unknown bind type ({bind_type}) detected while processing {_device_guid}")
+                            _logger.warning(
+                                f"Unknown bind type ({bind_type}) detected while processing {_device_guid}"
+                            )
 
         return profile_collection
 
@@ -109,7 +117,9 @@ class JoystickGremlinParser:
 
         for position in hat_positions:
             # Get REMAP of node (assumes 1)
-            hat_position_id = int(position.getElementsByTagName("remap")[0].getAttribute("button"))
+            hat_position_id = int(
+                position.getElementsByTagName("remap")[0].getAttribute("button")
+            )
 
             # Get the description node if exists
             hat_description_check = position.getElementsByTagName("description")
@@ -125,13 +135,17 @@ class JoystickGremlinParser:
                 continue
 
             hat_position_to_string = HAT_POSITIONS[hat_position_id]
-            hat_mappings.append([Hat(hat_id, HatDirection[hat_position_to_string]), hat_description])
+            hat_mappings.append(
+                [Hat(hat_id, HatDirection[hat_position_to_string]), hat_description]
+            )
 
         return hat_mappings
 
 
 if __name__ == "__main__":
-    ps = JoystickGremlinParser("D:\\Git Repos\\joystick-diagrams\\tests\\data\\joystick_gremlin\\gremlin_pov_multi.xml")
+    ps = JoystickGremlinParser(
+        "D:\\Git Repos\\joystick-diagrams\\tests\\data\\joystick_gremlin\\gremlin_pov_multi.xml"
+    )
 
     dta = ps.create_dictionary()
 

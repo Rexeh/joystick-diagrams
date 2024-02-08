@@ -10,45 +10,18 @@
 
 from PySide6.QtCore import (
     QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
     QMetaObject,
-    QObject,
-    QPoint,
     QRect,
-    QSize,
-    QTime,
-    QUrl,
-    Qt,
 )
 from PySide6.QtGui import (
-    QBrush,
-    QColor,
-    QConicalGradient,
-    QCursor,
     QFont,
-    QFontDatabase,
-    QGradient,
-    QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
 )
 from PySide6.QtWidgets import (
-    QApplication,
     QComboBox,
     QHBoxLayout,
     QLabel,
     QListWidget,
-    QListWidgetItem,
     QPushButton,
-    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
@@ -131,16 +104,26 @@ class Ui_Form(object):
         self.label.setText(QCoreApplication.translate("Form", "Parents", None))
         self.label_2.setText(
             QCoreApplication.translate(
-                "Form", "Adding parents will automatically add their binds to your profile", None
+                "Form",
+                "Adding parents will automatically add their binds to your profile",
+                None,
             )
         )
         self.parentUp.setText(QCoreApplication.translate("Form", "Up", None))
         self.parentDown.setText(QCoreApplication.translate("Form", "Down", None))
         self.deleteParent.setText(QCoreApplication.translate("Form", "Delete", None))
-        self.availableParentsComboBox.setItemText(0, QCoreApplication.translate("Form", "Profile1", None))
-        self.availableParentsComboBox.setItemText(1, QCoreApplication.translate("Form", "Profile2", None))
-        self.availableParentsComboBox.setItemText(2, QCoreApplication.translate("Form", "Profile3", None))
+        self.availableParentsComboBox.setItemText(
+            0, QCoreApplication.translate("Form", "Profile1", None)
+        )
+        self.availableParentsComboBox.setItemText(
+            1, QCoreApplication.translate("Form", "Profile2", None)
+        )
+        self.availableParentsComboBox.setItemText(
+            2, QCoreApplication.translate("Form", "Profile3", None)
+        )
 
-        self.addParentItem.setText(QCoreApplication.translate("Form", "Add Parent", None))
+        self.addParentItem.setText(
+            QCoreApplication.translate("Form", "Add Parent", None)
+        )
 
     # retranslateUi

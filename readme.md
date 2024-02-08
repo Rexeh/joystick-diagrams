@@ -18,4 +18,3 @@ For project setup and documentation see [Development](./docs/setup.md)
 
 ## Discord
 The quickest way to get help or ask questions is to join our Discord Channel - https://discord.gg/JC5QFMB
-

@@ -28,7 +28,7 @@ jobs:
     - name: Build Package
       run: |
         make build-exe
-    - name: Upload  
+    - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: py_package

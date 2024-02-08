@@ -5,12 +5,12 @@ test: fmt lint unit-test
 unit-test:
 	@echo "Running unit tests"
 	@poetry run pytest -sv --cov-report=term-missing --cov-report html --cov=joystick_diagrams tests/
-	
+
 fmt:
 	@echo "Formatting source code"
 	@poetry run ruff ./joystick_diagrams
 
-lint: 
+lint:
 	@echo "Linting source code"
 	@poetry run pylint --rcfile pyproject.toml joystick_diagrams tests/
 

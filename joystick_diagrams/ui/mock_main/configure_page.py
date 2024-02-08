@@ -5,7 +5,6 @@ from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QApplication, QMainWindow, QTreeWidgetItem
 from qt_material import apply_stylesheet
 
-from joystick_diagrams import app_init
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.ui.mock_main import parent_profiles
 from joystick_diagrams.ui.mock_main.qt_designer import configure_page_ui
@@ -13,7 +12,9 @@ from joystick_diagrams.ui.mock_main.qt_designer import configure_page_ui
 _logger = logging.getLogger(__name__)
 
 
-class configurePage(QMainWindow, configure_page_ui.Ui_Form):  # Refactor pylint: disable=too-many-instance-attributes
+class configurePage(
+    QMainWindow, configure_page_ui.Ui_Form
+):  # Refactor pylint: disable=too-many-instance-attributes
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
@@ -77,7 +78,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):  # Refactor pylint:
 if __name__ == "__main__":
     logger = logging.basicConfig
     app = QApplication(sys.argv)
-    app_init
+
     window = configurePage()
     window.show()
     apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)

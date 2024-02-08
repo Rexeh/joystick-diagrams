@@ -115,7 +115,7 @@
                 </button>
                 <hat description="" id="1"/>
             </mode>
-           
+
             <mode name="FA18"/>
             <mode name="KA50">
                 <axis description="" id="1"/>

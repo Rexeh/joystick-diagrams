@@ -1,22 +1,15 @@
 import logging
 import sys
 
-from PySide6.QtCore import QMetaMethod, Qt, Signal, Slot
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import (
-    QApplication,
-    QFileDialog,
-    QListWidgetItem,
-    QMainWindow,
-    QMessageBox,
-)
+from PySide6.QtWidgets import QApplication, QListWidgetItem, QMainWindow
 from qt_material import apply_stylesheet
 
 from joystick_diagrams import app_init
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.db import db_init, db_plugin_data
-from joystick_diagrams.exceptions import JoystickDiagramsException
-from joystick_diagrams.input.profile_collection import ProfileCollection
+from joystick_diagrams.db import db_init
+from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
 from joystick_diagrams.ui.mock_main.plugin_settings import PluginSettings
@@ -25,7 +18,9 @@ from joystick_diagrams.ui.mock_main.qt_designer import setting_page_ui
 _logger = logging.getLogger(__name__)
 
 
-class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: disable=too-many-instance-attributes
+class PluginsPage(
+    QMainWindow, setting_page_ui.Ui_Form
+):  # Refactor pylint: disable=too-many-instance-attributes
     profileCollectionChange = Signal()
 
     def __init__(self, *args, **kwargs):
@@ -80,12 +75,12 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):  # Refactor pylint: dis
         try:
             plugin.plugin_profile_collection = plugin.process()
             self.profileCollectionChange.emit()
-        except JoystickDiagramsException:
+        except JoystickDiagramsError:
             pass
 
     @Slot()
     def update_profile_collections(self):
-        _logger.debug(f"Updating profile collections from all plugins")
+        _logger.debug("Updating profile collections from all plugins")
         self.appState.process_profile_collection_updates()
 
     def get_selected_plugin_object(self) -> PluginInterface:

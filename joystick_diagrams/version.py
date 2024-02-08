@@ -36,7 +36,9 @@ class JoystickDiagramVersion:
             raise ValueError("Version must be a string")
 
         try:
-            self.semantic_version = semver.Version.parse(self.version, optional_minor_and_patch=True)
+            self.semantic_version = semver.Version.parse(
+                self.version, optional_minor_and_patch=True
+            )
         except ValueError as e:
             raise ValueError(f"Error creating version from provided string: {e}") from e
 
@@ -56,7 +58,9 @@ def fetch_remote_manifest() -> str | None:
 
 def fetch_local_manifest() -> str | None:
     try:
-        with open(os.path.join(MANIFEST_DIR, MANIFEST_FILE), "r", encoding=ENCODING) as file:
+        with open(
+            os.path.join(MANIFEST_DIR, MANIFEST_FILE), "r", encoding=ENCODING
+        ) as file:
             return file.read()
     except OSError as error:
         _LOGGER.error(f"Unable to find local manifest. {error}")
@@ -73,13 +77,17 @@ def perform_version_check() -> bool:
     local_manifest = fetch_local_manifest()
 
     if not remote_manifest or not local_manifest:
-        _LOGGER.error("Unable to perform version check due to one or more manifests not being present.")
+        _LOGGER.error(
+            "Unable to perform version check due to one or more manifests not being present."
+        )
         return True
 
     running_version = __convert_json_to_object(local_manifest)
     latest_version = __convert_json_to_object(remote_manifest)
 
-    return compare_versions(latest_version=latest_version, running_version=running_version)
+    return compare_versions(
+        latest_version=latest_version, running_version=running_version
+    )
 
 
 def __convert_json_to_object(payload: str) -> JoystickDiagramVersion:
@@ -99,7 +107,9 @@ def generate_version(version_number: str = VERSION) -> JoystickDiagramVersion:
 
     dump = json.dumps(ver, cls=VersionEncode)
 
-    with open(os.path.join(MANIFEST_DIR, MANIFEST_FILE), "w", encoding=ENCODING) as output_file:
+    with open(
+        os.path.join(MANIFEST_DIR, MANIFEST_FILE), "w", encoding=ENCODING
+    ) as output_file:
         output_file.write(dump)
 
     return ver
@@ -123,7 +133,9 @@ def generate_template_manifest() -> dict[str, str]:
     return manifest
 
 
-def compare_versions(running_version: JoystickDiagramVersion, latest_version: JoystickDiagramVersion) -> bool:
+def compare_versions(
+    running_version: JoystickDiagramVersion, latest_version: JoystickDiagramVersion
+) -> bool:
     """Compares versions based on the running version being less than the latest remote
 
     Returns TRUE for MATCH

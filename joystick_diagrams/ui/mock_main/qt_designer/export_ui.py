@@ -10,41 +10,16 @@
 
 from PySide6.QtCore import (
     QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
     QMetaObject,
-    QObject,
-    QPoint,
     QRect,
-    QSize,
-    QTime,
-    QUrl,
     Qt,
 )
 from PySide6.QtGui import (
-    QBrush,
-    QColor,
-    QConicalGradient,
-    QCursor,
     QFont,
-    QFontDatabase,
-    QGradient,
-    QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
 )
 from PySide6.QtWidgets import (
     QAbstractItemView,
-    QApplication,
     QHBoxLayout,
-    QHeaderView,
     QLabel,
     QPushButton,
     QSizePolicy,
@@ -73,7 +48,9 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.label)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.verticalSpacer_2 = QSpacerItem(
+            20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum
+        )
 
         self.verticalLayout.addItem(self.verticalSpacer_2)
 
@@ -151,7 +128,9 @@ class Ui_Form(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer = QSpacerItem(
+            40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum
+        )
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer)
 
@@ -175,7 +154,9 @@ class Ui_Form(object):
         sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.pushButton_2.sizePolicy().hasHeightForWidth())
+        sizePolicy1.setHeightForWidth(
+            self.pushButton_2.sizePolicy().hasHeightForWidth()
+        )
         self.pushButton_2.setSizePolicy(sizePolicy1)
 
         self.verticalLayout_6.addWidget(self.pushButton_2)
@@ -186,7 +167,9 @@ class Ui_Form(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(
+            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
+        )
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
@@ -212,31 +195,57 @@ class Ui_Form(object):
                 None,
             )
         )
-        self.label_3.setText(QCoreApplication.translate("Form", "Device Templates", None))
-        self.label_2.setText(QCoreApplication.translate("Form", "Only devices with templates will be exported", None))
+        self.label_3.setText(
+            QCoreApplication.translate("Form", "Device Templates", None)
+        )
+        self.label_2.setText(
+            QCoreApplication.translate(
+                "Form", "Only devices with templates will be exported", None
+            )
+        )
         self.pushButton.setText(QCoreApplication.translate("Form", "PushButton", None))
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
-        ___qtablewidgetitem.setText(QCoreApplication.translate("Form", "Device ID", None))
+        ___qtablewidgetitem.setText(
+            QCoreApplication.translate("Form", "Device ID", None)
+        )
         ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("Form", "Device Name", None))
+        ___qtablewidgetitem1.setText(
+            QCoreApplication.translate("Form", "Device Name", None)
+        )
         ___qtablewidgetitem2 = self.tableWidget.horizontalHeaderItem(2)
-        ___qtablewidgetitem2.setText(QCoreApplication.translate("Form", "Template", None))
+        ___qtablewidgetitem2.setText(
+            QCoreApplication.translate("Form", "Template", None)
+        )
         ___qtablewidgetitem3 = self.tableWidget.verticalHeaderItem(0)
         ___qtablewidgetitem3.setText(QCoreApplication.translate("Form", "Device", None))
 
         __sortingEnabled = self.tableWidget.isSortingEnabled()
         self.tableWidget.setSortingEnabled(False)
         ___qtablewidgetitem4 = self.tableWidget.item(0, 0)
-        ___qtablewidgetitem4.setText(QCoreApplication.translate("Form", "<00200-00000-00000-00000>", None))
+        ___qtablewidgetitem4.setText(
+            QCoreApplication.translate("Form", "<00200-00000-00000-00000>", None)
+        )
         ___qtablewidgetitem5 = self.tableWidget.item(0, 1)
-        ___qtablewidgetitem5.setText(QCoreApplication.translate("Form", "Device1", None))
+        ___qtablewidgetitem5.setText(
+            QCoreApplication.translate("Form", "Device1", None)
+        )
         ___qtablewidgetitem6 = self.tableWidget.item(0, 2)
-        ___qtablewidgetitem6.setText(QCoreApplication.translate("Form", "C:\\xxx\\xxx\\xxxxxxxxxx.svg", None))
+        ___qtablewidgetitem6.setText(
+            QCoreApplication.translate("Form", "C:\\xxx\\xxx\\xxxxxxxxxx.svg", None)
+        )
         self.tableWidget.setSortingEnabled(__sortingEnabled)
 
-        self.label_4.setText(QCoreApplication.translate("Form", "Export Location", None))
-        self.label_5.setText(QCoreApplication.translate("Form", "Where your diagrams will be exported", None))
-        self.pushButton_2.setText(QCoreApplication.translate("Form", "Sekect Folder", None))
+        self.label_4.setText(
+            QCoreApplication.translate("Form", "Export Location", None)
+        )
+        self.label_5.setText(
+            QCoreApplication.translate(
+                "Form", "Where your diagrams will be exported", None
+            )
+        )
+        self.pushButton_2.setText(
+            QCoreApplication.translate("Form", "Sekect Folder", None)
+        )
         self.ExportButton.setText(QCoreApplication.translate("Form", "Export", None))
 
     # retranslateUi

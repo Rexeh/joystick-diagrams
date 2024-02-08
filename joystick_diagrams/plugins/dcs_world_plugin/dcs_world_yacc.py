@@ -162,7 +162,7 @@ _lr_action_items = {
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
-    for _x, _y in zip(_v[0], _v[1]):
+    for _x, _y in zip(_v[0], _v[1]):  # noqa: B905
         if _x not in _lr_action:
             _lr_action[_x] = {}
         _lr_action[_x][_k] = _y
@@ -221,7 +221,7 @@ _lr_goto_items = {
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
-    for _x, _y in zip(_v[0], _v[1]):
+    for _x, _y in zip(_v[0], _v[1]):  # noqa: B905
         if _x not in _lr_goto:
             _lr_goto[_x] = {}
         _lr_goto[_x][_k] = _y
@@ -234,11 +234,46 @@ _lr_productions = [
     ("dvalues -> dvalue COMMA dvalues", "dvalues", 3, "p_dvalues", "dcs_world.py", 256),
     ("key -> LBRACE NUMBER RBRACE", "key", 3, "p_key_expression", "dcs_world.py", 262),
     ("key -> LBRACE STRING RBRACE", "key", 3, "p_key_expression", "dcs_world.py", 263),
-    ("dvalue -> key EQUALS STRING", "dvalue", 3, "p_value_expression", "dcs_world.py", 267),
-    ("dvalue -> key EQUALS boolean", "dvalue", 3, "p_value_expression", "dcs_world.py", 268),
-    ("dvalue -> key EQUALS DOUBLE_VAL", "dvalue", 3, "p_value_expression", "dcs_world.py", 269),
-    ("dvalue -> key EQUALS NUMBER", "dvalue", 3, "p_value_expression", "dcs_world.py", 270),
-    ("dvalue -> key EQUALS dict", "dvalue", 3, "p_value_expression", "dcs_world.py", 271),
+    (
+        "dvalue -> key EQUALS STRING",
+        "dvalue",
+        3,
+        "p_value_expression",
+        "dcs_world.py",
+        267,
+    ),
+    (
+        "dvalue -> key EQUALS boolean",
+        "dvalue",
+        3,
+        "p_value_expression",
+        "dcs_world.py",
+        268,
+    ),
+    (
+        "dvalue -> key EQUALS DOUBLE_VAL",
+        "dvalue",
+        3,
+        "p_value_expression",
+        "dcs_world.py",
+        269,
+    ),
+    (
+        "dvalue -> key EQUALS NUMBER",
+        "dvalue",
+        3,
+        "p_value_expression",
+        "dcs_world.py",
+        270,
+    ),
+    (
+        "dvalue -> key EQUALS dict",
+        "dvalue",
+        3,
+        "p_value_expression",
+        "dcs_world.py",
+        271,
+    ),
     ("boolean -> TRUE", "boolean", 1, "p_boolean", "dcs_world.py", 275),
     ("boolean -> FALSE", "boolean", 1, "p_boolean", "dcs_world.py", 276),
 ]

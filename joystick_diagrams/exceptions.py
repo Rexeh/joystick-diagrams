@@ -1,4 +1,4 @@
-class JoystickDiagramsException(Exception):
+class JoystickDiagramsError(Exception):
     def __init__(self, value):
         self.value = value
 
@@ -11,12 +11,12 @@ class JoystickDiagramsException(Exception):
 # -----------------------------------------------------------------------------
 
 
-class DirectoryNotValid(JoystickDiagramsException):
+class DirectoryNotValidError(JoystickDiagramsError):
     def __init__(self, value=""):
         super().__init__(value)
 
 
-class FileNotValid(JoystickDiagramsException):
+class FileNotValidError(JoystickDiagramsError):
     def __init__(self, value=""):
         super().__init__(value)
 
@@ -24,7 +24,7 @@ class FileNotValid(JoystickDiagramsException):
         return repr("File was invalid: " + self.value)
 
 
-class FileTypeInvalid(JoystickDiagramsException):
+class FileTypeInvalidError(JoystickDiagramsError):
     def __init__(self, value="Default"):
         super().__init__(value)
 
@@ -34,7 +34,7 @@ class FileTypeInvalid(JoystickDiagramsException):
 # -----------------------------------------------------------------------------
 
 
-class PluginNotValid(JoystickDiagramsException):
+class PluginNotValidError(JoystickDiagramsError):
     def __init__(self, value="", error=""):
         super().__init__(value)
         self.error = error
@@ -43,7 +43,7 @@ class PluginNotValid(JoystickDiagramsException):
         return repr(f"Plugin {self.value} loaded was invalid: {self.error}")
 
 
-class NoPluginsExist(JoystickDiagramsException):
+class NoPluginsExistError(JoystickDiagramsError):
     def __init__(self, value=""):
         super().__init__(value)
 

@@ -2,7 +2,7 @@ import functools
 import logging
 from pathlib import Path
 
-from joystick_diagrams.exceptions import JoystickDiagramsException
+from joystick_diagrams.exceptions import JoystickDiagramsError
 
 _logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ def handle_bare_exception(exception_type):
     """
 
     if not exception_type:
-        exception_type = JoystickDiagramsException
+        exception_type = JoystickDiagramsError
 
     def outer(func):
         @functools.wraps(func)
@@ -30,7 +30,9 @@ def handle_bare_exception(exception_type):
             try:
                 return func()
             except Exception as e:
-                raise exception_type(f"An error occured from within the plugin. {e}") from e
+                raise exception_type(
+                    f"An error occured from within the plugin. {e}"
+                ) from e
 
         return inner
 
