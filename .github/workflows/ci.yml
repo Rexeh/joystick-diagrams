@@ -29,7 +29,7 @@ jobs:
         poetry add pylint-exit
     - name: Analysing the code with Ruff
       run: |
-        poetry run ruff .\joystick_diagrams\ .\tests\
+        poetry run ruff ./joystick_diagrams ./tests
     - name: Run tests
       run: poetry run pytest --cov-report=term-missing --cov=joystick_diagrams ./tests --cov-report=xml
     - name: Run Upload coverage
