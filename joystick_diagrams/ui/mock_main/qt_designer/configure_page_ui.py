@@ -209,7 +209,6 @@ class Ui_Form(object):
         ___qtreewidgetitem.setText(
             0, QCoreApplication.translate("Form", "Device", None)
         )
-
         __sortingEnabled1 = self.treeWidget.isSortingEnabled()
         self.treeWidget.setSortingEnabled(False)
         ___qtreewidgetitem1 = self.treeWidget.topLevelItem(0)

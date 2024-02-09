@@ -12,20 +12,16 @@ from PySide6.QtCore import (
     QCoreApplication,
     QMetaObject,
     QRect,
-    Qt,
 )
 from PySide6.QtGui import (
     QFont,
 )
 from PySide6.QtWidgets import (
-    QAbstractItemView,
     QHBoxLayout,
     QLabel,
     QPushButton,
     QSizePolicy,
     QSpacerItem,
-    QTableWidget,
-    QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
@@ -89,38 +85,6 @@ class Ui_Form(object):
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.tableWidget = QTableWidget(self.activeScreenWidget)
-        if self.tableWidget.columnCount() < 3:
-            self.tableWidget.setColumnCount(3)
-        __qtablewidgetitem = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
-        __qtablewidgetitem1 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        __qtablewidgetitem2 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(2, __qtablewidgetitem2)
-        if self.tableWidget.rowCount() < 1:
-            self.tableWidget.setRowCount(1)
-        __qtablewidgetitem3 = QTableWidgetItem()
-        self.tableWidget.setVerticalHeaderItem(0, __qtablewidgetitem3)
-        __qtablewidgetitem4 = QTableWidgetItem()
-        self.tableWidget.setItem(0, 0, __qtablewidgetitem4)
-        __qtablewidgetitem5 = QTableWidgetItem()
-        self.tableWidget.setItem(0, 1, __qtablewidgetitem5)
-        __qtablewidgetitem6 = QTableWidgetItem()
-        self.tableWidget.setItem(0, 2, __qtablewidgetitem6)
-        self.tableWidget.setObjectName("tableWidget")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
-        self.tableWidget.setSizePolicy(sizePolicy)
-        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.tableWidget.setGridStyle(Qt.SolidLine)
-        self.tableWidget.verticalHeader().setVisible(False)
-
-        self.horizontalLayout.addWidget(self.tableWidget)
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
@@ -151,13 +115,11 @@ class Ui_Form(object):
 
         self.pushButton_2 = QPushButton(self.activeScreenWidget)
         self.pushButton_2.setObjectName("pushButton_2")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(
-            self.pushButton_2.sizePolicy().hasHeightForWidth()
-        )
-        self.pushButton_2.setSizePolicy(sizePolicy1)
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_2.sizePolicy().hasHeightForWidth())
+        self.pushButton_2.setSizePolicy(sizePolicy)
 
         self.verticalLayout_6.addWidget(self.pushButton_2)
 
@@ -166,12 +128,6 @@ class Ui_Form(object):
         self.horizontalLayout_3.addLayout(self.horizontalLayout_4)
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
-
-        self.verticalSpacer = QSpacerItem(
-            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
-        )
-
-        self.verticalLayout.addItem(self.verticalSpacer)
 
         self.ExportButton = QPushButton(self.activeScreenWidget)
         self.ExportButton.setObjectName("ExportButton")
@@ -204,37 +160,6 @@ class Ui_Form(object):
             )
         )
         self.pushButton.setText(QCoreApplication.translate("Form", "PushButton", None))
-        ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
-        ___qtablewidgetitem.setText(
-            QCoreApplication.translate("Form", "Device ID", None)
-        )
-        ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(
-            QCoreApplication.translate("Form", "Device Name", None)
-        )
-        ___qtablewidgetitem2 = self.tableWidget.horizontalHeaderItem(2)
-        ___qtablewidgetitem2.setText(
-            QCoreApplication.translate("Form", "Template", None)
-        )
-        ___qtablewidgetitem3 = self.tableWidget.verticalHeaderItem(0)
-        ___qtablewidgetitem3.setText(QCoreApplication.translate("Form", "Device", None))
-
-        __sortingEnabled = self.tableWidget.isSortingEnabled()
-        self.tableWidget.setSortingEnabled(False)
-        ___qtablewidgetitem4 = self.tableWidget.item(0, 0)
-        ___qtablewidgetitem4.setText(
-            QCoreApplication.translate("Form", "<00200-00000-00000-00000>", None)
-        )
-        ___qtablewidgetitem5 = self.tableWidget.item(0, 1)
-        ___qtablewidgetitem5.setText(
-            QCoreApplication.translate("Form", "Device1", None)
-        )
-        ___qtablewidgetitem6 = self.tableWidget.item(0, 2)
-        ___qtablewidgetitem6.setText(
-            QCoreApplication.translate("Form", "C:\\xxx\\xxx\\xxxxxxxxxx.svg", None)
-        )
-        self.tableWidget.setSortingEnabled(__sortingEnabled)
-
         self.label_4.setText(
             QCoreApplication.translate("Form", "Export Location", None)
         )

@@ -6,9 +6,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
-    QHeaderView,
     QMainWindow,
-    QTableWidgetItem,
 )
 from qt_material import apply_stylesheet
 
@@ -18,6 +16,7 @@ from joystick_diagrams.db.db_device_management import (
     get_device_templates,
 )
 from joystick_diagrams.export import export
+from joystick_diagrams.ui.mock_main.device_setup import DeviceSetup
 from joystick_diagrams.ui.mock_main.qt_designer import export_ui
 
 _logger = logging.getLogger(__name__)
@@ -38,58 +37,17 @@ class ExportPage(
         self.appState = AppState()
         self.ExportButton.clicked.connect(self.run_exporter)
 
-        self.tableWidget.itemClicked.connect(self.device_template_item_clicked)
+        # self.tableWidget.itemClicked.connect(self.device_template_item_clicked)
         self.pushButton.clicked.connect(self.select_template)
 
         # UI Setup
-        self.setup_device_table_widget()
 
-    # Devices WIdget
-    def setup_device_table_widget(self):
-        self.tableWidget.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.tableWidget.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.tableWidget.horizontalHeader().setSectionResizeMode(
-            2, QHeaderView.ResizeMode.Stretch
-        )
+        self.device_widget = DeviceSetup()
+        self.device_widget.device_item_selected.connect(self.change_template_button)
+        self.horizontalLayout.addWidget(self.device_widget)
 
-        self.add_device_templates_to_widget()
-
-    def add_device_templates_to_widget(self):
-        devices = get_unique_devices()
-
-        ## Show the devices / mix of stored and new devices
-
-        self.tableWidget.clear()
-        self.tableWidget.setColumnCount(3)
-
-        self.tableWidget.setHorizontalHeaderLabels(
-            ["Device ID", "Device Name", "Template"]
-        )
-
-        for index, item in enumerate(devices):
-            self.tableWidget.insertRow(index)
-
-            self.tableWidget.setItem(index, 0, QTableWidgetItem(item.guid))
-
-            self.tableWidget.setItem(index, 2, QTableWidgetItem(item.path))
-
-        self.pushButton.setText("Select Item")
-        self.pushButton.setDisabled(True)
-
-    def device_template_item_clicked(self, item):
-        item_row_index = item.row()
-
-        template_path = self.tableWidget.item(item_row_index, 2).text()
-
-        self.pushButton.setDisabled(False)
-        if not template_path:
-            self.pushButton.setText("Select Template")
-        else:
-            self.pushButton.setText("Change Template")
+    def change_template_button(self, data):
+        print(data)
 
     def select_template(self):
         _file = QFileDialog.getOpenFileName(
@@ -99,28 +57,26 @@ class ExportPage(
         )
         if _file[0]:
             file_path = Path(_file[0])
-            print(file_path)
+            print(f"File selected is {file_path}")
             self.set_template_for_device(file_path)
 
     def set_template_for_device(self, template_path: Path):
-        selected_table_rows = self.tableWidget.selectionModel().selectedRows()
+        selected_table_rows = self.device_widget.treeWidget.currentItem()
 
         # Selection Mode is single so force select first
         if not selected_table_rows:
             return  # Add handling here...
 
-        row_to_modify = selected_table_rows[0].row()
-        device_guid = self.tableWidget.item(row_to_modify, 0).text()
+        row_guid_data = selected_table_rows.text(0)
 
-        print(f"Modifying row {row_to_modify} for guid {device_guid}")
+        print(f"Modifying row for guid {row_guid_data}")
 
         # Save the device information
-        _save = add_update_device_template_path(device_guid, template_path.__str__())
+        _save = add_update_device_template_path(row_guid_data, template_path.__str__())
 
         if _save:
-            self.tableWidget.setItem(
-                row_to_modify, 2, QTableWidgetItem(template_path.__str__())
-            )
+            print(f"Devices template was updated for {row_guid_data}")
+            self.device_widget.devices_updated.emit()
 
     def run_exporter(self):
         for profile in self.appState.processedProfileObjectMapping.values():

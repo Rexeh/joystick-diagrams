@@ -57,7 +57,7 @@ def get_device_template_path(guid: str):
     cur.execute(query, params)
     result = cur.fetchone()
 
-    return result if result else None
+    return result[0] if result else None
 
 
 if __name__ == "__main__":
