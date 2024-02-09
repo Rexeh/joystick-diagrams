@@ -23,8 +23,12 @@ class MainWindow(
         self.customiseSectionButton.clicked.connect(self.load_other_widget)
         self.exportSectionButton.clicked.connect(self.load_export_page)
         self.window_content = None
+
+        # Load default tab
+        self.load_setting_widget()
+
+        # Window Setup
         self.setWindowTitle("Joystick Diagrams")
-        _logger.info("Testing In main")
 
     def load_setting_widget(self):
         if self.window_content:
