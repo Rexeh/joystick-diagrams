@@ -35,9 +35,9 @@ INPUT_TYPE_IDENTIFIERS = {
 
 
 class Device_:  # noqa: N801
-    def __init__(self, guid: str, name: str):
+    def __init__(self, guid: str, device_name: str):
         self.guid = self.validate_guid(guid)
-        self.name = name.strip()
+        self.name = device_name.strip()
 
         self.inputs: dict[str, dict[str | int, Input_]] = {
             INPUT_BUTTON_KEY: {},
