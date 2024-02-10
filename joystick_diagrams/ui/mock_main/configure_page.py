@@ -70,8 +70,9 @@ class configurePage(
         for device_obj in profile_data.devices.values():
             device_item = QTreeWidgetItem(self.treeWidget)
             device_item.setText(
-                0, f"{device_obj.name} - {device_obj.guid})"
+                0, device_obj.name
             )  # Set device name in the first column
+            device_item.setToolTip(0, device_obj.guid)
             self.treeWidget.addTopLevelItem(device_item)
 
             for input_obj in device_obj.get_combined_inputs().values():

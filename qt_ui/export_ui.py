@@ -106,7 +106,7 @@ class Ui_Form(object):
 
         self.pushButton_2 = QPushButton(self.activeScreenWidget)
         self.pushButton_2.setObjectName(u"pushButton_2")
-        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pushButton_2.sizePolicy().hasHeightForWidth())

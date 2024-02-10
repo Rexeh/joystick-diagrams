@@ -3,12 +3,9 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (
-    QApplication,
-    QFileDialog,
-    QMainWindow,
-)
+import qtawesome as qta
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
 from qt_material import apply_stylesheet
 
 from joystick_diagrams.app_state import AppState
@@ -40,6 +37,14 @@ class ExportPage(
 
         # self.tableWidget.itemClicked.connect(self.device_template_item_clicked)
         self.pushButton.clicked.connect(self.select_template)
+        self.pushButton.setIconSize(QSize(32, 32))
+        self.pushButton.setIcon(
+            qta.icon(
+                "fa5s.file-code",
+                color="white",
+            )
+        )
+        self.pushButton.setText("Setup template")
 
         # UI Setup
 
@@ -68,7 +73,11 @@ class ExportPage(
         if not selected_table_rows:
             return  # Add handling here...
 
-        row_guid_data = selected_table_rows.text(0)
+        # Not a root object, child was selected
+        if selected_table_rows.parent() is not None:
+            return
+
+        row_guid_data = selected_table_rows.data(0, Qt.UserRole)
 
         print(f"Modifying row for guid {row_guid_data}")
 

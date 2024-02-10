@@ -3,8 +3,10 @@ import sys
 
 import qtawesome as qta
 from PySide6 import QtWidgets
+from PySide6.QtCore import QSize
 from qt_material import apply_stylesheet
 
+from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.ui.mock_main import configure_page, export_page, setting_page
 from joystick_diagrams.ui.mock_main.qt_designer import main_window
@@ -25,19 +27,23 @@ class MainWindow(
         self.exportSectionButton.clicked.connect(self.load_export_page)
         self.window_content = None
 
+        # verticalPolicy = QSizePolicy()
+        # verticalPolicy.setVerticalPolicy(QSizePolicy.Policy.Expanding)
+        # self.setupSectionButton.setSizePolicy(verticalPolicy)
         self.setupSectionButton.setIcon(
             qta.icon(
                 "fa5s.cog",
                 color="white",
             )
         )
-
+        self.setupSectionButton.setIconSize(QSize(32, 32))
         self.exportSectionButton.setIcon(
             qta.icon(
                 "fa5s.file-export",
                 color="white",
             )
         )
+        self.exportSectionButton.setIconSize(QSize(32, 32))
 
         self.customiseSectionButton.setIcon(
             qta.icon(
@@ -45,11 +51,12 @@ class MainWindow(
                 color="white",
             )
         )
+        self.customiseSectionButton.setIconSize(QSize(32, 32))
         # Load default tab
         self.load_setting_widget()
 
         # Window Setup
-        self.setWindowTitle("Joystick Diagrams")
+        self.setWindowTitle(f"Joystick Diagrams - {version.get_current_version()}")
 
     def load_setting_widget(self):
         if self.window_content:

@@ -88,7 +88,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         child_nodes = []
         self.treeWidget.clear()
 
-        identifiers = set([x.device_id for x in export_devices])
+        identifiers = set([(x.device_id, x.device_name) for x in export_devices])
 
         def return_top_level_icon_state(
             children_have_template_issues: bool, children_have_errors: bool
@@ -101,13 +101,25 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
 
             return (self.good_icon, "")
 
-        for identifier in identifiers:
+        for device_identifier, device_name in identifiers:
             root_item = QTreeWidgetItem()
-            root_item.setText(0, identifier)
+            # root_item.setStatusTip(0, identifier)
+            root_item.setToolTip(0, f"Device GUID: {device_identifier}")
+            root_item.setData(0, Qt.UserRole, device_identifier)
+            root_item.setText(0, device_name)
 
             # Get the child items for the root identifier
-            child_items = [x for x in export_devices if x.device_id == identifier]
+            child_items = [
+                x for x in export_devices if x.device_id == device_identifier
+            ]
 
+            root_profile_text = (
+                f"{len(child_items)} Profiles"
+                if len(child_items) > 1
+                else f"{len(child_items)} Profile"
+            )
+
+            root_item.setText(1, root_profile_text)
             # Detect if any of the potential children have a missing template, if so all items will be missing template
             children_have_template_issues = bool(
                 [x.has_template for x in child_items if not x.has_template]
