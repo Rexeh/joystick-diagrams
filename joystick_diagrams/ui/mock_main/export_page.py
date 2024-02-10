@@ -3,6 +3,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -79,8 +80,12 @@ class ExportPage(
             self.device_widget.devices_updated.emit()
 
     def run_exporter(self):
-        for profile in self.appState.processedProfileObjectMapping.values():
-            export(profile)
+        # Check what is selected / Child / Parent
+        items_to_export = self.device_widget.treeWidget.currentItem()
+
+        item_data = items_to_export.data(0, Qt.UserRole)
+
+        export(item_data)
 
 
 def get_unique_devices() -> list[DeviceTemplate]:

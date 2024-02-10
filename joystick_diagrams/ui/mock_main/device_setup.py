@@ -2,7 +2,7 @@ import logging
 import sys
 
 import qtawesome as qta
-from PySide6.QtCore import QSize, Signal
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -123,6 +123,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             if not children_have_template_issues:
                 for child in child_items:
                     child_item = QTreeWidgetItem()
+                    child_item.setData(0, Qt.UserRole, child)
                     child_item.setText(1, child.description)
 
                     # Get the child icon state where template not exists / or errors bucket contains entries

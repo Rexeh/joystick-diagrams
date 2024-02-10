@@ -11,12 +11,11 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any
 
 from joystick_diagrams import utils
 from joystick_diagrams.db.db_device_management import get_device_template_path
 from joystick_diagrams.input.device import Device_
-from joystick_diagrams.input.profile import Profile_
+from joystick_diagrams.ui.device_setup_controller import ExportDevice
 
 _logger = logging.getLogger(__name__)
 
@@ -38,16 +37,15 @@ EXPORT_DIRECTORY = Path.joinpath(Path(ROOT_DIR, "test_export"))
 ENCODING_TYPE = "utf8"
 
 
-def export(profile: Profile_, output_directory: Path = EXPORT_DIRECTORY):
+def export(export_device: ExportDevice, output_directory: Path = EXPORT_DIRECTORY):
     try:
-        profile_name = profile.name
+        profile_name = export_device.description
 
         # Get Profile Devices, that have valid templates
-        _logger.debug(f"Getting device templates for {profile} object")
-        export_devices = get_profile_device_templates(profile.devices)
+        _logger.debug(f"Getting device templates for {export_device} object")
 
         # Use the template
-        export_devices_to_templates(export_devices, profile_name)
+        export_device_to_templates(export_device, profile_name)
         # Iterate over the DEVICE items to format the template
         # Check output directory exists
 
@@ -56,26 +54,21 @@ def export(profile: Profile_, output_directory: Path = EXPORT_DIRECTORY):
         _logger.debug(e)
 
 
-def export_devices_to_templates(devices: dict[str, dict[str, Any]], profile_name: str):
+def export_device_to_templates(device: ExportDevice, profile_name: str):
     """Handles the manipulation of the template."""
-    for _, device_data in devices.items():
-        _obj = device_data["Object"]
-        _template = device_data["Template"]
-        # Get the template
-        raw_template_data = read_template(_template)
 
-        if raw_template_data is None:
-            _logger.error(
-                f"There was an issue getting data for the current template: {_template}"
-            )
-            continue
+    if device.template is None:
+        _logger.error(
+            f"There was an issue getting data for the current template: {device}"
+        )
+        return
 
-        # Replace strings in the template data with device data
-        result = populate_template(raw_template_data, _obj, profile_name)
+    # Replace strings in the template data with device data
+    result = populate_template(device.template.raw_data, device.device, profile_name)
 
-        # TODO hardcode for test
-        file_name = f"{_obj.name}-{profile_name}.svg"
-        save_template(result, file_name)
+    # TODO hardcode for test
+    file_name = f"{device.device.name}-{profile_name}.svg"
+    save_template(result, file_name)
 
 
 def save_template(template_data, file_name):
