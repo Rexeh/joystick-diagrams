@@ -2,7 +2,13 @@ import logging
 import sys
 
 from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QApplication, QMainWindow, QTreeWidgetItem
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QApplication,
+    QHeaderView,
+    QMainWindow,
+    QTreeWidgetItem,
+)
 from qt_material import apply_stylesheet
 
 from joystick_diagrams.app_state import AppState
@@ -20,6 +26,16 @@ class configurePage(
         self.setupUi(self)
         self.appState = AppState()
         self.treeWidget.header().setVisible(True)
+        self.treeWidget.header().setStretchLastSection(True)
+        self.treeWidget.header().setSectionResizeMode(
+            QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.treeWidget.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+        self.treeWidget.setSelectionMode(
+            QAbstractItemView.SelectionMode.SingleSelection
+        )
         self.initialise_available_profiles()
         self.initialise_customise_binds()
         self.profileParentWidget = parent_profiles.parent_profile_ui()
@@ -51,9 +67,11 @@ class configurePage(
 
         profile_data = self.appState.get_processed_profile(selected_profile)
 
-        for device_name, device_obj in profile_data.devices.items():
+        for device_obj in profile_data.devices.values():
             device_item = QTreeWidgetItem(self.treeWidget)
-            device_item.setText(0, device_name)  # Set device name in the first column
+            device_item.setText(
+                0, f"{device_obj.name} - {device_obj.guid})"
+            )  # Set device name in the first column
             self.treeWidget.addTopLevelItem(device_item)
 
             for input_obj in device_obj.get_combined_inputs().values():

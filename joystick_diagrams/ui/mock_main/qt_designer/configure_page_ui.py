@@ -8,12 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (
-    QCoreApplication,
-    QMetaObject,
-    QRect,
-    Qt,
-)
+from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, Qt
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -62,6 +57,11 @@ class Ui_Form(object):
         self.verticalLayout_4 = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.label_3 = QLabel(self.verticalLayoutWidget)
+        self.label_3.setObjectName("label_3")
+
+        self.verticalLayout_4.addWidget(self.label_3)
+
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.profileList = QListWidget(self.verticalLayoutWidget)
@@ -160,12 +160,17 @@ class Ui_Form(object):
         self.label.setText(
             QCoreApplication.translate(
                 "Form",
-                '<html><head/><body><p><span style=" font-size:14pt; font-weight:600;">Configure</span></p></body></html>',
+                '<html><head/><body><p><span style=" font-size:14pt; font-weight:600;">Configure &amp; Review</span></p></body></html>',
                 None,
             )
         )
-        self.label_2.setText(
-            QCoreApplication.translate("Form", "... setup your profiles/binds", None)
+        self.label_2.setText("")
+        self.label_3.setText(
+            QCoreApplication.translate(
+                "Form",
+                '<html><head/><body><p>Allows ability to <span style=" font-weight:600;">merge profiles together</span>, so a  single profile can inherit the binds of many others.</p></body></html>',
+                None,
+            )
         )
 
         __sortingEnabled = self.profileList.isSortingEnabled()
@@ -209,6 +214,7 @@ class Ui_Form(object):
         ___qtreewidgetitem.setText(
             0, QCoreApplication.translate("Form", "Device", None)
         )
+
         __sortingEnabled1 = self.treeWidget.isSortingEnabled()
         self.treeWidget.setSortingEnabled(False)
         ___qtreewidgetitem1 = self.treeWidget.topLevelItem(0)
@@ -275,7 +281,7 @@ class Ui_Form(object):
 
         self.tabWidget.setTabText(
             self.tabWidget.indexOf(self.tab_3),
-            QCoreApplication.translate("Form", "Customise Binds", None),
+            QCoreApplication.translate("Form", "View binds by Profile", None),
         )
 
     # retranslateUi

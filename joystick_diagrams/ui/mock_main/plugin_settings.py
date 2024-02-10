@@ -34,6 +34,7 @@ class PluginSettings(
         self.pluginModified.connect(self.trigger_plugin_save)
 
         # Setup
+
         # Style Overrides
 
     def setup(self):

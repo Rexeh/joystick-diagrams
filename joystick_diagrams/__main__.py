@@ -30,7 +30,7 @@ if __name__ == "__main__":
         window = MainWindow()
         window.show()
 
-        apply_stylesheet(app, theme="light_blue.xml", invert_secondary=True)
+        apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
 
         app.exec()
     except Exception as error:  # pylint: disable=broad-except

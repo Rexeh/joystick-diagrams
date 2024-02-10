@@ -1,6 +1,7 @@
 import logging
 import sys
 
+import qtawesome as qta
 from PySide6 import QtWidgets
 from qt_material import apply_stylesheet
 
@@ -24,6 +25,26 @@ class MainWindow(
         self.exportSectionButton.clicked.connect(self.load_export_page)
         self.window_content = None
 
+        self.setupSectionButton.setIcon(
+            qta.icon(
+                "fa5s.cog",
+                color="white",
+            )
+        )
+
+        self.exportSectionButton.setIcon(
+            qta.icon(
+                "fa5s.file-export",
+                color="white",
+            )
+        )
+
+        self.customiseSectionButton.setIcon(
+            qta.icon(
+                "fa5s.tools",
+                color="white",
+            )
+        )
         # Load default tab
         self.load_setting_widget()
 

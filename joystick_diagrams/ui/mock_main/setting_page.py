@@ -37,6 +37,7 @@ class PluginsPage(
         self.profileCollectionChange.connect(self.update_profile_collections)
 
         # Setup
+        self.pageTitle.setText("Available plugins")
         self.remove_defaults()
         self.populate_available_plugin_list()
 

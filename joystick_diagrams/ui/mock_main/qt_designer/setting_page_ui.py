@@ -8,19 +8,8 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (
-    QCoreApplication,
-    QMetaObject,
-    QRect,
-    QSize,
-    Qt,
-)
-from PySide6.QtGui import (
-    QBrush,
-    QColor,
-    QFont,
-    QIcon,
-)
+from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize, Qt
+from PySide6.QtGui import QBrush, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -49,7 +38,7 @@ class Ui_Form(object):
         Form.setBaseSize(QSize(1024, 0))
         self.verticalLayoutWidget = QWidget(Form)
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(9, 9, 1006, 664))
+        self.verticalLayoutWidget.setGeometry(QRect(9, 9, 1012, 664))
         self.verticalLayout_2 = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -82,10 +71,12 @@ class Ui_Form(object):
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.splitter = QSplitter(self.verticalLayoutWidget)
         self.splitter.setObjectName("splitter")
-        sizePolicy1.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
-        self.splitter.setSizePolicy(sizePolicy1)
-        self.splitter.setMinimumSize(QSize(1006, 600))
-        self.splitter.setMaximumSize(QSize(1006, 600))
+        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
+        self.splitter.setSizePolicy(sizePolicy2)
+        self.splitter.setMaximumSize(QSize(16777215, 16777215))
         self.splitter.setOrientation(Qt.Horizontal)
         self.parserPluginList = QListWidget(self.splitter)
         brush = QBrush(QColor(0, 0, 0, 255))
@@ -124,13 +115,13 @@ class Ui_Form(object):
         __qlistwidgetitem2.setFont(font1)
         __qlistwidgetitem2.setIcon(icon1)
         self.parserPluginList.setObjectName("parserPluginList")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(
+        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(
             self.parserPluginList.sizePolicy().hasHeightForWidth()
         )
-        self.parserPluginList.setSizePolicy(sizePolicy2)
+        self.parserPluginList.setSizePolicy(sizePolicy3)
         self.parserPluginList.setMaximumSize(QSize(1087, 16777215))
         self.parserPluginList.setBaseSize(QSize(1, 0))
         self.splitter.addWidget(self.parserPluginList)
@@ -157,17 +148,17 @@ class Ui_Form(object):
         sizePolicy1.setHeightForWidth(self.splitter_2.sizePolicy().hasHeightForWidth())
         self.splitter_2.setSizePolicy(sizePolicy1)
         self.splitter_2.setMinimumSize(QSize(1006, 23))
-        self.splitter_2.setMaximumSize(QSize(1006, 23))
+        self.splitter_2.setMaximumSize(QSize(16777215, 16777215))
         self.splitter_2.setOrientation(Qt.Horizontal)
         self.addParserPlugin = QPushButton(self.splitter_2)
         self.addParserPlugin.setObjectName("addParserPlugin")
-        sizePolicy3 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(
+        sizePolicy4 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(
             self.addParserPlugin.sizePolicy().hasHeightForWidth()
         )
-        self.addParserPlugin.setSizePolicy(sizePolicy3)
+        self.addParserPlugin.setSizePolicy(sizePolicy4)
         self.splitter_2.addWidget(self.addParserPlugin)
         self.pushButton = QPushButton(self.splitter_2)
         self.pushButton.setObjectName("pushButton")
