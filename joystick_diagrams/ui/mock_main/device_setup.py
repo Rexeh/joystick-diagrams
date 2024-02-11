@@ -13,8 +13,8 @@ from PySide6.QtWidgets import (
 )
 from qt_material import apply_stylesheet
 
+from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.ui.device_setup_controller import (
-    ExportDevice,
     get_export_devices,
 )
 from joystick_diagrams.ui.mock_main.qt_designer import device_setup_ui
@@ -161,6 +161,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             tree_roots.append(root_item)
 
         self.treeWidget.addTopLevelItems(tree_roots)
+        self.treeWidget.sortByColumn(0, Qt.SortOrder.AscendingOrder)
 
 
 if __name__ == "__main__":

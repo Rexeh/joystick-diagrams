@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
@@ -30,12 +30,14 @@ class configurePage(
         self.treeWidget.header().setSectionResizeMode(
             QHeaderView.ResizeMode.ResizeToContents
         )
+
         self.treeWidget.setSelectionBehavior(
             QAbstractItemView.SelectionBehavior.SelectRows
         )
         self.treeWidget.setSelectionMode(
             QAbstractItemView.SelectionMode.SingleSelection
         )
+        self.treeWidget.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         self.initialise_available_profiles()
         self.initialise_customise_binds()
         self.profileParentWidget = parent_profiles.parent_profile_ui()
