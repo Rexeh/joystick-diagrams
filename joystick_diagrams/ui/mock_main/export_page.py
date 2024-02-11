@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -16,6 +17,7 @@ from joystick_diagrams.db.db_device_management import (
 from joystick_diagrams.export import export
 from joystick_diagrams.ui.mock_main.device_setup import DeviceSetup
 from joystick_diagrams.ui.mock_main.qt_designer import export_ui
+from joystick_diagrams.utils import install_root
 
 _logger = logging.getLogger(__name__)
 
@@ -45,6 +47,7 @@ class ExportPage(
             )
         )
         self.pushButton.setText("Setup template")
+        self.pushButton.setProperty("class", "success")
 
         # UI Setup
 
@@ -60,6 +63,7 @@ class ExportPage(
             self,
             caption="Select an SVG file to use as a template",
             filter=("SVG Files (*.svg)"),
+            dir=os.path.join(install_root(), "templates"),
         )
         if _file[0]:
             file_path = Path(_file[0])
