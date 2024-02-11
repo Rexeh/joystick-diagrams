@@ -23,6 +23,7 @@ class Template:
 
     def __init__(self, template_path: str):
         self.raw_data: str = self.get_template_data(Path(template_path))
+        self.template_file_name = Path(template_path).name
 
     def get_template_data(self, template_path: Path):
         try:

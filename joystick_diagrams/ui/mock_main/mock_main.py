@@ -27,9 +27,6 @@ class MainWindow(
         self.exportSectionButton.clicked.connect(self.load_export_page)
         self.window_content = None
 
-        # verticalPolicy = QSizePolicy()
-        # verticalPolicy.setVerticalPolicy(QSizePolicy.Policy.Expanding)
-        # self.setupSectionButton.setSizePolicy(verticalPolicy)
         self.setupSectionButton.setIcon(
             qta.icon(
                 "fa5s.cog",
@@ -84,26 +81,6 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     window.show()
-
-    # ['dark_amber.xml',
-    # 'dark_blue.xml',
-    # 'dark_cyan.xml',
-    # 'dark_lightgreen.xml',
-    # 'dark_pink.xml',
-    # 'dark_purple.xml',
-    # 'dark_red.xml',
-    # 'dark_teal.xml',
-    # 'dark_yellow.xml',
-    # 'light_amber.xml',
-    # 'light_blue.xml',
-    # 'light_cyan.xml',
-    # 'light_cyan_500.xml',
-    # 'light_lightgreen.xml',
-    # 'light_pink.xml',
-    # 'light_purple.xml',
-    # 'light_red.xml',
-    # 'light_teal.xml',
-    # 'light_yellow.xml']
 
     extra = {
         # Button colors

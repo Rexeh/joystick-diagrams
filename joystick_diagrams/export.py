@@ -7,15 +7,13 @@ Author: Robert Cox
 
 import html
 import logging
-import os
 import re
-import sys
 from pathlib import Path
 
 from joystick_diagrams import utils
 from joystick_diagrams.db.db_device_management import get_device_template_path
+from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.input.device import Device_
-from joystick_diagrams.ui.device_setup_controller import ExportDevice
 
 _logger = logging.getLogger(__name__)
 
@@ -28,12 +26,8 @@ _logger = logging.getLogger(__name__)
 # Dating template re.sub("\\bCURRENT_DATE\\b", datetime.now().strftime("%d/%m/%Y"), template)
 # Branding template  re.sub("\\bTEMPLATE_NAME\\b", title, template)
 
-ROOT_DIR = (
-    os.path.dirname(sys.executable)
-    if getattr(sys, "frozen", False)
-    else os.path.dirname(__package__)
-)
-EXPORT_DIRECTORY = Path.joinpath(Path(ROOT_DIR, "test_export"))
+
+EXPORT_DIRECTORY = Path.joinpath(Path(utils.install_root(), "test_export"))
 ENCODING_TYPE = "utf8"
 
 

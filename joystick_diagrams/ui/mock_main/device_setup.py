@@ -9,6 +9,8 @@ from PySide6.QtWidgets import (
     QApplication,
     QHeaderView,
     QMainWindow,
+    QMessageBox,
+    QPushButton,
     QTreeWidgetItem,
 )
 from qt_material import apply_stylesheet
@@ -36,10 +38,10 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         self.device_header.setText(1, "Profile")
         self.device_header.setText(2, "Status")
         self.treeWidget.setHeaderItem(self.device_header)
-        self.treeWidget.setIconSize(QSize(28, 28))
+        self.treeWidget.setIconSize(QSize(20, 20))
 
         self.devices_updated.connect(self.initialise_ui)
-
+        self.treeWidget.setColumnCount(3)
         self.treeWidget.itemClicked.connect(self.device_item_clicked)
         self.treeWidget.header().setStretchLastSection(True)
         self.treeWidget.header().setSectionResizeMode(
@@ -82,6 +84,33 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
     def device_item_clicked(self, data):
         # If root node
         self.device_item_selected.emit(data)
+
+    def view_device_errors(self):
+        current_treewidget_row = self.treeWidget.currentItem()
+        data = current_treewidget_row.data(0, Qt.UserRole)
+
+        # Format the text, this is horrible
+
+        message_content = f"""
+            <h2>Your template {data.template_file_name} is missing {len(data.errors)} controls</h2>
+            <strong></strong>
+            <p>This won't prevent an export, but you will be missing binds on your final export</p>
+
+            <div class="container" style="inline-size: 100px; overflow-wrap: break-word;">
+                <p>
+                {data.errors}
+                </p>
+            </div>
+
+        """
+
+        msgBox = QMessageBox()
+        msgBox.setWindowTitle(f"{data.device_name}")
+        msgBox.setTextFormat(Qt.RichText)
+        msgBox.setText(message_content)
+        msgBox.setStandardButtons(QMessageBox.Ok)
+        msgBox.setDefaultButton(QMessageBox.Ok)
+        msgBox.exec()
 
     def add_devices_to_widget(self, export_devices: list[ExportDevice]):
         tree_roots = []
@@ -143,9 +172,6 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
                         not child.has_template, bool(child.errors)
                     )
 
-                    if child.errors:
-                        child_item.setText(2, str(child.errors))
-
                     child_item.setIcon(2, child_icon_state)
 
                     child_nodes.append(child_item)
@@ -161,7 +187,28 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             tree_roots.append(root_item)
 
         self.treeWidget.addTopLevelItems(tree_roots)
+        self.add_view_error_controls_to_tree()
         self.treeWidget.sortByColumn(0, Qt.SortOrder.AscendingOrder)
+
+    def add_view_error_controls_to_tree(self):
+        """Adds in widgets to existing treeWidget items. This has to be done post tree setup due to QT"""
+        for i in range(self.treeWidget.topLevelItemCount()):
+            item = self.treeWidget.topLevelItem(i)
+            for c in range(item.childCount()):
+                child_item = item.child(c)
+                child_data = child_item.data(0, Qt.UserRole)
+
+                if child_data.errors:
+                    button = QPushButton("View Errors")
+                    button.setProperty("class", "warning")
+                    button.setFixedWidth(150)
+                    button.setFixedHeight(25)
+                    button.setStyleSheet(
+                        "padding-left: 5px; padding-right: 3px;"
+                        "padding-top: 1px; padding-bottom: 1px;"
+                    )
+                    button.clicked.connect(self.view_device_errors)
+                    self.treeWidget.setItemWidget(child_item, 2, button)
 
 
 if __name__ == "__main__":
