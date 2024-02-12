@@ -7,7 +7,7 @@ from qt_material import apply_stylesheet
 from joystick_diagrams import app_init
 
 # from joystick_diagrams.ui.main_window.main_window import MainWindow
-from joystick_diagrams.ui.mock_main.mock_main import MainWindow
+from joystick_diagrams.ui.mock_main import MainWindow
 
 logging.basicConfig(
     level=logging.DEBUG,

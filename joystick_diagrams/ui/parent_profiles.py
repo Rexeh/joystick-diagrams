@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow
 from qt_material import apply_stylesheet
 
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.ui.mock_main.qt_designer import parent_profile_management_ui
+from joystick_diagrams.ui.qt_designer import parent_profile_management_ui
 
 _logger = logging.getLogger(__name__)
 

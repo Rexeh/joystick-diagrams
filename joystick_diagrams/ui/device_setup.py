@@ -19,7 +19,7 @@ from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.ui.device_setup_controller import (
     get_export_devices,
 )
-from joystick_diagrams.ui.mock_main.qt_designer import device_setup_ui
+from joystick_diagrams.ui.qt_designer import device_setup_ui
 
 _logger = logging.getLogger(__name__)
 

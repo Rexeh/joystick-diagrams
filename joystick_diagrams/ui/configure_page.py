@@ -12,8 +12,8 @@ from PySide6.QtWidgets import (
 from qt_material import apply_stylesheet
 
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.ui.mock_main import parent_profiles
-from joystick_diagrams.ui.mock_main.qt_designer import configure_page_ui
+from joystick_diagrams.ui import parent_profiles
+from joystick_diagrams.ui.qt_designer import configure_page_ui
 
 _logger = logging.getLogger(__name__)
 
@@ -62,8 +62,6 @@ class configurePage(
 
         for key in profiles.keys():
             self.comboBox.addItem(key)
-
-        self.load_binds_for_selected_profile()
 
     def load_binds_for_selected_profile(self):
         selected_profile = self.comboBox.currentText()

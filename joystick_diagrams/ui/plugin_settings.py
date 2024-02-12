@@ -9,7 +9,7 @@ from qt_material import apply_stylesheet  # type: ignore
 from joystick_diagrams import app_init
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
-from joystick_diagrams.ui.mock_main.qt_designer import plugin_settings_ui
+from joystick_diagrams.ui.qt_designer import plugin_settings_ui
 
 _logger = logging.getLogger(__name__)
 

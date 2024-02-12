@@ -12,8 +12,8 @@ from PySide6.QtWidgets import (
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.ui.mock_main import configure_page, export_page, setting_page
-from joystick_diagrams.ui.mock_main.qt_designer import main_window
+from joystick_diagrams.ui import configure_page, export_page, setting_page
+from joystick_diagrams.ui.qt_designer import main_window
 from joystick_diagrams.utils import install_root
 
 _logger = logging.getLogger(__name__)

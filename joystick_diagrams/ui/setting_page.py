@@ -12,8 +12,8 @@ from joystick_diagrams.db import db_init
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
-from joystick_diagrams.ui.mock_main.plugin_settings import PluginSettings
-from joystick_diagrams.ui.mock_main.qt_designer import setting_page_ui
+from joystick_diagrams.ui.plugin_settings import PluginSettings
+from joystick_diagrams.ui.qt_designer import setting_page_ui
 
 _logger = logging.getLogger(__name__)
 
