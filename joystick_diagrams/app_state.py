@@ -15,12 +15,13 @@ class AppState:
 
     def __new__(cls, *args, **kwargs):
         if not cls._inst:
-            cls._inst = super(AppState, cls).__new__(cls, *args, **kwargs)
-            cls._inst._init()
+            cls._inst = super(AppState, cls).__new__(cls)
+
+            cls._inst._init(plugin_manager=kwargs["plugin_manager"])
         return cls._inst
 
-    def _init(self) -> None:
-        self.plugin_manager: ParserPluginManager | None = None
+    def _init(self, plugin_manager: ParserPluginManager) -> None:
+        self.plugin_manager: ParserPluginManager = plugin_manager
         self.profileObjectMapping: dict[str, Profile_] = {}
         self.profileParentMapping: dict[
             str, list[str]
@@ -29,10 +30,6 @@ class AppState:
             str, Profile_
         ] = {}  # TODO Think here about name colissions
         self.update_processed_profiles()
-
-    def init_plugins(self, plugin_manager: ParserPluginManager):
-        """Injects a plugin manager instance to be managed by AppState"""
-        self.plugin_manager = plugin_manager
         self.process_profile_collection_updates()
 
     ## Temp code for handling Plugin Wrapper changes > TODO REFACTOR

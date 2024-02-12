@@ -1,19 +1,16 @@
 import logging
-import sys
 
-import qtawesome as qta
+import qtawesome as qta  # type:  ignore
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
-    QApplication,
     QHeaderView,
     QMainWindow,
     QMessageBox,
     QPushButton,
     QTreeWidgetItem,
 )
-from qt_material import apply_stylesheet
 
 from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.ui.device_setup_controller import (
@@ -76,7 +73,6 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         self.initialise_ui()
 
     def initialise_ui(self):
-        print("Initialise UI called")
         devices = get_export_devices()
 
         self.add_devices_to_widget(devices)
@@ -87,7 +83,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
 
     def view_device_errors(self):
         current_treewidget_row = self.treeWidget.currentItem()
-        data = current_treewidget_row.data(0, Qt.UserRole)
+        data = current_treewidget_row.data(0, Qt.ItemDataRole.UserRole)
 
         # Format the text, this is horrible
 
@@ -134,7 +130,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             root_item = QTreeWidgetItem()
             # root_item.setStatusTip(0, identifier)
             root_item.setToolTip(0, f"Device GUID: {device_identifier}")
-            root_item.setData(0, Qt.UserRole, device_identifier)
+            root_item.setData(0, Qt.ItemDataRole.UserRole, device_identifier)
             root_item.setText(0, device_name)
 
             # Get the child items for the root identifier
@@ -164,7 +160,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             if not children_have_template_issues:
                 for child in child_items:
                     child_item = QTreeWidgetItem()
-                    child_item.setData(0, Qt.UserRole, child)
+                    child_item.setData(0, Qt.ItemDataRole.UserRole, child)
                     child_item.setText(1, child.description)
 
                     # Get the child icon state where template not exists / or errors bucket contains entries
@@ -196,7 +192,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             item = self.treeWidget.topLevelItem(i)
             for c in range(item.childCount()):
                 child_item = item.child(c)
-                child_data = child_item.data(0, Qt.UserRole)
+                child_data = child_item.data(0, Qt.ItemDataRole.UserRole)
 
                 if child_data.errors:
                     button = QPushButton("View Errors")
@@ -212,10 +208,4 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
 
 
 if __name__ == "__main__":
-    logger = logging.basicConfig
-    app = QApplication(sys.argv)
-
-    window = DeviceSetup()
-    window.show()
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
-    app.exec()
+    pass

@@ -61,6 +61,4 @@ def get_device_template_path(guid: str):
 
 
 if __name__ == "__main__":
-    add_update_device_template_path("123", "2322323")
-    data = get_device_template_path("1234")
-    print(data)
+    pass

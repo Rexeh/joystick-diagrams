@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 
-import requests
+import requests  # type: ignore
 import semver
 
 _LOGGER = logging.getLogger(__name__)
@@ -148,9 +148,4 @@ def get_current_version() -> str:
 
 
 if __name__ == "__main__":
-    ver = JoystickDiagramVersion("2.1.1", {})
-    ver2 = JoystickDiagramVersion("2.0.1", {})
-
-    check = compare_versions(ver, ver2)
-
-    print(check)
+    pass

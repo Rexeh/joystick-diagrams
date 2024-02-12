@@ -143,10 +143,4 @@ class JoystickGremlinParser:
 
 
 if __name__ == "__main__":
-    ps = JoystickGremlinParser(
-        "D:\\Git Repos\\joystick-diagrams\\tests\\data\\joystick_gremlin\\gremlin_pov_multi.xml"
-    )
-
-    dta = ps.create_dictionary()
-
-    print(dta)
+    pass

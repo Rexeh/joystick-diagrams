@@ -1,15 +1,12 @@
 import logging
-import sys
 
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
     QAbstractItemView,
-    QApplication,
     QHeaderView,
     QMainWindow,
     QTreeWidgetItem,
 )
-from qt_material import apply_stylesheet
 
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.ui import parent_profiles
@@ -97,10 +94,4 @@ class configurePage(
 
 
 if __name__ == "__main__":
-    logger = logging.basicConfig
-    app = QApplication(sys.argv)
-
-    window = configurePage()
-    window.show()
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
-    app.exec()
+    pass

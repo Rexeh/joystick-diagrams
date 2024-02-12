@@ -43,5 +43,4 @@ class ParserPlugin(PluginInterface):
 
 
 if __name__ == "__main__":
-    plugin = ParserPlugin()
-    print(plugin)
+    pass

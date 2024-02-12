@@ -15,7 +15,7 @@ from json import JSONDecodeError
 from pathlib import Path
 from types import ModuleType
 
-from dynaconf import ValidationError
+from dynaconf import ValidationError  # type: ignore
 
 from joystick_diagrams.exceptions import JoystickDiagramsError, PluginNotValidError
 from joystick_diagrams.plugin_wrapper import PluginWrapper

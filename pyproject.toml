@@ -90,7 +90,7 @@ omit = [
     "*/site-packages/*",
     "*/config.py",
     "*/plugins/*",
-    "*/ui/*/",
+    "*/ui/*",
     "*/db*",
 ]
 

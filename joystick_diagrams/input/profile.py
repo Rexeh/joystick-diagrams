@@ -1,7 +1,6 @@
 import logging
 from copy import deepcopy
 
-from joystick_diagrams.input.button import Button
 from joystick_diagrams.input.device import Device_
 
 _logger = logging.getLogger("__name__")
@@ -79,19 +78,4 @@ class Profile_:  # noqa: N801
 
 
 if __name__ == "__main__":
-    profile1 = Profile_("Profile1")
-
-    dev1 = profile1.add_device("dev_1", "dev_1")
-    dev1.create_input(Button(1), "shoot")
-
-    dev1.add_modifier_to_input(Button(1), {"ctrl"}, "bang")
-    dev1.add_modifier_to_input(Button(1), {"alt"}, "bang again")
-
-    profile2 = Profile_("Profile2")
-
-    dev3 = profile2.add_device("dev_1", "dev_1")
-    dev3.create_input(Button(3), "potato")
-    dev3.add_modifier_to_input(Button(1), {"ctrl"}, "hello")
-
-    data = profile1.merge_profiles(profile2)
-    print(data)
+    pass

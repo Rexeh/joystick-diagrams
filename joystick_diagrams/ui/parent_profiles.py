@@ -1,9 +1,7 @@
 import logging
-import sys
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QApplication, QMainWindow
-from qt_material import apply_stylesheet
+from PySide6.QtWidgets import QMainWindow
 
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.ui.qt_designer import parent_profile_management_ui
@@ -106,9 +104,4 @@ class parent_profile_ui(
 
 
 if __name__ == "__main__":
-    logger = logging.basicConfig
-    app = QApplication(sys.argv)
-    window = parent_profile_ui()
-    window.show()
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
-    app.exec()
+    pass

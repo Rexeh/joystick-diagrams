@@ -35,11 +35,7 @@ def get_export_devices() -> list[ExportDevice]:
 
 
 def get_template_for_device(device_guid: str) -> Union[Template, None]:
-    print(f"Getting template for {device_guid}")
     template = get_device_template_path(device_guid)
-
-    print(f"Template was {template}")
-
     return Template(template) if template else None
 
 

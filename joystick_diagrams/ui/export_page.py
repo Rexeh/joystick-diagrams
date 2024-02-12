@@ -1,13 +1,11 @@
 import logging
 import os
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import qtawesome as qta
+import qtawesome as qta  # type: ignore
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
-from qt_material import apply_stylesheet
+from PySide6.QtWidgets import QFileDialog, QMainWindow
 
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db.db_device_management import (
@@ -67,7 +65,6 @@ class ExportPage(
         )
         if _file[0]:
             file_path = Path(_file[0])
-            print(f"File selected is {file_path}")
             self.set_template_for_device(file_path)
 
     def set_template_for_device(self, template_path: Path):
@@ -81,22 +78,19 @@ class ExportPage(
         if selected_table_rows.parent() is not None:
             return
 
-        row_guid_data = selected_table_rows.data(0, Qt.UserRole)
-
-        print(f"Modifying row for guid {row_guid_data}")
+        row_guid_data = selected_table_rows.data(0, Qt.ItemDataRole.UserRole)
 
         # Save the device information
         _save = add_update_device_template_path(row_guid_data, template_path.__str__())
 
         if _save:
-            print(f"Devices template was updated for {row_guid_data}")
             self.device_widget.devices_updated.emit()
 
     def run_exporter(self):
         # Check what is selected / Child / Parent
         items_to_export = self.device_widget.treeWidget.currentItem()
 
-        item_data = items_to_export.data(0, Qt.UserRole)
+        item_data = items_to_export.data(0, Qt.ItemDataRole.UserRole)
 
         export(item_data)
 
@@ -139,14 +133,4 @@ def get_devices_from_profiles():
 
 
 if __name__ == "__main__":
-    # print(get_unique_devices())
-
-    app = QApplication(sys.argv)
-
-    window = ExportPage()
-    window.show()
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
-    app.exec()
-    window.show()
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
-    app.exec()
+    pass

@@ -1,12 +1,10 @@
 import logging
 import os
-import sys
 
-import qtawesome as qta
+import qtawesome as qta  # type:  ignore
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
-    QApplication,
     QMainWindow,
 )
 
@@ -93,18 +91,4 @@ class MainWindow(
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-
-    extra = {
-        # Button colors
-        "danger": "#dc3545",
-        "warning": "#ffc107",
-        "success": "#17a2b8",
-        # Font
-        "font_family": "Roboto",
-    }
-
-    # apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False, extra=extra)
-    app.exec()
+    pass
