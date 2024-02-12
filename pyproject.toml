@@ -64,6 +64,7 @@ packages = [
     "joystick_diagrams.plugins.joystick_gremlin_plugin",
 ]
 include_files = [
+    "./img",
     "./templates",
     "./settings.json",
     "./readme.md",

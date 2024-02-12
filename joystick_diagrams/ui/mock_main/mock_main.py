@@ -1,55 +1,68 @@
 import logging
+import os
 import sys
 
 import qtawesome as qta
-from PySide6 import QtWidgets
 from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+)
 from qt_material import apply_stylesheet
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.ui.mock_main import configure_page, export_page, setting_page
 from joystick_diagrams.ui.mock_main.qt_designer import main_window
+from joystick_diagrams.utils import install_root
 
 _logger = logging.getLogger(__name__)
 
+JD_ICON = os.path.join(install_root(), r"img\logo.ico")
+
 
 class MainWindow(
-    QtWidgets.QMainWindow, main_window.Ui_MainWindow
+    QMainWindow, main_window.Ui_MainWindow
 ):  # Refactor pylint: disable=too-many-instance-attributes
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
         self.appState = AppState()
 
+        window_icon = QIcon(JD_ICON)
+        self.setWindowIcon(window_icon)
+
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
         self.customiseSectionButton.clicked.connect(self.load_other_widget)
         self.exportSectionButton.clicked.connect(self.load_export_page)
         self.window_content = None
 
+        # Plugins Menu Controls
         self.setupSectionButton.setIcon(
-            qta.icon(
-                "fa5s.cog",
-                color="white",
-            )
+            qta.icon("fa5s.cog", color="white", color_active="green")
         )
+        self.setupSectionButton.setToolTip("Manage plugins")
         self.setupSectionButton.setIconSize(QSize(32, 32))
-        self.exportSectionButton.setIcon(
-            qta.icon(
-                "fa5s.file-export",
-                color="white",
-            )
-        )
-        self.exportSectionButton.setIconSize(QSize(32, 32))
 
+        # Customise Menu  Controls
         self.customiseSectionButton.setIcon(
-            qta.icon(
-                "fa5s.tools",
-                color="white",
-            )
+            qta.icon("fa5s.tools", color="white", color_active="green")
         )
         self.customiseSectionButton.setIconSize(QSize(32, 32))
+        self.customiseSectionButton.setToolTip(
+            "Setup your profiles, and customise your binds"
+        )
+
+        # Export Menu Controls
+        self.exportSectionButton.setIcon(
+            qta.icon("fa5s.file-export", color="white", color_active="green")
+        )
+        self.exportSectionButton.setIconSize(QSize(32, 32))
+        self.exportSectionButton.setToolTip("Export your profiles to diagrams")
+
         # Load default tab
+        self.setupSectionButton.click()
         self.load_setting_widget()
 
         # Window Setup
@@ -59,26 +72,29 @@ class MainWindow(
         if self.window_content:
             self.window_content.hide()
         self.window_content = setting_page.PluginsPage()
-        self.window_content.setParent(self.activeMainWindowWidget)
+        # self.window_content.setParent(self.horizontalLayout_2)
+        self.horizontalLayout_2.addWidget(self.window_content)
         self.window_content.show()
 
     def load_other_widget(self):
         if self.window_content:
             self.window_content.hide()
         self.window_content = configure_page.configurePage()
-        self.window_content.setParent(self.activeMainWindowWidget)
+        # self.window_content.setParent(self.horizontalLayout_2)
+        self.horizontalLayout_2.addWidget(self.window_content)
         self.window_content.show()
 
     def load_export_page(self):
         if self.window_content:
             self.window_content.hide()
         self.window_content = export_page.ExportPage()
-        self.window_content.setParent(self.activeMainWindowWidget)
+        # self.window_content.setParent(self.horizontalLayout_2)
+        self.horizontalLayout_2.addWidget(self.window_content)
         self.window_content.show()
 
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
 
@@ -88,7 +104,7 @@ if __name__ == "__main__":
         "warning": "#ffc107",
         "success": "#17a2b8",
         # Font
-        "font_family": "Windings",
+        "font_family": "Roboto",
     }
 
     apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False, extra=extra)
