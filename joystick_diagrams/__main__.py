@@ -30,7 +30,18 @@ if __name__ == "__main__":
         window = MainWindow()
         window.show()
 
-        apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
+        extra = {
+            # Button colors
+            "danger": "#dc3545",
+            "warning": "#ffc107",
+            "success": "#27ae60",
+            # Font
+            "font_family": "Roboto",
+        }
+
+        apply_stylesheet(
+            app, theme="dark_blue.xml", invert_secondary=False, extra=extra
+        )
 
         app.exec()
     except Exception as error:  # pylint: disable=broad-except

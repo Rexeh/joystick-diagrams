@@ -67,7 +67,7 @@ class PluginsPage(
 
         self.window_content.setup()
 
-        self.window_content.setParent(self.pluginOptionsWidget)
+        self.window_content.setParent(self.pluginOptionWidget)
         self.window_content.show()
 
     @Slot()

@@ -8,15 +8,18 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, Qt
+from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize, Qt
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QListView,
     QListWidget,
     QListWidgetItem,
+    QSizePolicy,
     QTabWidget,
     QTreeWidget,
     QTreeWidgetItem,
@@ -29,25 +32,32 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName("Form")
-        Form.resize(1050, 651)
-        self.activeScreenWidget = QWidget(Form)
-        self.activeScreenWidget.setObjectName("activeScreenWidget")
-        self.activeScreenWidget.setGeometry(QRect(0, 0, 1041, 631))
-        self.verticalLayout_2 = QVBoxLayout(self.activeScreenWidget)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.verticalLayout = QVBoxLayout()
+        Form.resize(1100, 800)
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
+        Form.setSizePolicy(sizePolicy)
+        Form.setMinimumSize(QSize(1100, 800))
+        self.layoutWidget = QWidget(Form)
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.layoutWidget.setGeometry(QRect(0, 0, 1021, 601))
+        self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.label = QLabel(self.activeScreenWidget)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.label = QLabel(self.layoutWidget)
         self.label.setObjectName("label")
 
         self.verticalLayout.addWidget(self.label)
 
-        self.label_2 = QLabel(self.activeScreenWidget)
-        self.label_2.setObjectName("label_2")
+        self.line = QFrame(self.layoutWidget)
+        self.line.setObjectName("line")
+        self.line.setFrameShape(QFrame.HLine)
+        self.line.setFrameShadow(QFrame.Sunken)
 
-        self.verticalLayout.addWidget(self.label_2)
+        self.verticalLayout.addWidget(self.line)
 
-        self.tabWidget = QTabWidget(self.activeScreenWidget)
+        self.tabWidget = QTabWidget(self.layoutWidget)
         self.tabWidget.setObjectName("tabWidget")
         self.tab_2 = QWidget()
         self.tab_2.setObjectName("tab_2")
@@ -71,6 +81,9 @@ class Ui_Form(object):
         QListWidgetItem(self.profileList)
         QListWidgetItem(self.profileList)
         self.profileList.setObjectName("profileList")
+        font = QFont()
+        font.setFamilies(["Sans Serif Collection"])
+        self.profileList.setFont(font)
         self.profileList.setDragEnabled(True)
         self.profileList.setDragDropOverwriteMode(True)
         self.profileList.setDragDropMode(QAbstractItemView.DragOnly)
@@ -145,11 +158,9 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.tabWidget)
 
-        self.verticalLayout_2.addLayout(self.verticalLayout)
-
         self.retranslateUi(Form)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
 
         QMetaObject.connectSlotsByName(Form)
 
@@ -164,7 +175,6 @@ class Ui_Form(object):
                 None,
             )
         )
-        self.label_2.setText("")
         self.label_3.setText(
             QCoreApplication.translate(
                 "Form",

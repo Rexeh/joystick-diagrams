@@ -9,7 +9,6 @@ from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
 )
-from qt_material import apply_stylesheet
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
@@ -107,5 +106,5 @@ if __name__ == "__main__":
         "font_family": "Roboto",
     }
 
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False, extra=extra)
+    # apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False, extra=extra)
     app.exec()

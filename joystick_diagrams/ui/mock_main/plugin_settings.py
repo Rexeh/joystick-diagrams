@@ -36,6 +36,14 @@ class PluginSettings(
         # Setup
 
         # Style Overrides
+        configure_style = """
+                            QCommandLinkButton {
+                                border: 1px solid #8f8f91;
+                                border-radius: 10px;
+                                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f6f7fa, stop: 1 #dadbde);
+                                min-width: 80px; }
+                        """
+        self.configureLink.setStyleSheet(configure_style)
 
     def setup(self):
         """Initialise the widget configuration"""
