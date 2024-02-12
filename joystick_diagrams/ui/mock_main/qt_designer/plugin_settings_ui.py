@@ -96,7 +96,7 @@ class Ui_Form(object):
             self.configureLink.sizePolicy().hasHeightForWidth()
         )
         self.configureLink.setSizePolicy(sizePolicy2)
-        self.configureLink.setMaximumSize(QSize(400, 16777215))
+        self.configureLink.setMaximumSize(QSize(500, 16777215))
 
         self.horizontalLayout_2.addWidget(self.configureLink)
 

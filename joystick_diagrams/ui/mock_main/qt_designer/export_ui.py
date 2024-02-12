@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QSizePolicy,
-    QSpacerItem,
     QVBoxLayout,
     QWidget,
 )
@@ -33,23 +32,26 @@ class Ui_Form(object):
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
         Form.setMinimumSize(QSize(1100, 800))
+        Form.setMaximumSize(QSize(1100, 16777215))
         font = QFont()
         font.setFamilies(["MS Sans Serif"])
         Form.setFont(font)
         self.layoutWidget = QWidget(Form)
         self.layoutWidget.setObjectName("layoutWidget")
-        self.layoutWidget.setGeometry(QRect(0, 0, 981, 621))
+        self.layoutWidget.setGeometry(QRect(0, 0, 1081, 621))
+        self.layoutWidget.setMaximumSize(QSize(1100, 16777215))
         self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.label = QLabel(self.layoutWidget)
         self.label.setObjectName("label")
-        self.label.setMaximumSize(QSize(16777215, 23))
+        self.label.setMaximumSize(QSize(1100, 23))
 
         self.verticalLayout.addWidget(self.label)
 
         self.line = QFrame(self.layoutWidget)
         self.line.setObjectName("line")
+        self.line.setMaximumSize(QSize(1100, 16777215))
         self.line.setFrameShape(QFrame.HLine)
         self.line.setFrameShadow(QFrame.Sunken)
 
@@ -63,6 +65,7 @@ class Ui_Form(object):
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.label_3 = QLabel(self.layoutWidget)
         self.label_3.setObjectName("label_3")
+        self.label_3.setMaximumSize(QSize(1100, 16777215))
         font1 = QFont()
         font1.setPointSize(10)
         font1.setBold(True)
@@ -72,6 +75,7 @@ class Ui_Form(object):
 
         self.label_2 = QLabel(self.layoutWidget)
         self.label_2.setObjectName("label_2")
+        self.label_2.setMaximumSize(QSize(1100, 16777215))
 
         self.verticalLayout_4.addWidget(self.label_2)
 
@@ -81,7 +85,7 @@ class Ui_Form(object):
         self.verticalLayout_5.setObjectName("verticalLayout_5")
         self.pushButton = QPushButton(self.layoutWidget)
         self.pushButton.setObjectName("pushButton")
-        self.pushButton.setMaximumSize(QSize(250, 16777215))
+        self.pushButton.setMaximumSize(QSize(1100, 16777215))
 
         self.verticalLayout_5.addWidget(self.pushButton)
 
@@ -98,38 +102,10 @@ class Ui_Form(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.horizontalSpacer = QSpacerItem(
-            40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum
-        )
-
-        self.horizontalLayout_3.addItem(self.horizontalSpacer)
-
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         self.verticalLayout_6 = QVBoxLayout()
         self.verticalLayout_6.setObjectName("verticalLayout_6")
-        self.label_4 = QLabel(self.layoutWidget)
-        self.label_4.setObjectName("label_4")
-        self.label_4.setFont(font1)
-
-        self.verticalLayout_6.addWidget(self.label_4)
-
-        self.label_5 = QLabel(self.layoutWidget)
-        self.label_5.setObjectName("label_5")
-
-        self.verticalLayout_6.addWidget(self.label_5)
-
-        self.pushButton_2 = QPushButton(self.layoutWidget)
-        self.pushButton_2.setObjectName("pushButton_2")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(
-            self.pushButton_2.sizePolicy().hasHeightForWidth()
-        )
-        self.pushButton_2.setSizePolicy(sizePolicy1)
-
-        self.verticalLayout_6.addWidget(self.pushButton_2)
 
         self.horizontalLayout_4.addLayout(self.verticalLayout_6)
 
@@ -139,6 +115,7 @@ class Ui_Form(object):
 
         self.ExportButton = QPushButton(self.layoutWidget)
         self.ExportButton.setObjectName("ExportButton")
+        self.ExportButton.setMaximumSize(QSize(1100, 16777215))
 
         self.verticalLayout.addWidget(self.ExportButton)
 
@@ -166,17 +143,6 @@ class Ui_Form(object):
             )
         )
         self.pushButton.setText(QCoreApplication.translate("Form", "PushButton", None))
-        self.label_4.setText(
-            QCoreApplication.translate("Form", "Export Location", None)
-        )
-        self.label_5.setText(
-            QCoreApplication.translate(
-                "Form", "Where your diagrams will be exported", None
-            )
-        )
-        self.pushButton_2.setText(
-            QCoreApplication.translate("Form", "Sekect Folder", None)
-        )
         self.ExportButton.setText(QCoreApplication.translate("Form", "Export", None))
 
     # retranslateUi
