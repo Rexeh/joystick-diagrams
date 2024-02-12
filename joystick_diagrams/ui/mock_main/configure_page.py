@@ -63,6 +63,8 @@ class configurePage(
         for key in profiles.keys():
             self.comboBox.addItem(key)
 
+        self.load_binds_for_selected_profile()
+
     def load_binds_for_selected_profile(self):
         selected_profile = self.comboBox.currentText()
         self.treeWidget.clear()
