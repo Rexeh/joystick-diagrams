@@ -18,8 +18,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QGridLayout,
     QHBoxLayout, QLayout, QMainWindow, QMenu,
-    QMenuBar, QSizePolicy, QSplitter, QStatusBar,
-    QToolButton, QVBoxLayout, QWidget)
+    QMenuBar, QPushButton, QSizePolicy, QSplitter,
+    QStatusBar, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -143,7 +143,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.horizontalLayout.setContentsMargins(-1, 25, -1, 25)
-        self.setupSectionButton = QToolButton(self.centralwidget)
+        self.setupSectionButton = QPushButton(self.centralwidget)
         self.buttonGroup_2 = QButtonGroup(MainWindow)
         self.buttonGroup_2.setObjectName(u"buttonGroup_2")
         self.buttonGroup_2.addButton(self.setupSectionButton)
@@ -152,16 +152,21 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.setupSectionButton)
 
-        self.customiseSectionButton = QToolButton(self.centralwidget)
+        self.customiseSectionButton = QPushButton(self.centralwidget)
         self.buttonGroup_2.addButton(self.customiseSectionButton)
         self.customiseSectionButton.setObjectName(u"customiseSectionButton")
         self.customiseSectionButton.setAutoExclusive(True)
 
         self.horizontalLayout.addWidget(self.customiseSectionButton)
 
-        self.exportSectionButton = QToolButton(self.centralwidget)
+        self.exportSectionButton = QPushButton(self.centralwidget)
         self.buttonGroup_2.addButton(self.exportSectionButton)
         self.exportSectionButton.setObjectName(u"exportSectionButton")
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.exportSectionButton.sizePolicy().hasHeightForWidth())
+        self.exportSectionButton.setSizePolicy(sizePolicy)
         self.exportSectionButton.setAutoExclusive(True)
 
         self.horizontalLayout.addWidget(self.exportSectionButton)
@@ -191,7 +196,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1100, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1100, 21))
         self.menubar.setContextMenuPolicy(Qt.NoContextMenu)
         self.menubar.setNativeMenuBar(True)
         self.menuStyles = QMenu(self.menubar)

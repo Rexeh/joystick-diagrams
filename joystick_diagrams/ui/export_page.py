@@ -33,22 +33,24 @@ class ExportPage(
         self.setTemplateButton.clicked.connect(self.select_template)
 
         # UI Setup
-        self.setTemplateButton.setIconSize(QSize(32, 32))
+        self.setTemplateButton.setIconSize(QSize(20, 20))
         self.setTemplateButton.setIcon(
-            qta.icon(
-                "fa5s.file-code",
-                color="white",
-            )
+            qta.icon("fa5s.file-code", color="white", color_disabled="white")
         )
-        self.setTemplateButton.setText("Setup template")
-        self.setTemplateButton.setProperty("class", "success")
+        self.setTemplateButton.setText("Select an item to set Template")
+        self.setTemplateButton.setStyleSheet(
+            """
+            QPushButton:disabled{background-color:grey}QPushButton{background-color:#2980b9;color:white;font-size:14px;border-radius:3px;border:none}
+            """
+        )
+        self.setTemplateButton.setDisabled(True)
 
         self.ExportButton.setIcon(
             qta.icon("fa5s.file-export", color="white", color_disabled="white")
         )
         self.ExportButton.setStyleSheet(
             """
-            QPushButton:disabled{background-color:grey}QPushButton{background-color:#1abc9c;color:white;font-size:14px;border-radius:3px;border:none}
+            QPushButton:disabled{background-color:grey}QPushButton{background-color:#27ae60;color:white;font-size:14px;border-radius:3px;border:none}
             """
         )
         self.ExportButton.setIconSize(QSize(35, 35))
@@ -82,9 +84,11 @@ class ExportPage(
     def change_template_button(self, data: QTreeWidgetItem):
         if data.parent():
             self.setTemplateButton.setDisabled(True)
+            self.setTemplateButton.setText("Select an item to set Template")
 
         if data.parent() is None:
             self.setTemplateButton.setDisabled(False)
+            self.setTemplateButton.setText(f"Update template for {data.text(0)}")
 
     def select_template(self):
         _file = QFileDialog.getOpenFileName(

@@ -36,56 +36,73 @@ class MainWindow(
         self.window_content = None
 
         # Plugins Menu Controls
+
+        # TODO move this out into styles
+        section_button_style = """
+            QPushButton{background-color:#bdc3c7;color:grey;font-size:14px;border-radius:5px;border:none;padding:15px;margin-left:5px;margin-right:5px}
+            QPushButton:pressed{background-color:#2980b9;color:white}
+            QPushButton:checked{background-color:#16a085;color:white}
+            QPushButton:disabled{background-color:#7f8c8d;color:white}
+            """.replace(" ", "")
+
         self.setupSectionButton.setIcon(
-            qta.icon("fa5s.cog", color="white", color_active="green")
+            qta.icon("fa5s.cog", color="grey", color_active="white")
         )
         self.setupSectionButton.setToolTip("Manage plugins")
         self.setupSectionButton.setIconSize(QSize(32, 32))
+        self.setupSectionButton.setStyleSheet(section_button_style)
+        self.setupSectionButton.setCheckable(True)
 
         # Customise Menu  Controls
         self.customiseSectionButton.setIcon(
-            qta.icon("fa5s.tools", color="white", color_active="green")
+            qta.icon("fa5s.tools", color="grey", color_active="white")
         )
         self.customiseSectionButton.setIconSize(QSize(32, 32))
         self.customiseSectionButton.setToolTip(
             "Setup your profiles, and customise your binds"
         )
+        self.customiseSectionButton.setStyleSheet(section_button_style)
+
+        self.customiseSectionButton.setCheckable(True)
 
         # Export Menu Controls
         self.exportSectionButton.setIcon(
-            qta.icon("fa5s.file-export", color="white", color_active="green")
+            qta.icon("fa5s.file-export", color="grey", color_active="white")
         )
         self.exportSectionButton.setIconSize(QSize(32, 32))
         self.exportSectionButton.setToolTip("Export your profiles to diagrams")
+        self.exportSectionButton.setStyleSheet(section_button_style)
+        self.exportSectionButton.setCheckable(True)
 
         # Load default tab
-        self.setupSectionButton.click()
         self.load_setting_widget()
+        self.setupSectionButton.click()
 
         # Window Setup
         self.setWindowTitle(f"Joystick Diagrams - {version.get_current_version()}")
 
     def load_setting_widget(self):
+        self.setupSectionButton.setChecked(True)
+
         if self.window_content:
             self.window_content.hide()
         self.window_content = setting_page.PluginsPage()
-        # self.window_content.setParent(self.horizontalLayout_2)
         self.horizontalLayout_2.addWidget(self.window_content)
         self.window_content.show()
 
     def load_other_widget(self):
+        self.customiseSectionButton.setChecked(True)
         if self.window_content:
             self.window_content.hide()
         self.window_content = configure_page.configurePage()
-        # self.window_content.setParent(self.horizontalLayout_2)
         self.horizontalLayout_2.addWidget(self.window_content)
         self.window_content.show()
 
     def load_export_page(self):
+        self.exportSectionButton.setChecked(True)
         if self.window_content:
             self.window_content.hide()
         self.window_content = export_page.ExportPage()
-        # self.window_content.setParent(self.horizontalLayout_2)
         self.horizontalLayout_2.addWidget(self.window_content)
         self.window_content.show()
 
