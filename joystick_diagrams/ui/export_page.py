@@ -44,10 +44,12 @@ class ExportPage(
         self.setTemplateButton.setProperty("class", "success")
 
         self.ExportButton.setIcon(
-            qta.icon(
-                "fa5s.file-export",
-                color="white",
-            )
+            qta.icon("fa5s.file-export", color="white", color_disabled="white")
+        )
+        self.ExportButton.setStyleSheet(
+            """
+            QPushButton:disabled{background-color:grey}QPushButton{background-color:#1abc9c;color:white;font-size:14px;border-radius:3px;border:none}
+            """
         )
         self.ExportButton.setIconSize(QSize(35, 35))
 
