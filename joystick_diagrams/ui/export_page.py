@@ -1,29 +1,23 @@
 import logging
 import os
-from dataclasses import dataclass
 from pathlib import Path
 
 import qtawesome as qta  # type: ignore
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtWidgets import QFileDialog, QMainWindow
+from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QTreeWidgetItem
 
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db.db_device_management import (
     add_update_device_template_path,
-    get_device_templates,
 )
 from joystick_diagrams.export import export
+from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.ui.device_setup import DeviceSetup
+from joystick_diagrams.ui.export_settings import ExportSettings
 from joystick_diagrams.ui.qt_designer import export_ui
 from joystick_diagrams.utils import install_root
 
 _logger = logging.getLogger(__name__)
-
-
-@dataclass
-class DeviceTemplate:
-    guid: str
-    path: Path | None
 
 
 class ExportPage(
@@ -35,26 +29,60 @@ class ExportPage(
         self.appState = AppState()
         self.ExportButton.clicked.connect(self.run_exporter)
 
-        # self.tableWidget.itemClicked.connect(self.device_template_item_clicked)
-        self.pushButton.clicked.connect(self.select_template)
-        self.pushButton.setIconSize(QSize(32, 32))
-        self.pushButton.setIcon(
+        # Connections
+        self.setTemplateButton.clicked.connect(self.select_template)
+
+        # UI Setup
+        self.setTemplateButton.setIconSize(QSize(32, 32))
+        self.setTemplateButton.setIcon(
             qta.icon(
                 "fa5s.file-code",
                 color="white",
             )
         )
-        self.pushButton.setText("Setup template")
-        self.pushButton.setProperty("class", "success")
+        self.setTemplateButton.setText("Setup template")
+        self.setTemplateButton.setProperty("class", "success")
 
-        # UI Setup
+        self.ExportButton.setIcon(
+            qta.icon(
+                "fa5s.file-export",
+                color="white",
+            )
+        )
+        self.ExportButton.setIconSize(QSize(35, 35))
 
+        # Include Device setup Widget
         self.device_widget = DeviceSetup()
         self.device_widget.device_item_selected.connect(self.change_template_button)
         self.horizontalLayout.addWidget(self.device_widget)
+        self.device_widget.number_of_selected_profiles.connect(
+            self.update_export_button_state
+        )
 
-    def change_template_button(self, data):
-        print(data)
+        ## Include Export Settings Panel
+        self.export_settings_widget = ExportSettings()
+        self.export_settings_container.addWidget(self.export_settings_widget)
+
+        # Defaults
+        self.update_export_button_state(0)  # Set the export button state
+
+    def update_export_button_state(self, data: int):
+        if data == 0:
+            self.ExportButton.setDisabled(True)
+            self.ExportButton.setText("  Select a profile to export")
+            return
+
+        self.ExportButton.setDisabled(False)
+
+        profile_text = "profiles" if data > 1 else "profile"
+        self.ExportButton.setText(f"  Export {data} {profile_text}")
+
+    def change_template_button(self, data: QTreeWidgetItem):
+        if data.parent():
+            self.setTemplateButton.setDisabled(True)
+
+        if data.parent() is None:
+            self.setTemplateButton.setDisabled(False)
 
     def select_template(self):
         _file = QFileDialog.getOpenFileName(
@@ -86,50 +114,35 @@ class ExportPage(
         if _save:
             self.device_widget.devices_updated.emit()
 
+    def get_items_to_export(self) -> list[ExportDevice]:
+        return self.device_widget.get_selected_export_items()
+
     def run_exporter(self):
+        # Check a location is set
+        if self.export_settings_widget.export_location is None:
+            QMessageBox.warning(
+                self,
+                "No export location set",
+                "You need to set an export location before exporting",
+                buttons=QMessageBox.StandardButton.Ok,
+                defaultButton=QMessageBox.StandardButton.Ok,
+            )
+            return
+
         # Check what is selected / Child / Parent
-        items_to_export = self.device_widget.treeWidget.currentItem()
+        items_to_export = self.get_items_to_export()
 
-        item_data = items_to_export.data(0, Qt.ItemDataRole.UserRole)
+        # TODO rework exporter structure > Push into async
+        for item in items_to_export:
+            export(item, self.export_settings_widget.export_location)
 
-        export(item_data)
-
-
-def get_unique_devices() -> list[DeviceTemplate]:
-    "Gets the unique device list from stored device configurations and new device configurations"
-
-    # Get stored devices
-    stored_devices = get_device_template_configurations()
-
-    # Get the devices active from profiles
-    active_profile_devices = get_devices_from_profiles()
-
-    # Remove items from new profiles where intersect with stored
-    active_profile_devices.difference_update({x[0] for x in stored_devices})
-
-    # Create wrapper objects
-    stored_objs = [DeviceTemplate(x[0], x[1]) for x in stored_devices]
-    new_objs = [DeviceTemplate(x, None) for x in active_profile_devices]
-
-    return stored_objs + new_objs
-
-
-def get_device_template_configurations() -> list:
-    "Gets the stored device template configurations from datastore"
-
-    return get_device_templates()
-
-
-def get_devices_from_profiles():
-    "Retreives a unique set of devices from all processed profiles"
-
-    all_profiles = AppState().get_processed_profiles().values()
-
-    merge_set = set()
-    for profile in all_profiles:
-        merge_set.update(profile.get_all_device_guids())
-
-    return merge_set
+        QMessageBox.information(
+            self,
+            "Items exported",
+            f"{len(items_to_export)} items were exported to {self.export_settings_widget.export_location}",
+            buttons=QMessageBox.StandardButton.Ok,
+            defaultButton=QMessageBox.StandardButton.Ok,
+        )
 
 
 if __name__ == "__main__":

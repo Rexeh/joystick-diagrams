@@ -28,6 +28,7 @@ def setup_export_devices(export_device_list: list[ExportDevice]):
 
 
 def get_export_devices() -> list[ExportDevice]:
+    """Retrieves profiles from global state and converts them to device trees"""
     devices = convert_profiles_to_export_devices(get_processed_profiles())
 
     setup_export_devices(devices)
@@ -35,11 +36,13 @@ def get_export_devices() -> list[ExportDevice]:
 
 
 def get_template_for_device(device_guid: str) -> Union[Template, None]:
+    """Retrieves a device template from storage"""
     template = get_device_template_path(device_guid)
     return Template(template) if template else None
 
 
-def get_processed_profiles():
+def get_processed_profiles() -> dict[str, Profile_]:
+    "Access global state and return processed profiles"
     app_state = AppState()
     return app_state.get_processed_profiles()
 

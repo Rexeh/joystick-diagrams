@@ -16,7 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
-    QPushButton, QSizePolicy, QVBoxLayout, QWidget)
+    QLayout, QPushButton, QSizePolicy, QVBoxLayout,
+    QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -81,11 +82,11 @@ class Ui_Form(object):
 
         self.verticalLayout_5 = QVBoxLayout()
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.pushButton = QPushButton(self.layoutWidget)
-        self.pushButton.setObjectName(u"pushButton")
-        self.pushButton.setMaximumSize(QSize(1100, 16777215))
+        self.setTemplateButton = QPushButton(self.layoutWidget)
+        self.setTemplateButton.setObjectName(u"setTemplateButton")
+        self.setTemplateButton.setMaximumSize(QSize(1100, 16777215))
 
-        self.verticalLayout_5.addWidget(self.pushButton)
+        self.verticalLayout_5.addWidget(self.setTemplateButton)
 
 
         self.horizontalLayout_2.addLayout(self.verticalLayout_5)
@@ -95,32 +96,36 @@ class Ui_Form(object):
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
 
         self.verticalLayout.addLayout(self.verticalLayout_3)
 
-        self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.verticalLayout_6 = QVBoxLayout()
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout_5.setContentsMargins(-1, 30, -1, -1)
+        self.export_settings_container = QHBoxLayout()
+        self.export_settings_container.setObjectName(u"export_settings_container")
+        self.export_settings_container.setContentsMargins(-1, -1, 50, -1)
 
-        self.horizontalLayout_4.addLayout(self.verticalLayout_6)
-
-
-        self.horizontalLayout_3.addLayout(self.horizontalLayout_4)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_3)
+        self.horizontalLayout_5.addLayout(self.export_settings_container)
 
         self.ExportButton = QPushButton(self.layoutWidget)
         self.ExportButton.setObjectName(u"ExportButton")
-        self.ExportButton.setMaximumSize(QSize(1100, 16777215))
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.ExportButton.sizePolicy().hasHeightForWidth())
+        self.ExportButton.setSizePolicy(sizePolicy1)
+        self.ExportButton.setMinimumSize(QSize(300, 100))
+        self.ExportButton.setMaximumSize(QSize(300, 100))
 
-        self.verticalLayout.addWidget(self.ExportButton)
+        self.horizontalLayout_5.addWidget(self.ExportButton)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_5)
 
 
         self.retranslateUi(Form)
@@ -133,6 +138,6 @@ class Ui_Form(object):
         self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Export</span></p></body></html>", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"Device Templates", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"Only devices with templates will be exported", None))
-        self.pushButton.setText(QCoreApplication.translate("Form", u"PushButton", None))
+        self.setTemplateButton.setText(QCoreApplication.translate("Form", u"PushButton", None))
         self.ExportButton.setText(QCoreApplication.translate("Form", u"Export", None))
     # retranslateUi

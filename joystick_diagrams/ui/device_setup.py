@@ -24,12 +24,20 @@ _logger = logging.getLogger(__name__)
 class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
     devices_updated = Signal()
     device_item_selected = Signal(object)
+    device_checkstate_changed = Signal()
+    number_of_selected_profiles = Signal(int)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.setupUi(self)
 
+        # Connections
+        self.treeWidget.itemChanged.connect(self.handle_item_change)
+        self.devices_updated.connect(self.initialise_ui)
+        self.device_checkstate_changed.connect(self.update_number_of_checked_items)
+
+        # UI Setup
         self.device_header = QTreeWidgetItem()
         self.device_header.setText(0, "Device")
         self.device_header.setText(1, "Profile")
@@ -37,7 +45,6 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         self.treeWidget.setHeaderItem(self.device_header)
         self.treeWidget.setIconSize(QSize(20, 20))
 
-        self.devices_updated.connect(self.initialise_ui)
         self.treeWidget.setColumnCount(3)
         self.treeWidget.itemClicked.connect(self.device_item_clicked)
         self.treeWidget.header().setStretchLastSection(True)
@@ -69,6 +76,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             opacity=0.7,
             scale_factor=1,
         )
+
         # Init
         self.initialise_ui()
 
@@ -76,6 +84,87 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         devices = get_export_devices()
 
         self.add_devices_to_widget(devices)
+
+    def update_number_of_checked_items(self):
+        """Checks the number of active items in tree, to emit to consumers"""
+
+        _count = 0
+        for top_level_id in range(self.treeWidget.topLevelItemCount()):
+            top_level_item = self.treeWidget.topLevelItem(top_level_id)
+            for child_item_id in range(top_level_item.childCount()):
+                _state = top_level_item.child(child_item_id).checkState(0)
+                if _state == Qt.CheckState.Checked:
+                    _count = _count + 1
+
+        self.number_of_selected_profiles.emit(_count)
+
+    def get_all_root_nodes(self) -> list[QTreeWidgetItem]:
+        roots: list[QTreeWidgetItem] = []
+        for root_id in range(self.treeWidget.topLevelItemCount()):
+            roots.append(self.treeWidget.topLevelItem(root_id))
+        return roots
+
+    def get_children_for_root_node(self, root: QTreeWidgetItem):
+        children: list[QTreeWidgetItem] = []
+        for child_id in range(root.childCount()):
+            children.append(root.child(child_id))
+        return children
+
+    def one_or_more_checkstate_checked(self, items: list[QTreeWidgetItem]) -> bool:
+        "Returns True if any QTreeWidget items have a CHECKED state for COL0"
+        for widget_item in items:
+            if widget_item.checkState(0) == Qt.CheckState.Checked:
+                return True
+        return False
+
+    def get_selected_export_items(self) -> list[ExportDevice]:
+        roots = self.get_all_root_nodes()
+
+        export_devices: list[ExportDevice] = []
+
+        for root in roots:
+            children = self.get_children_for_root_node(root)
+            for child in children:
+                export_devices.append(child.data(0, Qt.ItemDataRole.UserRole))
+
+        return export_devices
+
+    def set_checkstate(
+        self, items: list[QTreeWidgetItem], state: Qt.CheckState
+    ) -> bool:
+        "Sets the checkstate for groups of QTreeWidgetItems"
+        for widget_item in items:
+            widget_item.setCheckState(0, state)
+        return False
+
+    def handle_item_change(self, item: QTreeWidgetItem):
+        # Get Item Check State
+        parent_node = item.parent()
+        item_check_state = item.checkState(0)
+        self.device_checkstate_changed.emit()
+
+        # Scenario 1- Clicked a parent item
+        if parent_node is None:
+            _child_items = self.get_children_for_root_node(item)
+            _check = self.one_or_more_checkstate_checked(_child_items)
+
+            if item_check_state == Qt.CheckState.Unchecked:
+                self.set_checkstate(_child_items, Qt.CheckState.Unchecked)
+
+            if item_check_state == Qt.CheckState.Checked:
+                if not _check:
+                    self.set_checkstate(_child_items, Qt.CheckState.Checked)
+
+        # Scenario 2 - Clicked a child item
+        if parent_node:
+            if item_check_state == Qt.CheckState.Checked:
+                parent_node.setCheckState(0, Qt.CheckState.Checked)
+            if item_check_state == Qt.CheckState.Unchecked:
+                _child_items_states = self.one_or_more_checkstate_checked(
+                    self.get_children_for_root_node(parent_node)
+                )
+                if _child_items_states is False:
+                    parent_node.setCheckState(0, Qt.CheckState.Unchecked)
 
     def device_item_clicked(self, data):
         # If root node
@@ -157,11 +246,18 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
                 children_have_template_issues, children_have_errors
             )
 
+            # For items without templates missing, add their child profiles to tree
             if not children_have_template_issues:
+                # Add export tree root option
+                root_item.setCheckState(0, Qt.CheckState.Unchecked)
+
                 for child in child_items:
                     child_item = QTreeWidgetItem()
                     child_item.setData(0, Qt.ItemDataRole.UserRole, child)
                     child_item.setText(1, child.description)
+
+                    # Add export option for child
+                    child_item.setCheckState(0, Qt.CheckState.Unchecked)
 
                     # Get the child icon state where template not exists / or errors bucket contains entries
                     child_icon_state, child_message = return_top_level_icon_state(

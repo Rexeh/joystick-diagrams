@@ -23,12 +23,8 @@ class AppState:
     def _init(self, plugin_manager: ParserPluginManager) -> None:
         self.plugin_manager: ParserPluginManager = plugin_manager
         self.profileObjectMapping: dict[str, Profile_] = {}
-        self.profileParentMapping: dict[
-            str, list[str]
-        ] = {}  # TODO correctly initialise these
-        self.processedProfileObjectMapping: dict[
-            str, Profile_
-        ] = {}  # TODO Think here about name colissions
+        self.profileParentMapping: dict[str, list[str]] = {}
+        self.processedProfileObjectMapping: dict[str, Profile_] = {}
         self.update_processed_profiles()
         self.process_profile_collection_updates()
 
