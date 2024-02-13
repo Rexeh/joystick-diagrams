@@ -125,7 +125,8 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         for root in roots:
             children = self.get_children_for_root_node(root)
             for child in children:
-                export_devices.append(child.data(0, Qt.ItemDataRole.UserRole))
+                if child.checkState(0) == Qt.CheckState.Checked:
+                    export_devices.append(child.data(0, Qt.ItemDataRole.UserRole))
 
         return export_devices
 
