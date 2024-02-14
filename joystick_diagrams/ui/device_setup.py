@@ -40,8 +40,12 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         # UI Setup
         self.device_header = QTreeWidgetItem()
         self.device_header.setText(0, "Device")
+
         self.device_header.setText(1, "Profile")
+        self.device_header.setSizeHint(1, QSize(100, 25))
+        self.device_header.setTextAlignment(1, Qt.AlignmentFlag.AlignCenter)
         self.device_header.setText(2, "Status")
+
         self.treeWidget.setHeaderItem(self.device_header)
         self.treeWidget.setIconSize(QSize(20, 20))
 
@@ -104,7 +108,9 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             roots.append(self.treeWidget.topLevelItem(root_id))
         return roots
 
-    def get_children_for_root_node(self, root: QTreeWidgetItem):
+    def get_children_for_root_node(
+        self, root: QTreeWidgetItem
+    ) -> list[QTreeWidgetItem]:
         children: list[QTreeWidgetItem] = []
         for child_id in range(root.childCount()):
             children.append(root.child(child_id))
@@ -130,13 +136,10 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
 
         return export_devices
 
-    def set_checkstate(
-        self, items: list[QTreeWidgetItem], state: Qt.CheckState
-    ) -> bool:
+    def set_checkstate(self, items: list[QTreeWidgetItem], state: Qt.CheckState):
         "Sets the checkstate for groups of QTreeWidgetItems"
         for widget_item in items:
             widget_item.setCheckState(0, state)
-        return False
 
     def handle_item_change(self, item: QTreeWidgetItem):
         # Get Item Check State
@@ -168,7 +171,6 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
                     parent_node.setCheckState(0, Qt.CheckState.Unchecked)
 
     def device_item_clicked(self, data):
-        # If root node
         self.device_item_selected.emit(data)
 
     def view_device_errors(self):
@@ -235,6 +237,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             )
 
             root_item.setText(1, root_profile_text)
+            root_item.setTextAlignment(1, Qt.AlignmentFlag.AlignCenter)
             # Detect if any of the potential children have a missing template, if so all items will be missing template
             children_have_template_issues = bool(
                 [x.has_template for x in child_items if not x.has_template]
