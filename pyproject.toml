@@ -2,7 +2,7 @@
 name = "joystick_diagrams"
 description = ""
 authors = ["Robert Cox"]
-version = "2.0.1"
+version = "2.0.4"
 homepage = "https://www.joystick-diagrams.com"
 readme = "readme.md"
 repository = "https://github.com/Rexeh/joystick-diagrams"
@@ -64,6 +64,7 @@ packages = [
     "joystick_diagrams.plugins.joystick_gremlin_plugin",
 ]
 include_files = [
+    "./img",
     "./templates",
     "./settings.json",
     "./readme.md",
@@ -89,7 +90,7 @@ omit = [
     "*/site-packages/*",
     "*/config.py",
     "*/plugins/*",
-    "*/ui/*/",
+    "*/ui/*",
     "*/db*",
 ]
 

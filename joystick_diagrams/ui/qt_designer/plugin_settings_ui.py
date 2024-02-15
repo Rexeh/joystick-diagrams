@@ -27,11 +27,16 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName("Form")
-        Form.resize(750, 596)
-        Form.setMaximumSize(QSize(750, 600))
+        Form.resize(700, 596)
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
+        Form.setSizePolicy(sizePolicy)
+        Form.setMaximumSize(QSize(700, 16777215))
         self.verticalLayoutWidget = QWidget(Form)
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(9, 9, 731, 87))
+        self.verticalLayoutWidget.setGeometry(QRect(10, 10, 681, 121))
         self.verticalLayout_3 = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
@@ -52,17 +57,24 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
+        self.line = QFrame(self.verticalLayoutWidget)
+        self.line.setObjectName("line")
+        self.line.setFrameShape(QFrame.HLine)
+        self.line.setFrameShadow(QFrame.Sunken)
+
+        self.verticalLayout_3.addWidget(self.line)
+
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.pluginEnabled = QCheckBox(self.verticalLayoutWidget)
         self.pluginEnabled.setObjectName("pluginEnabled")
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(
             self.pluginEnabled.sizePolicy().hasHeightForWidth()
         )
-        self.pluginEnabled.setSizePolicy(sizePolicy)
+        self.pluginEnabled.setSizePolicy(sizePolicy1)
         font1 = QFont()
         font1.setPointSize(14)
         self.pluginEnabled.setFont(font1)
@@ -77,20 +89,27 @@ class Ui_Form(object):
 
         self.configureLink = QCommandLinkButton(self.verticalLayoutWidget)
         self.configureLink.setObjectName("configureLink")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(
             self.configureLink.sizePolicy().hasHeightForWidth()
         )
-        self.configureLink.setSizePolicy(sizePolicy1)
-        self.configureLink.setStyleSheet(
-            "color: rgb(255, 255, 255);\n" "selection-color: rgb(255, 255, 255);"
-        )
+        self.configureLink.setSizePolicy(sizePolicy2)
+        self.configureLink.setMaximumSize(QSize(500, 16777215))
 
         self.horizontalLayout_2.addWidget(self.configureLink)
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.label_3 = QLabel(self.verticalLayoutWidget)
+        self.label_3.setObjectName("label_3")
+
+        self.horizontalLayout_3.addWidget(self.label_3)
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_3)
 
         self.frame = QFrame(Form)
         self.frame.setObjectName("frame")
@@ -102,10 +121,6 @@ class Ui_Form(object):
         self.frame.setMidLineWidth(1)
         self.verticalLayout_2 = QVBoxLayout(self.frame)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.label_3 = QLabel(self.frame)
-        self.label_3.setObjectName("label_3")
-
-        self.verticalLayout_2.addWidget(self.label_3)
 
         self.retranslateUi(Form)
 

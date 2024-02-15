@@ -28,13 +28,4 @@ class ProfileCollection:
 
 
 if __name__ == "__main__":
-    collection = ProfileCollection()
-
-    inst1 = collection.create_profile("test")
-    inst2 = collection.create_profile("abc")
-
-    dev1 = inst1.add_device("guid1", "joystick_1")
-    dev2 = inst1.add_device("guid2", "joystick_2")
-
-    if dev1 is not None:
-        print(dev1.inputs)
+    pass

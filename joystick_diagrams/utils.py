@@ -1,5 +1,7 @@
 import functools
 import logging
+import os
+import sys
 from pathlib import Path
 
 from joystick_diagrams.exceptions import JoystickDiagramsError
@@ -13,6 +15,14 @@ def create_directory(directory) -> None:  # pylint: disable=missing-function-doc
             Path(directory).mkdir()
     except OSError as error:
         _logger.error(f"Failed to create directory: {directory} with {error}")
+
+
+def install_root() -> str:  # pylint: disable=missing-function-docstring
+    return (
+        os.path.dirname(sys.executable)
+        if getattr(sys, "frozen", False)
+        else os.path.dirname(__package__)
+    )
 
 
 def handle_bare_exception(exception_type):

@@ -1,19 +1,16 @@
 import logging
-import sys
 
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
     QAbstractItemView,
-    QApplication,
     QHeaderView,
     QMainWindow,
     QTreeWidgetItem,
 )
-from qt_material import apply_stylesheet
 
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.ui.mock_main import parent_profiles
-from joystick_diagrams.ui.mock_main.qt_designer import configure_page_ui
+from joystick_diagrams.ui import parent_profiles
+from joystick_diagrams.ui.qt_designer import configure_page_ui
 
 _logger = logging.getLogger(__name__)
 
@@ -30,12 +27,14 @@ class configurePage(
         self.treeWidget.header().setSectionResizeMode(
             QHeaderView.ResizeMode.ResizeToContents
         )
+
         self.treeWidget.setSelectionBehavior(
             QAbstractItemView.SelectionBehavior.SelectRows
         )
         self.treeWidget.setSelectionMode(
             QAbstractItemView.SelectionMode.SingleSelection
         )
+        self.treeWidget.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         self.initialise_available_profiles()
         self.initialise_customise_binds()
         self.profileParentWidget = parent_profiles.parent_profile_ui()
@@ -70,8 +69,9 @@ class configurePage(
         for device_obj in profile_data.devices.values():
             device_item = QTreeWidgetItem(self.treeWidget)
             device_item.setText(
-                0, f"{device_obj.name} - {device_obj.guid})"
+                0, device_obj.name
             )  # Set device name in the first column
+            device_item.setToolTip(0, device_obj.guid)
             self.treeWidget.addTopLevelItem(device_item)
 
             for input_obj in device_obj.get_combined_inputs().values():
@@ -94,10 +94,4 @@ class configurePage(
 
 
 if __name__ == "__main__":
-    logger = logging.basicConfig
-    app = QApplication(sys.argv)
-
-    window = configurePage()
-    window.show()
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
-    app.exec()
+    pass

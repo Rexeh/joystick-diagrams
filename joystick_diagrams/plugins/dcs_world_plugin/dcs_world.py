@@ -335,10 +335,4 @@ class DCSWorldParser:
 
 
 if __name__ == "__main__":
-    dci = DCSWorldParser(
-        "D:\\Git Repos\\joystick-diagrams\\local_test_data\\toasty_test"
-    )
-
-    dta = dci.process_profiles()
-
-    print(dta)
+    pass

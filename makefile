@@ -8,11 +8,11 @@ unit-test:
 
 fmt:
 	@echo "Formatting source code"
-	@poetry run ruff ./joystick_diagrams
+	@poetry run ruff ./joystick_diagrams --fix
 
 lint:
 	@echo "Linting source code"
-	@poetry run pylint --rcfile pyproject.toml joystick_diagrams tests/
+	@poetry run ruff ./joystick_diagrams ./tests
 
 build-exe:
 	@echo "Making standard portable package"

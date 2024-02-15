@@ -101,7 +101,6 @@ class PluginWrapper:
     @enabled.setter
     def enabled(self, value):
         self._enabled = False if isinstance(value, property) else bool(value)
-        print("Setter triggered")
         # TODO process the plugins syncronously on enable
         if self._enabled is True:
             self.process()

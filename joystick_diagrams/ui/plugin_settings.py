@@ -1,15 +1,12 @@
 import logging
-import sys
 from pathlib import Path
 
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox
-from qt_material import apply_stylesheet  # type: ignore
+from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
 
-from joystick_diagrams import app_init
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
-from joystick_diagrams.ui.mock_main.qt_designer import plugin_settings_ui
+from joystick_diagrams.ui.qt_designer import plugin_settings_ui
 
 _logger = logging.getLogger(__name__)
 
@@ -36,6 +33,14 @@ class PluginSettings(
         # Setup
 
         # Style Overrides
+        configure_style = """
+                            QCommandLinkButton {
+                                border: 1px solid #8f8f91;
+                                border-radius: 10px;
+                                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f6f7fa, stop: 1 #dadbde);
+                                min-width: 80px; }
+                        """
+        self.configureLink.setStyleSheet(configure_style)
 
     def setup(self):
         """Initialise the widget configuration"""
@@ -118,8 +123,8 @@ class PluginSettings(
                 self,
                 "Plugin failure",
                 "Something went very wrong.",
-                buttons=QMessageBox.Discard,
-                defaultButton=QMessageBox.Discard,
+                buttons=QMessageBox.StandardButton.Discard,
+                defaultButton=QMessageBox.StandardButton.Discard,
             )
 
     def open_file_dialog(self) -> None:
@@ -149,9 +154,4 @@ class PluginSettings(
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    init = app_init.init()
-    window = PluginSettings()
-    window.show()
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False)
-    app.exec()
+    pass

@@ -1,19 +1,15 @@
 import logging
-import sys
 
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QListWidgetItem, QMainWindow
-from qt_material import apply_stylesheet
+from PySide6.QtWidgets import QListWidgetItem, QMainWindow
 
-from joystick_diagrams import app_init
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.db import db_init
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
-from joystick_diagrams.ui.mock_main.plugin_settings import PluginSettings
-from joystick_diagrams.ui.mock_main.qt_designer import setting_page_ui
+from joystick_diagrams.ui.plugin_settings import PluginSettings
+from joystick_diagrams.ui.qt_designer import setting_page_ui
 
 _logger = logging.getLogger(__name__)
 
@@ -49,7 +45,7 @@ class PluginsPage(
     def populate_available_plugin_list(self):
         for plugin_data in self.appState.plugin_manager.plugin_wrappers:
             item = QListWidgetItem(QIcon(plugin_data.icon), plugin_data.name)
-            item.setData(Qt.UserRole, plugin_data)
+            item.setData(Qt.ItemDataRole.UserRole, plugin_data)
             self.parserPluginList.addItem(item)
 
     @Slot()
@@ -67,7 +63,7 @@ class PluginsPage(
 
         self.window_content.setup()
 
-        self.window_content.setParent(self.pluginOptionsWidget)
+        self.window_content.setParent(self.pluginOptionWidget)
         self.window_content.show()
 
     @Slot()
@@ -85,15 +81,8 @@ class PluginsPage(
         self.appState.process_profile_collection_updates()
 
     def get_selected_plugin_object(self) -> PluginInterface:
-        return self.parserPluginList.currentItem().data(Qt.UserRole)
+        return self.parserPluginList.currentItem().data(Qt.ItemDataRole.UserRole)
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    db = db_init.init()
-    init = app_init.init()
-    window = PluginsPage()
-    window.show()
-
-    apply_stylesheet(app, theme="light_blue.xml", invert_secondary=True)
-    app.exec()
+    pass

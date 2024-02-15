@@ -9,7 +9,6 @@ import re
 from pathlib import Path
 
 from joystick_diagrams.exceptions import JoystickDiagramsError
-from joystick_diagrams.input.device import Device_
 
 _logger = logging.getLogger(__name__)
 
@@ -24,6 +23,7 @@ class Template:
 
     def __init__(self, template_path: str):
         self.raw_data: str = self.get_template_data(Path(template_path))
+        self.template_file_name = Path(template_path).name
 
     def get_template_data(self, template_path: Path):
         try:
@@ -35,13 +35,6 @@ class Template:
             raise JoystickDiagramsError(
                 "There was an issue reading the template file"
             ) from e
-
-    def dry_run(self, device: Device_):
-        """Computes mergeability of a Device to the Template.
-
-        Returns list of missing controls from TEMPLATE
-        """
-        pass
 
     def get_template_mndifiers(self) -> set[str]:
         "Returns the available MODIFIER NUMBERS supported for a given CONTROL from the template"

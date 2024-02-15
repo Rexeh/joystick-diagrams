@@ -11,6 +11,7 @@
 from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize, Qt
 from PySide6.QtGui import QAction, QFont, QIcon
 from PySide6.QtWidgets import (
+    QButtonGroup,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -30,9 +31,10 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1124, 822)
+        MainWindow.resize(1100, 900)
+        MainWindow.setMinimumSize(QSize(1100, 900))
         font = QFont()
-        font.setFamilies(["Cascadia Code SemiBold"])
+        font.setFamilies(["Century Gothic"])
         font.setBold(True)
         MainWindow.setFont(font)
         self.actionSubmenu_2 = QAction(MainWindow)
@@ -173,22 +175,41 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.horizontalLayout.setContentsMargins(-1, 25, -1, 25)
         self.setupSectionButton = QPushButton(self.centralwidget)
+        self.buttonGroup_2 = QButtonGroup(MainWindow)
+        self.buttonGroup_2.setObjectName("buttonGroup_2")
+        self.buttonGroup_2.addButton(self.setupSectionButton)
         self.setupSectionButton.setObjectName("setupSectionButton")
-        self.setupSectionButton.setAutoDefault(False)
+        self.setupSectionButton.setAutoExclusive(True)
 
         self.horizontalLayout.addWidget(self.setupSectionButton)
 
         self.customiseSectionButton = QPushButton(self.centralwidget)
+        self.buttonGroup_2.addButton(self.customiseSectionButton)
         self.customiseSectionButton.setObjectName("customiseSectionButton")
+        self.customiseSectionButton.setAutoExclusive(True)
 
         self.horizontalLayout.addWidget(self.customiseSectionButton)
 
         self.exportSectionButton = QPushButton(self.centralwidget)
+        self.buttonGroup_2.addButton(self.exportSectionButton)
         self.exportSectionButton.setObjectName("exportSectionButton")
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(
+            self.exportSectionButton.sizePolicy().hasHeightForWidth()
+        )
+        self.exportSectionButton.setSizePolicy(sizePolicy)
+        self.exportSectionButton.setAutoExclusive(True)
 
         self.horizontalLayout.addWidget(self.exportSectionButton)
 
         self.verticalLayout.addLayout(self.horizontalLayout)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
 
         self.line = QFrame(self.centralwidget)
         self.line.setObjectName("line")
@@ -196,18 +217,6 @@ class Ui_MainWindow(object):
         self.line.setFrameShadow(QFrame.Sunken)
 
         self.verticalLayout.addWidget(self.line)
-
-        self.activeMainWindowWidget = QWidget(self.centralwidget)
-        self.activeMainWindowWidget.setObjectName("activeMainWindowWidget")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.activeMainWindowWidget.sizePolicy().hasHeightForWidth()
-        )
-        self.activeMainWindowWidget.setSizePolicy(sizePolicy)
-
-        self.verticalLayout.addWidget(self.activeMainWindowWidget)
 
         self.gridLayout_17.addLayout(self.verticalLayout, 1, 0, 1, 1)
 
@@ -218,7 +227,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName("menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1124, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1100, 21))
         self.menubar.setContextMenuPolicy(Qt.NoContextMenu)
         self.menubar.setNativeMenuBar(True)
         self.menuStyles = QMenu(self.menubar)
