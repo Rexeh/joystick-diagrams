@@ -33,7 +33,7 @@ ENCODING_TYPE = "utf8"
 
 def export(export_device: ExportDevice, output_directory: str):
     try:
-        profile_name = export_device.description
+        profile_name = export_device.profile_wrapper.profile_name
 
         # Get Profile Devices, that have valid templates
         _logger.debug(f"Getting device templates for {export_device} object")

@@ -16,8 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
-    QListWidget, QListWidgetItem, QSizePolicy, QVBoxLayout,
-    QWidget)
+    QListWidget, QListWidgetItem, QPushButton, QSizePolicy,
+    QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -98,6 +98,11 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_2)
 
+        self.runButton = QPushButton(self.verticalLayoutWidget)
+        self.runButton.setObjectName(u"runButton")
+
+        self.verticalLayout_4.addWidget(self.runButton)
+
 
         self.verticalLayout_3.addLayout(self.verticalLayout_4)
 
@@ -119,4 +124,5 @@ class Ui_Form(object):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Plugin Setup</span></p></body></html>", None))
         self.pageTitle.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">Plugin Setup</span></p></body></html>", None))
+        self.runButton.setText(QCoreApplication.translate("Form", u"PushButton", None))
     # retranslateUi

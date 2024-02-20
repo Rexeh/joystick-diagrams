@@ -139,6 +139,7 @@ class ExportPage(
         items_to_export = self.get_items_to_export()
 
         # TODO rework exporter structure > Push into async
+        # TODO use case where two devices have same NAME but different GUIDS > Leads to export overwriting another
         for item in items_to_export:
             export(item, self.export_settings_widget.export_location)
 

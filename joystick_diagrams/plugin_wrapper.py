@@ -24,6 +24,7 @@ class PluginWrapper:
     def __post_init__(self):
         self.plugin_profile_collection = None
         self._enabled = False
+        self.ready = False
         self.setup_plugin()
 
     # @handle_bare_exception
@@ -31,7 +32,11 @@ class PluginWrapper:
         """Runs a specific plugin, attaching the result to the wrapper"""
         try:
             if self.path:
-                self.plugin_profile_collection = self.plugin.process()
+                result = self.plugin.process()
+
+                if isinstance(result, ProfileCollection):
+                    self.plugin_profile_collection = result
+
         except JoystickDiagramsError as e:
             _logger.error(e)
 
@@ -39,7 +44,9 @@ class PluginWrapper:
     def set_path(self, path: Path) -> bool:
         """Sets the path for a given plugin"""
         try:
-            return self.plugin.set_path(path)
+            path_set = self.plugin.set_path(path)
+            self.ready = True if path_set else False
+            return self.ready
         except JoystickDiagramsError as e:
             _logger.error(e)
 
@@ -55,7 +62,8 @@ class PluginWrapper:
 
             # Call the set_path to initialise the plugin correctly
             if self.plugin.path:
-                self.set_path(self.plugin.path)
+                path_set = self.set_path(self.plugin.path)
+                self.ready = True if path_set else False
 
             # Retrieve stored state for the PluginWrapper
             existing_configuration = self.get_plugin_configuration(self.plugin.name)
@@ -102,6 +110,6 @@ class PluginWrapper:
     def enabled(self, value):
         self._enabled = False if isinstance(value, property) else bool(value)
         # TODO process the plugins syncronously on enable
-        if self._enabled is True:
-            self.process()
+        # if self._enabled is True:
+        #    self.process()
         return self.enabled

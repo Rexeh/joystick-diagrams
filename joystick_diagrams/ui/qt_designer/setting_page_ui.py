@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QListWidget,
+    QPushButton,
     QSizePolicy,
     QVBoxLayout,
     QWidget,
@@ -102,6 +103,11 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_2)
 
+        self.runButton = QPushButton(self.verticalLayoutWidget)
+        self.runButton.setObjectName("runButton")
+
+        self.verticalLayout_4.addWidget(self.runButton)
+
         self.verticalLayout_3.addLayout(self.verticalLayout_4)
 
         self.verticalLayout_5 = QVBoxLayout()
@@ -133,5 +139,6 @@ class Ui_Form(object):
                 None,
             )
         )
+        self.runButton.setText(QCoreApplication.translate("Form", "PushButton", None))
 
     # retranslateUi

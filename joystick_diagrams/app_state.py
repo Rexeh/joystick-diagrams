@@ -1,9 +1,10 @@
 import logging
-from copy import deepcopy
 
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugin_manager import ParserPluginManager
+from joystick_diagrams.plugin_wrapper import PluginWrapper
+from joystick_diagrams.profile_wrapper import ProfileWrapper
 
 _logger = logging.getLogger(__name__)
 
@@ -22,15 +23,58 @@ class AppState:
 
     def _init(self, plugin_manager: ParserPluginManager) -> None:
         self.plugin_manager: ParserPluginManager = plugin_manager
-        self.profileObjectMapping: dict[str, Profile_] = {}
+
+        # Profile map for Plugin Profiles for lookups
+        self.plugin_profile_map: dict[str, Profile_] = {}
+
+        # Profile wrappers for use by app
+        self.profile_wrappers: list[ProfileWrapper] = []
+
         self.profileParentMapping: dict[str, list[str]] = {}
         self.processedProfileObjectMapping: dict[str, Profile_] = {}
-        self.update_processed_profiles()
-        self.process_profile_collection_updates()
+        self.process_profiles_from_collections()
 
-    ## Temp code for handling Plugin Wrapper changes > TODO REFACTOR
-    def process_profile_collection_updates(self):
-        self.process_loaded_plugins(self.get_plugin_wrapper_collections())
+    def process_profiles_from_collections(self):
+        plugin_collections = self.get_plugin_wrapper_collections()
+
+        # Create profile map from raw profiles
+        _logger.debug(
+            f"Processing profiles from plugins with {len(plugin_collections)} plugin collections"
+        )
+        self.create_plugin_profile_map(plugin_collections)
+
+        # Create profile wrappers for use in app
+        self.create_profile_wrappers(self.plugin_manager.get_enabled_plugin_wrappers())
+
+        # Initialise wrappers / restoring state and customisation
+        self.initialise_profile_wrappers()
+
+    def initialise_profile_wrappers(self):
+        _logger.debug(f"Initialising {len(self.profile_wrappers)} profile wrappers ")
+
+        for wrapper in self.profile_wrappers:
+            wrapper.initialise_wrapper()
+
+    def create_profile_wrappers(self, plugin_wrappers: list[PluginWrapper]):
+        # Clear Existing Wrappers
+        self.profile_wrappers.clear()
+
+        for plugin in plugin_wrappers:
+            # Get pluugins only
+
+            if not plugin.plugin_profile_collection:
+                continue
+
+            profiles = plugin.plugin_profile_collection.profiles
+
+            _logger.debug(f"{len(profiles)} profiles detected for {plugin}")
+
+            for profile in profiles.values():
+                self.profile_wrappers.append(ProfileWrapper(profile, plugin))
+
+            _logger.debug(
+                f"Processing profiles from plugins with {plugin} plugin collections"
+            )
 
     def get_plugin_wrapper_collections(self) -> dict[str, ProfileCollection]:
         """Returns a list of Profile Collections that are tagged with the Plugin Name where the plugin is enabled"""
@@ -40,7 +84,9 @@ class AppState:
             if x.enabled and x.plugin_profile_collection
         }
 
-    def process_loaded_plugins(self, profile_collections: dict[str, ProfileCollection]):
+    def create_plugin_profile_map(
+        self, profile_collections: dict[str, ProfileCollection]
+    ):
         """Processes the **raw** profilee collections from all loaded and enabled plugins, into a new dictionary mapping
 
         Key = Plugin Name - Profile Name
@@ -50,18 +96,16 @@ class AppState:
         """
 
         # Clear existing processed profiles
-        self.profileObjectMapping.clear()
+        self.plugin_profile_map.clear()
 
         for profile_source, profiles in profile_collections.items():
-            for profile_name, profile_obj in profiles.profiles.items():
-                combined_name = f"{profile_source} - {profile_name}"
-                self.profileObjectMapping[combined_name] = profile_obj
+            for profile_obj in profiles.profiles.values():
+                composite_key = f"{profile_source.lower().strip()}_{profile_obj.name.lower().strip()}"
+                self.plugin_profile_map[composite_key] = profile_obj
 
         _logger.debug(
-            f"Loaded plugins resulted in the following profiles being detected {self.profileObjectMapping}"
+            f"Loaded plugins resulted in the following profiles being detected {self.plugin_profile_map}"
         )
-
-        self.update_processed_profiles()
 
     def get_processed_profile(self, profile_identifier: str) -> Profile_:
         """Return inherited profile for given Profile Identifier."""
@@ -78,34 +122,6 @@ class AppState:
 
         """
         self.profileParentMapping[key] = values
-        self.update_processed_profiles()
-
-    def update_processed_profiles(self) -> None:
-        """Applies any PARENT relationships on top of profiles"""
-        for profile_key, profile_obj in self.profileObjectMapping.items():
-            self.processedProfileObjectMapping[profile_key] = deepcopy(profile_obj)
-
-        for profile, parents in self.profileParentMapping.items():
-            profile_copy = deepcopy(self.profileObjectMapping[profile])
-
-            if not parents:
-                self.processedProfileObjectMapping[profile] = profile_copy
-                continue
-
-            if parents:
-                parents.reverse()  # Reverse list to flip obj >> parent
-                merged_profiles = deepcopy(self.profileObjectMapping[parents[0]])
-
-                for parent in parents[:1]:
-                    obj = deepcopy(self.profileObjectMapping[parent])
-                    merged_profiles = merged_profiles.merge_profiles(obj)
-
-            self.processedProfileObjectMapping[
-                profile
-            ] = merged_profiles.merge_profiles(profile_copy)
-        _logger.debug(
-            f"Updated processed profiles {self.processedProfileObjectMapping}"
-        )
 
 
 if __name__ == "__main__":

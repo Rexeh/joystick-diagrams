@@ -107,7 +107,7 @@ class Device_:  # noqa: N801
         """
         return self.inputs
 
-    def get_combined_inputs(self) -> dict:
+    def get_combined_inputs(self) -> dict[str | int, Input_]:
         """Returns a flattened input dictionary
 
         Returns dict

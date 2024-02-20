@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QListWidgetItem, QMainWindow
 
+from joystick_diagrams import plugin_runner
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.plugin_wrapper import PluginWrapper
@@ -37,6 +38,7 @@ class PluginsPage(
         self.remove_defaults()
         self.populate_available_plugin_list()
 
+        self.runButton.clicked.connect(self.call_plugin_runner)
         # Styling Overrides
 
     def remove_defaults(self):
@@ -75,10 +77,14 @@ class PluginsPage(
         except JoystickDiagramsError:
             pass
 
+    def call_plugin_runner(self):
+        plugin_runner.run_parser_plugins()
+        self.profileCollectionChange.emit()
+
     @Slot()
     def update_profile_collections(self):
         _logger.debug("Updating profile collections from all plugins")
-        self.appState.process_profile_collection_updates()
+        self.appState.process_profiles_from_collections()
 
     def get_selected_plugin_object(self) -> PluginInterface:
         return self.parserPluginList.currentItem().data(Qt.ItemDataRole.UserRole)

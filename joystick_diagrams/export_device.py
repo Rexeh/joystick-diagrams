@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 
 from joystick_diagrams.input import device
 from joystick_diagrams.input.device import Device_
+from joystick_diagrams.profile_wrapper import ProfileWrapper
 from joystick_diagrams.template import Template
 
 
@@ -11,7 +12,7 @@ class ExportDevice:
 
     device: Device_
     _template: Template | None
-    description: str
+    profile_wrapper: ProfileWrapper
     errors: set = field(default_factory=set, init=False)
 
     @property
