@@ -2,7 +2,7 @@
 name = "joystick_diagrams"
 description = ""
 authors = ["Robert Cox"]
-version = "2.0.4"
+version = "2.0.5"
 homepage = "https://www.joystick-diagrams.com"
 readme = "readme.md"
 repository = "https://github.com/Rexeh/joystick-diagrams"
@@ -15,7 +15,6 @@ qt-material = "^2.14"
 dynaconf = "^3.2.4"
 pyside6 = "^6.6.1"
 semver = "^3.0.2"
-sphinx = "^7.2.6"
 pre-commit = "^3.6.0"
 qtawesome = "^1.3.0"
 
