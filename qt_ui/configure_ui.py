@@ -51,48 +51,7 @@ class Ui_Form(object):
 
         self.tabWidget = QTabWidget(self.layoutWidget)
         self.tabWidget.setObjectName(u"tabWidget")
-        self.tab_2 = QWidget()
-        self.tab_2.setObjectName(u"tab_2")
-        self.verticalLayoutWidget = QWidget(self.tab_2)
-        self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(10, 10, 1091, 521))
-        self.verticalLayout_4 = QVBoxLayout(self.verticalLayoutWidget)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.label_3 = QLabel(self.verticalLayoutWidget)
-        self.label_3.setObjectName(u"label_3")
-
-        self.verticalLayout_4.addWidget(self.label_3)
-
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.profileList = QListWidget(self.verticalLayoutWidget)
-        QListWidgetItem(self.profileList)
-        QListWidgetItem(self.profileList)
-        QListWidgetItem(self.profileList)
-        QListWidgetItem(self.profileList)
-        QListWidgetItem(self.profileList)
-        self.profileList.setObjectName(u"profileList")
-        font = QFont()
-        font.setFamilies([u"Sans Serif Collection"])
-        self.profileList.setFont(font)
-        self.profileList.setDragEnabled(True)
-        self.profileList.setDragDropOverwriteMode(True)
-        self.profileList.setDragDropMode(QAbstractItemView.DragOnly)
-        self.profileList.setViewMode(QListView.ListMode)
-        self.profileList.setSelectionRectVisible(False)
-
-        self.horizontalLayout.addWidget(self.profileList)
-
-        self.verticalLayout_6 = QVBoxLayout()
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-
-        self.horizontalLayout.addLayout(self.verticalLayout_6)
-
-
-        self.verticalLayout_4.addLayout(self.horizontalLayout)
-
-        self.tabWidget.addTab(self.tab_2, "")
+        self.tabWidget.setMouseTracking(False)
         self.tab_3 = QWidget()
         self.tab_3.setObjectName(u"tab_3")
         self.verticalLayoutWidget_2 = QWidget(self.tab_3)
@@ -136,6 +95,48 @@ class Ui_Form(object):
         self.verticalLayout_3.addWidget(self.treeWidget)
 
         self.tabWidget.addTab(self.tab_3, "")
+        self.tab_2 = QWidget()
+        self.tab_2.setObjectName(u"tab_2")
+        self.verticalLayoutWidget = QWidget(self.tab_2)
+        self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
+        self.verticalLayoutWidget.setGeometry(QRect(10, 10, 1091, 521))
+        self.verticalLayout_4 = QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.label_3 = QLabel(self.verticalLayoutWidget)
+        self.label_3.setObjectName(u"label_3")
+
+        self.verticalLayout_4.addWidget(self.label_3)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.profileList = QListWidget(self.verticalLayoutWidget)
+        QListWidgetItem(self.profileList)
+        QListWidgetItem(self.profileList)
+        QListWidgetItem(self.profileList)
+        QListWidgetItem(self.profileList)
+        QListWidgetItem(self.profileList)
+        self.profileList.setObjectName(u"profileList")
+        font = QFont()
+        font.setFamilies([u"Sans Serif Collection"])
+        self.profileList.setFont(font)
+        self.profileList.setDragEnabled(True)
+        self.profileList.setDragDropOverwriteMode(True)
+        self.profileList.setDragDropMode(QAbstractItemView.DragOnly)
+        self.profileList.setViewMode(QListView.ListMode)
+        self.profileList.setSelectionRectVisible(False)
+
+        self.horizontalLayout.addWidget(self.profileList)
+
+        self.verticalLayout_6 = QVBoxLayout()
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+
+        self.horizontalLayout.addLayout(self.verticalLayout_6)
+
+
+        self.verticalLayout_4.addLayout(self.horizontalLayout)
+
+        self.tabWidget.addTab(self.tab_2, "")
 
         self.verticalLayout.addWidget(self.tabWidget)
 
@@ -150,24 +151,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Configure &amp; Review</span></p></body></html>", None))
-        self.label_3.setText(QCoreApplication.translate("Form", u"<html><head/><body><p>Allows ability to <span style=\" font-weight:600;\">merge profiles together</span>, so a  single profile can inherit the binds of many others.</p></body></html>", None))
-
-        __sortingEnabled = self.profileList.isSortingEnabled()
-        self.profileList.setSortingEnabled(False)
-        ___qlistwidgetitem = self.profileList.item(0)
-        ___qlistwidgetitem.setText(QCoreApplication.translate("Form", u"DCS World - A10C2", None));
-        ___qlistwidgetitem1 = self.profileList.item(1)
-        ___qlistwidgetitem1.setText(QCoreApplication.translate("Form", u"DCS World - FA18", None));
-        ___qlistwidgetitem2 = self.profileList.item(2)
-        ___qlistwidgetitem2.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - Base", None));
-        ___qlistwidgetitem3 = self.profileList.item(3)
-        ___qlistwidgetitem3.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - A10C", None));
-        ___qlistwidgetitem4 = self.profileList.item(4)
-        ___qlistwidgetitem4.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - FA18", None));
-        self.profileList.setSortingEnabled(__sortingEnabled)
-
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("Form", u"Profile Setup", None))
+        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Customise &amp; Review</span></p></body></html>", None))
         self.comboBox.setItemText(0, QCoreApplication.translate("Form", u"FA-18", None))
         self.comboBox.setItemText(1, QCoreApplication.translate("Form", u"A10-C", None))
 
@@ -176,7 +160,7 @@ class Ui_Form(object):
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("Form", u"Control", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("Form", u"Device", None));
 
-        __sortingEnabled1 = self.treeWidget.isSortingEnabled()
+        __sortingEnabled = self.treeWidget.isSortingEnabled()
         self.treeWidget.setSortingEnabled(False)
         ___qtreewidgetitem1 = self.treeWidget.topLevelItem(0)
         ___qtreewidgetitem1.setText(2, QCoreApplication.translate("Form", u"Go Fast", None));
@@ -202,7 +186,24 @@ class Ui_Form(object):
         ___qtreewidgetitem6.setText(2, QCoreApplication.translate("Form", u"Reload", None));
         ___qtreewidgetitem6.setText(1, QCoreApplication.translate("Form", u"+ ALT", None));
         ___qtreewidgetitem6.setText(0, QCoreApplication.translate("Form", u"Modifier", None));
-        self.treeWidget.setSortingEnabled(__sortingEnabled1)
+        self.treeWidget.setSortingEnabled(__sortingEnabled)
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("Form", u"View binds by Profile", None))
+        self.label_3.setText(QCoreApplication.translate("Form", u"<html><head/><body><p>Allows ability to <span style=\" font-weight:600;\">merge profiles together</span>, so a  single profile can inherit the binds of many others.</p></body></html>", None))
+
+        __sortingEnabled1 = self.profileList.isSortingEnabled()
+        self.profileList.setSortingEnabled(False)
+        ___qlistwidgetitem = self.profileList.item(0)
+        ___qlistwidgetitem.setText(QCoreApplication.translate("Form", u"DCS World - A10C2", None));
+        ___qlistwidgetitem1 = self.profileList.item(1)
+        ___qlistwidgetitem1.setText(QCoreApplication.translate("Form", u"DCS World - FA18", None));
+        ___qlistwidgetitem2 = self.profileList.item(2)
+        ___qlistwidgetitem2.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - Base", None));
+        ___qlistwidgetitem3 = self.profileList.item(3)
+        ___qlistwidgetitem3.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - A10C", None));
+        ___qlistwidgetitem4 = self.profileList.item(4)
+        ___qlistwidgetitem4.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - FA18", None));
+        self.profileList.setSortingEnabled(__sortingEnabled1)
+
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("Form", u"Profile Setup", None))
     # retranslateUi

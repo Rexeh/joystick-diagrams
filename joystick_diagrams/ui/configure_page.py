@@ -46,7 +46,6 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.verticalLayout_6.addWidget(self.profileParentWidget)
         self.profileList.clicked.connect(self.handle_clicked_profile)
 
-        # self.comboBox.activated.connect(self.load_binds_for_selected_profile)
         self.comboBox.currentIndexChanged.connect(self.load_binds_for_selected_profile)
 
         # UI Setup
