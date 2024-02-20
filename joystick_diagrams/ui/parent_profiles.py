@@ -45,6 +45,9 @@ class parent_profile_ui(
 
         self.availableParentsComboBox.setStyleSheet("color:white")
 
+        self.disable_parent_controls()
+
+    def disable_parent_controls(self):
         self.deleteParent.setDisabled(True)
         self.parentDown.setDisabled(True)
         self.parentUp.setDisabled(True)
@@ -87,6 +90,9 @@ class parent_profile_ui(
 
     def remove_parent_profile(self):
         self.listWidget.takeItem(self.listWidget.currentRow())
+
+        if self.listWidget.count() == 0:
+            self.disable_parent_controls()
         self.parentProfileChange.emit()
 
     def change_parent_index_up(self):
@@ -132,7 +138,18 @@ class parent_profile_ui(
 
     def update_selectable_profiles(self):
         self.availableParentsComboBox.clear()
-        for item in self.filter_available_parents():
+
+        available_items = self.filter_available_parents()
+
+        if not available_items:
+            self.availableParentsComboBox.setPlaceholderText("No items available")
+            self.addParentItem.setDisabled(True)
+            return
+
+        self.addParentItem.setDisabled(False)
+        self.availableParentsComboBox.setPlaceholderText("")
+
+        for item in available_items:
             self.availableParentsComboBox.addItem(
                 QIcon(item.profile_origin.icon), item.profile_name, item
             )
