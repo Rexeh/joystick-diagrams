@@ -45,6 +45,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.profileParentWidget = parent_profiles.parent_profile_ui()
         self.verticalLayout_6.addWidget(self.profileParentWidget)
         self.profileList.clicked.connect(self.handle_clicked_profile)
+        self.profileList.setDragEnabled(False)
 
         self.comboBox.currentIndexChanged.connect(self.load_binds_for_selected_profile)
 
@@ -105,6 +106,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
                 profile.profile_name,
                 profile,
             )
+
         self.comboBox.setCurrentIndex(0)
 
     def create_control_type_widget(self, control: Axis | Button | Hat | AxisSlider):
