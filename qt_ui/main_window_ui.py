@@ -17,9 +17,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QGridLayout,
-    QHBoxLayout, QLayout, QMainWindow, QMenu,
-    QMenuBar, QPushButton, QSizePolicy, QSplitter,
-    QStatusBar, QVBoxLayout, QWidget)
+    QHBoxLayout, QLayout, QMainWindow, QMenuBar,
+    QPushButton, QSizePolicy, QSplitter, QStatusBar,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -199,12 +199,7 @@ class Ui_MainWindow(object):
         self.menubar.setGeometry(QRect(0, 0, 1100, 21))
         self.menubar.setContextMenuPolicy(Qt.NoContextMenu)
         self.menubar.setNativeMenuBar(True)
-        self.menuStyles = QMenu(self.menubar)
-        self.menuStyles.setObjectName(u"menuStyles")
-        self.menuStyles.setContextMenuPolicy(Qt.DefaultContextMenu)
         MainWindow.setMenuBar(self.menubar)
-
-        self.menubar.addAction(self.menuStyles.menuAction())
 
         self.retranslateUi(MainWindow)
 
@@ -242,5 +237,4 @@ class Ui_MainWindow(object):
         self.setupSectionButton.setText(QCoreApplication.translate("MainWindow", u"Setup", None))
         self.customiseSectionButton.setText(QCoreApplication.translate("MainWindow", u"Customise", None))
         self.exportSectionButton.setText(QCoreApplication.translate("MainWindow", u"Export", None))
-        self.menuStyles.setTitle(QCoreApplication.translate("MainWindow", u"Menu1", None))
     # retranslateUi

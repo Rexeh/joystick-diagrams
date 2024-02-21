@@ -24,6 +24,7 @@ class AppState:
     def _init(self, plugin_manager: ParserPluginManager) -> None:
         self.plugin_manager: ParserPluginManager = plugin_manager
 
+        self.main_window = None
         # Profile map for Plugin Profiles for lookups
         self.plugin_profile_map: dict[str, Profile_] = {}
 

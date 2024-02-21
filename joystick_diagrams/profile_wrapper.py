@@ -96,6 +96,4 @@ class ProfileWrapper:
 
 
 if __name__ == "__main__":
-    prof = Profile_("Test")
-
-    print(dict(prof))
+    pass

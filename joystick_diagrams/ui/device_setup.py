@@ -259,6 +259,9 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
                     child_item = QTreeWidgetItem()
                     child_item.setData(0, Qt.ItemDataRole.UserRole, child)
                     child_item.setText(1, child.profile_wrapper.profile_name)
+                    child_item.setIcon(
+                        1, QIcon(child.profile_wrapper.profile_origin.icon)
+                    )
 
                     # Add export option for child
                     child_item.setCheckState(0, Qt.CheckState.Unchecked)

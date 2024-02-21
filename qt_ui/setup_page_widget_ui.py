@@ -15,15 +15,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
-    QListWidget, QListWidgetItem, QPushButton, QSizePolicy,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QHBoxLayout, QHeaderView,
+    QLabel, QPushButton, QSizePolicy, QSpacerItem,
+    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1100, 800)
+        Form.resize(1100, 803)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -36,7 +36,7 @@ class Ui_Form(object):
         Form.setFont(font)
         self.verticalLayoutWidget = QWidget(Form)
         self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(0, 0, 1081, 791))
+        self.verticalLayoutWidget.setGeometry(QRect(0, 10, 1081, 791))
         self.verticalLayout_2 = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -45,74 +45,62 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addWidget(self.label)
 
-        self.line = QFrame(self.verticalLayoutWidget)
-        self.line.setObjectName(u"line")
-        self.line.setFrameShape(QFrame.HLine)
-        self.line.setFrameShadow(QFrame.Sunken)
+        self.label_2 = QLabel(self.verticalLayoutWidget)
+        self.label_2.setObjectName(u"label_2")
 
-        self.verticalLayout_2.addWidget(self.line)
+        self.verticalLayout_2.addWidget(self.label_2)
 
-        self.verticalLayout_3 = QVBoxLayout()
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.pageTitle = QLabel(self.verticalLayoutWidget)
-        self.pageTitle.setObjectName(u"pageTitle")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.pluginContainer = QHBoxLayout()
+        self.pluginContainer.setObjectName(u"pluginContainer")
+        self.pluginTreeWidget = QTreeWidget(self.verticalLayoutWidget)
+        self.pluginTreeWidget.headerItem().setText(4, "")
+        QTreeWidgetItem(self.pluginTreeWidget)
+        self.pluginTreeWidget.setObjectName(u"pluginTreeWidget")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.pageTitle.sizePolicy().hasHeightForWidth())
-        self.pageTitle.setSizePolicy(sizePolicy1)
+        sizePolicy1.setHeightForWidth(self.pluginTreeWidget.sizePolicy().hasHeightForWidth())
+        self.pluginTreeWidget.setSizePolicy(sizePolicy1)
+        self.pluginTreeWidget.setMinimumSize(QSize(0, 200))
+        self.pluginTreeWidget.setMaximumSize(QSize(16777215, 500))
+        font1 = QFont()
+        font1.setPointSize(14)
+        self.pluginTreeWidget.setFont(font1)
+        self.pluginTreeWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.pluginTreeWidget.setProperty("showDropIndicator", False)
+        self.pluginTreeWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.pluginTreeWidget.setIndentation(0)
+        self.pluginTreeWidget.setRootIsDecorated(True)
+        self.pluginTreeWidget.setItemsExpandable(False)
+        self.pluginTreeWidget.header().setVisible(True)
 
-        self.horizontalLayout.addWidget(self.pageTitle)
+        self.pluginContainer.addWidget(self.pluginTreeWidget)
 
+        self.treeWidgetSidePanel = QVBoxLayout()
+        self.treeWidgetSidePanel.setObjectName(u"treeWidgetSidePanel")
 
-        self.verticalLayout_3.addLayout(self.horizontalLayout)
-
-        self.verticalLayout_4 = QVBoxLayout()
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.parserPluginList = QListWidget(self.verticalLayoutWidget)
-        self.parserPluginList.setObjectName(u"parserPluginList")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.parserPluginList.sizePolicy().hasHeightForWidth())
-        self.parserPluginList.setSizePolicy(sizePolicy2)
-        self.parserPluginList.setMaximumSize(QSize(300, 16777215))
-
-        self.horizontalLayout_2.addWidget(self.parserPluginList)
-
-        self.pluginOptionWidget = QWidget(self.verticalLayoutWidget)
-        self.pluginOptionWidget.setObjectName(u"pluginOptionWidget")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.pluginOptionWidget.sizePolicy().hasHeightForWidth())
-        self.pluginOptionWidget.setSizePolicy(sizePolicy3)
-        self.pluginOptionWidget.setMaximumSize(QSize(800, 16777215))
-
-        self.horizontalLayout_2.addWidget(self.pluginOptionWidget)
+        self.pluginContainer.addLayout(self.treeWidgetSidePanel)
 
 
-        self.verticalLayout_4.addLayout(self.horizontalLayout_2)
+        self.verticalLayout_2.addLayout(self.pluginContainer)
 
-        self.runButton = QPushButton(self.verticalLayoutWidget)
-        self.runButton.setObjectName(u"runButton")
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.runPluginsButton = QPushButton(self.verticalLayoutWidget)
+        self.runPluginsButton.setObjectName(u"runPluginsButton")
 
-        self.verticalLayout_4.addWidget(self.runButton)
+        self.horizontalLayout.addWidget(self.runPluginsButton)
 
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Preferred, QSizePolicy.Minimum)
 
-        self.verticalLayout_3.addLayout(self.verticalLayout_4)
-
-        self.verticalLayout_5 = QVBoxLayout()
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-
-        self.verticalLayout_3.addLayout(self.verticalLayout_5)
+        self.horizontalLayout.addItem(self.horizontalSpacer_2)
 
 
-        self.verticalLayout_2.addLayout(self.verticalLayout_3)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_2.addItem(self.verticalSpacer)
 
 
         self.retranslateUi(Form)
@@ -123,6 +111,21 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Plugin Setup</span></p></body></html>", None))
-        self.pageTitle.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">Plugin Setup</span></p></body></html>", None))
-        self.runButton.setText(QCoreApplication.translate("Form", u"PushButton", None))
+        self.label_2.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        ___qtreewidgetitem = self.pluginTreeWidget.headerItem()
+        ___qtreewidgetitem.setText(3, QCoreApplication.translate("Form", u"Errors", None));
+        ___qtreewidgetitem.setText(2, QCoreApplication.translate("Form", u"Plugin Status", None));
+        ___qtreewidgetitem.setText(1, QCoreApplication.translate("Form", u"Plugin Version", None));
+        ___qtreewidgetitem.setText(0, QCoreApplication.translate("Form", u"Plugin Name", None));
+
+        __sortingEnabled = self.pluginTreeWidget.isSortingEnabled()
+        self.pluginTreeWidget.setSortingEnabled(False)
+        ___qtreewidgetitem1 = self.pluginTreeWidget.topLevelItem(0)
+        ___qtreewidgetitem1.setText(3, QCoreApplication.translate("Form", u"-", None));
+        ___qtreewidgetitem1.setText(2, QCoreApplication.translate("Form", u"Disabled", None));
+        ___qtreewidgetitem1.setText(1, QCoreApplication.translate("Form", u"1.2", None));
+        ___qtreewidgetitem1.setText(0, QCoreApplication.translate("Form", u"DCS World", None));
+        self.pluginTreeWidget.setSortingEnabled(__sortingEnabled)
+
+        self.runPluginsButton.setText(QCoreApplication.translate("Form", u"Run (0) Plugins", None))
     # retranslateUi

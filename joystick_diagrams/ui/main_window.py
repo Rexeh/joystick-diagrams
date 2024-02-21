@@ -3,14 +3,12 @@ import os
 
 import qtawesome as qta  # type:  ignore
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import (
-    QMainWindow,
-)
+from PySide6.QtGui import QAction, QDesktopServices, QIcon
+from PySide6.QtWidgets import QMainWindow, QMenu
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.ui import configure_page, export_page, setting_page
+from joystick_diagrams.ui import configure_page, export_page, plugins_page
 from joystick_diagrams.ui.qt_designer import main_window
 from joystick_diagrams.utils import install_root
 
@@ -27,6 +25,8 @@ class MainWindow(
         self.setupUi(self)
         self.appState = AppState()
 
+        self.appState.main_window = self
+
         window_icon = QIcon(JD_ICON)
         self.setWindowIcon(window_icon)
 
@@ -34,6 +34,27 @@ class MainWindow(
         self.customiseSectionButton.clicked.connect(self.load_other_widget)
         self.exportSectionButton.clicked.connect(self.load_export_page)
         self.window_content = None
+
+        # Menu Bars
+
+        ## Menu Icons
+        discord_icon = qta.icon("fa5b.discord", color="white")
+        web_icon = qta.icon("fa5s.globe", color="white")
+
+        # Menus
+        self.help_menu = QMenu("Help", self.menubar)
+
+        ## Menu Actions
+        self.discord_link = QAction(discord_icon, "Visit our Discord")
+        self.help_menu.addAction(self.discord_link)
+
+        self.website_link = QAction(web_icon, "Visit our Website")
+        self.help_menu.addAction(self.website_link)
+
+        self.discord_link.triggered.connect(self.open_discord_link)
+        self.website_link.triggered.connect(self.open_website_link)
+
+        self.menubar.addMenu(self.help_menu)
 
         # Plugins Menu Controls
 
@@ -81,12 +102,18 @@ class MainWindow(
         # Window Setup
         self.setWindowTitle(f"Joystick Diagrams - {version.get_current_version()}")
 
+    def open_discord_link(self):
+        QDesktopServices.openUrl("https://discord.gg/UUyRUuX2dX")
+
+    def open_website_link(self):
+        QDesktopServices.openUrl("https://joystick-diagrams.com")
+
     def load_setting_widget(self):
         self.setupSectionButton.setChecked(True)
 
         if self.window_content:
             self.window_content.hide()
-        self.window_content = setting_page.PluginsPage()
+        self.window_content = plugins_page.PluginsPage()
         self.horizontalLayout_2.addWidget(self.window_content)
         self.window_content.show()
 

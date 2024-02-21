@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QLayout,
-    QMenu,
     QMenuBar,
     QPushButton,
     QSizePolicy,
@@ -230,12 +229,7 @@ class Ui_MainWindow(object):
         self.menubar.setGeometry(QRect(0, 0, 1100, 21))
         self.menubar.setContextMenuPolicy(Qt.NoContextMenu)
         self.menubar.setNativeMenuBar(True)
-        self.menuStyles = QMenu(self.menubar)
-        self.menuStyles.setObjectName("menuStyles")
-        self.menuStyles.setContextMenuPolicy(Qt.DefaultContextMenu)
         MainWindow.setMenuBar(self.menubar)
-
-        self.menubar.addAction(self.menuStyles.menuAction())
 
         self.retranslateUi(MainWindow)
 
@@ -323,9 +317,6 @@ class Ui_MainWindow(object):
         )
         self.exportSectionButton.setText(
             QCoreApplication.translate("MainWindow", "Export", None)
-        )
-        self.menuStyles.setTitle(
-            QCoreApplication.translate("MainWindow", "Menu1", None)
         )
 
     # retranslateUi
