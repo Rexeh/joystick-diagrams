@@ -113,8 +113,8 @@ warn_return_any = false
 warn_unused_configs = true
 show_error_codes = true
 
-[tool.mypy.overrides]
-module = ["dynaconf.*", "qt_material.*"]
+[[tool.mypy.overrides]]
+module = ["dynaconf.*", "qt_material.*","qtawesome.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
