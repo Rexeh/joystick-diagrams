@@ -140,5 +140,4 @@ class PluginWrapper:
             self.disable_plugin()
 
         self.store_plugin_configuration()
-        print(self)
         return self.enabled
