@@ -4,7 +4,7 @@ import os
 import qtawesome as qta  # type:  ignore
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QAction, QDesktopServices, QIcon
-from PySide6.QtWidgets import QMainWindow, QMenu
+from PySide6.QtWidgets import QLabel, QMainWindow, QMenu, QProgressBar
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
@@ -55,6 +55,13 @@ class MainWindow(
         self.website_link.triggered.connect(self.open_website_link)
 
         self.menubar.addMenu(self.help_menu)
+
+        self.progressBar = QProgressBar()
+        self.statusLabel = QLabel()
+        self.statusLabel.setText("Waiting...")
+
+        self.statusBar().addPermanentWidget(self.statusLabel)
+        self.statusBar().addPermanentWidget(self.progressBar)
 
         # Plugins Menu Controls
 

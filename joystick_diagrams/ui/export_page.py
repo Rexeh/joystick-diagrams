@@ -1,11 +1,13 @@
 import logging
 import os
+import webbrowser
 from pathlib import Path
 
 import qtawesome as qta  # type: ignore
-from PySide6.QtCore import QRunnable, QSize, Qt, QThreadPool, Slot
+from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QTreeWidgetItem
 
+from build.lib.ui.main_window import MainWindow
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db.db_device_management import (
     add_update_device_template_path,
@@ -126,6 +128,31 @@ class ExportPage(
     def get_items_to_export(self) -> list[ExportDevice]:
         return self.device_widget.get_selected_export_items()
 
+    def export_finished(self, data):
+        # TODO handle MW interaction better
+        main_window_inst: MainWindow = self.appState.main_window
+        main_window_inst.statusLabel.setText("Waiting...")
+        QMessageBox.information(
+            self,
+            "Items exported",
+            f"{data} items were exported to {self.export_settings_widget.export_location}",
+            buttons=QMessageBox.StandardButton.Ok,
+            defaultButton=QMessageBox.StandardButton.Ok,
+        )
+        webbrowser.open(self.export_settings_widget.export_location)
+
+    def update_export_progress(self, data):
+        # TODO handle MW interaction better
+        main_window_inst: MainWindow = self.appState.main_window
+        main_window_inst.progressBar.setValue(data)
+        main_window_inst.statusLabel.setText("Exporting templates")
+
+    def unlock_export_button(self):
+        self.ExportButton.setEnabled(True)
+
+    def lock_export_button(self):
+        self.ExportButton.setEnabled(False)
+
     def run_exporter(self):
         # Check a location is set
         if self.export_settings_widget.export_location is None:
@@ -141,21 +168,20 @@ class ExportPage(
         # Check what is selected / Child / Parent
         items_to_export = self.get_items_to_export()
 
-        # TODO rework exporter structure > Push into async
-
         worker = ExportDispatch(
             items_to_export, self.export_settings_widget.export_location
         )
-        # export(item, self.export_settings_widget.export_location)
+        worker.signals.started.connect(self.lock_export_button)
+        worker.signals.finished.connect(self.export_finished)
+        worker.signals.finished.connect(self.unlock_export_button)
+        worker.signals.progress.connect(self.update_export_progress)
         self.threadPool.start(worker)
 
-        # QMessageBox.information(
-        #     self,
-        #     "Items exported",
-        #     f"{len(items_to_export)} items were exported to {self.export_settings_widget.export_location}",
-        #     buttons=QMessageBox.StandardButton.Ok,
-        #     defaultButton=QMessageBox.StandardButton.Ok,
-        # )
+
+class ExportSignals(QObject):
+    started = Signal()
+    finished = Signal(int)
+    progress = Signal(int)
 
 
 class ExportDispatch(QRunnable):
@@ -173,18 +199,26 @@ class ExportDispatch(QRunnable):
 
         self.export_items = export_items
         self.export_directory = export_directory
+        self.signals = ExportSignals()
 
     @Slot()  # QtCore.Slot
     def run(self):
         """
         Initialise the runner function with passed args, kwargs.
         """
+        self.signals.started.emit()
+        item_count = len(self.export_items)
 
-        for item in self.export_items:
-            _logger.debug(
-                f"Exporting {item.device_name} which has profile {item.profile_wrapper.profile_name}"
+        for count, item in enumerate(self.export_items, 1):
+            _logger.info(
+                f"Exporting {count}/{item_count} which has profile {item.profile_wrapper.profile_name}"
             )
             export(item, self.export_directory)
+            self.signals.progress.emit(
+                round(count / item_count * 100 if item != item_count - 1 else 100)
+            )
+
+        self.signals.finished.emit(item_count)
 
 
 if __name__ == "__main__":
