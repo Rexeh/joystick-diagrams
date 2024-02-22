@@ -28,7 +28,7 @@ class PluginWrapper:
         self.setup_plugin()
 
     # @handle_bare_exception
-    def process(self):
+    def process(self) -> bool:
         """Runs a specific plugin, attaching the result to the wrapper"""
         try:
             if self.path:
@@ -37,9 +37,12 @@ class PluginWrapper:
                 if isinstance(result, ProfileCollection):
                     self.plugin_profile_collection = result
 
+            return True
+
         except JoystickDiagramsError as e:
             _logger.error(e)
-            self.push_error(e)
+            self.push_error(str(e))
+            return False
 
     def push_error(self, error: str):
         self.error = ""

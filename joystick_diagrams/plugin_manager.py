@@ -39,6 +39,12 @@ class ParserPluginManager:
         for plugin in self.get_available_plugins():
             self.plugin_wrappers.append(PluginWrapper(plugin))
 
+    def execute_plugin_wrapper_process(self, plugin_wrapper: PluginWrapper):
+        """Executes a plugin wrapper if it in a ready state"""
+
+        if plugin_wrapper.ready:
+            plugin_wrapper.process()
+
     def get_enabled_plugin_wrappers(self):
         "Returns plugin wrappers where the plugin is enabled"
         return [x for x in self.plugin_wrappers if x.enabled is True]

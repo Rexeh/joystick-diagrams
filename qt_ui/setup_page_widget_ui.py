@@ -45,10 +45,30 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addWidget(self.label)
 
-        self.label_2 = QLabel(self.verticalLayoutWidget)
-        self.label_2.setObjectName(u"label_2")
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.pluginTreeHelpLabel = QLabel(self.verticalLayoutWidget)
+        self.pluginTreeHelpLabel.setObjectName(u"pluginTreeHelpLabel")
+        self.pluginTreeHelpLabel.setEnabled(True)
 
-        self.verticalLayout_2.addWidget(self.label_2)
+        self.horizontalLayout_2.addWidget(self.pluginTreeHelpLabel)
+
+        self.installPlugin = QPushButton(self.verticalLayoutWidget)
+        self.installPlugin.setObjectName(u"installPlugin")
+        self.installPlugin.setEnabled(False)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.installPlugin.sizePolicy().hasHeightForWidth())
+        self.installPlugin.setSizePolicy(sizePolicy1)
+        self.installPlugin.setMinimumSize(QSize(250, 0))
+        self.installPlugin.setMaximumSize(QSize(250, 16777215))
+        self.installPlugin.setFlat(False)
+
+        self.horizontalLayout_2.addWidget(self.installPlugin)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
 
         self.pluginContainer = QHBoxLayout()
         self.pluginContainer.setObjectName(u"pluginContainer")
@@ -56,11 +76,11 @@ class Ui_Form(object):
         self.pluginTreeWidget.headerItem().setText(4, "")
         QTreeWidgetItem(self.pluginTreeWidget)
         self.pluginTreeWidget.setObjectName(u"pluginTreeWidget")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.pluginTreeWidget.sizePolicy().hasHeightForWidth())
-        self.pluginTreeWidget.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.pluginTreeWidget.sizePolicy().hasHeightForWidth())
+        self.pluginTreeWidget.setSizePolicy(sizePolicy2)
         self.pluginTreeWidget.setMinimumSize(QSize(0, 200))
         self.pluginTreeWidget.setMaximumSize(QSize(16777215, 500))
         font1 = QFont()
@@ -111,7 +131,8 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Plugin Setup</span></p></body></html>", None))
-        self.label_2.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.pluginTreeHelpLabel.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.installPlugin.setText(QCoreApplication.translate("Form", u"Install Plugin", None))
         ___qtreewidgetitem = self.pluginTreeWidget.headerItem()
         ___qtreewidgetitem.setText(3, QCoreApplication.translate("Form", u"Errors", None));
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("Form", u"Plugin Status", None));

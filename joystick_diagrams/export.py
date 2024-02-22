@@ -11,7 +11,6 @@ import re
 from pathlib import Path
 
 from joystick_diagrams import utils
-from joystick_diagrams.db.db_device_management import get_device_template_path
 from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.input.device import Device_
 
@@ -101,44 +100,6 @@ def populate_template(template_data: str, device: Device_, profile_name: str) ->
         )
 
     return modified_template_data
-
-
-def read_template(template_path: Path) -> str | None:
-    try:
-        _logger.debug(f"Reading template data for {template_path}")
-        return Path(template_path).read_text(encoding=ENCODING_TYPE)
-
-    except OSError:
-        _logger.debug(f"Error reading file data for {template_path}")
-        return None
-
-
-def get_profile_device_templates(
-    devices: dict[str, Device_],
-) -> dict[str, Device_ | Path]:
-    filtered_devices: dict = {}
-    for device_name, device_obj in devices.items():
-        lookup = get_template_for_device(device_obj.guid)
-
-        if lookup is None:
-            _logger.info(f"No template configured for {device_name}")
-            continue
-
-        filtered_devices[device_name] = {"Object": device_obj, "Template": lookup}
-
-    _logger.debug(f"Filtered devices are {filtered_devices}")
-    return filtered_devices
-
-
-def get_template_for_device(guid: str) -> Path | None:
-    """Get the latest template file mapping for a GUID"""
-
-    template = get_device_template_path(guid)
-
-    if template:
-        return template[0]
-
-    return None
 
 
 if __name__ == "__main__":

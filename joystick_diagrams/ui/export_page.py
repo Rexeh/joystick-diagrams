@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 import qtawesome as qta  # type: ignore
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QRunnable, QSize, Qt, QThreadPool, Slot
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QTreeWidgetItem
 
 from joystick_diagrams.app_state import AppState
@@ -69,6 +69,9 @@ class ExportPage(
 
         # Defaults
         self.update_export_button_state(0)  # Set the export button state
+
+        # Threading pool
+        self.threadPool = QThreadPool()
 
     def update_export_button_state(self, data: int):
         if data == 0:
@@ -139,17 +142,49 @@ class ExportPage(
         items_to_export = self.get_items_to_export()
 
         # TODO rework exporter structure > Push into async
-        # TODO use case where two devices have same NAME but different GUIDS > Leads to export overwriting another
-        for item in items_to_export:
-            export(item, self.export_settings_widget.export_location)
 
-        QMessageBox.information(
-            self,
-            "Items exported",
-            f"{len(items_to_export)} items were exported to {self.export_settings_widget.export_location}",
-            buttons=QMessageBox.StandardButton.Ok,
-            defaultButton=QMessageBox.StandardButton.Ok,
+        worker = ExportDispatch(
+            items_to_export, self.export_settings_widget.export_location
         )
+        # export(item, self.export_settings_widget.export_location)
+        self.threadPool.start(worker)
+
+        # QMessageBox.information(
+        #     self,
+        #     "Items exported",
+        #     f"{len(items_to_export)} items were exported to {self.export_settings_widget.export_location}",
+        #     buttons=QMessageBox.StandardButton.Ok,
+        #     defaultButton=QMessageBox.StandardButton.Ok,
+        # )
+
+
+class ExportDispatch(QRunnable):
+    """
+    ExportDispatch
+    Exports items out to files
+
+    """
+
+    def __init__(
+        self, export_items: list[ExportDevice], export_directory: str, **kwargs
+    ):
+        super(ExportDispatch, self).__init__()
+        # Store constructor arguments (re-used for processing)
+
+        self.export_items = export_items
+        self.export_directory = export_directory
+
+    @Slot()  # QtCore.Slot
+    def run(self):
+        """
+        Initialise the runner function with passed args, kwargs.
+        """
+
+        for item in self.export_items:
+            _logger.debug(
+                f"Exporting {item.device_name} which has profile {item.profile_wrapper.profile_name}"
+            )
+            export(item, self.export_directory)
 
 
 if __name__ == "__main__":

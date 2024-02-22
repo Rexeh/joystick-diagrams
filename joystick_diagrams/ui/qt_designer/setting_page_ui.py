@@ -50,10 +50,31 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addWidget(self.label)
 
-        self.label_2 = QLabel(self.verticalLayoutWidget)
-        self.label_2.setObjectName("label_2")
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.pluginTreeHelpLabel = QLabel(self.verticalLayoutWidget)
+        self.pluginTreeHelpLabel.setObjectName("pluginTreeHelpLabel")
+        self.pluginTreeHelpLabel.setEnabled(True)
 
-        self.verticalLayout_2.addWidget(self.label_2)
+        self.horizontalLayout_2.addWidget(self.pluginTreeHelpLabel)
+
+        self.installPlugin = QPushButton(self.verticalLayoutWidget)
+        self.installPlugin.setObjectName("installPlugin")
+        self.installPlugin.setEnabled(False)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(
+            self.installPlugin.sizePolicy().hasHeightForWidth()
+        )
+        self.installPlugin.setSizePolicy(sizePolicy1)
+        self.installPlugin.setMinimumSize(QSize(250, 0))
+        self.installPlugin.setMaximumSize(QSize(250, 16777215))
+        self.installPlugin.setFlat(False)
+
+        self.horizontalLayout_2.addWidget(self.installPlugin)
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
 
         self.pluginContainer = QHBoxLayout()
         self.pluginContainer.setObjectName("pluginContainer")
@@ -61,13 +82,13 @@ class Ui_Form(object):
         self.pluginTreeWidget.headerItem().setText(4, "")
         QTreeWidgetItem(self.pluginTreeWidget)
         self.pluginTreeWidget.setObjectName("pluginTreeWidget")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(
+        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(
             self.pluginTreeWidget.sizePolicy().hasHeightForWidth()
         )
-        self.pluginTreeWidget.setSizePolicy(sizePolicy1)
+        self.pluginTreeWidget.setSizePolicy(sizePolicy2)
         self.pluginTreeWidget.setMinimumSize(QSize(0, 200))
         self.pluginTreeWidget.setMaximumSize(QSize(16777215, 500))
         font1 = QFont()
@@ -126,7 +147,12 @@ class Ui_Form(object):
                 None,
             )
         )
-        self.label_2.setText(QCoreApplication.translate("Form", "TextLabel", None))
+        self.pluginTreeHelpLabel.setText(
+            QCoreApplication.translate("Form", "TextLabel", None)
+        )
+        self.installPlugin.setText(
+            QCoreApplication.translate("Form", "Install Plugin", None)
+        )
         ___qtreewidgetitem = self.pluginTreeWidget.headerItem()
         ___qtreewidgetitem.setText(
             3, QCoreApplication.translate("Form", "Errors", None)

@@ -15,7 +15,6 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from joystick_diagrams import plugin_runner
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.plugin_wrapper import PluginWrapper
@@ -95,8 +94,12 @@ class PluginsPage(
         self.pluginTreeWidget.setSelectionMode(
             QAbstractItemView.SelectionMode.NoSelection
         )
-        # self.runButton.clicked.connect(self.call_plugin_runner)
+
         # Styling Overrides
+        self.installPlugin.setIcon(qta.icon("fa5s.file-import"))
+        self.pluginTreeHelpLabel.setText(
+            "Setup your plugins below, plugins must be ready to be processed"
+        )
 
     class EnabledPushButton(QPushButton):
         """Custom PushButton class to handle QTreeWidget item pass through to click event for embedded widget"""
@@ -120,6 +123,16 @@ class PluginsPage(
         else:
             self.runPluginsButton.setText("No plugins ready")
 
+    def get_plugin_data_for_tree(self) -> list[PluginWrapper]:
+        plugin_wrappers = []
+        for plugin_row in range(self.pluginTreeWidget.topLevelItemCount()):
+            plugin_data: PluginWrapper = self.pluginTreeWidget.topLevelItem(
+                plugin_row
+            ).data(0, Qt.ItemDataRole.UserRole)
+            plugin_wrappers.append(plugin_data)
+
+        return plugin_wrappers
+
     def update_plugin_count_statistics(self):
         plugin_item_count = self.pluginTreeWidget.topLevelItemCount()
 
@@ -128,11 +141,8 @@ class PluginsPage(
 
         # Calculate Ready Plugins
         self.plugins_ready = 0
-        for plugin_row in range(plugin_item_count):
-            plugin_data: PluginWrapper = self.pluginTreeWidget.topLevelItem(
-                plugin_row
-            ).data(0, Qt.ItemDataRole.UserRole)
-            if plugin_data.ready:
+        for plugin in self.get_plugin_data_for_tree():
+            if plugin.ready:
                 self.plugins_ready = self.plugins_ready + 1
         self.statistics_change.emit()
 
@@ -183,7 +193,9 @@ class PluginsPage(
         button.setFlat(True)
 
         if state:
-            button.setIcon(qta.icon("fa5s.check-circle", color="green"))
+            button.setIcon(
+                qta.icon("fa5s.check-circle", color="green", background="white")
+            )
             return button
 
         button.setIcon(qta.icon("fa5s.times-circle", color="red"))
@@ -228,7 +240,9 @@ class PluginsPage(
             )
 
             path_setup_button = QPushButton()
-            path_setup_button.setText("Setup Plugin")
+            path_setup_button.setText(
+                "Setup plugin path" if not plugin_data.path else "Update plugin path"
+            )
             path_setup_button.setStyleSheet("width:auto")
             path_setup_button.clicked.connect(self.handle_path_set_for_plugin)
             self.pluginTreeWidget.setItemWidget(plugin, 2, path_setup_button)
@@ -318,7 +332,9 @@ class PluginsPage(
         return None
 
     def call_plugin_runner(self):
-        plugin_runner.run_parser_plugins()
+        for wrapper in self.get_plugin_data_for_tree():
+            wrapper.process()
+
         self.profileCollectionChange.emit()
 
     @Slot()
