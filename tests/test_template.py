@@ -59,11 +59,20 @@ def test_template_button_property(get_template_path_valid):
 
 
 def test_template_modifiers_property(get_template_path_valid):
-    expected_modifiers = {"button_1_mod_1", "button_1_mod_2", "button_2_mod_1"}
+    expected_modifiers = {
+        "button_1_modifier_1",
+        "button_2_modifiers",
+        "button_1_modifiers",
+        "button_1_modifier_2",
+        "button_1_modifier_1_key",
+        "button_1_modifier_1_action",
+        "button_1_modifier_2_key",
+        "button_1_modifier_2_action",
+    }
     setup_template = Template(get_template_path_valid)
 
-    assert setup_template.modifier_count == 3
-    assert setup_template.get_template_mndifiers() == expected_modifiers
+    assert setup_template.modifier_count == 8
+    assert setup_template.get_template_modifiers() == expected_modifiers
 
 
 def test_template_template_name_exists(get_template_path_valid):
