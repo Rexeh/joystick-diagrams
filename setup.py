@@ -15,7 +15,7 @@ setup(
         "Documentation": "https://joystick-diagrams.com/",
         "Bug Reports": "https://github.com/Rexeh/joystick-diagrams/issues",
         "Funding": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WLLDYGQM5Z39W&source=url",
-        "Source": "https://github.com/Rexeh/joystick-diagrams/src",
+        "Source": "https://github.com/Rexeh/joystick-diagrams",
     },
     executables=[
         Executable(
