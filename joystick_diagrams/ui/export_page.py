@@ -13,9 +13,9 @@ from joystick_diagrams.db.db_device_management import (
 )
 from joystick_diagrams.export import export
 from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.ui import main_window
 from joystick_diagrams.ui.device_setup import DeviceSetup
 from joystick_diagrams.ui.export_settings import ExportSettings
-from joystick_diagrams.ui.main_window import MainWindow
 from joystick_diagrams.ui.qt_designer import export_ui
 from joystick_diagrams.utils import install_root
 
@@ -130,7 +130,7 @@ class ExportPage(
 
     def export_finished(self, data):
         # TODO handle MW interaction better
-        main_window_inst: MainWindow = self.appState.main_window
+        main_window_inst: main_window = self.appState.main_window
         main_window_inst.statusLabel.setText("Waiting...")
         QMessageBox.information(
             self,
@@ -143,7 +143,7 @@ class ExportPage(
 
     def update_export_progress(self, data):
         # TODO handle MW interaction better
-        main_window_inst: MainWindow = self.appState.main_window
+        main_window_inst: main_window = self.appState.main_window
         main_window_inst.progressBar.setValue(data)
         main_window_inst.statusLabel.setText("Exporting templates")
 
