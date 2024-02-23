@@ -7,7 +7,6 @@ import qtawesome as qta  # type: ignore
 from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QTreeWidgetItem
 
-from build.lib.ui.main_window import MainWindow
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db.db_device_management import (
     add_update_device_template_path,
@@ -16,6 +15,7 @@ from joystick_diagrams.export import export
 from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.ui.device_setup import DeviceSetup
 from joystick_diagrams.ui.export_settings import ExportSettings
+from joystick_diagrams.ui.main_window import MainWindow
 from joystick_diagrams.ui.qt_designer import export_ui
 from joystick_diagrams.utils import install_root
 
