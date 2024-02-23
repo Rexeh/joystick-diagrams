@@ -18,7 +18,6 @@ from joystick_diagrams.template import Template
 
 _logger = logging.getLogger(__name__)
 
-
 TEMPLATE_NAMING_KEY = "TEMPLATE_NAME"
 TEMPLATE_DATING_KEY = "CURRENT_DATE"
 
@@ -71,12 +70,10 @@ def populate_template(export_device: ExportDevice) -> str:
         )
 
         if input_object.modifiers:
-            # TODO optimise only if we know the template uses these
             modified_template_data = replace_input_modifiers_string(
                 input_key, input_object.modifiers, modified_template_data
             )
 
-            # TODO Optimise to only run if we need to
             for modifier_number, modifier in enumerate(input_object.modifiers, 1):
                 modified_template_data = replace_input_modifier_id_key(
                     input_key, modifier_number, modifier, modified_template_data
@@ -113,6 +110,7 @@ def replace_input_modifiers_string(
 def replace_input_modifier_id_key(
     input_key: str, modifier_number: int, modifier: Modifier, data: str
 ) -> str:
+    """Replaces instances where a particular Modifier key has been used, either with an overall ID, or with specific ID/Value combinations"""
     # Handle INPUT_KEY_MODIFIER_X
     search = re.compile(rf"\b{input_key}_Modifier_{modifier_number}\b", re.IGNORECASE)
     replacement = f"{modifier.modifiers} - {modifier.command}"
@@ -148,6 +146,7 @@ def replace_input_string(search_key: str, replacement: str, data: str) -> str:
 def replace_unused_keys(data: str) -> str:
     """Replaces all unused keys in the template with default values"""
     search_keys = [Template.BUTTON_KEY, Template.AXIS_KEY, Template.HAT_KEY]
+    search_keys.extend(Template.MODIFIER_KEYS)
 
     def find_keys(search_keys: list[re.Pattern]) -> list[str]:
         found_keys = []
@@ -167,12 +166,14 @@ def replace_unused_keys(data: str) -> str:
 
 
 def replace_template_date_string(data: str) -> str:
+    """Basic replacement of the key with a date at time of run"""
     search = re.compile(rf"\b{TEMPLATE_DATING_KEY}\b", re.IGNORECASE)
 
     return re.sub(search, datetime.now().strftime("%d/%m/%Y"), data)
 
 
 def replace_template_name_string(replacement: str, data: str) -> str:
+    """Basic replacement of the key with a replacement as name"""
     search = re.compile(rf"\b{TEMPLATE_NAMING_KEY}\b", re.IGNORECASE)
     return re.sub(search, replacement, data)
 
