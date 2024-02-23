@@ -65,7 +65,6 @@ packages = [
 include_files = [
     "./img",
     "./templates",
-    "./settings.json",
     "./readme.md",
     "version_manifest.json",
 ]
