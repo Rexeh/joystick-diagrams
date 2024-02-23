@@ -39,7 +39,7 @@ class Device_:  # noqa: N801
         self.guid = self.validate_guid(guid)
         self.name = device_name.strip()
 
-        self.inputs: dict[str, dict[str | int, Input_]] = {
+        self.inputs: dict[str, dict[str, Input_]] = {
             INPUT_BUTTON_KEY: {},
             INPUT_AXIS_KEY: {},
             INPUT_AXIS_SLIDER_KEY: {},
@@ -93,27 +93,27 @@ class Device_:  # noqa: N801
                 getattr(control, INPUT_TYPE_IDENTIFIERS[control_key])
             ] = Input_(control, command)
 
-    def get_input(self, input_type: str, input_id: str | int) -> Input_ | None:
+    def get_input(self, input_type: str, input_id: str) -> Input_ | None:
         """Get an input for a specific input type.
 
         Returns None | Input_
         """
         return self.inputs[input_type].get(input_id)
 
-    def get_inputs(self) -> dict[str, dict[str | int, Input_]]:
+    def get_inputs(self) -> dict[str, dict[str, Input_]]:
         """Returns input dictionary
 
         Returns dict
         """
         return self.inputs
 
-    def get_combined_inputs(self) -> dict[str | int, Input_]:
+    def get_combined_inputs(self) -> dict[str, Input_]:
         """Returns a flattened input dictionary
 
         Returns dict
         """
         flattened_dict_ = {}
-        for value in self.inputs.values():
+        for value in self.get_inputs().values():
             flattened_dict_.update(value)
         return flattened_dict_
 
