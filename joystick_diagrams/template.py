@@ -15,7 +15,7 @@ _logger = logging.getLogger(__name__)
 
 class Template:
     BUTTON_KEY = re.compile(r"\bBUTTON_\d+\b", flags=re.IGNORECASE)
-    MODIFIER_KEY = re.compile(r"\b[a-zA-Z]+_\d+_MOD_\d+", flags=re.IGNORECASE)
+    MODIFIER_KEY = re.compile(r"\b[a-zA-Z]+_\d+_Modifier_\d+", flags=re.IGNORECASE)
     HAT_KEY = re.compile(r"\bPOV_\d+_[URDL]+\b", flags=re.IGNORECASE)
     AXIS_KEY = re.compile(r"\bAXIS_[a-zA-Z]+_?\d?+\b", flags=re.IGNORECASE)
     TEMPLATE_NAMING_KEY = re.compile(r"\bTEMPLATE_NAME\b", flags=re.IGNORECASE)
@@ -36,7 +36,7 @@ class Template:
                 "There was an issue reading the template file"
             ) from e
 
-    def get_template_mndifiers(self) -> set[str]:
+    def get_template_modifiers(self) -> set[str]:
         "Returns the available MODIFIER NUMBERS supported for a given CONTROL from the template"
         return {x.lower() for x in re.findall(self.MODIFIER_KEY, self.raw_data)}
 
@@ -80,7 +80,7 @@ class Template:
     @property
     def modifier_count(self) -> int:
         "Returns the number of modifiers available"
-        return len(self.get_template_mndifiers())
+        return len(self.get_template_modifiers())
 
 
 if __name__ == "__main__":

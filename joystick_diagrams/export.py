@@ -8,58 +8,47 @@ Author: Robert Cox
 import html
 import logging
 import re
+from datetime import datetime
 from pathlib import Path
 
 from joystick_diagrams import utils
 from joystick_diagrams.export_device import ExportDevice
-from joystick_diagrams.input.device import Device_
+from joystick_diagrams.input.modifier import Modifier
+from joystick_diagrams.template import Template
 
 _logger = logging.getLogger(__name__)
 
 
-# Exporter
-# Extensible to other types of EXPORT destination (svg, pdf)
-# Accepts PROFILES
-# Users can set the no bind behaviour?
-# Users can it to a custom location?
-# Dating template re.sub("\\bCURRENT_DATE\\b", datetime.now().strftime("%d/%m/%Y"), template)
-# Branding template  re.sub("\\bTEMPLATE_NAME\\b", title, template)
-
-
-EXPORT_DIRECTORY = Path.joinpath(Path(utils.install_root(), "test_export"))
-ENCODING_TYPE = "utf8"
+TEMPLATE_NAMING_KEY = "TEMPLATE_NAME"
+TEMPLATE_DATING_KEY = "CURRENT_DATE"
 
 
 def export(export_device: ExportDevice, output_directory: str):
     try:
-        profile_name = export_device.profile_wrapper.profile_name
-
         # Get Profile Devices, that have valid templates
         _logger.debug(f"Getting device templates for {export_device} object")
 
         # Use the template
-        export_device_to_templates(export_device, profile_name, Path(output_directory))
+        export_device_to_templates(export_device, Path(output_directory))
 
     except Exception as e:
         _logger.debug(e)
 
 
-def export_device_to_templates(
-    device: ExportDevice, profile_name: str, export_location: Path
-):
+def export_device_to_templates(export_device: ExportDevice, export_location: Path):
     """Handles the manipulation of the template."""
 
-    if device.template is None:
+    if export_device.template is None:
         _logger.error(
-            f"There was an issue getting data for the current template: {device}"
+            f"There was an issue getting data for the current template: {export_device}"
         )
         return
 
     # Replace strings in the template data with device data
-    result = populate_template(device.template.raw_data, device.device, profile_name)
+    result = populate_template(export_device)
 
-    # TODO hardcode for test
-    file_name = f"{device.device.name}-{profile_name}.svg"
+    # TODO handle duplicate file names due to device name clashes
+    file_name = f"{export_device.device_id[:5]}-{export_device.device.name}-{export_device.profile_wrapper.profile_name}.svg"
     save_template(result, file_name, export_location)
 
 
@@ -70,59 +59,123 @@ def save_template(template_data, file_name, export_path):
         f.write(template_data)
 
 
-def populate_template(template_data: str, device: Device_, profile_name: str) -> str:
-    """Manipulates template_data to replace known keys with data"""
-    modified_template_data = template_data
+def populate_template(export_device: ExportDevice) -> str:
+    """Manipulates template_data to replace known keys with data from Device_"""
+    modified_template_data = export_device.template.raw_data
 
-    # Do the inputs
-    # Do the modifiers
-    # Do date strings, template name
-
-    # TODO improve boilerplate for test
-    for input_key, input_object in device.get_combined_inputs().items():
+    for input_key, input_object in export_device.device.get_combined_inputs().items():
         # Escape the primary action
-        primary_action = html.escape(input_object.command)
 
-        # Create Modifier Strings
-        mod_string = ""
-        for modifier in input_object.modifiers:
-            mod_string = mod_string + "<br></br>" + html.escape(modifier.__str__())
-
-        final_template_string = primary_action + mod_string
-
-        regex_search = "\\b" + input_key + "\\b"
-
-        modified_template_data = re.sub(
-            regex_search,
-            final_template_string,
-            modified_template_data,
-            flags=re.IGNORECASE,
+        modified_template_data = replace_input_string(
+            input_key, html.escape(input_object.command), modified_template_data
         )
+
+        if input_object.modifiers:
+            # TODO optimise only if we know the template uses these
+            modified_template_data = replace_input_modifiers_string(
+                input_key, input_object.modifiers, modified_template_data
+            )
+
+            # TODO Optimise to only run if we need to
+            for modifier_number, modifier in enumerate(input_object.modifiers, 1):
+                modified_template_data = replace_input_modifier_id_key(
+                    input_key, modifier_number, modifier, modified_template_data
+                )
+
+    modified_template_data = replace_template_name_string(
+        export_device.profile_wrapper.profile_name, modified_template_data
+    )
+    modified_template_data = replace_template_date_string(modified_template_data)
+    modified_template_data = replace_unused_keys(modified_template_data)
 
     return modified_template_data
 
 
+def replace_input_modifiers_string(
+    input_key: str, modifiers: list[Modifier], data: str
+) -> str:
+    """Replaces the INPUT_KEY_MODIFIERS key with combined modifiers from input"""
+    search = re.compile(rf"\b{input_key}_Modifiers\b", re.IGNORECASE)
+
+    # Create Modifier Strings
+    mod_string = ""
+    total_modifiers = len(modifiers)
+    for modifier_index, modifier in enumerate(modifiers, 1):
+        mod_string = mod_string + html.escape(str(modifier))
+
+        # Due to way SVG handles new lines, this is a compromise for modifiers to be joined and look reasonable
+        if modifier_index != total_modifiers:
+            mod_string = mod_string + " | "
+
+    return re.sub(search, mod_string, data)
+
+
+def replace_input_modifier_id_key(
+    input_key: str, modifier_number: int, modifier: Modifier, data: str
+) -> str:
+    # Handle INPUT_KEY_MODIFIER_X
+    search = re.compile(rf"\b{input_key}_Modifier_{modifier_number}\b", re.IGNORECASE)
+    replacement = f"{modifier.modifiers} - {modifier.command}"
+
+    data = re.sub(search, html.escape(replacement), data)
+
+    # INPUT_KEY_Modifier_1_KEY
+    search = re.compile(
+        rf"\b{input_key}_Modifier_{modifier_number}_Key\b", re.IGNORECASE
+    )
+    replacement = f"{modifier.modifiers}"
+    data = re.sub(search, html.escape(replacement), data)
+
+    # INPUT_KEY_Modifier_1_ACTION
+    search = re.compile(
+        rf"\b{input_key}_Modifier_{modifier_number}_Action\b", re.IGNORECASE
+    )
+    replacement = f"{modifier.command}"
+    data = re.sub(search, html.escape(replacement), data)
+
+    return data
+
+
+def replace_input_string(search_key: str, replacement: str, data: str) -> str:
+    """Replaces basic keys with their expected action
+
+    BUTTON_X, AXIS_X, POV_X_X
+    """
+    search = re.compile(rf"\b{search_key}\b", re.IGNORECASE)
+    return re.sub(search, html.escape(replacement), data)
+
+
+def replace_unused_keys(data: str) -> str:
+    """Replaces all unused keys in the template with default values"""
+    search_keys = [Template.BUTTON_KEY, Template.AXIS_KEY, Template.HAT_KEY]
+
+    def find_keys(search_keys: list[re.Pattern]) -> list[str]:
+        found_keys = []
+        for key in search_keys:
+            result = re.findall(key, data)
+            found_keys.extend(result)
+
+        return found_keys
+
+    aggregated_keys = find_keys(search_keys)
+
+    for key in aggregated_keys:
+        compiled_key = re.compile(rf"\b{key}\b", re.IGNORECASE)
+        data = re.sub(compiled_key, "", data)
+
+    return data
+
+
+def replace_template_date_string(data: str) -> str:
+    search = re.compile(rf"\b{TEMPLATE_DATING_KEY}\b", re.IGNORECASE)
+
+    return re.sub(search, datetime.now().strftime("%d/%m/%Y"), data)
+
+
+def replace_template_name_string(replacement: str, data: str) -> str:
+    search = re.compile(rf"\b{TEMPLATE_NAMING_KEY}\b", re.IGNORECASE)
+    return re.sub(search, replacement, data)
+
+
 if __name__ == "__main__":
-    pass
-    # from joystick_diagrams.input.button import Button
-    # from joystick_diagrams.input.profile_collection import ProfileCollection
-
-    # collection1 = ProfileCollection()
-    # profile1 = collection1.create_profile("Profile1")
-
-    # dev1 = profile1.add_device("dev_1", "dev_1")
-
-    # dev1.create_input(Button(3), "Wheel Brake - ON/OFF")
-
-    # Modifier(modifiers={'LCtrl'}, command='UFC Function Selector Pushbutton - A/P')
-    # Modifier(modifiers={'LShift'}, command='UFC Option Select Pushbutton 1')
-    # Modifier(modifiers={'LCtrl', 'LShift'}, command='UFC Option Select Pushbutton 3')
-    # Modifier(modifiers={'LAlt'}, command='UFC Option Select Pushbutton 5')
-
-    # dev1.add_modifier_to_input(Button(3), {"LCtrl"}, "UFC Function Selector Pushbutton - A/P")
-    # dev1.add_modifier_to_input(Button(3), {"LShift"}, "UFC Option Select Pushbutton 1")
-    # dev1.add_modifier_to_input(Button(3), {"LCtrl", "LShift"}, "UFC Option Select Pushbutton 3")
-    # dev1.add_modifier_to_input(Button(3), {"LAlt"}, "UFC Option Select Pushbutton 5")
-
-    # data = read_template(Path("D:\\Git Repos\\joystick-diagrams\\templates\\CH Fighterstick USB.svg"))
-    # populate_template(data, dev1, "potato")
+    replace_unused_keys("button_2")
