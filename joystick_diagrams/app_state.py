@@ -108,22 +108,6 @@ class AppState:
             f"Loaded plugins resulted in the following profiles being detected {self.plugin_profile_map}"
         )
 
-    def get_processed_profile(self, profile_identifier: str) -> Profile_:
-        """Return inherited profile for given Profile Identifier."""
-        return self.processedProfileObjectMapping[profile_identifier]
-
-    def get_processed_profiles(self) -> dict[str, Profile_]:
-        """Return all inherited profiles."""
-        return self.processedProfileObjectMapping
-
-    def update_parent_profile_map(self, key: str, values: list) -> None:
-        """Updates the global map of Profiles -> Profile Parents. Parents form the basis for inheritance of profiles.
-
-        Returns None
-
-        """
-        self.profileParentMapping[key] = values
-
 
 if __name__ == "__main__":
     pass
