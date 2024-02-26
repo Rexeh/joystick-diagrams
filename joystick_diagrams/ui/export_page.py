@@ -40,21 +40,14 @@ class ExportPage(
             qta.icon("fa5s.file-code", color="white", color_disabled="white")
         )
         self.setTemplateButton.setText("Select an item to set Template")
-        self.setTemplateButton.setStyleSheet(
-            """
-            QPushButton:disabled{background-color:grey}QPushButton{background-color:#2980b9;color:white;font-size:14px;border-radius:3px;border:none}
-            """
-        )
+        self.setTemplateButton.setProperty("class", "template-set-button")
+
         self.setTemplateButton.setDisabled(True)
 
         self.ExportButton.setIcon(
             qta.icon("fa5s.file-export", color="white", color_disabled="white")
         )
-        self.ExportButton.setStyleSheet(
-            """
-            QPushButton:disabled{background-color:grey}QPushButton{background-color:#27ae60;color:white;font-size:14px;border-radius:3px;border:none}
-            """
-        )
+        self.ExportButton.setProperty("class", "export-button")
         self.ExportButton.setIconSize(QSize(35, 35))
 
         # Include Device setup Widget
@@ -73,6 +66,7 @@ class ExportPage(
         ## Include Export Settings Panel
         self.export_settings_widget = ExportSettings()
         self.export_settings_container.addWidget(self.export_settings_widget)
+        self.export_bottom_section.setProperty("class", "export-bottom-container")
 
         # Defaults
         self.update_export_button_state(0)  # Set the export button state

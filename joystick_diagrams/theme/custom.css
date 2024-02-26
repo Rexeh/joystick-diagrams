@@ -59,15 +59,27 @@ QWidget {{
     max-height: 15px
   }}
 
+.nav-button::menu-indicator {{
+    color: white;
+    background-color: #3A6FCD;
+    border-bottom: 2px solid #A9BCD0;
+  }}
+
+.nav-button:pressed {{
+    color: white;
+    background-color: #3A6FCD;
+    border-bottom: 2px solid #A9BCD0;
+  }}
+
 .nav-button:checked {{
     color: white;
-    background-color: #255F85;
+    background-color: #3A6FCD;
     border-bottom: 2px solid #A9BCD0;
   }}
 
 .nav-button:hover:checked {{
     color: white;
-    background-color: #255F85;
+    background-color: #3A6FCD;
   }}
 
 .nav-button:hover {{
@@ -90,12 +102,12 @@ QWidget {{
     padding: 25px;
 }}
 
-.run-button.enabled {{
-    background:  #255F85;
+.run-button:enabled {{
+    background:  #3A6FCD;
     color:white;
 }}
 
-.run-button.disabled {{
+.run-button:disabled {{
     background:  #C5283D;
     color: white;
 }}
@@ -112,7 +124,8 @@ QWidget {{
 }}
 
 .enabled-button:checked {{
-    background: #255F85
+    background: #3A6FCD;
+    color: white;
 }}
 
 .ready-button {{
@@ -152,7 +165,9 @@ QTreeWidget.plugin-tree QHeaderView::section {{
 
 /* Tab Controls */
 
-
+QTabWidget.configure-tabwidget::tab-bar {{
+    left: 10px;
+}}
 
 .configure-tabwidget QTabBar::tab {{
     padding:10px;
@@ -163,7 +178,7 @@ QTreeWidget.plugin-tree QHeaderView::section {{
 
 .configure-tabwidget QTabBar::tab:selected {{
     border-bottom: 2px solid white;
-    background: #255F85;
+    background: #3A6FCD;
     color: white;
 }}
 
@@ -178,7 +193,8 @@ QTreeWidget.plugin-tree QHeaderView::section {{
 /* Drop Down List */
 
 QComboBox.view-binds-list {{
-    background: #29468a;
+    background: #3A6FCD;
+    opacity: 0.5;
     padding: 10px;
 }}
 
@@ -189,30 +205,123 @@ QComboBox::item.view-binds-list {{
 
 /* Tree Widget */
 
-QTreeWidget .view-binds-tree {{
-    color: white;
+QTreeWidget.view-binds-tree {{
+    color: black;
     background-color: #D8DBE2;
     padding: 20px;
 }}
 
-QTreeWidget::item .view-binds-tree {{
+QTreeWidget.view-binds-tree::item {{
     color: #120303;
     background-color: #D8DBE2;
     border-top-color: transparent;
     border-bottom-color: transparent;
 }}
 
-QTreeView::branch:closed:has-children:has-siblings {{
-        border-image: none;
+QTreeWidget.view-binds-tree::branch {{
         background: #D8DBE2;
+        color:black;
 }}
 
-QTreeWidget QHeaderView::section .view-binds-tree {{
-    font-size: 12pt;
+QTreeWidget.view-binds-tree::item:selected {{
+
+        selection-color: black;
+}}
+
+QTreeWidget.view-binds-tree::branch:closed:has-children {{
+        background: #D8DBE2;
+        image: url(:/icons/arrow-down);
+        border-image: none;
+}}
+
+QTreeWidget.view-binds-tree::branch:open:has-children {{
+        background: #D8DBE2;
+        image: url(:/icons/arrow-right);
+        border-image: none;
+}}
+
+QTreeWidget.view-binds-tree QHeaderView::section  {{
     color: #2d3436;
     background-color: #D8DBE2;
 }}
 
-QTreeWidget.view-binds-tree::branch {{
+
+/* Export Styling */
+
+QTreeWidget.device-tree {{
+    color: black;
     background-color: #D8DBE2;
+    padding: 20px;
+}}
+
+QTreeWidget.device-tree::item {{
+    color: #120303;
+    background-color: #D8DBE2;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}}
+
+QTreeWidget.device-tree::branch {{
+        background: #D8DBE2;
+        color:black;
+}}
+
+QTreeWidget.device-tree::item:selected {{
+
+        selection-color: black;
+}}
+
+QTreeWidget.device-tree::branch:closed:has-children {{
+        background: #D8DBE2;
+        image: url(:/icons/arrow-down);
+        border-image: none;
+}}
+
+QTreeWidget.device-tree::branch:open:has-children {{
+        background: #D8DBE2;
+        image: url(:/icons/arrow-right);
+        border-image: none;
+}}
+
+QTreeWidget.device-tree QHeaderView::section  {{
+    color: #2d3436;
+    background-color: #D8DBE2;
+}}
+
+#export_format {{
+    color: white;
+}}
+
+.export-location-button {{
+    background: white;
+    border: none;
+    border-radius: 5px;
+}}
+
+.template-set-button {{
+    background: #C5283D;
+    border: none;
+    border-radius: 5px;
+    color: white
+}}
+
+.template-set-button:disabled {{
+    background: #D8DBE2;
+    border: none;
+    border-radius: 5px;
+    color: #A9BCD0
+}}
+
+.export-button {{
+    border: none;
+    border-radius: 5px;
+}}
+
+.export-button:disabled  {{
+    background: #D8DBE2;
+}}
+
+.export-button:enabled {{
+    background: #3A6FCD;
+    color: #D8DBE2;
 }}

@@ -102,6 +102,8 @@ class PluginsPage(
             "Enable and setup the plugins you want to create diagrams for."
         )
 
+        self.runPluginsButton.setProperty("class", "run-button")
+
     class EnabledPushButton(QPushButton):
         """Custom PushButton class to handle QTreeWidget item pass through to click event for embedded widget"""
 
@@ -121,10 +123,8 @@ class PluginsPage(
         if self.plugins_ready > 0:
             self.runPluginsButton.setText(f"Run {self.plugins_ready} plugins")
             self.runPluginsButton.setEnabled(True)
-            self.runPluginsButton.setProperty("class", "run-button enabled")
         else:
             self.runPluginsButton.setText("No plugins ready")
-            self.runPluginsButton.setProperty("class", "run-button disabled")
 
     def get_plugin_data_for_tree(self) -> list[PluginWrapper]:
         plugin_wrappers = []

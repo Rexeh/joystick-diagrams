@@ -27,6 +27,7 @@ class Ui_MainWindow(object):
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(1100, 900)
         MainWindow.setMinimumSize(QSize(1100, 900))
+        MainWindow.setMaximumSize(QSize(1100, 900))
         font = QFont()
         font.setFamilies([u"Century Gothic"])
         font.setBold(True)

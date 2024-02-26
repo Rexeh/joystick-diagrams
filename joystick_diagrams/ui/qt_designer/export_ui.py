@@ -8,8 +8,15 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize
-from PySide6.QtGui import QFont
+from PySide6.QtCore import (
+    QCoreApplication,
+    QMetaObject,
+    QRect,
+    QSize,
+)
+from PySide6.QtGui import (
+    QFont,
+)
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -26,20 +33,20 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName("Form")
-        Form.resize(1100, 800)
+        Form.resize(1100, 700)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QSize(1100, 800))
-        Form.setMaximumSize(QSize(1100, 16777215))
+        Form.setMinimumSize(QSize(1100, 700))
+        Form.setMaximumSize(QSize(1100, 700))
         font = QFont()
         font.setFamilies(["MS Sans Serif"])
         Form.setFont(font)
         self.layoutWidget = QWidget(Form)
         self.layoutWidget.setObjectName("layoutWidget")
-        self.layoutWidget.setGeometry(QRect(0, 0, 1081, 621))
+        self.layoutWidget.setGeometry(QRect(0, 0, 1081, 691))
         self.layoutWidget.setMaximumSize(QSize(1100, 16777215))
         self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -60,9 +67,10 @@ class Ui_Form(object):
 
         self.devices_layout = QVBoxLayout()
         self.devices_layout.setObjectName("devices_layout")
-        self.devices_layout.setSizeConstraint(QLayout.SetMaximumSize)
+        self.devices_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.devices_header = QHBoxLayout()
         self.devices_header.setObjectName("devices_header")
+        self.devices_header.setSizeConstraint(QLayout.SetMinimumSize)
         self.device_text_layout = QVBoxLayout()
         self.device_text_layout.setObjectName("device_text_layout")
         self.device_text_layout.setContentsMargins(5, -1, -1, -1)
@@ -98,22 +106,21 @@ class Ui_Form(object):
 
         self.devices_container = QHBoxLayout()
         self.devices_container.setObjectName("devices_container")
-        self.devices_container.setSizeConstraint(QLayout.SetMaximumSize)
+        self.devices_container.setSizeConstraint(QLayout.SetDefaultConstraint)
 
         self.devices_layout.addLayout(self.devices_container)
 
-        self.devices_layout.setStretch(0, 1)
-
         self.verticalLayout.addLayout(self.devices_layout)
 
-        self.horizontalLayout_5 = QHBoxLayout()
-        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.horizontalLayout_5.setContentsMargins(-1, 30, -1, -1)
+        self.export_bottom_section = QHBoxLayout()
+        self.export_bottom_section.setObjectName("export_bottom_section")
+        self.export_bottom_section.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.export_bottom_section.setContentsMargins(-1, 0, -1, -1)
         self.export_settings_container = QHBoxLayout()
         self.export_settings_container.setObjectName("export_settings_container")
         self.export_settings_container.setContentsMargins(-1, -1, 50, -1)
 
-        self.horizontalLayout_5.addLayout(self.export_settings_container)
+        self.export_bottom_section.addLayout(self.export_settings_container)
 
         self.ExportButton = QPushButton(self.layoutWidget)
         self.ExportButton.setObjectName("ExportButton")
@@ -127,9 +134,9 @@ class Ui_Form(object):
         self.ExportButton.setMinimumSize(QSize(300, 100))
         self.ExportButton.setMaximumSize(QSize(300, 100))
 
-        self.horizontalLayout_5.addWidget(self.ExportButton)
+        self.export_bottom_section.addWidget(self.ExportButton)
 
-        self.verticalLayout.addLayout(self.horizontalLayout_5)
+        self.verticalLayout.addLayout(self.export_bottom_section)
 
         self.retranslateUi(Form)
 

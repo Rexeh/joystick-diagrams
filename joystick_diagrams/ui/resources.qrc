@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="icons">
+    <file alias="arrow-down">resources/circle-chevron-down-solid.svg</file>
+    <file alias="arrow-right">resources/circle-chevron-right-solid.svg</file>
+  </qresource>
+</RCC>

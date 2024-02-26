@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 from PySide6 import QtWidgets
@@ -35,7 +36,13 @@ def init():
         "font_family": "Roboto",
     }
 
-    apply_stylesheet(app, theme="dark_blue.xml", invert_secondary=False, extra=extra)
+    apply_stylesheet(
+        app,
+        theme="dark_blue.xml",
+        invert_secondary=False,
+        extra=extra,
+        css_file=os.path.join(os.getcwd(), "joystick_diagrams/theme/custom.css"),
+    )
 
     app.exec()
 

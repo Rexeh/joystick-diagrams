@@ -49,6 +49,8 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         self.treeWidget.setHeaderItem(self.device_header)
         self.treeWidget.setIconSize(QSize(20, 20))
 
+        self.treeWidget.setProperty("class", "device-tree")
+
         self.treeWidget.setColumnCount(3)
         self.treeWidget.itemClicked.connect(self.device_item_clicked)
         self.treeWidget.header().setStretchLastSection(True)

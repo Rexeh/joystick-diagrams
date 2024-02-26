@@ -17,7 +17,6 @@ from PySide6.QtWidgets import (
     QLayout,
     QPushButton,
     QSizePolicy,
-    QSpacerItem,
     QVBoxLayout,
     QWidget,
 )
@@ -27,21 +26,21 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName("Form")
-        Form.resize(500, 200)
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        Form.resize(500, 150)
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QSize(500, 200))
-        Form.setMaximumSize(QSize(500, 200))
-        Form.setBaseSize(QSize(500, 200))
+        Form.setMinimumSize(QSize(500, 150))
+        Form.setMaximumSize(QSize(500, 150))
+        Form.setBaseSize(QSize(500, 150))
         self.verticalLayoutWidget = QWidget(Form)
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(9, 9, 481, 161))
+        self.verticalLayoutWidget.setGeometry(QRect(9, 9, 481, 111))
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.verticalLayout.setSizeConstraint(QLayout.SetMaximumSize)
+        self.verticalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.label = QLabel(self.verticalLayoutWidget)
         self.label.setObjectName("label")
@@ -49,68 +48,58 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.label)
 
-        self.verticalSpacer = QSpacerItem(
-            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
-        )
-
-        self.verticalLayout.addItem(self.verticalSpacer)
-
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.horizontalLayout.setSizeConstraint(QLayout.SetMaximumSize)
+        self.export_location_container = QHBoxLayout()
+        self.export_location_container.setObjectName("export_location_container")
+        self.export_location_container.setSizeConstraint(QLayout.SetMaximumSize)
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout_2.setSizeConstraint(QLayout.SetMaximumSize)
-        self.label_2 = QLabel(self.verticalLayoutWidget)
-        self.label_2.setObjectName("label_2")
+        self.export_location_label_2 = QLabel(self.verticalLayoutWidget)
+        self.export_location_label_2.setObjectName("export_location_label_2")
         sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
-        self.label_2.setSizePolicy(sizePolicy1)
+        sizePolicy1.setHeightForWidth(
+            self.export_location_label_2.sizePolicy().hasHeightForWidth()
+        )
+        self.export_location_label_2.setSizePolicy(sizePolicy1)
         font = QFont()
         font.setBold(True)
-        self.label_2.setFont(font)
+        self.export_location_label_2.setFont(font)
 
-        self.verticalLayout_2.addWidget(self.label_2)
+        self.verticalLayout_2.addWidget(self.export_location_label_2)
 
-        self.export_location_label = QLabel(self.verticalLayoutWidget)
-        self.export_location_label.setObjectName("export_location_label")
-        self.export_location_label.setWordWrap(True)
+        self.export_location_directory = QLabel(self.verticalLayoutWidget)
+        self.export_location_directory.setObjectName("export_location_directory")
+        self.export_location_directory.setWordWrap(True)
 
-        self.verticalLayout_2.addWidget(self.export_location_label)
+        self.verticalLayout_2.addWidget(self.export_location_directory)
 
-        self.horizontalLayout.addLayout(self.verticalLayout_2)
+        self.export_location_container.addLayout(self.verticalLayout_2)
 
         self.setExportLocationButton = QPushButton(self.verticalLayoutWidget)
         self.setExportLocationButton.setObjectName("setExportLocationButton")
 
-        self.horizontalLayout.addWidget(self.setExportLocationButton)
+        self.export_location_container.addWidget(self.setExportLocationButton)
 
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.verticalLayout.addLayout(self.export_location_container)
 
-        self.verticalSpacer_2 = QSpacerItem(
-            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
-        )
+        self.export_format_container = QHBoxLayout()
+        self.export_format_container.setObjectName("export_format_container")
+        self.export_format_container.setSizeConstraint(QLayout.SetMaximumSize)
+        self.export_format_label = QLabel(self.verticalLayoutWidget)
+        self.export_format_label.setObjectName("export_format_label")
+        self.export_format_label.setFont(font)
 
-        self.verticalLayout.addItem(self.verticalSpacer_2)
+        self.export_format_container.addWidget(self.export_format_label)
 
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.horizontalLayout_2.setSizeConstraint(QLayout.SetMaximumSize)
-        self.label_3 = QLabel(self.verticalLayoutWidget)
-        self.label_3.setObjectName("label_3")
-        self.label_3.setFont(font)
+        self.export_format = QComboBox(self.verticalLayoutWidget)
+        self.export_format.addItem("")
+        self.export_format.setObjectName("export_format")
 
-        self.horizontalLayout_2.addWidget(self.label_3)
+        self.export_format_container.addWidget(self.export_format)
 
-        self.comboBox = QComboBox(self.verticalLayoutWidget)
-        self.comboBox.addItem("")
-        self.comboBox.setObjectName("comboBox")
-
-        self.horizontalLayout_2.addWidget(self.comboBox)
-
-        self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.verticalLayout.addLayout(self.export_format_container)
 
         self.retranslateUi(Form)
 
@@ -127,16 +116,20 @@ class Ui_Form(object):
                 None,
             )
         )
-        self.label_2.setText(
+        self.export_location_label_2.setText(
             QCoreApplication.translate("Form", "Export Location", None)
         )
-        self.export_location_label.setText(
+        self.export_location_directory.setText(
             QCoreApplication.translate("Form", "TextLabel", None)
         )
         self.setExportLocationButton.setText(
             QCoreApplication.translate("Form", "Set Location", None)
         )
-        self.label_3.setText(QCoreApplication.translate("Form", "Export Format", None))
-        self.comboBox.setItemText(0, QCoreApplication.translate("Form", "SVG", None))
+        self.export_format_label.setText(
+            QCoreApplication.translate("Form", "Export Format", None)
+        )
+        self.export_format.setItemText(
+            0, QCoreApplication.translate("Form", "SVG", None)
+        )
 
     # retranslateUi

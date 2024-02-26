@@ -2,7 +2,7 @@ import logging
 import os
 
 import qtawesome as qta  # type:  ignore
-from PySide6.QtCore import QCoreApplication, QSize, QTimer
+from PySide6.QtCore import QCoreApplication, QSize
 from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (
     QLabel,
@@ -57,15 +57,6 @@ class MainWindow(
 
         # Top Additional Nav Setup
 
-        # Top Nav Dev Refresh Button
-        self.styleButton = QPushButton("Refresh Style")
-        self.styleButton.clicked.connect(self.set_style)
-
-        self.styleTimer = QTimer()
-        self.styleTimer.setInterval(10000)
-        self.styleTimer.timeout.connect(self.set_style)
-        self.styleTimer.start()
-
         self.topnav_layout.setSpacing(0)
         self.topnav_layout.setContentsMargins(0, 5, 0, 5)
 
@@ -84,7 +75,16 @@ class MainWindow(
 
         self.topnav_additional_layout.addStretch(1)
 
-        self.topnav_additional_layout.addWidget(self.styleButton)
+        # Top Nav Dev Refresh Button
+        # self.styleButton = QPushButton("Refresh Style")
+        # self.styleButton.clicked.connect(self.set_style)
+
+        # self.styleTimer = QTimer()
+        # self.styleTimer.setInterval(10000)
+        # self.styleTimer.timeout.connect(self.set_style)
+        # self.styleTimer.start()
+
+        # self.topnav_additional_layout.addWidget(self.styleButton)
         self.topnav_additional_layout.addWidget(self.discord_pill)
         self.topnav_additional_layout.addWidget(self.website_pill)
 
@@ -93,9 +93,7 @@ class MainWindow(
         # TODO move this out into styles
 
         self.setupSectionButton.setIcon(
-            qta.icon(
-                "fa5s.cog", color="grey", color_active="white", color_checked="white"
-            )
+            qta.icon("fa5s.cog", color="white", color_active="white")
         )
         self.setupSectionButton.setToolTip("Manage plugins")
         self.setupSectionButton.setIconSize(QSize(32, 32))
@@ -105,7 +103,7 @@ class MainWindow(
 
         # Customise Menu  Controls
         self.customiseSectionButton.setIcon(
-            qta.icon("fa5s.tools", color="grey", color_active="white")
+            qta.icon("fa5s.tools", color="white", color_active="white")
         )
         self.customiseSectionButton.setIconSize(QSize(32, 32))
         self.customiseSectionButton.setToolTip(
@@ -116,7 +114,7 @@ class MainWindow(
 
         # Export Menu Controls
         self.exportSectionButton.setIcon(
-            qta.icon("fa5s.file-export", color="grey", color_active="white")
+            qta.icon("fa5s.file-export", color="white", color_active="white")
         )
         self.exportSectionButton.setIconSize(QSize(32, 32))
         self.exportSectionButton.setToolTip("Export your profiles to diagrams")
@@ -136,8 +134,6 @@ class MainWindow(
 
         with open(theme_path) as file:
             self.app.setStyleSheet(stylesheet + file.read().format(**os.environ))
-
-        print("style set")
 
     def open_discord_link(self):
         QDesktopServices.openUrl("https://discord.gg/UUyRUuX2dX")

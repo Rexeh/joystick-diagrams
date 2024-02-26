@@ -12,6 +12,7 @@ from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QAbstractScrollArea,
+    QLayout,
     QSizePolicy,
     QTreeWidget,
     QTreeWidgetItem,
@@ -24,19 +25,20 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName("Form")
-        Form.resize(1100, 310)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        Form.resize(1116, 430)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
         Form.setMinimumSize(QSize(0, 310))
-        Form.setMaximumSize(QSize(16777215, 310))
+        Form.setMaximumSize(QSize(16777215, 600))
         self.verticalLayoutWidget = QWidget(Form)
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(0, 0, 1141, 351))
+        self.verticalLayoutWidget.setGeometry(QRect(0, 0, 1111, 421))
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setSizeConstraint(QLayout.SetMaximumSize)
         self.verticalLayout.setContentsMargins(0, 0, 0, 10)
         self.treeWidget = QTreeWidget(self.verticalLayoutWidget)
         __qtreewidgetitem = QTreeWidgetItem()
@@ -44,7 +46,7 @@ class Ui_Form(object):
         self.treeWidget.setHeaderItem(__qtreewidgetitem)
         self.treeWidget.setObjectName("treeWidget")
         self.treeWidget.setMinimumSize(QSize(0, 300))
-        self.treeWidget.setMaximumSize(QSize(1100, 600))
+        self.treeWidget.setMaximumSize(QSize(1100, 500))
         self.treeWidget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         self.treeWidget.setVerticalScrollMode(QAbstractItemView.ScrollPerItem)
         self.treeWidget.setWordWrap(True)

@@ -26,6 +26,7 @@ class ExportSettings(QMainWindow, export_settings.Ui_Form):
 
         # Connections
         self.setExportLocationButton.clicked.connect(self.set_export_location)
+        self.setExportLocationButton.setProperty("class", "export-location-button")
         self.export_path_changed.connect(self.setup_widget)
 
         # Setup
@@ -37,12 +38,12 @@ class ExportSettings(QMainWindow, export_settings.Ui_Form):
         export_location = self.get_export_location()
 
         if export_location:
-            self.export_location_label.setText(export_location)
+            self.export_location_directory.setText(export_location)
             self.setExportLocationButton.setText("Change Export Location")
             self.export_location = export_location
             return
 
-        self.export_location_label.setText("Not Selected")
+        self.export_location_directory.setText("Not Selected")
         self.setExportLocationButton.setText("Set Export Location")
 
     def get_export_location(self):
