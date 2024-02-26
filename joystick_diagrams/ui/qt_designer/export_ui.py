@@ -43,12 +43,12 @@ class Ui_Form(object):
         self.layoutWidget.setMaximumSize(QSize(1100, 16777215))
         self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.label = QLabel(self.layoutWidget)
-        self.label.setObjectName("label")
-        self.label.setMaximumSize(QSize(1100, 23))
+        self.verticalLayout.setContentsMargins(0, 10, 0, 0)
+        self.heading_label = QLabel(self.layoutWidget)
+        self.heading_label.setObjectName("heading_label")
+        self.heading_label.setMaximumSize(QSize(1100, 23))
 
-        self.verticalLayout.addWidget(self.label)
+        self.verticalLayout.addWidget(self.heading_label)
 
         self.line = QFrame(self.layoutWidget)
         self.line.setObjectName("line")
@@ -58,49 +58,53 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.line)
 
-        self.verticalLayout_3 = QVBoxLayout()
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.verticalLayout_4 = QVBoxLayout()
-        self.verticalLayout_4.setObjectName("verticalLayout_4")
-        self.label_3 = QLabel(self.layoutWidget)
-        self.label_3.setObjectName("label_3")
-        self.label_3.setMaximumSize(QSize(1100, 16777215))
+        self.devices_layout = QVBoxLayout()
+        self.devices_layout.setObjectName("devices_layout")
+        self.devices_layout.setSizeConstraint(QLayout.SetMaximumSize)
+        self.devices_header = QHBoxLayout()
+        self.devices_header.setObjectName("devices_header")
+        self.device_text_layout = QVBoxLayout()
+        self.device_text_layout.setObjectName("device_text_layout")
+        self.device_text_layout.setContentsMargins(5, -1, -1, -1)
+        self.device_header_label = QLabel(self.layoutWidget)
+        self.device_header_label.setObjectName("device_header_label")
+        self.device_header_label.setMaximumSize(QSize(1100, 16777215))
         font1 = QFont()
         font1.setPointSize(10)
         font1.setBold(True)
-        self.label_3.setFont(font1)
+        self.device_header_label.setFont(font1)
 
-        self.verticalLayout_4.addWidget(self.label_3)
+        self.device_text_layout.addWidget(self.device_header_label)
 
-        self.label_2 = QLabel(self.layoutWidget)
-        self.label_2.setObjectName("label_2")
-        self.label_2.setMaximumSize(QSize(1100, 16777215))
+        self.device_help_label = QLabel(self.layoutWidget)
+        self.device_help_label.setObjectName("device_help_label")
+        self.device_help_label.setMaximumSize(QSize(1100, 16777215))
 
-        self.verticalLayout_4.addWidget(self.label_2)
+        self.device_text_layout.addWidget(self.device_help_label)
 
-        self.horizontalLayout_2.addLayout(self.verticalLayout_4)
+        self.devices_header.addLayout(self.device_text_layout)
 
-        self.verticalLayout_5 = QVBoxLayout()
-        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.device_controls_layout = QVBoxLayout()
+        self.device_controls_layout.setObjectName("device_controls_layout")
         self.setTemplateButton = QPushButton(self.layoutWidget)
         self.setTemplateButton.setObjectName("setTemplateButton")
         self.setTemplateButton.setMaximumSize(QSize(1100, 16777215))
 
-        self.verticalLayout_5.addWidget(self.setTemplateButton)
+        self.device_controls_layout.addWidget(self.setTemplateButton)
 
-        self.horizontalLayout_2.addLayout(self.verticalLayout_5)
+        self.devices_header.addLayout(self.device_controls_layout)
 
-        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
+        self.devices_layout.addLayout(self.devices_header)
 
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.horizontalLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
+        self.devices_container = QHBoxLayout()
+        self.devices_container.setObjectName("devices_container")
+        self.devices_container.setSizeConstraint(QLayout.SetMaximumSize)
 
-        self.verticalLayout_3.addLayout(self.horizontalLayout)
+        self.devices_layout.addLayout(self.devices_container)
 
-        self.verticalLayout.addLayout(self.verticalLayout_3)
+        self.devices_layout.setStretch(0, 1)
+
+        self.verticalLayout.addLayout(self.devices_layout)
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
@@ -135,17 +139,17 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", "Form", None))
-        self.label.setText(
+        self.heading_label.setText(
             QCoreApplication.translate(
                 "Form",
                 '<html><head/><body><p><span style=" font-size:14pt; font-weight:600;">Export</span></p></body></html>',
                 None,
             )
         )
-        self.label_3.setText(
+        self.device_header_label.setText(
             QCoreApplication.translate("Form", "Device Templates", None)
         )
-        self.label_2.setText(
+        self.device_help_label.setText(
             QCoreApplication.translate(
                 "Form", "Only devices with templates will be exported", None
             )

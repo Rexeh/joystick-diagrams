@@ -44,7 +44,7 @@ class Ui_Form(object):
         self.treeWidget.setHeaderItem(__qtreewidgetitem)
         self.treeWidget.setObjectName("treeWidget")
         self.treeWidget.setMinimumSize(QSize(0, 300))
-        self.treeWidget.setMaximumSize(QSize(1100, 300))
+        self.treeWidget.setMaximumSize(QSize(1100, 600))
         self.treeWidget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         self.treeWidget.setVerticalScrollMode(QAbstractItemView.ScrollPerItem)
         self.treeWidget.setWordWrap(True)

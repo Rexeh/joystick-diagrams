@@ -60,9 +60,14 @@ class ExportPage(
         # Include Device setup Widget
         self.device_widget = DeviceSetup()
         self.device_widget.device_item_selected.connect(self.change_template_button)
-        self.horizontalLayout.addWidget(self.device_widget)
+        self.devices_container.addWidget(self.device_widget)
         self.device_widget.number_of_selected_profiles.connect(
             self.update_export_button_state
+        )
+
+        self.device_header_label.setText("Devices")
+        self.device_help_label.setText(
+            "Choose your devices or profiles to export below"
         )
 
         ## Include Export Settings Panel
@@ -132,13 +137,16 @@ class ExportPage(
         # TODO handle MW interaction better
         main_window_inst: main_window = self.appState.main_window
         main_window_inst.statusLabel.setText("Waiting...")
-        QMessageBox.information(
-            self,
-            "Items exported",
-            f"{data} items were exported to {self.export_settings_widget.export_location}",
-            buttons=QMessageBox.StandardButton.Ok,
-            defaultButton=QMessageBox.StandardButton.Ok,
+
+        msg_box = QMessageBox()
+        msg_box.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        msg_box.setText(
+            f"{data} items were exported to {self.export_settings_widget.export_location}"
         )
+        msg_box.setDefaultButton(QMessageBox.StandardButton.Ok)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+
+        msg_box.exec()
         webbrowser.open(self.export_settings_widget.export_location)
 
     def update_export_progress(self, data):

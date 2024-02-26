@@ -139,10 +139,16 @@ class Ui_MainWindow(object):
         self.gridLayout_17.setObjectName(u"gridLayout_17")
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.horizontalLayout.setContentsMargins(-1, 25, -1, 25)
+        self.topnav_additional_layout = QHBoxLayout()
+        self.topnav_additional_layout.setObjectName(u"topnav_additional_layout")
+        self.topnav_additional_layout.setContentsMargins(-1, -1, -1, 20)
+
+        self.verticalLayout.addLayout(self.topnav_additional_layout)
+
+        self.topnav_layout = QHBoxLayout()
+        self.topnav_layout.setObjectName(u"topnav_layout")
+        self.topnav_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.topnav_layout.setContentsMargins(-1, 25, -1, 50)
         self.setupSectionButton = QPushButton(self.centralwidget)
         self.buttonGroup_2 = QButtonGroup(MainWindow)
         self.buttonGroup_2.setObjectName(u"buttonGroup_2")
@@ -150,14 +156,14 @@ class Ui_MainWindow(object):
         self.setupSectionButton.setObjectName(u"setupSectionButton")
         self.setupSectionButton.setAutoExclusive(True)
 
-        self.horizontalLayout.addWidget(self.setupSectionButton)
+        self.topnav_layout.addWidget(self.setupSectionButton)
 
         self.customiseSectionButton = QPushButton(self.centralwidget)
         self.buttonGroup_2.addButton(self.customiseSectionButton)
         self.customiseSectionButton.setObjectName(u"customiseSectionButton")
         self.customiseSectionButton.setAutoExclusive(True)
 
-        self.horizontalLayout.addWidget(self.customiseSectionButton)
+        self.topnav_layout.addWidget(self.customiseSectionButton)
 
         self.exportSectionButton = QPushButton(self.centralwidget)
         self.buttonGroup_2.addButton(self.exportSectionButton)
@@ -169,15 +175,15 @@ class Ui_MainWindow(object):
         self.exportSectionButton.setSizePolicy(sizePolicy)
         self.exportSectionButton.setAutoExclusive(True)
 
-        self.horizontalLayout.addWidget(self.exportSectionButton)
+        self.topnav_layout.addWidget(self.exportSectionButton)
 
 
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.verticalLayout.addLayout(self.topnav_layout)
 
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.main_content_layout = QHBoxLayout()
+        self.main_content_layout.setObjectName(u"main_content_layout")
 
-        self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.verticalLayout.addLayout(self.main_content_layout)
 
         self.line = QFrame(self.centralwidget)
         self.line.setObjectName(u"line")

@@ -2,9 +2,14 @@ import logging
 import os
 
 import qtawesome as qta  # type:  ignore
-from PySide6.QtCore import QSize
-from PySide6.QtGui import QAction, QDesktopServices, QIcon
-from PySide6.QtWidgets import QLabel, QMainWindow, QMenu, QProgressBar
+from PySide6.QtCore import QCoreApplication, QSize, QTimer
+from PySide6.QtGui import QDesktopServices, QIcon
+from PySide6.QtWidgets import (
+    QLabel,
+    QMainWindow,
+    QProgressBar,
+    QPushButton,
+)
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
@@ -23,6 +28,9 @@ class MainWindow(
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
+
+        self.app = QCoreApplication.instance()
+
         self.appState = AppState()
 
         self.appState.main_window = self
@@ -37,24 +45,8 @@ class MainWindow(
 
         # Menu Bars
 
-        ## Menu Icons
-        discord_icon = qta.icon("fa5b.discord", color="white")
-        web_icon = qta.icon("fa5s.globe", color="white")
-
-        # Menus
-        self.help_menu = QMenu("Help", self.menubar)
-
-        ## Menu Actions
-        self.discord_link = QAction(discord_icon, "Visit our Discord")
-        self.help_menu.addAction(self.discord_link)
-
-        self.website_link = QAction(web_icon, "Visit our Website")
-        self.help_menu.addAction(self.website_link)
-
-        self.discord_link.triggered.connect(self.open_discord_link)
-        self.website_link.triggered.connect(self.open_website_link)
-
-        self.menubar.addMenu(self.help_menu)
+        ## Menu Icons - Defined in instance as QTAwesome requires QApplication
+        discord_icon = qta.icon("fa5b.discord", color="white", color_active="green")
 
         self.progressBar = QProgressBar()
         self.statusLabel = QLabel()
@@ -63,22 +55,52 @@ class MainWindow(
         self.statusBar().addPermanentWidget(self.statusLabel)
         self.statusBar().addPermanentWidget(self.progressBar)
 
+        # Top Additional Nav Setup
+
+        # Top Nav Dev Refresh Button
+        self.styleButton = QPushButton("Refresh Style")
+        self.styleButton.clicked.connect(self.set_style)
+
+        self.styleTimer = QTimer()
+        self.styleTimer.setInterval(10000)
+        self.styleTimer.timeout.connect(self.set_style)
+        self.styleTimer.start()
+
+        self.topnav_layout.setSpacing(0)
+        self.topnav_layout.setContentsMargins(0, 5, 0, 5)
+
+        self.discord_pill = QPushButton()
+        self.discord_pill.setText("Discord")
+        self.discord_pill.setIcon(discord_icon)
+        self.discord_pill.setProperty("class", "pill-button discord")
+
+        self.website_pill = QPushButton()
+        self.website_pill.setText("Website")
+        self.website_pill.setIcon(QIcon(JD_ICON))
+        self.website_pill.setProperty("class", "pill-button web")
+
+        self.discord_pill.clicked.connect(self.open_discord_link)
+        self.website_pill.clicked.connect(self.open_website_link)
+
+        self.topnav_additional_layout.addStretch(1)
+
+        self.topnav_additional_layout.addWidget(self.styleButton)
+        self.topnav_additional_layout.addWidget(self.discord_pill)
+        self.topnav_additional_layout.addWidget(self.website_pill)
+
         # Plugins Menu Controls
 
         # TODO move this out into styles
-        section_button_style = """
-            QPushButton{background-color:#bdc3c7;color:grey;font-size:14px;border-radius:5px;border:none;padding:15px;margin-left:5px;margin-right:5px}
-            QPushButton:pressed{background-color:#2980b9;color:white}
-            QPushButton:checked{background-color:#16a085;color:white}
-            QPushButton:disabled{background-color:#7f8c8d;color:white}
-            """.replace(" ", "")
 
         self.setupSectionButton.setIcon(
-            qta.icon("fa5s.cog", color="grey", color_active="white")
+            qta.icon(
+                "fa5s.cog", color="grey", color_active="white", color_checked="white"
+            )
         )
         self.setupSectionButton.setToolTip("Manage plugins")
         self.setupSectionButton.setIconSize(QSize(32, 32))
-        self.setupSectionButton.setStyleSheet(section_button_style)
+        self.setupSectionButton.setProperty("class", "nav-button left")
+
         self.setupSectionButton.setCheckable(True)
 
         # Customise Menu  Controls
@@ -89,8 +111,7 @@ class MainWindow(
         self.customiseSectionButton.setToolTip(
             "Setup your profiles, and customise your binds"
         )
-        self.customiseSectionButton.setStyleSheet(section_button_style)
-
+        self.customiseSectionButton.setProperty("class", "nav-button middle")
         self.customiseSectionButton.setCheckable(True)
 
         # Export Menu Controls
@@ -99,7 +120,7 @@ class MainWindow(
         )
         self.exportSectionButton.setIconSize(QSize(32, 32))
         self.exportSectionButton.setToolTip("Export your profiles to diagrams")
-        self.exportSectionButton.setStyleSheet(section_button_style)
+        self.exportSectionButton.setProperty("class", "nav-button right")
         self.exportSectionButton.setCheckable(True)
 
         # Load default tab
@@ -108,6 +129,15 @@ class MainWindow(
 
         # Window Setup
         self.setWindowTitle(f"Joystick Diagrams - {version.get_current_version()}")
+
+    def set_style(self):
+        stylesheet = self.app.styleSheet()
+        theme_path = os.path.join(os.getcwd(), "joystick_diagrams/theme/custom.css")
+
+        with open(theme_path) as file:
+            self.app.setStyleSheet(stylesheet + file.read().format(**os.environ))
+
+        print("style set")
 
     def open_discord_link(self):
         QDesktopServices.openUrl("https://discord.gg/UUyRUuX2dX")
@@ -121,7 +151,7 @@ class MainWindow(
         if self.window_content:
             self.window_content.hide()
         self.window_content = plugins_page.PluginsPage()
-        self.horizontalLayout_2.addWidget(self.window_content)
+        self.main_content_layout.addWidget(self.window_content)
         self.window_content.show()
 
     def load_other_widget(self):
@@ -129,7 +159,7 @@ class MainWindow(
         if self.window_content:
             self.window_content.hide()
         self.window_content = configure_page.configurePage()
-        self.horizontalLayout_2.addWidget(self.window_content)
+        self.main_content_layout.addWidget(self.window_content)
         self.window_content.show()
 
     def load_export_page(self):
@@ -137,7 +167,7 @@ class MainWindow(
         if self.window_content:
             self.window_content.hide()
         self.window_content = export_page.ExportPage()
-        self.horizontalLayout_2.addWidget(self.window_content)
+        self.main_content_layout.addWidget(self.window_content)
         self.window_content.show()
 
 

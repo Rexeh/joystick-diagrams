@@ -61,24 +61,22 @@ class PluginsPage(
         # Header Column Setup
         self.plugin_header = QTreeWidgetItem()
         self.plugin_header.setText(0, "Plugin Name")
-        # self.plugin_header.setSizeHint(0, QSize(150, 25))
+        self.plugin_header.setTextAlignment(0, Qt.AlignmentFlag.AlignLeft)
 
         self.plugin_header.setText(1, "Enabled")
-        # self.plugin_header.setSizeHint(1, QSize(100, 25))
 
-        self.plugin_header.setTextAlignment(1, Qt.AlignmentFlag.AlignCenter)
+        self.plugin_header.setTextAlignment(1, Qt.AlignmentFlag.AlignHCenter)
 
         self.plugin_header.setText(2, "Setup")
-        # self.plugin_header.setSizeHint(1, QSize(100, 25))
+        self.plugin_header.setTextAlignment(2, Qt.AlignmentFlag.AlignLeft)
 
         self.plugin_header.setText(3, "Ready")
-        # self.plugin_header.setSizeHint(3, QSize(50, 25))
-        self.plugin_header.setTextAlignment(3, Qt.AlignmentFlag.AlignCenter)
+        self.plugin_header.setTextAlignment(3, Qt.AlignmentFlag.AlignHCenter)
 
         self.pluginTreeWidget.setColumnCount(4)
 
         self.pluginTreeWidget.setHeaderItem(self.plugin_header)
-        self.pluginTreeWidget.setIconSize(QSize(25, 25))
+        self.pluginTreeWidget.setIconSize(QSize(30, 30))
         self.pluginTreeWidget.setWordWrap(False)
 
         self.pluginTreeWidget.header().setMinimumSectionSize(200)
@@ -95,10 +93,13 @@ class PluginsPage(
             QAbstractItemView.SelectionMode.NoSelection
         )
 
+        self.pluginTreeWidget.setProperty("class", "plugin-tree")
+
         # Styling Overrides
         self.installPlugin.setIcon(qta.icon("fa5s.file-import"))
+        self.installPlugin.setToolTip("Available in future version")
         self.pluginTreeHelpLabel.setText(
-            "Setup your plugins below, plugins must be ready to be processed"
+            "Enable and setup the plugins you want to create diagrams for."
         )
 
     class EnabledPushButton(QPushButton):
@@ -120,8 +121,10 @@ class PluginsPage(
         if self.plugins_ready > 0:
             self.runPluginsButton.setText(f"Run {self.plugins_ready} plugins")
             self.runPluginsButton.setEnabled(True)
+            self.runPluginsButton.setProperty("class", "run-button enabled")
         else:
             self.runPluginsButton.setText("No plugins ready")
+            self.runPluginsButton.setProperty("class", "run-button disabled")
 
     def get_plugin_data_for_tree(self) -> list[PluginWrapper]:
         plugin_wrappers = []
@@ -171,12 +174,11 @@ class PluginsPage(
         widget = self.EnabledPushButton(row_data=widget_item)
         widget.setCheckable(True)
         widget.setText("Enabled" if state else "Disabled")
-        widget.setStyleSheet(
-            """QPushButton:checked{background-color:#2980b9}QPushButton{background-color:grey;color:white;font-size:14px;border-radius:3px;border:none}"""
-        )
         widget.setChecked(state)
+        widget.setProperty("class", "enabled-button")
 
         checkBoxWrapper = QWidget()
+        checkBoxWrapper.setProperty("class", "enabled-wrapper")
 
         layout = QHBoxLayout()
         layout.addStretch()
@@ -191,6 +193,7 @@ class PluginsPage(
         button = QPushButton()
         button.setIconSize(QSize(25, 25))
         button.setFlat(True)
+        button.setProperty("class", "ready-button")
 
         if state:
             button.setIcon(
@@ -240,6 +243,7 @@ class PluginsPage(
             )
 
             path_setup_button = QPushButton()
+            path_setup_button.setProperty("class", "plugin-setup-button")
             path_setup_button.setText(
                 "Setup plugin path" if not plugin_data.path else "Update plugin path"
             )

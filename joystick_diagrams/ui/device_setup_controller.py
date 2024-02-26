@@ -30,8 +30,8 @@ def setup_export_devices(export_device_list: list[ExportDevice]):
         # Get the template
         try:
             export_device.template = get_template_for_device(export_device.device_id)
-        except JoystickDiagramsError:
-            _logger.error("Attempted to get a template that no longer exists")
+        except JoystickDiagramsError as e:
+            _logger.error(e)
 
 
 def get_export_devices() -> list[ExportDevice]:

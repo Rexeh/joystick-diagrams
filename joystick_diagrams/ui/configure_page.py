@@ -28,26 +28,34 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
         self.appState = AppState()
-        self.treeWidget.header().setVisible(True)
-        self.treeWidget.header().setStretchLastSection(True)
-        self.treeWidget.header().setSectionResizeMode(
+        self.viewBindsTreeWidget.header().setVisible(True)
+        self.viewBindsTreeWidget.header().setStretchLastSection(True)
+        self.viewBindsTreeWidget.header().setSectionResizeMode(
             QHeaderView.ResizeMode.ResizeToContents
         )
 
-        self.treeWidget.setSelectionBehavior(
+        self.viewBindsTreeWidget.setSelectionBehavior(
             QAbstractItemView.SelectionBehavior.SelectRows
         )
-        self.treeWidget.setSelectionMode(
+        self.viewBindsTreeWidget.setSelectionMode(
             QAbstractItemView.SelectionMode.SingleSelection
         )
-        self.treeWidget.sortByColumn(0, Qt.SortOrder.AscendingOrder)
+        self.viewBindsTreeWidget.sortByColumn(0, Qt.SortOrder.AscendingOrder)
 
         self.profileParentWidget = parent_profiles.parent_profile_ui()
         self.verticalLayout_6.addWidget(self.profileParentWidget)
         self.profileList.clicked.connect(self.handle_clicked_profile)
         self.profileList.setDragEnabled(False)
 
-        self.comboBox.currentIndexChanged.connect(self.load_binds_for_selected_profile)
+        self.viewBindsProfileList.currentIndexChanged.connect(
+            self.load_binds_for_selected_profile
+        )
+
+        self.tabWidget.setProperty("class", "configure-tabwidget")
+        self.viewBindsTreeWidget.setProperty("class", "view-binds-tree")
+        self.viewBindsProfileList.setProperty("class", "view-binds-list")
+
+        self.viewBindsProfileList.setIconSize(QSize(25, 25))
 
         # UI Setup
         self.device_header = QTreeWidgetItem()
@@ -57,19 +65,19 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.device_header.setText(1, "Action")
         self.device_header.setSizeHint(1, QSize(150, 25))
 
-        self.treeWidget.setHeaderItem(self.device_header)
-        self.treeWidget.setIconSize(QSize(20, 20))
-        self.treeWidget.setWordWrap(False)
-        self.treeWidget.setColumnCount(2)
-        self.treeWidget.header().setMinimumSectionSize(200)
-        self.treeWidget.header().setStretchLastSection(True)
-        self.treeWidget.header().setSectionResizeMode(
+        self.viewBindsTreeWidget.setHeaderItem(self.device_header)
+        self.viewBindsTreeWidget.setIconSize(QSize(20, 20))
+        self.viewBindsTreeWidget.setWordWrap(False)
+        self.viewBindsTreeWidget.setColumnCount(2)
+        self.viewBindsTreeWidget.header().setMinimumSectionSize(200)
+        self.viewBindsTreeWidget.header().setStretchLastSection(True)
+        self.viewBindsTreeWidget.header().setSectionResizeMode(
             QHeaderView.ResizeMode.ResizeToContents
         )
-        self.treeWidget.setSelectionBehavior(
+        self.viewBindsTreeWidget.setSelectionBehavior(
             QAbstractItemView.SelectionBehavior.SelectRows
         )
-        self.treeWidget.setSelectionMode(
+        self.viewBindsTreeWidget.setSelectionMode(
             QAbstractItemView.SelectionMode.SingleSelection
         )
 
@@ -97,17 +105,17 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
 
     def initialise_customise_binds(self):
         profile_wrappers = self.appState.profile_wrappers
-        self.treeWidget.clear()
-        self.comboBox.clear()
+        self.viewBindsTreeWidget.clear()
+        self.viewBindsProfileList.clear()
 
         for profile in profile_wrappers:
-            self.comboBox.addItem(
+            self.viewBindsProfileList.addItem(
                 QIcon(profile.profile_origin.icon),
                 profile.profile_name,
                 profile,
             )
 
-        self.comboBox.setCurrentIndex(0)
+        self.viewBindsProfileList.setCurrentIndex(0)
 
     def create_control_type_widget(self, control: Axis | Button | Hat | AxisSlider):
         if isinstance(control, Axis):
@@ -147,14 +155,14 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
             # If box has been emptied due to profile load
             return
 
-        selected_profile: ProfileWrapper = self.comboBox.currentData()
+        selected_profile: ProfileWrapper = self.viewBindsProfileList.currentData()
 
-        self.treeWidget.clear()
+        self.viewBindsTreeWidget.clear()
 
         profile_data = selected_profile.profile
 
         for device_obj in profile_data.get_devices().values():
-            device_root = QTreeWidgetItem(self.treeWidget)
+            device_root = QTreeWidgetItem(self.viewBindsTreeWidget)
 
             device_root.setText(0, device_obj.name)
             device_root.setIcon(0, self.device_icon)
@@ -178,7 +186,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
                 )
                 control_widget.setText(input_obj.input_control.identifier)
 
-                self.treeWidget.setItemWidget(input_node, 0, control_widget)
+                self.viewBindsTreeWidget.setItemWidget(input_node, 0, control_widget)
 
                 for modifier_obj in input_obj.modifiers:
                     modifier_node = QTreeWidgetItem(input_node)
@@ -186,7 +194,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
                     modifier_node.setText(0, str(modifier_obj.modifiers))
                     modifier_node.setText(1, modifier_obj.command)
 
-            self.treeWidget.addTopLevelItem(device_root)
+            self.viewBindsTreeWidget.addTopLevelItem(device_root)
 
     @Slot()
     def handle_clicked_profile(self, item):

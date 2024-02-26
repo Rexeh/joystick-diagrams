@@ -36,11 +36,11 @@ class Ui_Form(object):
         self.layoutWidget.setGeometry(QRect(0, 0, 1081, 791))
         self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.label = QLabel(self.layoutWidget)
-        self.label.setObjectName(u"label")
+        self.verticalLayout.setContentsMargins(0, 10, 0, 0)
+        self.heading_label = QLabel(self.layoutWidget)
+        self.heading_label.setObjectName(u"heading_label")
 
-        self.verticalLayout.addWidget(self.label)
+        self.verticalLayout.addWidget(self.heading_label)
 
         self.line = QFrame(self.layoutWidget)
         self.line.setObjectName(u"line")
@@ -52,52 +52,52 @@ class Ui_Form(object):
         self.tabWidget = QTabWidget(self.layoutWidget)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tabWidget.setMouseTracking(False)
-        self.tab_3 = QWidget()
-        self.tab_3.setObjectName(u"tab_3")
-        self.verticalLayoutWidget_2 = QWidget(self.tab_3)
+        self.view_binds_tab = QWidget()
+        self.view_binds_tab.setObjectName(u"view_binds_tab")
+        self.verticalLayoutWidget_2 = QWidget(self.view_binds_tab)
         self.verticalLayoutWidget_2.setObjectName(u"verticalLayoutWidget_2")
         self.verticalLayoutWidget_2.setGeometry(QRect(10, 10, 1001, 521))
         self.verticalLayout_3 = QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.comboBox = QComboBox(self.verticalLayoutWidget_2)
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.setObjectName(u"comboBox")
-        self.comboBox.setStyleSheet(u"color: rgb(255, 255, 255);")
+        self.viewBindsProfileList = QComboBox(self.verticalLayoutWidget_2)
+        self.viewBindsProfileList.addItem("")
+        self.viewBindsProfileList.addItem("")
+        self.viewBindsProfileList.setObjectName(u"viewBindsProfileList")
+        self.viewBindsProfileList.setStyleSheet(u"color: rgb(255, 255, 255);")
 
-        self.verticalLayout_3.addWidget(self.comboBox)
+        self.verticalLayout_3.addWidget(self.viewBindsProfileList)
 
-        self.treeWidget = QTreeWidget(self.verticalLayoutWidget_2)
-        QTreeWidgetItem(self.treeWidget)
-        __qtreewidgetitem = QTreeWidgetItem(self.treeWidget)
+        self.viewBindsTreeWidget = QTreeWidget(self.verticalLayoutWidget_2)
+        QTreeWidgetItem(self.viewBindsTreeWidget)
+        __qtreewidgetitem = QTreeWidgetItem(self.viewBindsTreeWidget)
         __qtreewidgetitem.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEditable|Qt.ItemIsDragEnabled|Qt.ItemIsUserCheckable|Qt.ItemIsEnabled);
         __qtreewidgetitem1 = QTreeWidgetItem(__qtreewidgetitem)
         __qtreewidgetitem1.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEditable|Qt.ItemIsDragEnabled|Qt.ItemIsUserCheckable|Qt.ItemIsEnabled);
         QTreeWidgetItem(__qtreewidgetitem)
-        __qtreewidgetitem2 = QTreeWidgetItem(self.treeWidget)
+        __qtreewidgetitem2 = QTreeWidgetItem(self.viewBindsTreeWidget)
         QTreeWidgetItem(__qtreewidgetitem2)
-        self.treeWidget.setObjectName(u"treeWidget")
-        self.treeWidget.setProperty("showDropIndicator", False)
-        self.treeWidget.setAlternatingRowColors(False)
-        self.treeWidget.setRootIsDecorated(True)
-        self.treeWidget.setUniformRowHeights(False)
-        self.treeWidget.setSortingEnabled(True)
-        self.treeWidget.setAnimated(True)
-        self.treeWidget.setWordWrap(True)
-        self.treeWidget.setHeaderHidden(True)
-        self.treeWidget.header().setVisible(False)
-        self.treeWidget.header().setCascadingSectionResizes(True)
-        self.treeWidget.header().setHighlightSections(False)
-        self.treeWidget.header().setProperty("showSortIndicator", True)
-        self.treeWidget.header().setStretchLastSection(True)
+        self.viewBindsTreeWidget.setObjectName(u"viewBindsTreeWidget")
+        self.viewBindsTreeWidget.setProperty("showDropIndicator", False)
+        self.viewBindsTreeWidget.setAlternatingRowColors(False)
+        self.viewBindsTreeWidget.setRootIsDecorated(True)
+        self.viewBindsTreeWidget.setUniformRowHeights(False)
+        self.viewBindsTreeWidget.setSortingEnabled(True)
+        self.viewBindsTreeWidget.setAnimated(True)
+        self.viewBindsTreeWidget.setWordWrap(True)
+        self.viewBindsTreeWidget.setHeaderHidden(True)
+        self.viewBindsTreeWidget.header().setVisible(False)
+        self.viewBindsTreeWidget.header().setCascadingSectionResizes(True)
+        self.viewBindsTreeWidget.header().setHighlightSections(False)
+        self.viewBindsTreeWidget.header().setProperty("showSortIndicator", True)
+        self.viewBindsTreeWidget.header().setStretchLastSection(True)
 
-        self.verticalLayout_3.addWidget(self.treeWidget)
+        self.verticalLayout_3.addWidget(self.viewBindsTreeWidget)
 
-        self.tabWidget.addTab(self.tab_3, "")
-        self.tab_2 = QWidget()
-        self.tab_2.setObjectName(u"tab_2")
-        self.verticalLayoutWidget = QWidget(self.tab_2)
+        self.tabWidget.addTab(self.view_binds_tab, "")
+        self.profile_setup_tab = QWidget()
+        self.profile_setup_tab.setObjectName(u"profile_setup_tab")
+        self.verticalLayoutWidget = QWidget(self.profile_setup_tab)
         self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
         self.verticalLayoutWidget.setGeometry(QRect(10, 10, 1091, 521))
         self.verticalLayout_4 = QVBoxLayout(self.verticalLayoutWidget)
@@ -136,7 +136,7 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addLayout(self.horizontalLayout)
 
-        self.tabWidget.addTab(self.tab_2, "")
+        self.tabWidget.addTab(self.profile_setup_tab, "")
 
         self.verticalLayout.addWidget(self.tabWidget)
 
@@ -151,22 +151,22 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Customise &amp; Review</span></p></body></html>", None))
-        self.comboBox.setItemText(0, QCoreApplication.translate("Form", u"FA-18", None))
-        self.comboBox.setItemText(1, QCoreApplication.translate("Form", u"A10-C", None))
+        self.heading_label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Customise &amp; Review</span></p></body></html>", None))
+        self.viewBindsProfileList.setItemText(0, QCoreApplication.translate("Form", u"FA-18", None))
+        self.viewBindsProfileList.setItemText(1, QCoreApplication.translate("Form", u"A10-C", None))
 
-        ___qtreewidgetitem = self.treeWidget.headerItem()
+        ___qtreewidgetitem = self.viewBindsTreeWidget.headerItem()
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("Form", u"Action", None));
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("Form", u"Control", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("Form", u"Device", None));
 
-        __sortingEnabled = self.treeWidget.isSortingEnabled()
-        self.treeWidget.setSortingEnabled(False)
-        ___qtreewidgetitem1 = self.treeWidget.topLevelItem(0)
+        __sortingEnabled = self.viewBindsTreeWidget.isSortingEnabled()
+        self.viewBindsTreeWidget.setSortingEnabled(False)
+        ___qtreewidgetitem1 = self.viewBindsTreeWidget.topLevelItem(0)
         ___qtreewidgetitem1.setText(2, QCoreApplication.translate("Form", u"Go Fast", None));
         ___qtreewidgetitem1.setText(1, QCoreApplication.translate("Form", u"AXIS X", None));
         ___qtreewidgetitem1.setText(0, QCoreApplication.translate("Form", u"Throttle 1", None));
-        ___qtreewidgetitem2 = self.treeWidget.topLevelItem(1)
+        ___qtreewidgetitem2 = self.viewBindsTreeWidget.topLevelItem(1)
         ___qtreewidgetitem2.setText(2, QCoreApplication.translate("Form", u"Fire Guns", None));
         ___qtreewidgetitem2.setText(1, QCoreApplication.translate("Form", u"BUTTON 1", None));
         ___qtreewidgetitem2.setText(0, QCoreApplication.translate("Form", u"Joystick_1", None));
@@ -178,7 +178,7 @@ class Ui_Form(object):
         ___qtreewidgetitem4.setText(2, QCoreApplication.translate("Form", u"Drop something else", None));
         ___qtreewidgetitem4.setText(1, QCoreApplication.translate("Form", u"+CTRL ALT", None));
         ___qtreewidgetitem4.setText(0, QCoreApplication.translate("Form", u"Modifier", None));
-        ___qtreewidgetitem5 = self.treeWidget.topLevelItem(2)
+        ___qtreewidgetitem5 = self.viewBindsTreeWidget.topLevelItem(2)
         ___qtreewidgetitem5.setText(2, QCoreApplication.translate("Form", u"Fire the lasers", None));
         ___qtreewidgetitem5.setText(1, QCoreApplication.translate("Form", u"BUTTON 2", None));
         ___qtreewidgetitem5.setText(0, QCoreApplication.translate("Form", u"Joystick_1", None));
@@ -186,9 +186,9 @@ class Ui_Form(object):
         ___qtreewidgetitem6.setText(2, QCoreApplication.translate("Form", u"Reload", None));
         ___qtreewidgetitem6.setText(1, QCoreApplication.translate("Form", u"+ ALT", None));
         ___qtreewidgetitem6.setText(0, QCoreApplication.translate("Form", u"Modifier", None));
-        self.treeWidget.setSortingEnabled(__sortingEnabled)
+        self.viewBindsTreeWidget.setSortingEnabled(__sortingEnabled)
 
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("Form", u"View binds by Profile", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.view_binds_tab), QCoreApplication.translate("Form", u"View binds by Profile", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"<html><head/><body><p>Allows ability to <span style=\" font-weight:600;\">merge profiles together</span>, so a  single profile can inherit the binds of many others.</p></body></html>", None))
 
         __sortingEnabled1 = self.profileList.isSortingEnabled()
@@ -205,5 +205,5 @@ class Ui_Form(object):
         ___qlistwidgetitem4.setText(QCoreApplication.translate("Form", u"Joystick Gremlin - FA18", None));
         self.profileList.setSortingEnabled(__sortingEnabled1)
 
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("Form", u"Profile Setup", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.profile_setup_tab), QCoreApplication.translate("Form", u"Profile Setup", None))
     # retranslateUi

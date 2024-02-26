@@ -1,0 +1,218 @@
+/*
+Test  Comment
+*/
+
+QMainWindow {{
+    background: #120303;
+}}
+
+QWidget {{
+    background: #120303
+}}
+
+/* Main Navigation */
+
+.pill-button.discord {{
+    background: #7289da;
+    color:white
+}}
+
+.pill-button.discord::icon {{
+    color: black;
+}}
+.pill-button{{
+    max-height: 25px;
+    max-width: 70px;
+    font-size: 10px;
+    background: #D8DBE2;
+    border: none;
+    color: black;
+    opacity: 0.5;
+}}
+
+.pill-button:hover{{
+    background: #A9BCD0;
+}}
+
+.nav-button.right {{
+    border-top-right-radius: 10px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px
+  }}
+
+.nav-button.left {{
+    border-top-left-radius: 10px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 5px;
+  }}
+
+.nav-button.middle {{
+    border-radius: 0px;
+  }}
+
+.nav-button {{
+    color: #120303;
+    background-color: #D8DBE2;
+    border: none;
+    padding: 25px;
+    max-height: 15px
+  }}
+
+.nav-button:checked {{
+    color: white;
+    background-color: #255F85;
+    border-bottom: 2px solid #A9BCD0;
+  }}
+
+.nav-button:hover:checked {{
+    color: white;
+    background-color: #255F85;
+  }}
+
+.nav-button:hover {{
+    color: #120303;
+    background-color: #A9BCD0;
+  }}
+
+/* Plugin Setup CSS */
+
+#heading_label {{
+    color:#D8DBE2;
+    font-size: 300px;
+}}
+
+#pluginTreeHelpLabel {{
+    color:#D8DBE2;
+}}
+
+.run-button {{
+    padding: 25px;
+}}
+
+.run-button.enabled {{
+    background:  #255F85;
+    color:white;
+}}
+
+.run-button.disabled {{
+    background:  #C5283D;
+    color: white;
+}}
+
+.enabled-wrapper {{
+    background:#D8DBE2;
+}}
+
+.enabled-button {{
+    padding: 5px;
+    background: #C5283D;
+    color: white;
+    border: none;
+}}
+
+.enabled-button:checked {{
+    background: #255F85
+}}
+
+.ready-button {{
+    background:#D8DBE2;
+}}
+
+.ready-button:hover {{
+    background:#D8DBE2;
+}}
+
+.plugin-setup-button {{
+    background: #C5283D;
+    color:white
+}}
+QTreeWidget.plugin-tree {{
+    color: black;
+    background-color: #D8DBE2;
+    padding: 20px;
+}}
+
+QTreeWidget.plugin-tree::item:hover {{
+    background-color: #D8DBE2;
+}}
+
+QTreeWidget.plugin-tree::item {{
+    color: #120303;
+    background-color: #D8DBE2;
+}}
+
+QTreeWidget.plugin-tree QHeaderView::section {{
+    font-size: 12pt;
+    color: #2d3436;
+    background-color: #D8DBE2;
+}}
+
+/* Configure Page CSS */
+
+/* Tab Controls */
+
+
+
+.configure-tabwidget QTabBar::tab {{
+    padding:10px;
+    color: #120303;
+    background-color: #D8DBE2;
+    border-right:1px solid black;
+}}
+
+.configure-tabwidget QTabBar::tab:selected {{
+    border-bottom: 2px solid white;
+    background: #255F85;
+    color: white;
+}}
+
+.configure-tabwidget QTabBar::tab:first {{
+    border-top-left-radius: 5px;
+}}
+
+.configure-tabwidget QTabBar::tab:last {{
+    border-top-right-radius: 5px;
+}}
+
+/* Drop Down List */
+
+QComboBox.view-binds-list {{
+    background: #29468a;
+    padding: 10px;
+}}
+
+QComboBox::item.view-binds-list {{
+    color: black;
+}}
+
+
+/* Tree Widget */
+
+QTreeWidget .view-binds-tree {{
+    color: white;
+    background-color: #D8DBE2;
+    padding: 20px;
+}}
+
+QTreeWidget::item .view-binds-tree {{
+    color: #120303;
+    background-color: #D8DBE2;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}}
+
+QTreeView::branch:closed:has-children:has-siblings {{
+        border-image: none;
+        background: #D8DBE2;
+}}
+
+QTreeWidget QHeaderView::section .view-binds-tree {{
+    font-size: 12pt;
+    color: #2d3436;
+    background-color: #D8DBE2;
+}}
+
+QTreeWidget.view-binds-tree::branch {{
+    background-color: #D8DBE2;
+}}

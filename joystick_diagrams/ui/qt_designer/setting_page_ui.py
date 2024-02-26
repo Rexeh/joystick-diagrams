@@ -41,14 +41,14 @@ class Ui_Form(object):
         Form.setFont(font)
         self.verticalLayoutWidget = QWidget(Form)
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(0, 10, 1081, 791))
+        self.verticalLayoutWidget.setGeometry(QRect(0, 0, 1081, 791))
         self.verticalLayout_2 = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.label = QLabel(self.verticalLayoutWidget)
-        self.label.setObjectName("label")
+        self.verticalLayout_2.setContentsMargins(0, 10, 0, 0)
+        self.heading_label = QLabel(self.verticalLayoutWidget)
+        self.heading_label.setObjectName("heading_label")
 
-        self.verticalLayout_2.addWidget(self.label)
+        self.verticalLayout_2.addWidget(self.heading_label)
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -78,17 +78,15 @@ class Ui_Form(object):
 
         self.pluginContainer = QHBoxLayout()
         self.pluginContainer.setObjectName("pluginContainer")
+        self.pluginContainer.setContentsMargins(5, -1, 5, -1)
         self.pluginTreeWidget = QTreeWidget(self.verticalLayoutWidget)
         self.pluginTreeWidget.headerItem().setText(4, "")
         QTreeWidgetItem(self.pluginTreeWidget)
         self.pluginTreeWidget.setObjectName("pluginTreeWidget")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(
+        sizePolicy.setHeightForWidth(
             self.pluginTreeWidget.sizePolicy().hasHeightForWidth()
         )
-        self.pluginTreeWidget.setSizePolicy(sizePolicy2)
+        self.pluginTreeWidget.setSizePolicy(sizePolicy)
         self.pluginTreeWidget.setMinimumSize(QSize(0, 200))
         self.pluginTreeWidget.setMaximumSize(QSize(16777215, 500))
         font1 = QFont()
@@ -140,7 +138,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", "Form", None))
-        self.label.setText(
+        self.heading_label.setText(
             QCoreApplication.translate(
                 "Form",
                 '<html><head/><body><p><span style=" font-size:14pt; font-weight:600;">Plugin Setup</span></p></body></html>',
