@@ -28,10 +28,6 @@ class Profile_:  # noqa: N801
     def get_devices(self) -> dict[str, Device_] | None:
         return self.devices
 
-    def get_all_device_guids(self) -> set[str]:
-        """Returns a unique set of device GUIDs used for the specific profile"""
-        return {x for x in self.devices.keys()}
-
     def get_device(self, guid: str) -> Device_ | None:
         return self.devices.get(guid)
 
