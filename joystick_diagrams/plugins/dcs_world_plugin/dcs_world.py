@@ -197,6 +197,7 @@ class DCSWorldParser:
             if key in config.keys():
                 for data in config[key].values():
                     operation = data["name"]
+                    _logger.debug(f"Operation name is currently {operation=}")
                     if data.get("added"):
                         for binding in data["added"].values():
                             input_identifier = self.convert_button_format(
@@ -213,6 +214,11 @@ class DCSWorldParser:
                                 reform_set = self.reformers_to_set(
                                     binding.get("reformers")
                                 )
+
+                                _logger.debug(
+                                    f"Modifiers {reform_set=} and type is {type(reform_set)}"
+                                )
+
                                 profile.add_modifier_to_input(
                                     input_identifier, reform_set, operation
                                 )

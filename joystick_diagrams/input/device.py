@@ -87,11 +87,11 @@ class Device_:  # noqa: N801
             input_id=getattr(control, INPUT_TYPE_IDENTIFIERS[control_key]),
         )
         if input_obj:
-            input_obj.command = command
+            input_obj.command = str(command)
         else:
             self.inputs[control_key][
                 getattr(control, INPUT_TYPE_IDENTIFIERS[control_key])
-            ] = Input_(control, command)
+            ] = Input_(control, str(command))
 
     def get_input(self, input_type: str, input_id: str) -> Input_ | None:
         """Get an input for a specific input type.
@@ -150,10 +150,10 @@ class Device_:  # noqa: N801
             )
 
             if shell_input:
-                shell_input.add_modifier(modifier, command)
+                shell_input.add_modifier(modifier, str(command))
 
         else:
-            input_obj.add_modifier(modifier, command)
+            input_obj.add_modifier(modifier, str(command))
 
 
 if __name__ == "__main__":
