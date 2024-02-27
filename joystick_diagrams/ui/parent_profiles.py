@@ -127,7 +127,11 @@ class parent_profile_ui(
     def load_profile_parent_maps(self, profile_wrapper: ProfileWrapper):
         self.listWidget.clear()
 
-        for parent in profile_wrapper.parents:
+        _logger.debug(
+            f"Loading profile parent maps for {profile_wrapper.profile_key}: Maps {profile_wrapper.parents}"
+        )
+
+        for parent in reversed(profile_wrapper.parents):
             item = QListWidgetItem(
                 QIcon(parent.profile_origin.icon),
                 parent.profile_name,

@@ -1,11 +1,14 @@
 """Serves as a wrapper around Plugin Profiles, allowing customisation and restored state of profiles"""
 
+import logging
 from copy import deepcopy
 
 from joystick_diagrams import app_state
 from joystick_diagrams.db import db_profile_parents, db_profiles
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.plugin_wrapper import PluginWrapper
+
+_logger = logging.getLogger(__name__)
 
 
 class ProfileWrapper:
@@ -39,12 +42,17 @@ class ProfileWrapper:
         """Try get the parents for a given profile from persisted state"""
         self.parents.clear()
         parents = db_profiles.get_profile_parents(self.profile_key)
+
+        _logger.debug(f"Parents for profile {self.profile_key} were {parents}")
+
         _state = app_state.AppState()
-        for parent_key in parents:
+        for parent_key, _ in parents:
+            _logger.debug(f"Trying to get parent for {parent_key}")
+
             _wrapper = [
                 x for x in _state.profile_wrappers if x.profile_key == parent_key
             ]
-
+            _logger.debug(f"Profiles fond {_wrapper}")
             if _wrapper:
                 self.parents.append(_wrapper[0])
 
