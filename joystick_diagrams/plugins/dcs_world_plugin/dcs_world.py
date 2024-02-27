@@ -26,7 +26,7 @@ JOYSTICK_DIR = "joystick"
 
 class DCSWorldParser:
     def __init__(self, path, easy_modes=True):
-        self.path = path
+        self.path = Path(path)
         self.remove_easy_modes = easy_modes
         self.__easy_mode = EASY_MODES
         self.base_directory = self.__validate_base_directory()
@@ -38,6 +38,7 @@ class DCSWorldParser:
 
     def __validate_base_directory(self) -> list:
         """Validate the base directory structure, make sure there are files."""
+        # TODO refactor
         if CONFIG_DIR in os.listdir(self.path):
             try:
                 return os.listdir(os.path.join(self.path, CONFIG_DIR, INPUT_DIR))
