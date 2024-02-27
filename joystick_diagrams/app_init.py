@@ -30,7 +30,12 @@ def init():
     # -------------------------------
 
     # Setup UI and begin thread
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+    os.environ["QT_SCALE_FACTOR"] = "1"
+
     app = QtWidgets.QApplication(sys.argv)
+
     window = MainWindow()
     resources_rc.qInitResources()
     window.show()
