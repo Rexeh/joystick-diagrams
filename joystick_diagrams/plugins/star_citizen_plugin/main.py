@@ -55,7 +55,7 @@ class ParserPlugin(PluginInterface):
     def path_type(self):
         return self.FilePath(
             "Select your Star Citizen actionmaps.xml",
-            "/%USERPROFILE%/Saved Games",
+            Path.home(),
             [".xml"],
         )
 

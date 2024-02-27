@@ -53,8 +53,8 @@ class ParserPlugin(PluginInterface):
     @property
     def path_type(self):
         return self.FilePath(
-            "Select your Joystick Gremlin .XML file",
-            "/%USERPROFILE%/Saved Games",
+            "Select your Joystick Gremlin Profile .XML file",
+            Path.home(),
             [".xml"],
         )
 

@@ -306,10 +306,7 @@ class PluginsPage(
         self.pluginTreeChanged.emit()
 
     def open_file_dialog(self, plugin_object: PluginWrapper) -> Path | None:
-        current_treewidget_row = self.pluginTreeWidget.currentItem()
-        plugin_wrapper_object = current_treewidget_row.data(0, Qt.ItemDataRole.UserRole)
-
-        plugin_path = self.get_plugin_path_type(plugin_wrapper_object)
+        plugin_path = self.get_plugin_path_type(plugin_object)
 
         match type(plugin_path):
             case PluginInterface.FilePath:
@@ -318,7 +315,7 @@ class PluginsPage(
                 _file = QFileDialog.getOpenFileName(
                     self,
                     caption=plugin_path.dialog_title,
-                    dir=plugin_path.default_path,
+                    dir=str(plugin_path.default_path),
                     filter=(f"All Files ({exts})"),
                 )
 
@@ -326,7 +323,7 @@ class PluginsPage(
                     return Path(_file[0])
             case PluginInterface.FolderPath:
                 _folder = QFileDialog.getExistingDirectory(
-                    self, plugin_path.dialog_title, plugin_path.default_path
+                    self, plugin_path.dialog_title, str(plugin_path.default_path)
                 )
                 if _folder:
                     return Path(_folder)

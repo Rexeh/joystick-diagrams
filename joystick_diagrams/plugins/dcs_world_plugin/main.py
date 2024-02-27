@@ -54,7 +54,8 @@ class ParserPlugin(PluginInterface):
     @property
     def path_type(self):
         return self.FolderPath(
-            "Select your DCS World directory", "\\%%USERPROFILE%%\\Saved Games"
+            "Select your DCS World folder from saved games",
+            Path.joinpath(Path.home(), "Saved Games"),
         )
 
     @property

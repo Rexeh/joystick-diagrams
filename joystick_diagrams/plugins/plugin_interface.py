@@ -16,7 +16,7 @@ _logger = logging.getLogger(__name__)
 
 class PluginInterface(ABC):
     class FolderPath:
-        def __init__(self, dialog_title: str, default_path: str):
+        def __init__(self, dialog_title: str, default_path: Path):
             self.dialog_title = dialog_title
             self.default_path = default_path
 
