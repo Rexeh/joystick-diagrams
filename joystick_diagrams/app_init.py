@@ -3,8 +3,9 @@ import os
 import sys
 
 from PySide6 import QtWidgets
-from qt_material import apply_stylesheet  # type: ignore
+from qt_material import apply_stylesheet
 
+from joystick_diagrams import utils  # type: ignore
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db import db_init
 from joystick_diagrams.plugin_manager import ParserPluginManager
@@ -43,9 +44,9 @@ def init():
         theme="dark_blue.xml",
         invert_secondary=False,
         extra=extra,
-        css_file=os.path.join(os.getcwd(), "joystick_diagrams/theme/custom.css"),
+        css_file=os.path.join(utils.install_root(), "./theme/custom.css"),
     )
-
+    _logger.info(f"Starting up... Install root: {utils.install_root()}")
     app.exec()
 
 

@@ -67,6 +67,7 @@ include_files = [
     "./templates",
     "./readme.md",
     "version_manifest.json",
+    "./theme"
 ]
 zip_include_packages = ["encodings", "PySide6"]
 excludes = [
