@@ -5,8 +5,9 @@ import os
 import re
 from pathlib import Path
 
-from ply import lex, yacc  # type: ignore
+from ply import lex, yacc
 
+from joystick_diagrams.exceptions import JoystickDiagramsError  # type: ignore
 from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
 from joystick_diagrams.input.button import Button  # type: ignore
 
@@ -64,16 +65,30 @@ class DCSWorldParser:
         """Validate Inidividual Profile
         Return Valid Profile
         """
-        if os.path.isdir(
-            os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item)
-        ) and JOYSTICK_DIR in os.listdir(
-            os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item)
-        ):
-            return os.listdir(
-                os.path.join(self.path, CONFIG_DIR, INPUT_DIR, item, JOYSTICK_DIR)
-            )
+
+        item_path = Path.joinpath(self.path, CONFIG_DIR, INPUT_DIR, Path(item))
+
+        if not item_path.is_dir():
+            return False
+
+        if not {x for x in item_path.iterdir() if x.stem == JOYSTICK_DIR}:
+            return False
+
+        item_joystick_files_directory = Path.joinpath(item_path, JOYSTICK_DIR)
+        valid_files = self.get_valid_files_for_profile(item_joystick_files_directory)
+
+        if valid_files:
+            return valid_files
 
         return False
+
+    def get_valid_files_for_profile(self, path: Path) -> list[Path]:
+        return list(
+            filter(
+                lambda x: x.suffix == ".lua" and not x.is_dir(),
+                path.iterdir(),
+            )
+        )
 
     def get_validated_profiles(self) -> list[str]:
         """Expose Valid Profiles only to UI"""
@@ -132,46 +147,45 @@ class DCSWorldParser:
             _logger.warning("No profiles were found, so nothing to process.")
             return collection
 
+        _logger.info(f"Profiles to be processed {self.profiles_to_process}")
         for profile in self.profiles_to_process:
+            _logger.info(f"Processing {profile=}")
             prof = collection.create_profile(profile_name=profile)
             self.fq_path = os.path.join(
                 self.path, CONFIG_DIR, INPUT_DIR, profile, JOYSTICK_DIR
             )
-            self.profile_devices = os.listdir(os.path.join(self.fq_path))
+            self.profile_devices = self.get_valid_files_for_profile(Path(self.fq_path))
 
             for item in self.profile_devices:
-                guid, name = item[-46:-10], item[:-48]
+                _logger.info(f"Processing {profile=} device {item=}")
+                guid, name = item.name[-46:-10], item.name[:-48]
                 active_profile = prof.add_device(guid, name)
 
-                if os.path.isdir(os.path.join(self.fq_path, item)):
-                    _logger.info("Skipping as Folder")
+                try:
+                    _logger.debug(f"Obtaining file data  for {item}")
+                    file_data = (
+                        item.read_text(encoding="utf-8")
+                        .replace("local diff = ", "")
+                        .replace("return diff", "")
+                    )
+
+                except FileNotFoundError as err:
+                    _logger.error(
+                        f"DCS: File {item} no longer found - \
+                            It has been moved/deleted from directory. {err}"
+                    )
+                    raise JoystickDiagramsError(err) from err
+
                 else:
-                    try:
-                        _logger.debug(f"Obtaining file data  for {item}")
-                        file_data = (
-                            Path(os.path.join(self.fq_path, item))
-                            .read_text(encoding="utf-8")
-                            .replace("local diff = ", "")
-                            .replace("return diff", "")
-                        )
+                    parsed_config = self.parse_config(
+                        file_data
+                    )  ##Better handling - decompose
 
-                    except FileNotFoundError as err:
-                        _logger.error(
-                            f"DCS: File {item} no longer found - \
-                                It has been moved/deleted from directory. {err}"
-                        )
-                        raise
+                    if parsed_config is None:
+                        _logger.debug(f"Parsing failed for {item}")
+                        break
 
-                    else:
-                        parsed_config = self.parse_config(
-                            file_data
-                        )  ##Better handling - decompose
-
-                        if parsed_config is None:
-                            _logger.debug(f"Parsing failed for {item}")
-                            break
-
-                        self.assign_to_inputs(parsed_config, active_profile)
+                    self.assign_to_inputs(parsed_config, active_profile)
 
         return collection
 
