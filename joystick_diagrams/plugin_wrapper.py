@@ -31,7 +31,7 @@ class PluginWrapper:
     def process(self) -> bool:
         """Runs a specific plugin, attaching the result to the wrapper"""
         try:
-            if self.path:
+            if self.path and self.enabled:
                 result = self.plugin.process()
 
                 if isinstance(result, ProfileCollection):
