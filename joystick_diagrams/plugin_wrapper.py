@@ -20,7 +20,7 @@ class PluginWrapper:
     plugin: PluginInterface
     _enabled: bool = False
     ready: bool = False
-    plugin_profile_collection: ProfileCollection = field(init=False)
+    plugin_profile_collection: ProfileCollection | None = field(init=False)
     error: str = field(default_factory=str)
 
     def __post_init__(self):
@@ -30,6 +30,7 @@ class PluginWrapper:
     # @handle_bare_exception
     def process(self) -> bool:
         """Runs a specific plugin, attaching the result to the wrapper"""
+        self.plugin_profile_collection = None
         try:
             if self.path and self.enabled:
                 result = self.plugin.process()

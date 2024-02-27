@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 import qtawesome as qta
-from PySide6.QtCore import QSize, Qt, Signal, Slot
+from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -28,10 +28,10 @@ class PluginsPage(
     QMainWindow, setting_page_ui.Ui_Form
 ):  # Refactor pylint: disable=too-many-instance-attributes
     profileCollectionChange = Signal()
-
     pluginTreeChanged = Signal()
     togglePluginEnabledState = Signal(object)
     statistics_change = Signal()
+    total_parsed_profiles = Signal(int)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,6 +44,8 @@ class PluginsPage(
 
         # Connections
         self.pluginTreeChanged.connect(self.update_plugin_count_statistics)
+        self.pluginTreeChanged.connect(self.initialise_ui)
+
         self.runPluginsButton.clicked.connect(self.call_plugin_runner)
         self.togglePluginEnabledState.connect(self.toggle_enabled_plugin)
 
@@ -54,9 +56,6 @@ class PluginsPage(
         self.profileCollectionChange.connect(self.update_profile_collections)
 
         # Setup
-        # self.pageTitle.setText("Available plugins")
-        self.remove_defaults()
-        self.populate_available_plugin_list()
 
         # Header Column Setup
         self.plugin_header = QTreeWidgetItem()
@@ -73,11 +72,17 @@ class PluginsPage(
         self.plugin_header.setText(3, "Ready")
         self.plugin_header.setTextAlignment(3, Qt.AlignmentFlag.AlignHCenter)
 
-        self.pluginTreeWidget.setColumnCount(4)
+        self.plugin_header.setText(4, "Profiles")
+        self.plugin_header.setTextAlignment(4, Qt.AlignmentFlag.AlignHCenter)
+
+        self.pluginTreeWidget.setColumnCount(5)
 
         self.pluginTreeWidget.setHeaderItem(self.plugin_header)
         self.pluginTreeWidget.setIconSize(QSize(30, 30))
         self.pluginTreeWidget.setWordWrap(False)
+        self.pluginTreeWidget.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
 
         self.pluginTreeWidget.header().setMinimumSectionSize(200)
 
@@ -104,6 +109,11 @@ class PluginsPage(
 
         self.runPluginsButton.setProperty("class", "run-button")
 
+        self.threadPool = QThreadPool()
+
+        self.populate_available_plugin_list()
+        self.initialise_ui()
+
     class EnabledPushButton(QPushButton):
         """Custom PushButton class to handle QTreeWidget item pass through to click event for embedded widget"""
 
@@ -116,6 +126,13 @@ class PluginsPage(
         def mousePressEvent(self, event):
             self.toggle()
             self.toggled.emit(self.isChecked(), self.row_data)
+
+    def initialise_ui(self):
+        """Used to restore state between window changes"""
+        plugins = self.get_plugin_data_for_tree()
+
+        for plugin in plugins:
+            self.update_plugin_execute_state(plugin)
 
     def update_run_button_state(self):
         self.runPluginsButton.setEnabled(False)
@@ -148,10 +165,6 @@ class PluginsPage(
             if plugin.ready:
                 self.plugins_ready = self.plugins_ready + 1
         self.statistics_change.emit()
-
-    def remove_defaults(self):
-        # self.parserPluginList.clear()
-        pass
 
     def toggle_enabled_plugin(self, click_state: bool, data: QTreeWidgetItem):
         """Toggles an embedded enabled button from the QTreeWidgetItem
@@ -218,7 +231,11 @@ class PluginsPage(
             plugin.setText(0, f"{plugin_data.name} - V{plugin_data.version}")
             plugin.setIcon(0, QIcon(plugin_data.icon))
 
+            plugin.setText(4, "0")
+            plugin.setTextAlignment(4, Qt.AlignmentFlag.AlignCenter)
+
             # Add item to tree so it can be initlalised
+
             self.pluginTreeWidget.addTopLevelItem(plugin)
 
             # Setup further widgets on row
@@ -243,11 +260,14 @@ class PluginsPage(
             )
 
             path_setup_button = QPushButton()
+            path_setup_button.setCheckable(True)
             path_setup_button.setProperty("class", "plugin-setup-button")
             path_setup_button.setText(
-                "Setup plugin path" if not plugin_data.path else "Update plugin path"
+                "Setup Plugin" if not plugin_data.path else "Update Plugin"
             )
-            path_setup_button.setStyleSheet("width:auto")
+
+            path_setup_button.setChecked(True if plugin_data.path else False)
+
             path_setup_button.clicked.connect(self.handle_path_set_for_plugin)
             self.pluginTreeWidget.setItemWidget(plugin, 2, path_setup_button)
 
@@ -257,6 +277,35 @@ class PluginsPage(
         self, plugin_wrapper: PluginWrapper
     ) -> PluginInterface.FilePath | PluginInterface.FolderPath:
         return plugin_wrapper.path_type
+
+    def get_plugin_row_by_plugin_wrapper(
+        self, plugin_wrapper: PluginWrapper
+    ) -> QTreeWidgetItem | None:
+        search = self.pluginTreeWidget.findItems(
+            plugin_wrapper.name, Qt.MatchFlag.MatchContains, 0
+        )
+        return search[0] if search else None
+
+    def update_plugin_execute_state(self, plugin: PluginWrapper):
+        """Locates a plugin in QTreeWidget based on the plugin object Name"""
+
+        plugin_row: QTreeWidgetItem | None = self.get_plugin_row_by_plugin_wrapper(
+            plugin
+        )
+
+        if plugin_row is None:
+            _logger.error(
+                f"Plugin row was not found in plugins  page for {plugin=}. This indicates a problem with UI state."
+            )
+            return
+
+        plugin_collection_length = str(
+            len(plugin.plugin_profile_collection)
+            if plugin.plugin_profile_collection
+            else 0
+        )
+
+        plugin_row.setText(4, plugin_collection_length)
 
     def set_plugin_path(self, path: Path, plugin_wrapper: PluginWrapper) -> bool:
         if not isinstance(path, Path):
@@ -292,6 +341,14 @@ class PluginsPage(
         new_path = self.open_file_dialog(plugin_wrapper_object)
 
         if not new_path:
+            # Handle Checked State NULL for exited
+            widget: QPushButton = current_treewidget_row.treeWidget().itemWidget(
+                current_treewidget_row, 2
+            )
+
+            widget.setChecked(not widget.isChecked())
+
+            # widget.setChecked(widget.checkStateSet())
             return
 
         path_set_state = self.set_plugin_path(new_path, plugin_wrapper_object)
@@ -333,15 +390,75 @@ class PluginsPage(
         return None
 
     def call_plugin_runner(self):
-        for wrapper in self.get_plugin_data_for_tree():
-            wrapper.process()
+        # Emit parsed 0 to update buttons
+        self.total_parsed_profiles.emit(0)
 
-        self.profileCollectionChange.emit()
+        worker = PluginExecutor(self.get_plugin_data_for_tree())
+
+        # TODO handle started event/button disable
+
+        # worker.signals.started.connect(self.lock_export_button)
+        worker.signals.finished.connect(self.calculate_total_profile_count)
+        worker.signals.finished.connect(self.profileCollectionChange.emit)
+        worker.signals.processed.connect(self.update_plugin_execute_state)
+        self.threadPool.start(worker)
 
     @Slot()
     def update_profile_collections(self):
         _logger.debug("Updating profile collections from all plugins")
         self.appState.process_profiles_from_collections()
+
+    @Slot()
+    def calculate_total_profile_count(self):
+        count = sum(
+            [
+                len(x.plugin_profile_collection)
+                for x in self.get_plugin_data_for_tree()
+                if x.plugin_profile_collection
+            ],
+            0,
+        )
+        _logger.debug(f"Total of {count} profiles now detected")
+        self.total_parsed_profiles.emit(count)
+
+
+class Signals(QObject):
+    started = Signal()
+    processed = Signal(object)
+    process_error = Signal(object)
+    finished = Signal()
+
+
+class PluginExecutor(QRunnable):
+    """
+    PluginExecutor
+    Executes parser plugins to run their process methods and produce ProfileCollections
+
+    """
+
+    def __init__(self, plugin_wrappers: list[PluginWrapper]):
+        super(PluginExecutor, self).__init__()
+        # Store constructor arguments (re-used for processing)
+
+        self.plugin_wrappers = plugin_wrappers
+        self.signals = Signals()
+
+    @Slot()  # QtCore.Slot
+    def run(self):
+        """
+        Initialise the runner function with passed args, kwargs.
+        """
+        self.signals.started.emit()
+
+        for plugin in self.plugin_wrappers:
+            process_state = plugin.process()
+
+            if not process_state:
+                self.signals.process_error.emit(plugin)
+
+            self.signals.processed.emit(plugin)
+
+        self.signals.finished.emit()
 
 
 if __name__ == "__main__":

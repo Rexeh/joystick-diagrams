@@ -39,7 +39,7 @@ class MainWindow(
         self.setWindowIcon(window_icon)
 
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
-        self.customiseSectionButton.clicked.connect(self.load_other_widget)
+        self.customiseSectionButton.clicked.connect(self.load_customise_page)
         self.exportSectionButton.clicked.connect(self.load_export_page)
         self.window_content = None
 
@@ -121,6 +121,11 @@ class MainWindow(
         self.exportSectionButton.setProperty("class", "nav-button right")
         self.exportSectionButton.setCheckable(True)
 
+        # Disable Additional Menu Controls
+
+        self.additional_menus = [self.exportSectionButton, self.customiseSectionButton]
+        self.disable_additional_menus()
+
         # Load default tab
         self.load_setting_widget()
         self.setupSectionButton.click()
@@ -141,16 +146,28 @@ class MainWindow(
     def open_website_link(self):
         QDesktopServices.openUrl("https://joystick-diagrams.com")
 
+    def disable_additional_menus(self):
+        [x.setDisabled(True) for x in self.additional_menus]
+
+    def enable_additional_menus(self):
+        [x.setDisabled(False) for x in self.additional_menus]
+
+    def update_menus_from_profile_count(self, data: int):
+        self.enable_additional_menus() if data > 0 else self.disable_additional_menus()
+
     def load_setting_widget(self):
         self.setupSectionButton.setChecked(True)
 
         if self.window_content:
             self.window_content.hide()
         self.window_content = plugins_page.PluginsPage()
+        self.window_content.total_parsed_profiles.connect(
+            self.update_menus_from_profile_count
+        )
         self.main_content_layout.addWidget(self.window_content)
         self.window_content.show()
 
-    def load_other_widget(self):
+    def load_customise_page(self):
         self.customiseSectionButton.setChecked(True)
         if self.window_content:
             self.window_content.hide()

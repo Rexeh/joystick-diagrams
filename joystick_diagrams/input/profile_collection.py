@@ -26,6 +26,9 @@ class ProfileCollection:
     def get_profile(self, profile_name) -> Profile_ | None:
         return self.profiles.get(profile_name.lower())
 
+    def __len__(self):
+        return len(self.profiles)
+
 
 if __name__ == "__main__":
     pass

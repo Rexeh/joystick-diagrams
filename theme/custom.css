@@ -140,6 +140,11 @@ QWidget {{
     background: #C5283D;
     color:white
 }}
+
+.plugin-setup-button:checked {{
+    background: #3A6FCD;
+    color: white;
+}}
 QTreeWidget.plugin-tree {{
     color: black;
     background-color: #D8DBE2;
