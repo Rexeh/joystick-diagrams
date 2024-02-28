@@ -56,9 +56,7 @@ class Device_:  # noqa: N801
         try:
             return UUID(guid.strip()).__str__()
         except ValueError as e:
-            raise ValueError(
-                f"Could not create device as invalid GUID used: {e}"
-            ) from e
+            raise ValueError(f"GUID {guid} is not valid: {e}") from e
 
     def resolve_type(self, control: Axis | Button | Hat | AxisSlider) -> str:
         """Resolves a given input control to its corresponding dictionary key"""

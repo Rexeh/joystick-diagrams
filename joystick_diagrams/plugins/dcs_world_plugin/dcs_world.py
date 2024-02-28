@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ply import lex, yacc
 
-from joystick_diagrams.exceptions import JoystickDiagramsError  # type: ignore
+from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
 from joystick_diagrams.input.button import Button  # type: ignore
 
@@ -160,6 +160,14 @@ class DCSWorldParser:
             for item in self.profile_devices:
                 _logger.info(f"Processing {profile=} device {item=}")
                 guid, name = item.name[-46:-10], item.name[:-48]
+
+                # Handle lua files without a valid GUID
+                try:
+                    Device_.validate_guid(guid)
+                except ValueError as e:
+                    _logger.error(e)
+                    break
+
                 active_profile = prof.add_device(guid, name)
 
                 try:
