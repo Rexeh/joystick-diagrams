@@ -10,6 +10,7 @@ debug.txt
 poetry.lock
 coverage.xml
 *.log
+*.svg.bkp
 
 # Tests
 tests/__pycache__
