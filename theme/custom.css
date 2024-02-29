@@ -293,6 +293,15 @@ QTreeWidget.device-tree QHeaderView::section  {{
     background-color: #D8DBE2;
 }}
 
+QPushButton.view-errors-button {{
+    margin-top: 5px;
+    margin-left: 10px;
+    background: #C5283D;
+    color: white;
+    border: none;
+
+}}
+
 #export_format {{
     color: white;
 }}

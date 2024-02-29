@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 )
 
 from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.ui import ui_consts
 from joystick_diagrams.ui.device_setup_controller import (
     get_export_devices,
 )
@@ -177,13 +178,10 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
 
     def view_device_errors(self):
         current_treewidget_row = self.treeWidget.currentItem()
-        data = current_treewidget_row.data(0, Qt.ItemDataRole.UserRole)
-
-        # Format the text, this is horrible
-
+        data: ExportDevice = current_treewidget_row.data(0, Qt.ItemDataRole.UserRole)
+        # TODO move out to central location
         message_content = f"""
-            <h2>Your template {data.template_file_name} is missing {len(data.errors)} controls</h2>
-            <strong></strong>
+            <h2>Your template {data.template_file_name} is missing {len(data.errors)} controls for the profile {data.profile_wrapper.profile_name}</h2>
             <p>This won't prevent an export, but you will be missing binds on your final export</p>
 
             <div class="container" style="inline-size: 100px; overflow-wrap: break-word;">
@@ -195,6 +193,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         """
 
         msgBox = QMessageBox()
+        msgBox.setWindowIcon(QIcon(ui_consts.JD_ICON))
         msgBox.setWindowTitle(f"{data.device_name}")
         msgBox.setTextFormat(Qt.RichText)
         msgBox.setText(message_content)
@@ -274,6 +273,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
                     )
 
                     child_item.setIcon(2, child_icon_state)
+                    child_item.setTextAlignment(2, Qt.AlignmentFlag.AlignCenter)
 
                     child_nodes.append(child_item)
 
@@ -300,14 +300,10 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
                 child_data = child_item.data(0, Qt.ItemDataRole.UserRole)
 
                 if child_data.errors:
-                    button = QPushButton("View Errors")
-                    button.setProperty("class", "warning")
+                    button = QPushButton("View Warnings")
+                    button.setProperty("class", "view-errors-button")
                     button.setFixedWidth(150)
                     button.setFixedHeight(25)
-                    button.setStyleSheet(
-                        "padding-left: 5px; padding-right: 3px;"
-                        "padding-top: 1px; padding-bottom: 1px;"
-                    )
                     button.clicked.connect(self.view_device_errors)
                     self.treeWidget.setItemWidget(child_item, 2, button)
 

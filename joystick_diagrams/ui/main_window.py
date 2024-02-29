@@ -13,13 +13,10 @@ from PySide6.QtWidgets import (
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.ui import configure_page, export_page, plugins_page
+from joystick_diagrams.ui import configure_page, export_page, plugins_page, ui_consts
 from joystick_diagrams.ui.qt_designer import main_window
-from joystick_diagrams.utils import install_root
 
 _logger = logging.getLogger(__name__)
-
-JD_ICON = os.path.join(install_root(), r"img\logo.ico")
 
 
 class MainWindow(
@@ -35,7 +32,7 @@ class MainWindow(
 
         self.appState.main_window = self
 
-        window_icon = QIcon(JD_ICON)
+        window_icon = QIcon(ui_consts.JD_ICON)
         self.setWindowIcon(window_icon)
 
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
@@ -67,7 +64,7 @@ class MainWindow(
 
         self.website_pill = QPushButton()
         self.website_pill.setText("Website")
-        self.website_pill.setIcon(QIcon(JD_ICON))
+        self.website_pill.setIcon(QIcon(ui_consts.JD_ICON))
         self.website_pill.setProperty("class", "pill-button web")
 
         self.discord_pill.clicked.connect(self.open_discord_link)
@@ -93,7 +90,7 @@ class MainWindow(
         # TODO move this out into styles
 
         self.setupSectionButton.setIcon(
-            qta.icon("fa5s.cog", color="white", color_active="white")
+            qta.icon("fa5s.cog", color="black", color_active="white")
         )
         self.setupSectionButton.setToolTip("Manage plugins")
         self.setupSectionButton.setIconSize(QSize(32, 32))
@@ -103,7 +100,7 @@ class MainWindow(
 
         # Customise Menu  Controls
         self.customiseSectionButton.setIcon(
-            qta.icon("fa5s.tools", color="white", color_active="white")
+            qta.icon("fa5s.tools", color="black", color_active="white")
         )
         self.customiseSectionButton.setIconSize(QSize(32, 32))
         self.customiseSectionButton.setToolTip(
@@ -114,7 +111,7 @@ class MainWindow(
 
         # Export Menu Controls
         self.exportSectionButton.setIcon(
-            qta.icon("fa5s.file-export", color="white", color_active="white")
+            qta.icon("fa5s.file-export", color="black", color_active="white")
         )
         self.exportSectionButton.setIconSize(QSize(32, 32))
         self.exportSectionButton.setToolTip("Export your profiles to diagrams")
