@@ -18,9 +18,7 @@ def test_new_device_invalid_guid():
     guid = "11ee-8002-444553540000"
     name = "device name"
 
-    with pytest.raises(
-        ValueError, match="Could not create device as invalid GUID used"
-    ):
+    with pytest.raises(ValueError, match=f"GUID {guid} is not valid:"):
         Device_(guid, name)
 
 

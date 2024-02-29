@@ -76,6 +76,9 @@ def fetch_remote_mock(monkeypatch):
     class MockRequestObject:
         text: str
 
+        def raise_for_status(self):
+            return False
+
     def mock(*args, **kwargs):
         mock_text = '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
         return MockRequestObject(mock_text)
@@ -133,7 +136,7 @@ def test_perform_version_check_failure(
     check = version.perform_version_check()
 
     assert "Unable to perform version check" in caplog.text
-    assert check is True
+    assert check is None
 
 
 ## Version checking
