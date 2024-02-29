@@ -289,6 +289,20 @@ class PluginsPage(
         )
         return search[0] if search else None
 
+    def update_plugin_error_state(self, plugin: PluginWrapper):
+        plugin_row: QTreeWidgetItem | None = self.get_plugin_row_by_plugin_wrapper(
+            plugin
+        )
+
+        if plugin_row is None:
+            _logger.error(
+                f"Plugin row was not found in plugins  page for {plugin=}. This indicates a problem with UI state."
+            )
+            return
+
+        plugin_row.setText(4, "An error occured")
+        plugin_row.setToolTip(4, f"An error occured with the plugin: {plugin.error}")
+
     def update_plugin_execute_state(self, plugin: PluginWrapper):
         """Locates a plugin in QTreeWidget based on the plugin object Name"""
 
@@ -309,6 +323,7 @@ class PluginsPage(
         )
 
         plugin_row.setText(4, plugin_collection_length)
+        plugin_row.setToolTip(4, "")
 
     def set_plugin_path(self, path: Path, plugin_wrapper: PluginWrapper) -> bool:
         if not isinstance(path, Path):
@@ -418,6 +433,7 @@ class PluginsPage(
         worker.signals.finished.connect(self.update_run_button_on_finish)
         worker.signals.finished.connect(self.profileCollectionChange.emit)
         worker.signals.processed.connect(self.update_plugin_execute_state)
+        worker.signals.process_error.connect(self.update_plugin_error_state)
         self.threadPool.start(worker)
 
     @Slot()
@@ -471,7 +487,9 @@ class PluginExecutor(QRunnable):
             process_state = plugin.process()
 
             if not process_state:
+                _logger.error(f"An Exception Occured when processing {plugin.name}")
                 self.signals.process_error.emit(plugin)
+                break
 
             self.signals.processed.emit(plugin)
 
