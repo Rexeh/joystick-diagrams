@@ -333,9 +333,10 @@ QPushButton.view-errors-button {{
     color: white;
 }}
 
-.export-location-button {{
-    background: white;
+QPushButton.export-location-button {{
+    background: #3A6FCD;
     border: none;
+    color: white;
     border-radius: 5px;
 }}
 

@@ -212,10 +212,10 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
             children_have_template_issues: bool, children_have_errors: bool
         ) -> tuple[QIcon, str]:
             if children_have_template_issues:
-                return (self.bad_icon, "A template is not configured")
+                return (self.bad_icon, "A template has not configured for this device")
 
             if children_have_errors:
-                return (self.warning_icon, "One or more profiles have problems")
+                return (self.warning_icon, "One or more profiles have warnings")
 
             return (self.good_icon, "")
 
