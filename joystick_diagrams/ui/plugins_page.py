@@ -165,7 +165,7 @@ class PluginsPage(
         # Calculate Ready Plugins
         self.plugins_ready = 0
         for plugin in self.get_plugin_data_for_tree():
-            if plugin.ready:
+            if plugin.ready and plugin.enabled:
                 self.plugins_ready = self.plugins_ready + 1
         self.statistics_change.emit()
 
