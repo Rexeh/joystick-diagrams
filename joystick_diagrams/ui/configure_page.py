@@ -140,7 +140,6 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
 
         ctrl = QLabel("UNKNOWN")
         ctrl.setProperty("class", "device-control-pill")
-        ctrl.setStyleSheet("background:orange;max-width:30px")
         return ctrl
 
     def load_binds_for_selected_profile(self, index):
