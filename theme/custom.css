@@ -12,6 +12,12 @@ QWidget {{
 
 /* Main Navigation */
 
+.pill-button.update {{
+    background: #d80e902a;
+    color:white;
+    max-width: 150px;
+}}
+
 .pill-button.discord {{
     background: #7289da;
     color:white

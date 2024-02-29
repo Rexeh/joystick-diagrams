@@ -4,7 +4,13 @@ import os
 import qtawesome as qta  # type:  ignore
 from PySide6.QtCore import QCoreApplication, QSize
 from PySide6.QtGui import QDesktopServices, QIcon
-from PySide6.QtWidgets import QCheckBox, QLabel, QMainWindow, QProgressBar, QPushButton
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QLabel,
+    QMainWindow,
+    QProgressBar,
+    QPushButton,
+)
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
@@ -68,8 +74,15 @@ class MainWindow(
         self.website_pill.setIcon(QIcon(ui_consts.JD_ICON))
         self.website_pill.setProperty("class", "pill-button web")
 
+        self.update_pill = QPushButton()
+        self.update_pill.setText("An update is available!")
+        self.update_pill.setHidden(True)
+        self.update_pill.setIcon(QIcon(ui_consts.JD_ICON))
+        self.update_pill.setProperty("class", "pill-button update")
+
         self.discord_pill.clicked.connect(self.open_discord_link)
         self.website_pill.clicked.connect(self.open_website_link)
+        self.update_pill.clicked.connect(self.open_website_link)
 
         self.topnav_additional_layout.addStretch(1)
 
@@ -83,6 +96,7 @@ class MainWindow(
         # self.styleTimer.start()
 
         # self.topnav_additional_layout.addWidget(self.styleButton)
+        self.topnav_additional_layout.addWidget(self.update_pill)
         self.topnav_additional_layout.addWidget(self.discord_pill)
         self.topnav_additional_layout.addWidget(self.website_pill)
 
@@ -130,6 +144,16 @@ class MainWindow(
 
         # Window Setup
         self.setWindowTitle(f"Joystick Diagrams - {version.get_current_version()}")
+
+        self.check_for_new_version()
+
+    def check_for_new_version(self):
+        _logger.info("Checking version...")
+        version_check = version.perform_version_check()
+        _logger.info(f"Version check was {version_check}")
+
+        if version_check is False:
+            self.update_pill.setHidden(False)
 
     def handle_debug_mode_switch(self, state):
         if state == 2:
