@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Union
 from xml.dom import minidom
 
+from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.input.button import Button
 from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.profile_collection import ProfileCollection
@@ -30,9 +31,22 @@ class JoystickGremlinParser:
         self.file = self.parse_xml_file(filepath)
 
     def parse_xml_file(self, xml_file: Path) -> minidom.Document:
-        file_path = xml_file.__str__()
-        ## TODO Improve loading of file, checks for validity etc
-        return minidom.parse(file_path)
+        file_path = str(xml_file)
+        parsed_xml = minidom.parse(file_path)
+
+        valid = self.validate_xml(parsed_xml)
+
+        if valid:
+            return parsed_xml
+
+        raise JoystickDiagramsError("File was not a valid Joystick Gremlin XML")
+
+    def validate_xml(self, data: minidom.Document) -> bool:
+        """Very basic check for validity"""
+        if len(data.getElementsByTagName("mode")) > 0:
+            return True
+        else:
+            return False
 
     def create_dictionary(self) -> ProfileCollection:
         """Creates a valid ProfileCollection from Joystick Gremlin XML
