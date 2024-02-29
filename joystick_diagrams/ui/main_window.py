@@ -4,12 +4,7 @@ import os
 import qtawesome as qta  # type:  ignore
 from PySide6.QtCore import QCoreApplication, QSize
 from PySide6.QtGui import QDesktopServices, QIcon
-from PySide6.QtWidgets import (
-    QLabel,
-    QMainWindow,
-    QProgressBar,
-    QPushButton,
-)
+from PySide6.QtWidgets import QCheckBox, QLabel, QMainWindow, QProgressBar, QPushButton
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
@@ -49,8 +44,14 @@ class MainWindow(
         self.statusLabel = QLabel()
         self.statusLabel.setText("Waiting...")
 
-        self.statusBar().addPermanentWidget(self.statusLabel)
-        self.statusBar().addPermanentWidget(self.progressBar)
+        self.debug_mode = QCheckBox()
+        self.debug_mode.setText("Debug")
+        self.debug_mode.setChecked(False)
+        self.debug_mode.stateChanged.connect(self.handle_debug_mode_switch)
+
+        self.statusBar().addPermanentWidget(self.debug_mode)
+        self.statusBar().addPermanentWidget(self.statusLabel, 1)
+        self.statusBar().addPermanentWidget(self.progressBar, 1)
 
         # Top Additional Nav Setup
 
@@ -129,6 +130,12 @@ class MainWindow(
 
         # Window Setup
         self.setWindowTitle(f"Joystick Diagrams - {version.get_current_version()}")
+
+    def handle_debug_mode_switch(self, state):
+        if state == 2:
+            _logger.root.setLevel(logging.DEBUG)
+        else:
+            _logger.root.setLevel(logging.INFO)
 
     def set_style(self):
         stylesheet = self.app.styleSheet()
