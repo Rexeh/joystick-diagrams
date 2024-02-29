@@ -235,13 +235,13 @@ QTreeWidget.view-binds-tree::item:selected {{
 
 QTreeWidget.view-binds-tree::branch:closed:has-children {{
         background: #D8DBE2;
-        image: url(:/icons/arrow-down);
+        image: url(:/icons/arrow-right);
         border-image: none;
 }}
 
 QTreeWidget.view-binds-tree::branch:open:has-children {{
         background: #D8DBE2;
-        image: url(:/icons/arrow-right);
+        image: url(:/icons/arrow-down);
         border-image: none;
 }}
 
@@ -278,13 +278,13 @@ QTreeWidget.device-tree::item:selected {{
 
 QTreeWidget.device-tree::branch:closed:has-children {{
         background: #D8DBE2;
-        image: url(:/icons/arrow-down);
+        image: url(:/icons/arrow-right);
         border-image: none;
 }}
 
 QTreeWidget.device-tree::branch:open:has-children {{
         background: #D8DBE2;
-        image: url(:/icons/arrow-right);
+        image: url(:/icons/arrow-down);
         border-image: none;
 }}
 
