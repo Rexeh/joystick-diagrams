@@ -84,7 +84,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         # Icons
         self.device_icon = qta.icon(
             "fa5s.gamepad",
-            color="white",
+            color="#120303",
         )
 
         self.initialise_available_profiles()
@@ -120,33 +120,26 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
     def create_control_type_widget(self, control: Axis | Button | Hat | AxisSlider):
         if isinstance(control, Axis):
             ctrl = QLabel("Axis")
-            ctrl.setStyleSheet(
-                "background:#2980b9;color:white;max-width:100px;max-height:20px"
-            )
+            ctrl.setProperty("class", "device-control-pill axis")
             return ctrl
 
         if isinstance(control, Button):
             ctrl = QLabel("Button")
-            ctrl.setStyleSheet(
-                "background:#16a085;color:white;max-width:100px;max-height:20px"
-            )
+            ctrl.setProperty("class", "device-control-pill button")
             return ctrl
 
         if isinstance(control, Hat):
             ctrl = QLabel("Hat")
-            ctrl.setStyleSheet(
-                "background:#2c3e50;color:white;max-width:100px;max-height:20px"
-            )
+            ctrl.setProperty("class", "device-control-pill hat")
             return ctrl
 
         if isinstance(control, AxisSlider):
             ctrl = QLabel("Slider")
-            ctrl.setStyleSheet(
-                "background:#2980b9;color:white;max-width:100px;max-height:20px"
-            )
+            ctrl.setProperty("class", "device-control-pill  axis")
             return ctrl
 
         ctrl = QLabel("UNKNOWN")
+        ctrl.setProperty("class", "device-control-pill")
         ctrl.setStyleSheet("background:orange;max-width:30px")
         return ctrl
 

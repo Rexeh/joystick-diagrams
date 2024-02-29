@@ -250,6 +250,24 @@ QTreeWidget.view-binds-tree QHeaderView::section  {{
     background-color: #D8DBE2;
 }}
 
+QLabel.device-control-pill {{
+
+}}
+
+QLabel.device-control-pill.button {{
+    background:#16a085;
+}}
+
+QLabel.device-control-pill.hat {{
+    background:#2c3e50;
+}}
+
+QLabel.device-control-pill.axis {{
+    background:#2980b9;
+}}
+
+
+
 
 /* Export Styling */
 
