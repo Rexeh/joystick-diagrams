@@ -14,6 +14,7 @@ from joystick_diagrams.input.button import Button  # type: ignore
 #################
 from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.hat import Hat, HatDirection
+from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
 _logger = logging.getLogger(__name__)
@@ -22,6 +23,10 @@ EASY_MODES = "_easy"
 CONFIG_DIR = "Config"
 INPUT_DIR = "Input"
 JOYSTICK_DIR = "joystick"
+
+
+GUID_POSITION_SLICE = slice(-46, -10)
+NAME_POSITION_SLICE = slice(-48)
 
 
 class DCSWorldParser:
@@ -84,6 +89,7 @@ class DCSWorldParser:
         return False
 
     def get_valid_files_for_profile(self, path: Path) -> list[Path]:
+        """Returns a list of files deemed to be valid in a DCS Profile device type directory"""
         return list(
             filter(
                 lambda x: x.suffix == ".lua" and not x.is_dir(),
@@ -151,52 +157,56 @@ class DCSWorldParser:
         _logger.info(f"Profiles to be processed {self.profiles_to_process}")
         for profile in self.profiles_to_process:
             _logger.info(f"Processing {profile=}")
-            prof = collection.create_profile(profile_name=profile)
+            profile_object = collection.create_profile(profile_name=profile)
             self.fq_path = os.path.join(
                 self.path, CONFIG_DIR, INPUT_DIR, profile, JOYSTICK_DIR
             )
             self.profile_devices = self.get_valid_files_for_profile(Path(self.fq_path))
 
             for item in self.profile_devices:
-                _logger.info(f"Processing {profile=} device {item=}")
-                guid, name = item.name[-46:-10], item.name[:-48]
-
-                # Handle lua files without a valid GUID
-                try:
-                    Device_.validate_guid(guid)
-                except ValueError as e:
-                    _logger.error(e)
-                    break
-
-                active_profile = prof.add_device(guid, name)
-
-                try:
-                    _logger.debug(f"Obtaining file data  for {item}")
-                    file_data = (
-                        item.read_text(encoding="utf-8")
-                        .replace("local diff = ", "")
-                        .replace("return diff", "")
-                    )
-
-                except FileNotFoundError as err:
-                    _logger.error(
-                        f"DCS: File {item} no longer found - \
-                            It has been moved/deleted from directory. {err}"
-                    )
-                    raise JoystickDiagramsError(err) from err
-
-                else:
-                    parsed_config = self.parse_config(
-                        file_data
-                    )  ##Better handling - decompose
-
-                    if parsed_config is None:
-                        _logger.debug(f"Parsing failed for {item}")
-                        break
-
-                    self.assign_to_inputs(parsed_config, active_profile)
+                self.process_profile_device(item, profile_object)
 
         return collection
+
+    def process_profile_device(self, item: Path, profile: Profile_):
+        _logger.info(f"Processing {profile=} device {item=}")
+        guid, name = (
+            item.name[GUID_POSITION_SLICE],
+            item.name[NAME_POSITION_SLICE],
+        )
+
+        # Handle lua files without a valid GUID  > TODO push into validate_files?
+        try:
+            Device_.validate_guid(guid)
+        except ValueError as e:
+            _logger.error(e)
+            return
+
+        active_profile = profile.add_device(guid, name)
+
+        try:
+            _logger.debug(f"Obtaining file data  for {item}")
+            file_data = (
+                item.read_text(encoding="utf-8")
+                .replace("local diff = ", "")
+                .replace("return diff", "")
+            )
+
+        except FileNotFoundError as err:
+            _logger.error(
+                f"DCS: File {item} no longer found - \
+                    It has been moved/deleted from directory. {err}"
+            )
+            raise JoystickDiagramsError(err) from err
+
+        else:
+            parsed_config = self.parse_config(file_data)  ##Better handling - decompose
+
+            if parsed_config is None:
+                _logger.debug(f"Parsing failed for {item}")
+                return
+
+            self.assign_to_inputs(parsed_config, active_profile)
 
     def assign_to_inputs(self, config: dict, profile: Device_):
         search_keys = ["keyDiffs", "axisDiffs"]
