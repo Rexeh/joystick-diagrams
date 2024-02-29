@@ -5,6 +5,7 @@ from pathlib import Path
 
 import qtawesome as qta  # type: ignore
 from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QTreeWidgetItem
 
 from joystick_diagrams.app_state import AppState
@@ -13,7 +14,7 @@ from joystick_diagrams.db.db_device_management import (
 )
 from joystick_diagrams.export import export
 from joystick_diagrams.export_device import ExportDevice
-from joystick_diagrams.ui import main_window
+from joystick_diagrams.ui import main_window, ui_consts
 from joystick_diagrams.ui.device_setup import DeviceSetup
 from joystick_diagrams.ui.export_settings import ExportSettings
 from joystick_diagrams.ui.qt_designer import export_ui
@@ -67,6 +68,7 @@ class ExportPage(
         self.export_settings_widget = ExportSettings()
         self.export_settings_container.addWidget(self.export_settings_widget)
         self.export_bottom_section.setProperty("class", "export-bottom-container")
+        self.export_settings_container.setProperty("class", "export-settings-container")
 
         # Defaults
         self.update_export_button_state(0)  # Set the export button state
@@ -133,7 +135,8 @@ class ExportPage(
         main_window_inst.statusLabel.setText("Waiting...")
 
         msg_box = QMessageBox()
-        msg_box.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        msg_box.setWindowIcon(QIcon(ui_consts.JD_ICON))
+        msg_box.setWindowTitle("Export Completed")
         msg_box.setText(
             f"{data} items were exported to {self.export_settings_widget.export_location}"
         )

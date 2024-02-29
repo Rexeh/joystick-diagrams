@@ -8,15 +8,8 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (
-    QCoreApplication,
-    QMetaObject,
-    QRect,
-    QSize,
-)
-from PySide6.QtGui import (
-    QFont,
-)
+from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -114,11 +107,12 @@ class Ui_Form(object):
 
         self.export_bottom_section = QHBoxLayout()
         self.export_bottom_section.setObjectName("export_bottom_section")
-        self.export_bottom_section.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.export_bottom_section.setContentsMargins(-1, 0, -1, -1)
+        self.export_bottom_section.setSizeConstraint(QLayout.SetMaximumSize)
+        self.export_bottom_section.setContentsMargins(-1, 10, -1, 10)
         self.export_settings_container = QHBoxLayout()
         self.export_settings_container.setObjectName("export_settings_container")
-        self.export_settings_container.setContentsMargins(-1, -1, 50, -1)
+        self.export_settings_container.setSizeConstraint(QLayout.SetMaximumSize)
+        self.export_settings_container.setContentsMargins(-1, -1, 100, -1)
 
         self.export_bottom_section.addLayout(self.export_settings_container)
 
@@ -135,6 +129,9 @@ class Ui_Form(object):
         self.ExportButton.setMaximumSize(QSize(300, 100))
 
         self.export_bottom_section.addWidget(self.ExportButton)
+
+        self.export_bottom_section.setStretch(0, 1)
+        self.export_bottom_section.setStretch(1, 1)
 
         self.verticalLayout.addLayout(self.export_bottom_section)
 

@@ -1,8 +1,12 @@
 import logging
+from pathlib import Path
 from typing import Union
 
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.db.db_device_management import get_device_template_path
+from joystick_diagrams.db.db_device_management import (
+    get_device_template_path,
+    remove_template_path_from_device,
+)
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.profile_wrapper import ProfileWrapper
@@ -45,7 +49,20 @@ def get_export_devices() -> list[ExportDevice]:
 def get_template_for_device(device_guid: str) -> Union[Template, None]:
     """Retrieves a device template from storage"""
     template = get_device_template_path(device_guid)
-    return Template(template) if template else None
+
+    if not template:
+        return None
+
+    exists = Path(template).exists()
+
+    if not exists:
+        _logger.warning(
+            f"Template was retrieved for {device_guid} resulting in {template} but item doesn't exist at the path so it will be removed from database"
+        )
+        remove_template_path_from_device(device_guid)
+        return None
+
+    return Template(template)
 
 
 def get_processed_profiles() -> list[ProfileWrapper]:

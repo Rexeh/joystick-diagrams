@@ -26,21 +26,21 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName("Form")
-        Form.resize(500, 150)
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
+        Form.resize(550, 150)
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QSize(500, 150))
-        Form.setMaximumSize(QSize(500, 150))
+        Form.setMinimumSize(QSize(550, 150))
+        Form.setMaximumSize(QSize(550, 150))
         Form.setBaseSize(QSize(500, 150))
         self.verticalLayoutWidget = QWidget(Form)
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(9, 9, 481, 111))
+        self.verticalLayoutWidget.setGeometry(QRect(9, 9, 531, 131))
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.verticalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.verticalLayout.setSizeConstraint(QLayout.SetMaximumSize)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.label = QLabel(self.verticalLayoutWidget)
         self.label.setObjectName("label")
@@ -54,6 +54,7 @@ class Ui_Form(object):
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout_2.setSizeConstraint(QLayout.SetMaximumSize)
+        self.verticalLayout_2.setContentsMargins(-1, -1, 10, -1)
         self.export_location_label_2 = QLabel(self.verticalLayoutWidget)
         self.export_location_label_2.setObjectName("export_location_label_2")
         sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
@@ -71,7 +72,15 @@ class Ui_Form(object):
 
         self.export_location_directory = QLabel(self.verticalLayoutWidget)
         self.export_location_directory.setObjectName("export_location_directory")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(
+            self.export_location_directory.sizePolicy().hasHeightForWidth()
+        )
+        self.export_location_directory.setSizePolicy(sizePolicy2)
         self.export_location_directory.setWordWrap(True)
+        self.export_location_directory.setMargin(2)
 
         self.verticalLayout_2.addWidget(self.export_location_directory)
 
@@ -79,6 +88,14 @@ class Ui_Form(object):
 
         self.setExportLocationButton = QPushButton(self.verticalLayoutWidget)
         self.setExportLocationButton.setObjectName("setExportLocationButton")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(
+            self.setExportLocationButton.sizePolicy().hasHeightForWidth()
+        )
+        self.setExportLocationButton.setSizePolicy(sizePolicy3)
+        self.setExportLocationButton.setMaximumSize(QSize(200, 100))
 
         self.export_location_container.addWidget(self.setExportLocationButton)
 
@@ -96,10 +113,15 @@ class Ui_Form(object):
         self.export_format = QComboBox(self.verticalLayoutWidget)
         self.export_format.addItem("")
         self.export_format.setObjectName("export_format")
+        self.export_format.setMaximumSize(QSize(200, 16777215))
 
         self.export_format_container.addWidget(self.export_format)
 
         self.verticalLayout.addLayout(self.export_format_container)
+
+        self.verticalLayout.setStretch(0, 1)
+        self.verticalLayout.setStretch(1, 1)
+        self.verticalLayout.setStretch(2, 1)
 
         self.retranslateUi(Form)
 
@@ -120,7 +142,7 @@ class Ui_Form(object):
             QCoreApplication.translate("Form", "Export Location", None)
         )
         self.export_location_directory.setText(
-            QCoreApplication.translate("Form", "TextLabel", None)
+            QCoreApplication.translate("Form", "Export Path", None)
         )
         self.setExportLocationButton.setText(
             QCoreApplication.translate("Form", "Set Location", None)

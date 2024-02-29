@@ -112,16 +112,16 @@ class Ui_Form(object):
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalSpacer_2 = QSpacerItem(
+            40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum
+        )
+
+        self.horizontalLayout.addItem(self.horizontalSpacer_2)
+
         self.runPluginsButton = QPushButton(self.verticalLayoutWidget)
         self.runPluginsButton.setObjectName("runPluginsButton")
 
         self.horizontalLayout.addWidget(self.runPluginsButton)
-
-        self.horizontalSpacer_2 = QSpacerItem(
-            40, 20, QSizePolicy.Preferred, QSizePolicy.Minimum
-        )
-
-        self.horizontalLayout.addItem(self.horizontalSpacer_2)
 
         self.verticalLayout_2.addLayout(self.horizontalLayout)
 

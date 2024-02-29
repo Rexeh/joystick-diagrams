@@ -100,6 +100,14 @@ QWidget {{
 
 .run-button {{
     padding: 25px;
+    width: 500px;
+    margin-right: 5px;
+    margin-top: 10px;
+    border: none;
+}}
+
+.run-button:icon {{
+    color:white;
 }}
 
 .run-button:enabled {{
@@ -108,7 +116,7 @@ QWidget {{
 }}
 
 .run-button:disabled {{
-    background:  #C5283D;
+    background: #C5283D;
     color: white;
 }}
 
@@ -138,7 +146,8 @@ QWidget {{
 
 .plugin-setup-button {{
     background: #C5283D;
-    color:white
+    color: white;
+    border: none;
 }}
 
 .plugin-setup-button:checked {{

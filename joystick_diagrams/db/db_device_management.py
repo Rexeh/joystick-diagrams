@@ -24,6 +24,14 @@ def get_device_templates() -> list:
     return cur.fetchall()
 
 
+def remove_template_path_from_device(guid: str):
+    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
+    connection = connect(path)
+    cur = connection.cursor()
+    cur.execute("UPDATE devices SET template_path = NULL WHERE guid =  ?", (guid,))
+    connection.commit()
+
+
 def add_update_device_template_path(guid: str, template_path: str) -> bool:
     path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
     connection = connect(path)

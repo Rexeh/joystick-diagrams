@@ -104,7 +104,7 @@ class PluginsPage(
         self.installPlugin.setIcon(qta.icon("fa5s.file-import"))
         self.installPlugin.setToolTip("Available in future version")
         self.pluginTreeHelpLabel.setText(
-            "Enable and setup the plugins you want to create diagrams for."
+            "Enable and setup the plugins you want to create diagrams for. Run the plugins when ready to begin."
         )
 
         self.runPluginsButton.setProperty("class", "run-button")
@@ -138,7 +138,10 @@ class PluginsPage(
         self.runPluginsButton.setEnabled(False)
 
         if self.plugins_ready > 0:
-            self.runPluginsButton.setText(f"Run {self.plugins_ready} plugins")
+            plugin_button_text = "plugins" if self.plugins_ready > 1 else "plugin"
+            self.runPluginsButton.setText(
+                f"Run {self.plugins_ready} {plugin_button_text}"
+            )
             self.runPluginsButton.setEnabled(True)
         else:
             self.runPluginsButton.setText("No plugins ready")
@@ -389,6 +392,19 @@ class PluginsPage(
 
         return None
 
+    def update_run_button_on_start(self):
+        animation = qta.Spin(self.runPluginsButton)
+        spin_icon = qta.icon(
+            "fa5s.spinner", color="white", color_active="white", animation=animation
+        )
+        self.runPluginsButton.setIconSize(QSize(35, 35))
+        self.runPluginsButton.setIcon(spin_icon)
+        self.runPluginsButton.setDisabled(True)
+
+    def update_run_button_on_finish(self):
+        self.runPluginsButton.setIcon(QIcon())
+        self.runPluginsButton.setDisabled(False)
+
     def call_plugin_runner(self):
         # Emit parsed 0 to update buttons
         self.total_parsed_profiles.emit(0)
@@ -397,8 +413,9 @@ class PluginsPage(
 
         # TODO handle started event/button disable
 
-        # worker.signals.started.connect(self.lock_export_button)
+        worker.signals.started.connect(self.update_run_button_on_start)
         worker.signals.finished.connect(self.calculate_total_profile_count)
+        worker.signals.finished.connect(self.update_run_button_on_finish)
         worker.signals.finished.connect(self.profileCollectionChange.emit)
         worker.signals.processed.connect(self.update_plugin_execute_state)
         self.threadPool.start(worker)
