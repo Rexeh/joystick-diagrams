@@ -50,7 +50,10 @@ class VersionEncode(json.JSONEncoder):
 
 def fetch_remote_manifest() -> str | None:
     try:
-        return requests.get(VERSION_SERVER + MANIFEST_FILE, timeout=3).text
+        req = requests.get(VERSION_SERVER + MANIFEST_FILE, timeout=3)
+        if req.raise_for_status():
+            return None
+        return req.text
     except requests.exceptions.RequestException as request_exp:
         _LOGGER.error(f"Unable to reach server for version check: {request_exp}")
     return None
@@ -67,11 +70,12 @@ def fetch_local_manifest() -> str | None:
     return None
 
 
-def perform_version_check() -> bool:
+def perform_version_check() -> bool | None:
     """Checks the local version against the latest release.
 
     Returns True for Matched Versions
     Returns False for Unmatched Versions
+    Returns None for failure to check
     """
     remote_manifest = fetch_remote_manifest()
     local_manifest = fetch_local_manifest()
@@ -80,13 +84,14 @@ def perform_version_check() -> bool:
         _LOGGER.error(
             "Unable to perform version check due to one or more manifests not being present."
         )
-        return True
+        return None
 
     running_version = __convert_json_to_object(local_manifest)
     latest_version = __convert_json_to_object(remote_manifest)
 
     return compare_versions(
-        latest_version=latest_version, running_version=running_version
+        running_version=running_version,
+        latest_version=latest_version,
     )
 
 
