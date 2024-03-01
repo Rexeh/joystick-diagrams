@@ -10,6 +10,8 @@ from joystick_diagrams.db import (
     db_bind_text,
     db_device_management,
     db_plugin_data,
+    db_profile_parents,
+    db_profiles,
     db_settings,
 )
 
@@ -24,6 +26,8 @@ def init() -> None:
     db_bind_text.create_new_db_if_not_exist()
     db_plugin_data.create_new_db_if_not_exist()
     db_settings.create_new_db_if_not_exist()
+    db_profiles.create_new_db_if_not_exist()
+    db_profile_parents.create_new_db_if_not_exist()
 
 
 if __name__ == "__main__":
