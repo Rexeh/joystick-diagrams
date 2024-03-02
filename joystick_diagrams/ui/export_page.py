@@ -176,6 +176,7 @@ class ExportPage(
         worker = ExportDispatch(
             items_to_export, self.export_settings_widget.export_location
         )
+
         worker.signals.started.connect(self.lock_export_button)
         worker.signals.finished.connect(self.export_finished)
         worker.signals.finished.connect(self.unlock_export_button)
@@ -200,7 +201,6 @@ class ExportDispatch(QRunnable):
         self, export_items: list[ExportDevice], export_directory: str, **kwargs
     ):
         super(ExportDispatch, self).__init__()
-        # Store constructor arguments (re-used for processing)
 
         self.export_items = export_items
         self.export_directory = export_directory
@@ -219,10 +219,10 @@ class ExportDispatch(QRunnable):
                 f"Exporting {count}/{item_count} which has profile {item.profile_wrapper.profile_name}"
             )
             export(item, self.export_directory)
+
             self.signals.progress.emit(
                 round(count / item_count * 100 if item != item_count - 1 else 100)
             )
-
         self.signals.finished.emit(item_count)
 
 

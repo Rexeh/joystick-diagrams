@@ -24,10 +24,6 @@ TEMPLATE_DATING_KEY = "CURRENT_DATE"
 
 def export(export_device: ExportDevice, output_directory: str):
     try:
-        # Get Profile Devices, that have valid templates
-        _logger.debug(f"Getting device templates for {export_device} object")
-
-        # Use the template
         export_device_to_templates(export_device, Path(output_directory))
 
     except Exception as e:
@@ -52,6 +48,7 @@ def export_device_to_templates(export_device: ExportDevice, export_location: Pat
 
 
 def save_template(template_data, file_name, export_path):
+    # Replace strings in the template data with device data
     utils.create_directory(export_path)
 
     with open(export_path.joinpath(file_name), "w", encoding="UTF-8") as f:
@@ -82,7 +79,9 @@ def populate_template(export_device: ExportDevice) -> str:
     modified_template_data = replace_template_name_string(
         export_device.profile_wrapper.profile_name, modified_template_data
     )
+
     modified_template_data = replace_template_date_string(modified_template_data)
+
     modified_template_data = replace_unused_keys(modified_template_data)
 
     return modified_template_data
@@ -148,19 +147,19 @@ def replace_unused_keys(data: str) -> str:
     search_keys = [Template.BUTTON_KEY, Template.AXIS_KEY, Template.HAT_KEY]
     search_keys.extend(Template.MODIFIER_KEYS)
 
-    def find_keys(search_keys: list[re.Pattern]) -> list[str]:
-        found_keys = []
+    def find_keys(search_keys: list[re.Pattern]) -> set[str]:
+        found_keys = set()
         for key in search_keys:
             result = re.findall(key, data)
-            found_keys.extend(result)
-
+            found_keys.update(set(result))
         return found_keys
 
     aggregated_keys = find_keys(search_keys)
 
-    for key in aggregated_keys:
-        compiled_key = re.compile(rf"\b{key}\b", re.IGNORECASE)
-        data = re.sub(compiled_key, "", data)
+    # Best effort fix to gain performance, word boundaries required to prevent partial replacement depending on ordering of keys
+    joined_keys = "|".join({rf"\b{x}\b" for x in aggregated_keys})
+
+    data = re.sub(joined_keys, "", data, flags=re.IGNORECASE)
 
     return data
 
