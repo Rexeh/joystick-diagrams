@@ -40,9 +40,11 @@ class PluginWrapper:
 
             return True
 
-        except JoystickDiagramsError as e:
-            _logger.error(e)
-            self.push_error(str(e))
+        except Exception as e:  # Base exception handling as cannot garantee plugin conformance to handle errors
+            _logger.error(JoystickDiagramsError(f"Plugin had an unexpected error: {e}"))
+            self.push_error(
+                str(JoystickDiagramsError(f"Plugin had an unexpected error: {e}"))
+            )
             return False
 
     def push_error(self, error: str):
