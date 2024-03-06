@@ -21,18 +21,18 @@ _lexstateinfo = {"INITIAL": "inclusive"}
 _lexstatere = {
     "INITIAL": [
         (
-            '(?P<t_DOUBLE_VAL>(\\+|\\-)?[0-9]+\\.[0-9]+)|(?P<t_NUMBER>[0-9]+)|(?P<t_STRING>\\"[\\w|\\/|\\(|\\)|\\-|\\:|\\+|\\,|\\&|\\.|\\\'|\\<|\\\\\\%|\\>|\\\\\\"|\\s]+\\" )|(?P<t_TRUE>(true))|(?P<t_FALSE>(false))|(?P<t_ESCAPED_QUOTE>\\\\\\")|(?P<t_LCURLY>\\{)|(?P<t_RCURLY>\\})|(?P<t_LBRACE>\\[)|(?P<t_RBRACE>\\])|(?P<t_COMMA>\\,)|(?P<t_EQUALS>\\=)',
+            '(?P<t_DOUBLE_VAL>(\\+|\\-)?[0-9]+\\.[0-9]+)|(?P<t_NUMBER>[0-9]+)|(?P<t_STRING>\\"([^\\"\\\\]|\\\\.)*\\" )|(?P<t_TRUE>(true))|(?P<t_FALSE>(false))|(?P<t_LCURLY>\\{)|(?P<t_RCURLY>\\})|(?P<t_LBRACE>\\[)|(?P<t_RBRACE>\\])|(?P<t_COMMA>\\,)|(?P<t_EQUALS>\\=)',
             [
                 None,
                 ("t_DOUBLE_VAL", "DOUBLE_VAL"),
                 None,
                 ("t_NUMBER", "NUMBER"),
                 ("t_STRING", "STRING"),
+                None,
                 ("t_TRUE", "TRUE"),
                 None,
                 ("t_FALSE", "FALSE"),
                 None,
-                (None, "ESCAPED_QUOTE"),
                 (None, "LCURLY"),
                 (None, "RCURLY"),
                 (None, "LBRACE"),

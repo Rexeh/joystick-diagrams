@@ -258,6 +258,7 @@ class DCSWorldParser:
 
     def parse_file(self, file: str) -> dict:  # noqa
         # Linter disabled for this function, this is the format required by PLY
+
         tokens = (  # noqa
             "LCURLY",
             "RCURLY",
@@ -278,7 +279,6 @@ class DCSWorldParser:
         t_RBRACE = r"\]"  # noqa
         t_COMMA = r"\,"  # noqa
         t_EQUALS = r"\="  # noqa
-        t_ESCAPED_QUOTE = r"\\\""  # noqa
 
         def t_DOUBLE_VAL(t):  # noqa
             r"(\+|\-)?[0-9]+\.[0-9]+"
@@ -291,7 +291,7 @@ class DCSWorldParser:
             return t
 
         def t_STRING(t):  # noqa
-            r"\"[\w|\/|\(|\)|\-|\:|\+|\,|\&|\.|\'|\<|\\\%|\>|\\\"|\s]+\" "
+            r"\"([^\"\\]|\\.)*\" "
             t.value = t.value[1:-1]
             return t
 
