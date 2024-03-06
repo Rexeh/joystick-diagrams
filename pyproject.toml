@@ -2,7 +2,7 @@
 name = "joystick_diagrams"
 description = ""
 authors = ["Robert Cox"]
-version = "2.0.8"
+version = "2.0.9"
 homepage = "https://www.joystick-diagrams.com"
 readme = "readme.md"
 repository = "https://github.com/Rexeh/joystick-diagrams"
