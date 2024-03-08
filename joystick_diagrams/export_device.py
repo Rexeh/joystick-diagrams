@@ -16,8 +16,10 @@ class ExportDevice:
     errors: set = field(default_factory=set, init=False)
 
     @property
-    def template_file_name(self):
-        return self._template.template_file_name
+    def template_file_name(self) -> str | None:
+        if isinstance(self.template, Template):
+            return self.template.template_file_name
+        return None
 
     @property
     def device_id(self):
@@ -40,7 +42,7 @@ class ExportDevice:
         self._template = value
 
         if value is not None:
-            self.check_compatibility()
+            self.errors = self.check_compatibility()
 
     def check_compatibility(self):
         """Computes mergeability of a Device to the Template.
@@ -67,7 +69,7 @@ class ExportDevice:
         )
         device_axis.difference_update(self.template.get_template_axis())
 
-        self.errors = self.errors.union(device_buttons, device_hats, device_axis)
+        return set().union(device_buttons, device_hats, device_axis)
 
 
 if __name__ == "__main__":
