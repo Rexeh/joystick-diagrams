@@ -3,7 +3,6 @@ from datetime import datetime
 
 import pytest
 
-from build.lib.input.device import Device_
 from joystick_diagrams.export import (
     TEMPLATE_DATING_KEY,
     TEMPLATE_NAMING_KEY,
@@ -18,6 +17,7 @@ from joystick_diagrams.export import (
 )
 from joystick_diagrams.input.axis import Axis, AxisDirection
 from joystick_diagrams.input.button import Button
+from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.modifier import Modifier
 
