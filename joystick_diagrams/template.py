@@ -19,11 +19,11 @@ class Template:
     # Modifiers
     MODIFIER_KEYS = [
         # All Modifiers Key
-        re.compile(r"\b[a-zA-Z]+_\d+_Modifiers", flags=re.IGNORECASE),
+        re.compile(r"\b[a-zA-Z]+_\w+_Modifiers\b", flags=re.IGNORECASE),
         # Handles Modifier_X
-        re.compile(r"\b[a-zA-Z]+_\d+_Modifier_\d+", flags=re.IGNORECASE),
+        re.compile(r"\b[a-zA-Z]+_\w+_Modifier_\d+\b", flags=re.IGNORECASE),
         # Handles Specific Keys Modifier_X_Item
-        re.compile(r"\b[a-zA-Z]+_\d+_Modifier_\d+_[a-zA-Z]+", flags=re.IGNORECASE),
+        re.compile(r"\b[a-zA-Z]+_\w+_Modifier_\d+_[a-zA-Z]+\b", flags=re.IGNORECASE),
     ]
 
     HAT_KEY = re.compile(r"\bPOV_\d+_[URDL]+\b", flags=re.IGNORECASE)
