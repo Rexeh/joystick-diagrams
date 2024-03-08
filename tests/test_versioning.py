@@ -71,13 +71,13 @@ def request_exception_mock(monkeypatch):
 
 ## Remote/Local manifest retrieval and comparisons
 @pytest.fixture
-def fetch_remote_mock(monkeypatch):
+def fetch_remote_mock(request, monkeypatch):
     @dataclass
     class MockRequestObject:
         text: str
 
         def raise_for_status(self):
-            return False
+            return request.param
 
     def mock(*args, **kwargs):
         mock_text = '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
@@ -86,10 +86,26 @@ def fetch_remote_mock(monkeypatch):
     monkeypatch.setattr(requests, "get", mock)
 
 
+@pytest.mark.parametrize(
+    "fetch_remote_mock",
+    [False],
+    indirect=True,
+)
 def test_remote_manifest(fetch_remote_mock):
     data = version.fetch_remote_manifest()
 
     assert data == '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
+
+
+@pytest.mark.parametrize(
+    "fetch_remote_mock",
+    [True],
+    indirect=True,
+)
+def test_remote_manifest_failure(fetch_remote_mock):
+    data = version.fetch_remote_manifest()
+
+    assert data is None
 
 
 def test_remote_manifest_request_fail(request_exception_mock, caplog):
@@ -125,11 +141,21 @@ def test_local_manifest_read():
     assert data == '{"version": "2.0", "template_hashes": {"hash_item_one" : "123"}}'
 
 
+@pytest.mark.parametrize(
+    "fetch_remote_mock",
+    [False],
+    indirect=True,
+)
 def test_perform_version_check_success(fetch_local_mock, fetch_remote_mock, caplog):
     check = version.perform_version_check()
     assert check is True
 
 
+@pytest.mark.parametrize(
+    "fetch_remote_mock",
+    [False],
+    indirect=True,
+)
 def test_perform_version_check_failure(
     fetch_local_mock_none_found, fetch_remote_mock, caplog
 ):
