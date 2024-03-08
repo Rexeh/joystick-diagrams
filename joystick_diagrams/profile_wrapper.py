@@ -3,7 +3,6 @@
 import logging
 from copy import deepcopy
 
-from joystick_diagrams import app_state
 from joystick_diagrams.db import db_profile_parents, db_profiles
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.plugin_wrapper import PluginWrapper
@@ -45,7 +44,9 @@ class ProfileWrapper:
 
         _logger.debug(f"Parents for profile {self.profile_key} were {parents}")
 
-        _state = app_state.AppState()
+        from joystick_diagrams.app_state import AppState  # TODO Resolve circular  dep
+
+        _state = AppState()
         for parent_key, _ in parents:
             _logger.debug(f"Trying to get parent for {parent_key}")
 
