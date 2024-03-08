@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from joystick_diagrams.input.button import Button
@@ -91,6 +93,7 @@ def test_device_existing_input(caplog):
 
 
 def test_new_modifier_no_input(caplog):
+    caplog.set_level(logging.DEBUG)
     obj = Device_("666EC0A0-556B-11EE-8002-444553540000", "name")
     obj.add_modifier_to_input(Button(1), {"alt"}, "press")
 

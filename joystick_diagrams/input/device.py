@@ -135,7 +135,7 @@ class Device_:  # noqa: N801
         )
 
         if input_obj is None:
-            _logger.warning(
+            _logger.debug(
                 f"Modifier attempted to be added to {control} but input does not exist. So a shell will be created"
             )
 

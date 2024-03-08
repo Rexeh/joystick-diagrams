@@ -44,15 +44,15 @@ class Input_:  # noqa: N801
         """Adds a modifier to an existing input, or amends an existing modifier"""
         existing = self._check_existing_modifier(modifier)
 
-        _logger.info(f"Existing modifier check is {existing}")
+        _logger.debug(f"Existing modifier check is {existing}")
 
         if existing is None:
-            _logger.info(
+            _logger.debug(
                 f"Modifier {modifier} for input {self.input_control} not found so adding"
             )
             self.modifiers.append(Modifier(modifier, command))
         else:
-            _logger.info(
+            _logger.debug(
                 f"Modifier {modifier} already exists for {self.input_control} and command has been overidden"
             )
             existing.command = command
