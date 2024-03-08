@@ -11,6 +11,7 @@ def profile_collection():
 
 def test_empty_collection(profile_collection):
     assert profile_collection.profiles == {}
+    assert len(profile_collection) == 0
 
 
 def test_create_profile_in_collection(profile_collection):
