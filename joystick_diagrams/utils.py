@@ -1,10 +1,7 @@
-import functools
 import logging
 import os
 import sys
 from pathlib import Path
-
-from joystick_diagrams.exceptions import JoystickDiagramsError
 
 _logger = logging.getLogger(__name__)
 
@@ -29,27 +26,3 @@ def install_root() -> str:  # pylint: disable=missing-function-docstring
         if getattr(sys, "frozen", False)
         else os.path.dirname(__package__)
     )
-
-
-def handle_bare_exception(exception_type):
-    """Handles bare exception by wrapping it in a Joystick Diagrams exception type.
-
-    Default type is JoystickDiagramsException
-    """
-
-    if not exception_type:
-        exception_type = JoystickDiagramsError
-
-    def outer(func):
-        @functools.wraps(func)
-        def inner():
-            try:
-                return func()
-            except Exception as e:
-                raise exception_type(
-                    f"An error occured from within the plugin. {e}"
-                ) from e
-
-        return inner
-
-    return outer
