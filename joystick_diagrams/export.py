@@ -9,7 +9,7 @@ import logging
 import re
 from datetime import datetime
 from pathlib import Path
-from xml.sax.saxutils import escape
+from xml.sax.saxutils import escape, unescape
 
 from joystick_diagrams import utils
 from joystick_diagrams.export_device import ExportDevice
@@ -87,7 +87,8 @@ def populate_template(export_device: ExportDevice) -> str:
 
 
 def sanitize_string_for_svg(value_to_sanitize: str) -> str:
-    return escape(value_to_sanitize)
+    """Safely sanitize string for SVG display"""
+    return escape(unescape(value_to_sanitize))
 
 
 def replace_input_modifiers_string(
