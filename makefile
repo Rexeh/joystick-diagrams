@@ -8,7 +8,7 @@ unit-test:
 
 fmt:
 	@echo "Formatting source code"
-	@poetry run ruff ./joystick_diagrams --fix
+	@poetry run ruff ./joystick_diagrams ./tests --fix
 
 lint:
 	@echo "Linting source code"
