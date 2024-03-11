@@ -20,9 +20,7 @@ from joystick_diagrams.ui.qt_designer import main_window
 _logger = logging.getLogger(__name__)
 
 
-class MainWindow(
-    QMainWindow, main_window.Ui_MainWindow
-):  # Refactor pylint: disable=too-many-instance-attributes
+class MainWindow(QMainWindow, main_window.Ui_MainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)

@@ -12,9 +12,7 @@ from joystick_diagrams.ui.qt_designer import parent_profile_management_ui
 _logger = logging.getLogger(__name__)
 
 
-class parent_profile_ui(
-    QMainWindow, parent_profile_management_ui.Ui_Form
-):  # Refactor pylint: disable=too-many-instance-attributes
+class parent_profile_ui(QMainWindow, parent_profile_management_ui.Ui_Form):
     parentProfileChange = Signal()
 
     def __init__(self, *args, **kwargs):

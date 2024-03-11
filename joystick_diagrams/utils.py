@@ -6,7 +6,7 @@ from pathlib import Path
 _logger = logging.getLogger(__name__)
 
 
-def create_directory(directory) -> None:  # pylint: disable=missing-function-docstring
+def create_directory(directory) -> None:
     try:
         if not Path(directory).exists():
             Path(directory).mkdir()
@@ -14,7 +14,7 @@ def create_directory(directory) -> None:  # pylint: disable=missing-function-doc
         _logger.error(f"Failed to create directory: {directory} with {error}")
 
 
-def install_root() -> str:  # pylint: disable=missing-function-docstring
+def install_root() -> str:
     """Returns the currently root directory of the package
 
     "" in local development environments

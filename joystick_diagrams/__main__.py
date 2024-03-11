@@ -20,5 +20,5 @@ if __name__ == "__main__":
     try:
         app_init.init()
 
-    except Exception as error:  # pylint: disable=broad-except
+    except Exception as error:
         _logger.exception(error)

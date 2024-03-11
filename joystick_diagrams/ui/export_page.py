@@ -23,9 +23,7 @@ from joystick_diagrams.utils import install_root
 _logger = logging.getLogger(__name__)
 
 
-class ExportPage(
-    QMainWindow, export_ui.Ui_Form
-):  # Refactor pylint: disable=too-many-instance-attributes
+class ExportPage(QMainWindow, export_ui.Ui_Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)

@@ -24,9 +24,7 @@ from joystick_diagrams.ui.qt_designer import setting_page_ui
 _logger = logging.getLogger(__name__)
 
 
-class PluginsPage(
-    QMainWindow, setting_page_ui.Ui_Form
-):  # Refactor pylint: disable=too-many-instance-attributes
+class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
     profileCollectionChange = Signal()
     pluginTreeChanged = Signal()
     togglePluginEnabledState = Signal(object)
