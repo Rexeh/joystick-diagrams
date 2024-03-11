@@ -22,7 +22,7 @@ class ExportDevice:
         return None
 
     @property
-    def device_id(self):
+    def device_id(self) -> str:
         return self.device.guid
 
     @property

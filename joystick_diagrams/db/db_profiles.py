@@ -1,24 +1,19 @@
-import os
-from sqlite3 import connect
+from joystick_diagrams.db.db_connection import connection
 
-DB_DIR = "data"
-DB_NAME = "joystick_diagrams.db"
 TABLE_NAME = "profiles"
 
 
 def create_new_db_if_not_exist():
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
     cur.execute(
         f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(profile_key TEXT PRIMARY KEY)"
     )
 
 
 def get_profile(profile_key: str) -> list[str]:
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
 
     query = "SELECT * from profiles WHERE profile_key = ?"
     params = (profile_key,)
@@ -33,15 +28,14 @@ def get_profile(profile_key: str) -> list[str]:
 
 
 def add_profile(profile_key: str) -> list[str]:
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
 
     query = "INSERT OR IGNORE INTO profiles (profile_key) VALUES(?)"
     params = (profile_key,)
     cur.execute(query, params)
 
-    connection.commit()
+    con.commit()
 
     query = "SELECT * from profiles WHERE profile_key = ?"
     params = (profile_key,)
@@ -52,9 +46,8 @@ def add_profile(profile_key: str) -> list[str]:
 
 
 def get_profile_parents(profile_key: str):
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
 
     query = "SELECT parent_profile_key,ordering from profile_parents WHERE profile_key = ? ORDER BY ordering asc"
     params = (profile_key,)

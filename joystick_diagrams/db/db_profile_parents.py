@@ -1,20 +1,16 @@
 import logging
-import os
 import sqlite3
-from sqlite3 import connect
 
-DB_DIR = "data"
-DB_NAME = "joystick_diagrams.db"
+from joystick_diagrams.db.db_connection import connection
+
 TABLE_NAME = "profile_parents"
 
 _logger = logging.getLogger(__name__)
 
 
 def create_new_db_if_not_exist():
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    connection.execute("PRAGMA foreign_keys = 1")
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
     cur.execute(
         f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(\
             parent_profile_key TEXT NOT NULL,\
@@ -27,10 +23,8 @@ def create_new_db_if_not_exist():
 
 
 def add_parents_to_profile(profile_key: str, parents: list):
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    connection.execute("PRAGMA foreign_keys = 1")
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
 
     query = "SELECT * from profiles WHERE profile_key = ?"
     params = (profile_key,)
@@ -60,7 +54,7 @@ def add_parents_to_profile(profile_key: str, parents: list):
                 f"Integrity errors when inserting which suggests the {profile_key=} no longer exists in profiles"
             )
 
-    connection.commit()
+    con.commit()
 
 
 if __name__ == "__main__":

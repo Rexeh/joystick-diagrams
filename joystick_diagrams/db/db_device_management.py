@@ -1,41 +1,35 @@
-import os
-from sqlite3 import connect
+from joystick_diagrams.db.db_connection import connection
 
-DB_DIR = "data"
-DB_NAME = "joystick_diagrams.db"
 TABLE_NAME = "devices"
 
 
 def create_new_db_if_not_exist():
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
+
     cur.execute(
         f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(guid TEXT PRIMARY KEY, template_path TEXT)"
     )
 
 
 def get_device_templates() -> list:
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
 
     cur.execute("SELECT * from devices")
     return cur.fetchall()
 
 
 def remove_template_path_from_device(guid: str):
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
     cur.execute("UPDATE devices SET template_path = NULL WHERE guid =  ?", (guid,))
-    connection.commit()
+    connection().commit()
 
 
 def add_update_device_template_path(guid: str, template_path: str) -> bool:
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
 
     cur.execute("SELECT * from devices WHERE guid = ?", (guid,))
     result = cur.fetchall()
@@ -50,14 +44,13 @@ def add_update_device_template_path(guid: str, template_path: str) -> bool:
         params = (guid, template_path)
         cur.execute(query, params)
 
-    connection.commit()
+    con.commit()
     return True
 
 
 def get_device_template_path(guid: str):
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
 
     query = "SELECT template_path from devices WHERE guid = ?"
     params = [guid]

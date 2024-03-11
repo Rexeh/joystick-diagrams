@@ -7,7 +7,7 @@ from qt_material import apply_stylesheet
 
 from joystick_diagrams import utils  # type: ignore
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.db import db_init
+from joystick_diagrams.db import db_handler
 from joystick_diagrams.plugin_manager import ParserPluginManager
 from joystick_diagrams.ui import resources_rc
 from joystick_diagrams.ui.main_window import MainWindow
@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 
 def init():
     # Setup datastore
-    db_init.init()
+    db_handler.init()
     # -------------------------------
 
     # -- Initialise Plugins System --

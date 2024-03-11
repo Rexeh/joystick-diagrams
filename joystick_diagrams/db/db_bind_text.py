@@ -1,24 +1,18 @@
-import os
-from sqlite3 import connect
-
-DB_DIR = "data"
-DB_NAME = "joystick_diagrams.db"
+from joystick_diagrams.db.db_connection import connection
 
 
 def create_new_db_if_not_exist():
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
     cur.execute(
         "CREATE TABLE IF NOT EXISTS bind_text(original_str TEXT PRIMARY KEY, replaced_str TEXT)"
     )
-    connection.commit()
+    connection().commit()
 
 
 def add_update_bind_text(original_str: str, replaced_str: str):
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
 
     query = "SELECT * from bind_text WHERE original_str = ?"
     params = [
@@ -38,13 +32,12 @@ def add_update_bind_text(original_str: str, replaced_str: str):
         params = (original_str, replaced_str)
         cur.execute(query, params)
 
-    connection.commit()
+    con.commit()
 
 
 def get_bind_text_for_string(search_string: str) -> str | None:
-    path = os.path.join(os.getcwd(), DB_DIR, DB_NAME)
-    connection = connect(path)
-    cur = connection.cursor()
+    con = connection()
+    cur = con.cursor()
 
     query = "SELECT replaced_str from bind_text WHERE original_str = ?"
     params = [search_string]
