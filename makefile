@@ -8,11 +8,11 @@ unit-test:
 
 fmt:
 	@echo "Formatting source code"
-	@poetry run ruff ./joystick_diagrams ./tests --fix
+	@poetry run ruff format ./joystick_diagrams ./tests
 
 lint:
 	@echo "Linting source code"
-	@poetry run ruff ./joystick_diagrams ./tests
+	@poetry run ruff check ./joystick_diagrams ./tests --fix
 
 build-exe:
 	@echo "Making standard portable package"
