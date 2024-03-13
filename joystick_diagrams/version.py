@@ -122,6 +122,7 @@ def generate_version(version_number: str = VERSION) -> JoystickDiagramVersion:
 
 def generate_template_manifest() -> dict[str, str]:
     """Generates a list of hashes for each templatein the package"""
+    # TODO Possible deprecation
     templates = Path(TEMPLATE_DIR)
     manifest: dict[str, str] = {}
 
