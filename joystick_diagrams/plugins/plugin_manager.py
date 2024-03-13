@@ -23,10 +23,10 @@ from joystick_diagrams.plugins.plugin_interface import PluginInterface
 
 _logger = logging.getLogger(__name__)
 
-PLUGINS_DIRECTORY: str = "plugins"
+PLUGINS_DIRECTORY: str = "."
 PLUGIN_REL_PATH: str = ".plugins."
-EXPECTED_PLUGIN_FILES = ["__init__", "config", "main", "settings"]
-EXCLUDED_PLUGIN_DIRS = ["__pycache__"]
+EXPECTED_PLUGIN_FILES: list[str] = ["__init__", "config", "main", "settings"]
+EXCLUDED_PLUGIN_DIRS: list[str] = ["__pycache__"]
 
 
 class ParserPluginManager:

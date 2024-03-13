@@ -2,8 +2,8 @@ import logging
 
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.input.profile_collection import ProfileCollection
-from joystick_diagrams.plugin_manager import ParserPluginManager
 from joystick_diagrams.plugin_wrapper import PluginWrapper
+from joystick_diagrams.plugins.plugin_manager import ParserPluginManager
 from joystick_diagrams.profile_wrapper import ProfileWrapper
 
 _logger = logging.getLogger(__name__)

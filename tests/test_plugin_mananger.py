@@ -2,8 +2,9 @@ from dataclasses import dataclass
 
 import pytest
 
-from joystick_diagrams import exceptions, plugin_manager
-from joystick_diagrams.plugin_manager import (
+from joystick_diagrams import exceptions
+from joystick_diagrams.plugins import plugin_manager
+from joystick_diagrams.plugins.plugin_manager import (
     check_expected_files,
     check_folder_validity,
     load_plugin,
