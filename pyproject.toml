@@ -43,15 +43,16 @@ name = "Joystick_Diagrams"
 description = "Automatically create diagrams for your throttles, joysticks and custom HID devices"
 dynamic = ["version", "readme"]
 
-[tool.setuptools.packages.find]
-where = ["joystick_diagrams"]
-namespaces = false
+[tool.setuptools]
+packages  = ["joystick_diagrams"]
 
 [tool.setuptools.dynamic]
 version = { attr = "joystick_diagrams.version.VERSION" }
 readme = { file = "readme.md" }
 
 [tool.distutils.build_exe]
+silent = 3
+optimize = 2
 includes = [
     "joystick_diagrams.plugins.dcs_world_plugin",
     "joystick_diagrams.plugins.star_citizen_plugin",
@@ -69,15 +70,16 @@ include_files = [
     "version_manifest.json",
     "./theme"
 ]
-zip_include_packages = ["encodings", "PySide6"]
+zip_include_packages = ["encodings", "PySide6","dynaconf"]
+bin_excludes =  ["Qt6Pdf.dll", "QtOpenGL.pyd"]
 excludes = [
     "tkinter",
     "test",
     "distutils",
     "asyncio",
     "concurrent",
-    "black",
-    "IPython",
+    "joystick_diagrams..mypy_cache",
+    "unittest"
 ]
 
 [tool.coverage.paths]
@@ -110,8 +112,8 @@ exclude_lines = [
 
 [tool.mypy]
 warn_return_any = false
-warn_unused_configs = true
-show_error_codes = true
+warn_unused_configs = false
+disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]
 module = ["dynaconf.*", "qt_material.*","qtawesome.*"]
@@ -154,3 +156,4 @@ unfixable = ["B"]
 
 [tool.ruff.format]
 quote-style = "double"
+docstring-code-format = true
