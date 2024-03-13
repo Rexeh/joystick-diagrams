@@ -1,7 +1,12 @@
 import logging
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 from joystick_diagrams import app_init
+from joystick_diagrams.utils import create_directory, data_root
+
+log_path = Path.joinpath(data_root(), "logs")
+create_directory(str(log_path))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -9,7 +14,10 @@ logging.basicConfig(
     handlers=[
         logging.StreamHandler(),
         RotatingFileHandler(
-            "application.log", mode="a", maxBytes=5 * 1000000, backupCount=1
+            str(Path.joinpath(log_path, "application.log")),
+            mode="a",
+            maxBytes=5 * 1000000,
+            backupCount=1,
         ),
     ],
 )

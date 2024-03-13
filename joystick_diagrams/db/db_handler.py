@@ -21,7 +21,7 @@ _logger = logging.getLogger(__name__)
 def init() -> None:
     _logger.info("Initialising datastores")
 
-    utils.create_directory("data")
+    utils.create_directory(utils.data_root().joinpath("data"))
     db_device_management.create_new_db_if_not_exist()
     db_bind_text.create_new_db_if_not_exist()
     db_plugin_data.create_new_db_if_not_exist()

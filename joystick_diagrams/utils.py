@@ -5,6 +5,15 @@ from pathlib import Path
 
 _logger = logging.getLogger(__name__)
 
+JOYSTICK_DIAGRAMS_DATA_DIR = "Joystick Diagrams"
+
+
+def data_root() -> Path:
+    """Returns the user data path for storage of data"""
+    return Path.joinpath(
+        Path().home(), "AppData", "Roaming", JOYSTICK_DIAGRAMS_DATA_DIR
+    )
+
 
 def create_directory(directory) -> None:
     try:
@@ -15,7 +24,7 @@ def create_directory(directory) -> None:
 
 
 def install_root() -> str:
-    """Returns the currently root directory of the package
+    """Returns the current root directory of the package i.e. installation location
 
     "" in local development environments
     "path_to_frozen_app_exe" in frozen environment
