@@ -37,7 +37,10 @@ One is included in the library - https://github.com/Rexeh/joystick-diagrams/tree
 At this time, Plugins can only use native Python packages or those utilised by 1st party modules. If you should require some additional libraries in order to write your plugin then open for discussion.
 
 ## Configuration Management
-Parser Plugins are responsible for their own configuration, choice of how to persist the data for your plugin is yours, but you can also follow convention.
+Parser Plugins are responsible for their own configuration, choice of how to persist the data for your plugin is yours.
+
+- Data is stored in the Users AppData directory, for this you can use the **get_plugin_data_path** method on Plugin Interface to obtain your file path at runtime.
+- Additionally a helper method **get_plugin_data** exists to return all currently files/folders as a list[Path]
 
 ### load_data()
 This method should restore any relevant data to your plugin. load_data() is called as part of the plugin loading mechanism.
@@ -46,7 +49,5 @@ A key part of load data should be setting your path attribute to any stored valu
 
 ### Dynaconf
 Core Plugin Configuration is provided by Dynaconf **config.py** and the chosen format is JSON for configuration store.
-
-Dynaconf can be used as a write store also, but this is down to individual plugins to decide, generally
 
 You can retrieve settings for your plugin using **settings.VARIABLE**, for further usage and validation see [Dynaconf Documentation](https://www.dynaconf.com/)
