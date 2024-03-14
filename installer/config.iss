@@ -1,26 +1,32 @@
+#define ExeName "Joystick_Diagrams.exe"
+#define BuildDir "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\"
+#define ApplicationName "Joystick Diagrams"
+#define Version "2.1.0"
+
 [Setup]
-AppName=Joystick Diagrams
-AppVersion=2.0.8
-AppId=JoystickDiagrams
+AppName={#ApplicationName}
+AppVersion={#Version}
+VersionInfoVersion={#Version}
+AppId={{CF6C627F-F3AB-42A2-97DC-F1319BB37430}}
 ArchitecturesInstallIn64BitMode=x64
-DefaultDirName={autopf}\Joystick Diagrams
-DefaultGroupName=Joystick Diagrams
+DefaultDirName={autopf}\{#ApplicationName}
+DefaultGroupName={#ApplicationName}
 AppCopyright=Robert Cox - joystick-diagrams.com
 AppSupportURL=http://www.joystick-diagrams.com
-SetupIconFile=D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\img\logo.ico
+SetupIconFile="{#BuildDir}img\logo.ico"
 DisableWelcomePage=no
-WizardImageFile=D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\img\logo-small.bmp
-WizardSmallImageFile=D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\img\logo-thumb.bmp
+WizardImageFile="{#BuildDir}\img\logo-small.bmp"
+WizardSmallImageFile="{#BuildDir}img\logo-thumb.bmp"
 WizardImageStretch=no
 WizardStyle=classic
-OutputBaseFilename=Joystick Diagrams Installer
+OutputBaseFilename=Joystick Diagrams Installer - {#SetupSetting("AppVersion")}
 [Dirs]
 Name: "{userappdata}\Joystick Diagrams"
 
 [Files]
-Source: "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\*"; DestDir: "{app}"
-Source: "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\img\*"; DestDir: "{app}\img"
-Source: "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\lib\*"; DestDir: "{app}\lib"; Flags: recursesubdirs
+Source: "{#BuildDir}*"; DestDir: "{app}"
+Source: "{#BuildDir}img\*"; DestDir: "{app}\img"
+Source: "{#BuildDir}lib\*"; DestDir: "{app}\lib"; Flags: recursesubdirs
 
 #define ProcessFile(Source, FindResult, FindHandle) \
     Local[0] = FindGetFileName(FindHandle), \
@@ -34,17 +40,26 @@ Source: "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\lib\*"; DestDir
 #define DepedenciesToInstall ProcessFolder("D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\lib")
 #define DependenciesLog "{app}\dependencies.log"
 
-Source: "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\templates\*"; DestDir: "{app}\templates"; Flags: recursesubdirs
-Source: "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\theme\*"; DestDir: "{app}\theme"
+Source: "{#BuildDir}templates\*"; DestDir: "{app}\templates"; Flags: recursesubdirs
+Source: "{#BuildDir}theme\*"; DestDir: "{app}\theme"
 
 [UninstallDelete]
 Type: files; Name: "{#DependenciesLog}"
 
+[Tasks]
+Name: "desktopicon"; Description: "Automatically create desktop icon?"; \
+    GroupDescription: "Desktop Icon"; Flags: unchecked
+
 [Icons]
-Name: "{group}\Joystick Diagrams"; Filename: "{app}\Joystick_Diagrams.exe"; IconFilename: "{app}\Joystick_Diagrams.exe"
+Name: "{group}\{#ApplicationName}"; Filename: "{app}\{#ExeName}"; IconFilename: "{app}\{#ExeName}";
+Name: "{userdesktop}\{#SetupSetting("AppName")}"; Filename: "{app}\{#ExeName}"; \
+    IconFilename: "{app}\{#ExeName}"; Tasks: desktopicon
 
 [Languages]
 Name: "en"; MessagesFile: "D:\Git Repos\joystick-diagrams\installer\Default.isl"; InfoAfterFile: "D:\Git Repos\joystick-diagrams\installer\success.rtf"
+
+[Run]
+Filename: "{app}\{#ExeName}"; Description: Open Joystick Diagrams; Flags: nowait postinstall skipifsilent runascurrentuser
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);

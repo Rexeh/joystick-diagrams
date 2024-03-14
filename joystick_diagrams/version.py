@@ -17,7 +17,7 @@ import semver
 
 _LOGGER = logging.getLogger(__name__)
 
-VERSION = "2.0.9"  # Format Major.Minor
+VERSION = "2.1.0"  # Format Major.Minor
 VERSION_SERVER = "https://www.joystick-diagrams.com/"
 TEMPLATE_DIR = "./templates"
 MANIFEST_DIR = "./"
