@@ -27,7 +27,6 @@ class PluginWrapper:
         self.plugin_profile_collection = None
         self.setup_plugin()
 
-    # @handle_bare_exception
     def process(self) -> bool:
         """Runs a specific plugin, attaching the result to the wrapper"""
         self.plugin_profile_collection = None
@@ -51,14 +50,13 @@ class PluginWrapper:
         self.error = ""
         self.error = error
 
-    # @handle_bare_exception
     def set_path(self, path: Path) -> bool:
         """Sets the path for a given plugin"""
         try:
             path_set = self.plugin.set_path(path)
             self.set_ready(path_set)
             return path_set
-        except JoystickDiagramsError as e:
+        except Exception as e:  # Bare except required to handle error types
             _logger.error(e)
             self.set_ready(False)
             self.push_error(str(e))
@@ -73,7 +71,6 @@ class PluginWrapper:
     def enable_plugin(self):
         self.setup_plugin_path()
 
-    # @handle_bare_exception
     def setup_plugin(self):
         """Sets up a pluging on first use or restores existing state"""
 
