@@ -15,6 +15,13 @@ def data_root() -> Path:
     )
 
 
+def plugin_data_root() -> Path:
+    """Returns the user data path for storage of plugin data"""
+    if not Path.joinpath(data_root(), "plugins").is_dir():
+        create_directory(Path.joinpath(data_root(), "plugins"))
+    return Path.joinpath(data_root(), "plugins")
+
+
 def create_directory(directory) -> None:
     try:
         if not Path(directory).exists():

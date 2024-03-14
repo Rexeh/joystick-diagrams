@@ -4,6 +4,7 @@ from pathlib import Path
 
 import dynaconf
 
+from joystick_diagrams import utils
 from joystick_diagrams.exceptions import (
     DirectoryNotValidError,
     FileNotValidError,
@@ -46,6 +47,19 @@ class PluginInterface(ABC):
     def file_type_invalid(self, exception_message: str):
         return FileTypeInvalidError(value=exception_message)
 
+    def get_plugin_data_path(self) -> Path:
+        """Returns the full path to a plugins data directory"""
+        plugin_data_path = Path.joinpath(
+            utils.plugin_data_root(), clean_plugin_name(self.name)
+        )
+        if not plugin_data_path.is_dir():
+            utils.create_directory(plugin_data_path)
+        return plugin_data_path
+
+    def get_plugin_data(self) -> list[Path]:
+        """Returns all available files/folders for a calling plugin"""
+        return list(self.get_plugin_data_path().iterdir())
+
     @abstractmethod
     def process(self) -> ProfileCollection:
         """Runs the relevant processes to return an ProfileCollection object
@@ -87,3 +101,11 @@ class PluginInterface(ABC):
     def get_path(self) -> Path | None:
         """Returns a plugins current path"""
         return Path(self.path) if self.path else None
+
+
+def clean_plugin_name(name: str) -> str:
+    """Cleans the plugin name from any potentially problematic characters for Windows"""
+    disallowed = ["<", ">", ":", '"', "/", "\\", "|", "?", "*"]
+    for char in disallowed:
+        name = name.replace(char, "")
+    return name
