@@ -14,15 +14,15 @@ lint:
 	@echo "Linting source code"
 	@poetry run ruff check ./joystick_diagrams ./tests --fix
 
-build-exe:
-	@echo "Making standard portable package"
+build-exe: make-version
+	@echo "Making Frozen Executable"
 	@python setup.py build
-	@echo "Making MSI Build"
-	@python setup.py build bdist_msi
+	@echo "Creating Installer"
+	@cmd /C "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /Qp ./installer/config.iss
 
 make-version:
 	@echo "Making version manifest"
-	@poetry run python joystick_diagrams/classes/version/version.py
+	@poetry run python joystick_diagrams/version.py
 
 ui:
 	@echo "Generating UI python"
