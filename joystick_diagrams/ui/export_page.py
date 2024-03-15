@@ -119,7 +119,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         row_guid_data = selected_table_rows.data(0, Qt.ItemDataRole.UserRole)
 
         # Save the device information
-        _save = add_update_device_template_path(row_guid_data, template_path.__str__())
+        _save = add_update_device_template_path(row_guid_data, str(template_path))
 
         if _save:
             self.device_widget.devices_updated.emit()
