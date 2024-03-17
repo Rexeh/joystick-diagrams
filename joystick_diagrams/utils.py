@@ -10,9 +10,15 @@ JOYSTICK_DIAGRAMS_DATA_DIR = "Joystick Diagrams"
 
 def data_root() -> Path:
     """Returns the user data path for storage of data"""
-    return Path.joinpath(
+
+    root = Path.joinpath(
         Path().home(), "AppData", "Roaming", JOYSTICK_DIAGRAMS_DATA_DIR
     )
+
+    if not root.exists():
+        create_directory(root)
+
+    return Path.joinpath(root)
 
 
 def plugin_data_root() -> Path:
