@@ -35,6 +35,8 @@ htmlcov
 /local_test_data
 test_export/
 _*
+/scripts/dcs_user_files
+/installer/*
 
 # IDE
 *.code-workspace
