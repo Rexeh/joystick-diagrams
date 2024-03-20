@@ -4,7 +4,6 @@ Author: Robert Cox
 """
 import logging
 from pathlib import Path
-from typing import Union
 from xml.dom import minidom
 
 from joystick_diagrams.exceptions import JoystickDiagramsError
@@ -25,15 +24,27 @@ HAT_POSITIONS = {
     8: "UL",
 }
 
+VIRTUAL_HAT_POSITIONS = {
+    "north": HAT_POSITIONS[1],
+    "north-east": HAT_POSITIONS[2],
+    "east": HAT_POSITIONS[3],
+    "south-east": HAT_POSITIONS[4],
+    "south": HAT_POSITIONS[5],
+    "south-west": HAT_POSITIONS[6],
+    "west": HAT_POSITIONS[7],
+    "north-west": HAT_POSITIONS[8],
+}
+
 
 class JoystickGremlinParser:
     def __init__(self, filepath: Path):
-        self.file = self.parse_xml_file(filepath)
+        import os
+
+        _logger.debug(os.access(Path(filepath), os.R_OK))
+        self.file = self.parse_xml_file(Path(filepath))
 
     def parse_xml_file(self, xml_file: Path) -> minidom.Document:
-        file_path = str(xml_file)
-        parsed_xml = minidom.parse(file_path)
-
+        parsed_xml = minidom.parse(str(xml_file))
         valid = self.validate_xml(parsed_xml)
 
         if valid:
@@ -102,7 +113,7 @@ class JoystickGremlinParser:
 
         return profile_collection
 
-    def extract_hats(self, hat_node) -> list[Union[str, str] | None]:
+    def extract_hats(self, hat_node: minidom.Element) -> list[tuple[Hat, str]]:
         """Extract the hat positions for a given HAT node.
 
         Each HAT node may contain a CONTAINER, which may contain N number of action-set nodes
@@ -114,47 +125,140 @@ class JoystickGremlinParser:
         hat_description: str = hat_node.getAttribute("description") or ""
         hat_mappings: list = []
 
-        _logger.debug("Hat ID: {hat_id}")
-        _logger.debug("Hat has description: {hat_description}")
+        _logger.debug(f"Hat ID: {hat_id}")
+        _logger.debug(f"Hat has description: {hat_description}")
 
         # Get the containers
-        hat_container = hat_node.getElementsByTagName("container")
+        hat_containers = hat_node.getElementsByTagName("container")
 
-        if not hat_container:
+        if not hat_containers:
             return hat_mappings
 
-        _logger.debug("Has containers: {hat_containers.length}")
+        # Gather container types
+        basic_containers = [
+            x for x in hat_containers if x.getAttribute("type") == "basic"
+        ]
+        filtered_hat_containers = [
+            x for x in hat_containers if x.getAttribute("type") == "hat_buttons"
+        ]
 
-        hat_positions = hat_container[0].getElementsByTagName("action-set")
+        _logger.debug(f"Basic Containers: {len(basic_containers)}")
+        _logger.debug(f"Hat Containers: {len(filtered_hat_containers)}")
 
+        if filtered_hat_containers:
+            hat_mappings = self.handle_hat_button_container(
+                hat_id, filtered_hat_containers
+            )
+
+        if basic_containers:
+            hat_mappings = self.handle_virtual_button_container(hat_id, hat_containers)
+
+        return hat_mappings
+
+    def handle_virtual_button_container(
+        self, hat_id, containers: minidom.NodeList[minidom.Element]
+    ):
         hat_mappings = []
-
-        for position in hat_positions:
-            # Get REMAP of node (assumes 1)
-            hat_position_id = int(
-                position.getElementsByTagName("remap")[0].getAttribute("button")
+        for container in containers:
+            # Check if we have a top level description
+            container_description = (
+                container.getAttribute("description")
+                if container.getAttribute("description") != ""
+                else None
             )
 
-            # Get the description node if exists
-            hat_description_check = position.getElementsByTagName("description")
+            # Try source description from inner block
+            if not container_description:
+                container_description = " - ".join(
+                    {
+                        x.getAttribute("description")
+                        for x in container.getElementsByTagName("description")
+                    }
+                )
 
-            # If no node then continue
-            if not hat_description_check:
+            # Skip processing if we have no descriptions
+            if not container_description:
+                print("No point continuing")
                 continue
 
-            hat_description = hat_description_check[0].getAttribute("description")
-
-            if not hat_description:
-                # If we don't have a description then no point using the item
-                continue
-
-            hat_position_to_string = HAT_POSITIONS[hat_position_id]
-            hat_mappings.append(
-                [Hat(hat_id, HatDirection[hat_position_to_string]), hat_description]
+            virtual_buttons: minidom.Element = container.getElementsByTagName(
+                "virtual-button"
             )
+
+            if not virtual_buttons:
+                # If we don't have virtual buttons we have no hats to process
+                continue
+
+            if len(virtual_buttons) != 1:
+                print("Not expected number of virtual button elements")
+                continue
+
+            attributes = [x for x in virtual_buttons[0].attributes.keys()]
+
+            for attribute in attributes:
+                hat_mappings.append(
+                    (
+                        Hat(hat_id, HatDirection[VIRTUAL_HAT_POSITIONS[attribute]]),
+                        container_description,
+                    )
+                )
+
+        return hat_mappings
+
+    def handle_hat_button_container(
+        self, hat_id, hat_containers: minidom.NodeList[minidom.Element]
+    ):
+        four_way_hat = 4
+
+        for container in hat_containers:
+            button_count = int(container.getAttribute("button-count"))
+
+            hat_positions = container.getElementsByTagName("action-set")
+
+            hat_mappings = []
+
+            # Iterate each ACTION_SET, for the HAT_BUTTONS
+            for hat_direction_no, position in enumerate(hat_positions, 1):
+                # Get the description node if exists
+                hat_description_node = position.getElementsByTagName("description")
+
+                hat_direction = hat_direction_no
+
+                if button_count == four_way_hat:
+                    hat_direction = hat_direction_no + (hat_direction_no - 1)
+
+                # If no node then continue
+                if not hat_description_node:
+                    continue
+
+                # What if multiple hat_description_nodes
+
+                hat_description = hat_description_node[0].getAttribute("description")
+
+                if not hat_description:
+                    # If we don't have a description then no point using the item
+                    continue
+
+                hat_position_to_string = HAT_POSITIONS[hat_direction]
+                hat_mappings.append(
+                    (Hat(hat_id, HatDirection[hat_position_to_string]), hat_description)
+                )
 
         return hat_mappings
 
 
 if __name__ == "__main__":
-    pass
+    pars = JoystickGremlinParser(
+        Path(
+            r"D:\Git Repos\joystick-diagrams\tests\data\joystick_gremlin\gremlin_pov_container_hat_buttons.xml"
+        )
+    )
+    # pars = JoystickGremlinParser(
+    #     Path(
+    #         r"D:\Git Repos\joystick-diagrams\tests\data\joystick_gremlin\gremlin_hat_virtual_buttons.xml"
+    #     )
+    # )
+
+    _logger.setLevel(logging.DEBUG)
+    data = pars.create_dictionary()
+    print(data)

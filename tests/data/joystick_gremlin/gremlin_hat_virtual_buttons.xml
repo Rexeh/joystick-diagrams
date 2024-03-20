@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<profile version="9">
+    <devices>
+        <device device-guid="{03F2F260-B49D-11EA-8001-444553540000}" label="" name="VPC Stick MT-50CM" type="joystick">
+            <mode name="Default">
+                <axis description="" id="1"/>
+                <axis description="" id="2"/>
+                <axis description="" id="3"/>
+                <button description="DESC1" id="1"/>
+                <button description="DESC2" id="2"/>
+     <hat description="The Hat Switch (HAT 1)" id="1">
+                <container type="basic">
+                    <action-set>
+                        <map-to-keyboard>
+                            <key extended="False" scan-code="57"/>
+                        </map-to-keyboard>
+
+                    </action-set>
+                    <!-- HAT 1 Directions 1, 3, 2 -->
+                    <description description="Desc 1"/>
+                    <virtual-button east="1" north="1" north-east="1"/>
+                </container>
+                <container type="basic">
+                    <action-set>
+                        <map-to-keyboard>
+                            <key extended="False" scan-code="28"/>
+                        </map-to-keyboard>
+                    </action-set>
+                    <!-- HAT 1 Directions 5 -->
+                    <virtual-button south-east="1"/>
+                </container>
+            </hat>
+            </mode>
+        </device>
+    </devices>
+    <settings>
+        <default-delay>0.05</default-delay>
+    </settings>
+    <plugins/>
+</profile>
