@@ -23,9 +23,11 @@ def data_root() -> Path:
 
 def plugin_data_root() -> Path:
     """Returns the user data path for storage of plugin data"""
-    if not Path.joinpath(data_root(), "plugins").is_dir():
-        create_directory(Path.joinpath(data_root(), "plugins"))
-    return Path.joinpath(data_root(), "plugins")
+
+    root = Path.joinpath(data_root(), "plugins")
+    if not root.is_dir():
+        create_directory(root)
+    return root
 
 
 def create_directory(directory) -> None:
