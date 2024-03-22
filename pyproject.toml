@@ -144,6 +144,7 @@ ignore = [
     "COM819",
     "ISC001",
     "ISC002",
+    "PLR2004"
 ]
 
 unfixable = ["B"]
