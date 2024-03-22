@@ -1,3 +1,4 @@
+import logging
 import xml.etree.ElementTree as eT
 from dataclasses import dataclass
 from pathlib import Path
@@ -6,6 +7,8 @@ from joystick_diagrams.input.axis import Axis, AxisDirection
 from joystick_diagrams.input.button import Button
 from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.profile_collection import ProfileCollection
+
+_logger = logging.getLogger(__name__)
 
 AXIS_TO_AXIS_TYPES = {
     "R-Axis X-": Axis(AxisDirection.RX),
@@ -36,14 +39,19 @@ class FS2020Parser:
         self.data = list()
 
     def run(self):
-        folders = Path(self.folder_path).iterdir()
+        folders = self.folder_path.iterdir()
+
+        _logger.debug(f"Folders detected {folders}")
 
         pc = ProfileCollection()
         pc.create_profile(default_profile_name)
 
         xml_files = check_folders(folders)
 
+        _logger.debug(f"XMLs detected {xml_files}")
+
         for xml in xml_files:
+            _logger.debug(f"Processing {xml}")
             process_xml_file(xml, pc)
 
         return pc
@@ -86,7 +94,11 @@ def process_device(device_xml: eT.Element, collection: ProfileCollection):
 
         # Update the command to prevent overwrite
         if existing_input and not control.modifiers:
-            existing_input.command = f"{existing_input.command} | {control.action}"
+            if existing_input.command:
+                existing_input.command = f"{existing_input.command} | {control.action}"
+            else:
+                existing_input.command = f"{control.action}"
+            continue
 
         # Handle modifiers being added to existing controls (where we have overlapping base)
         if existing_input and control.modifiers:
@@ -182,7 +194,11 @@ def split_action_name(name_key: str):
 
 
 def file_check(file):
+    import os
+
+    _logger.debug(f"File access: {os.stat(file).st_mode}")
     with open(file, "rb") as b:
+        _logger.debug("File opened")
         if b.read(5) == b"<?xml":
             return True
     return False
@@ -195,6 +211,7 @@ def check_folders(folders):
             continue
 
         for file in folder.iterdir():
+            _logger.debug(f"Processing file {file}")
             valid_files.append(file) if file_check(file) else None
 
     return valid_files
