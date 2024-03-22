@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as eT
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 from joystick_diagrams.input.axis import Axis, AxisDirection
@@ -30,13 +30,13 @@ HAT_DIR_TO_DIR = {
 default_profile_name = "Default"
 
 
-@dataclass
-class Parser:
-    path: str
-    data: list = field(init=False, default_factory=list)
+class FS2020Parser:
+    def __init__(self, folder_path):
+        self.folder_path = Path(folder_path)
+        self.data = list()
 
     def run(self):
-        folders = Path(self.path).iterdir()
+        folders = Path(self.folder_path).iterdir()
 
         pc = ProfileCollection()
         pc.create_profile(default_profile_name)
@@ -211,9 +211,4 @@ class Control:
 
 
 if __name__ == "__main__":
-    ps = Parser(
-        r"C:\Users\RCox\AppData\Local\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\SystemAppData\wgs\00090000038358E7_00000000000000000000000069F80140"
-    )
-    data = ps.run()
-
-    print(data)
+    pass
