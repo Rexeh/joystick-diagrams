@@ -156,7 +156,7 @@ class DCSWorldParser:
 
         _logger.info(f"Profiles to be processed {self.profiles_to_process}")
         for profile in self.profiles_to_process:
-            _logger.info(f"Processing {profile=}")
+            _logger.debug(f"Processing {profile=}")
             profile_object = collection.create_profile(profile_name=profile)
             self.fq_path = os.path.join(
                 self.path, CONFIG_DIR, INPUT_DIR, profile, JOYSTICK_DIR
@@ -169,7 +169,7 @@ class DCSWorldParser:
         return collection
 
     def process_profile_device(self, item: Path, profile: Profile_):
-        _logger.info(f"Processing {profile=} device {item=}")
+        _logger.debug(f"Processing {profile=} device {item=}")
         guid, name = (
             item.name[GUID_POSITION_SLICE],
             item.name[NAME_POSITION_SLICE],
