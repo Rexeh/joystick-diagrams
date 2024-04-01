@@ -1,6 +1,7 @@
 """Serves as a wrapper around Plugin Profiles, allowing customisation and restored state of profiles"""
 
 import logging
+import time
 from copy import deepcopy
 
 from joystick_diagrams.db import db_profile_parents, db_profiles
@@ -33,9 +34,33 @@ class ProfileWrapper:
         """Initalises the wrapper, applying the app settings on top of the profile object
 
         Results in a fully completed profile, and initalised ProfileWrapper with any relevant settings restored from DB"""
+
+        pt = time.perf_counter_ns()
         self.get_profile_settings()
         self.get_parents_for_profile()
+        self.apply_device_settings()
         self.inherit_parents_into_profile()
+        print(f"Wrapper init took {(time.perf_counter_ns()-pt)/1e+9}")
+
+    def apply_device_settings(self):
+        print(f"Applying device settings for {self.profile}")
+
+        # Hide Devices
+        filter_devices = [
+            "0d54fae0-d151-11e9-8001-444553540000",
+            "4ddcc6a0-3705-11ea-8001-444553540000",
+            "0d54fae0-d151-11e9-8001-444553540000",
+            "9026d510-cf53-11e9-8001-444553540000",
+            "b3f41ad0-33e8-11ea-8003-444553540000",
+        ]
+
+        self.profile.devices = {
+            g: o
+            for g, o in self.profile.devices.items()
+            if o.guid not in filter_devices
+        }
+
+        # Merge Devices
 
     def get_parents_for_profile(self):
         """Try get the parents for a given profile from persisted state"""
@@ -83,11 +108,9 @@ class ProfileWrapper:
 
         Uses original profile name, and origin as composite key
         """
-        profile_settings = db_profiles.get_profile(self.profile_key)
+        # profile_settings = db_profiles.get_profile(self.profile_key)
 
-        if profile_settings:
-            # TODO restore settings
-            pass
+        return ...
 
     @property
     def profile_name(self):
