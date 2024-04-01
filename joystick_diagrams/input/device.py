@@ -57,7 +57,7 @@ class Device_:  # noqa: N801
         """
 
         try:
-            return UUID(guid.strip()).__str__()
+            return str(UUID(guid.strip()))
         except ValueError as e:
             raise ValueError(f"GUID {guid} is not valid: {e}") from e
 
