@@ -7,7 +7,6 @@ diagrams/*.pdf
 *.ui
 *.bat
 debug.txt
-poetry.lock
 coverage.xml
 *.log
 *.svg.bkp
