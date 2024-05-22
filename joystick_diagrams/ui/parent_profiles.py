@@ -6,7 +6,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QListWidgetItem, QMainWindow
 
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.profile_wrapper import ProfileWrapper
+from joystick_diagrams.profile.profile_wrapper import ProfileWrapper
 from joystick_diagrams.ui.qt_designer import parent_profile_management_ui
 
 _logger = logging.getLogger(__name__)

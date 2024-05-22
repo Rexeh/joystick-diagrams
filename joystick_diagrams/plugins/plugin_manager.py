@@ -18,8 +18,8 @@ from types import ModuleType
 from dynaconf import ValidationError  # type: ignore
 
 from joystick_diagrams.exceptions import JoystickDiagramsError, PluginNotValidError
-from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.plugins.plugin_wrapper import PluginWrapper
 
 _logger = logging.getLogger(__name__)
 

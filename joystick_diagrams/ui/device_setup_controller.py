@@ -9,8 +9,8 @@ from joystick_diagrams.db.db_device_management import (
 )
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.export.export_device import ExportDevice
-from joystick_diagrams.profile_wrapper import ProfileWrapper
-from joystick_diagrams.template import Template
+from joystick_diagrams.profile.profile_wrapper import ProfileWrapper
+from joystick_diagrams.template.template import Template
 
 _logger = logging.getLogger(__name__)
 

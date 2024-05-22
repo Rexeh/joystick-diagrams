@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 
 from joystick_diagrams.input import device
 from joystick_diagrams.input.device import Device_
-from joystick_diagrams.profile_wrapper import ProfileWrapper
-from joystick_diagrams.template import Template
+from joystick_diagrams.profile.profile_wrapper import ProfileWrapper
+from joystick_diagrams.template.template import Template
 
 
 @dataclass

@@ -5,7 +5,7 @@ import time
 from copy import deepcopy
 
 from joystick_diagrams.db import db_profile_parents, db_profiles
-from joystick_diagrams.plugin_wrapper import PluginWrapper
+from joystick_diagrams.plugins.plugin_wrapper import PluginWrapper
 from joystick_diagrams.profile.profile import Profile_
 
 _logger = logging.getLogger(__name__)

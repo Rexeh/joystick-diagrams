@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from joystick_diagrams.exceptions import JoystickDiagramsError
-from joystick_diagrams.template import Template
+from joystick_diagrams.template.template import Template
 
 
 @pytest.fixture
