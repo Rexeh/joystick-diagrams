@@ -8,7 +8,7 @@ from joystick_diagrams.db.db_device_management import (
     remove_template_path_from_device,
 )
 from joystick_diagrams.exceptions import JoystickDiagramsError
-from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.export.export_device import ExportDevice
 from joystick_diagrams.profile_wrapper import ProfileWrapper
 from joystick_diagrams.template import Template
 

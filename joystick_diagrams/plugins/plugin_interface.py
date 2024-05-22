@@ -10,7 +10,7 @@ from joystick_diagrams.exceptions import (
     FileNotValidError,
     FileTypeInvalidError,
 )
-from joystick_diagrams.input.profile_collection import ProfileCollection
+from joystick_diagrams.profile.profile_collection import ProfileCollection
 
 _logger = logging.getLogger(__name__)
 

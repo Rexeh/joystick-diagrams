@@ -1,8 +1,8 @@
 import logging
 from pathlib import Path
 
-from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.profile.profile_collection import ProfileCollection
 
 from .config import settings
 

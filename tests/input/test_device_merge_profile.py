@@ -1,5 +1,5 @@
-from joystick_diagrams.input.button import Button
-from joystick_diagrams.input.profile import Profile_
+from joystick_diagrams.input.types.button import Button
+from joystick_diagrams.profile.profile import Profile_
 
 
 def test_merge_empty_profiles():

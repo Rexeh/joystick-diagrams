@@ -1,6 +1,6 @@
 import logging
 
-from joystick_diagrams.input.profile import Profile_
+from joystick_diagrams.profile.profile import Profile_
 
 _logger = logging.getLogger("__name__")
 

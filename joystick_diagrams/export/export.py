@@ -12,7 +12,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape, unescape
 
 from joystick_diagrams import utils
-from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.export.export_device import ExportDevice
 from joystick_diagrams.input.modifier import Modifier
 from joystick_diagrams.template import Template
 

@@ -2,8 +2,8 @@ import logging
 
 import pytest
 
-from joystick_diagrams.input.button import Button
 from joystick_diagrams.input.device import Device_
+from joystick_diagrams.input.types.button import Button
 
 # VALID_GUID = "666EC0A0-556B-11EE-8002-444553540000"
 

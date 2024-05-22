@@ -9,8 +9,8 @@ from pathlib import Path
 
 from joystick_diagrams.db import db_plugin_data
 from joystick_diagrams.exceptions import JoystickDiagramsError
-from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.profile.profile_collection import ProfileCollection
 
 _logger = logging.getLogger(__name__)
 

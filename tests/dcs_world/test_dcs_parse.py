@@ -1,9 +1,9 @@
 import unittest
 
 import joystick_diagrams.plugins.dcs_world_plugin.dcs_world as dcs
-from joystick_diagrams.input.axis import Axis
-from joystick_diagrams.input.button import Button
-from joystick_diagrams.input.hat import Hat
+from joystick_diagrams.input.types.axis import Axis
+from joystick_diagrams.input.types.button import Button
+from joystick_diagrams.input.types.hat import Hat
 
 
 class TestDCSParseTest(unittest.TestCase):

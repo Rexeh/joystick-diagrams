@@ -7,10 +7,11 @@ Not intended to be used directly, but via the Device class helper methods
 
 import logging
 
-from joystick_diagrams.input.axis import Axis, AxisSlider
-from joystick_diagrams.input.button import Button
-from joystick_diagrams.input.hat import Hat
 from joystick_diagrams.input.modifier import Modifier
+from joystick_diagrams.input.types.axis import Axis, AxisSlider
+from joystick_diagrams.input.types.button import Button
+from joystick_diagrams.input.types.control import JoystickDiagramControl
+from joystick_diagrams.input.types.hat import Hat
 
 _logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ CONTROL_TYPES = (Axis, Button, Hat, AxisSlider)
 
 
 class Input_:  # noqa: N801
-    def __init__(self, control: Axis | Button | Hat | AxisSlider, command: str) -> None:
+    def __init__(self, control: JoystickDiagramControl, command: str) -> None:
         self.input_control = control
         self.command = command
         self.modifiers: list[Modifier] = []

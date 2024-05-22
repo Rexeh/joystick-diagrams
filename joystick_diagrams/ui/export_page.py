@@ -12,8 +12,8 @@ from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db.db_device_management import (
     add_update_device_template_path,
 )
-from joystick_diagrams.export import export
-from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.export.export import export
+from joystick_diagrams.export.export_device import ExportDevice
 from joystick_diagrams.ui import main_window, ui_consts
 from joystick_diagrams.ui.device_setup import DeviceSetup
 from joystick_diagrams.ui.export_settings import ExportSettings

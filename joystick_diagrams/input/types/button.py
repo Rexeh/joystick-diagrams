@@ -2,9 +2,11 @@
 
 from dataclasses import dataclass
 
+from joystick_diagrams.input.types.control import JoystickDiagramControl
+
 
 @dataclass
-class Button:
+class Button(JoystickDiagramControl):
     id: int
 
     def __post_init__(self):

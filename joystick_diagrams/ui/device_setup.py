@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QTreeWidgetItem,
 )
 
-from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.export.export_device import ExportDevice
 from joystick_diagrams.ui import ui_consts
 from joystick_diagrams.ui.device_setup_controller import (
     get_export_devices,

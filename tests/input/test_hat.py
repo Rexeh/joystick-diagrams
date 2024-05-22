@@ -1,7 +1,7 @@
 #
 import pytest
 
-from joystick_diagrams.input.hat import Hat, HatDirection
+from joystick_diagrams.input.types.hat import Hat, HatDirection
 
 
 def test_hat_valid():

@@ -1,6 +1,6 @@
 import pytest
 
-from joystick_diagrams.input.button import Button
+from joystick_diagrams.input.types.button import Button
 
 
 def test_button_valid():

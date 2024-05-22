@@ -6,9 +6,11 @@ Handles AXIS and Axis Slider control types
 from dataclasses import dataclass
 from enum import Enum, auto
 
+from joystick_diagrams.input.types.control import JoystickDiagramControl
+
 
 @dataclass
-class Axis:
+class Axis(JoystickDiagramControl):
     id: "AxisDirection"
 
     def __post_init__(self):
@@ -31,7 +33,7 @@ class AxisDirection(Enum):
 
 
 @dataclass
-class AxisSlider:
+class AxisSlider(JoystickDiagramControl):
     id: int
 
     def __post_init__(self):

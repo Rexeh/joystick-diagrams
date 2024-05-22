@@ -13,9 +13,9 @@ from PySide6.QtWidgets import (
 )
 
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.input.axis import Axis, AxisSlider
-from joystick_diagrams.input.button import Button
-from joystick_diagrams.input.hat import Hat
+from joystick_diagrams.input.types.axis import Axis, AxisSlider
+from joystick_diagrams.input.types.button import Button
+from joystick_diagrams.input.types.hat import Hat
 from joystick_diagrams.profile_wrapper import ProfileWrapper
 from joystick_diagrams.ui import parent_profiles
 from joystick_diagrams.ui.qt_designer import configure_page_ui

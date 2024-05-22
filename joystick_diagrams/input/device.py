@@ -4,13 +4,13 @@
 """
 
 import logging
-from typing import Union
 from uuid import UUID
 
-from joystick_diagrams.input.axis import Axis, AxisSlider
-from joystick_diagrams.input.button import Button
-from joystick_diagrams.input.hat import Hat
 from joystick_diagrams.input.input import Input_
+from joystick_diagrams.input.types.axis import Axis, AxisSlider
+from joystick_diagrams.input.types.button import Button
+from joystick_diagrams.input.types.control import JoystickDiagramControl
+from joystick_diagrams.input.types.hat import Hat
 
 _logger = logging.getLogger("__name__")
 
@@ -61,7 +61,7 @@ class Device_:  # noqa: N801
         except ValueError as e:
             raise ValueError(f"GUID {guid} is not valid: {e}") from e
 
-    def resolve_type(self, control: Axis | Button | Hat | AxisSlider) -> str:
+    def resolve_type(self, control: JoystickDiagramControl) -> str:
         """Resolves a given input control to its corresponding dictionary key"""
         resolved_type = CLASS_MAP.get(type(control))
 
@@ -72,9 +72,7 @@ class Device_:  # noqa: N801
 
         return resolved_type
 
-    def create_input(
-        self, control: Union[Axis, Button, Hat, AxisSlider], command: str
-    ) -> None:
+    def create_input(self, control: JoystickDiagramControl, command: str) -> None:
         """Creates an input in the Device inputs dictionary where one does not exist.
 
         Where input already exists, the input command is updated
@@ -119,7 +117,7 @@ class Device_:  # noqa: N801
         return flattened_dict_
 
     def add_modifier_to_input(
-        self, control: Axis | Button | Hat | AxisSlider, modifier: set, command: str
+        self, control: JoystickDiagramControl, modifier: set, command: str
     ) -> None:
         """Adds a modifier to a respective control type supplied.
 

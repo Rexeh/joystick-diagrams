@@ -1,6 +1,6 @@
 import pytest
 
-from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
+from joystick_diagrams.input.types.axis import Axis, AxisDirection, AxisSlider
 
 # AXIS TESTS
 

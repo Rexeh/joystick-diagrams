@@ -3,9 +3,11 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 
+from joystick_diagrams.input.types.control import JoystickDiagramControl
+
 
 @dataclass
-class Hat:
+class Hat(JoystickDiagramControl):
     id: int
     direction: "HatDirection"
 

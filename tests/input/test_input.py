@@ -1,9 +1,9 @@
 import pytest
 
-from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
-from joystick_diagrams.input.button import Button
-from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.input import Input_
+from joystick_diagrams.input.types.axis import Axis, AxisDirection, AxisSlider
+from joystick_diagrams.input.types.button import Button
+from joystick_diagrams.input.types.hat import Hat, HatDirection
 
 
 def test_new_button_input_valid():

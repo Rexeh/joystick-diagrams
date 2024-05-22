@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytest
 
-from joystick_diagrams.export import (
+from joystick_diagrams.export.export import (
     TEMPLATE_DATING_KEY,
     TEMPLATE_NAMING_KEY,
     populate_template,
@@ -15,11 +15,11 @@ from joystick_diagrams.export import (
     replace_unused_keys,
     sanitize_string_for_svg,
 )
-from joystick_diagrams.input.axis import Axis, AxisDirection
-from joystick_diagrams.input.button import Button
 from joystick_diagrams.input.device import Device_
-from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.modifier import Modifier
+from joystick_diagrams.input.types.axis import Axis, AxisDirection
+from joystick_diagrams.input.types.button import Button
+from joystick_diagrams.input.types.hat import Hat, HatDirection
 
 # Unit Tests
 

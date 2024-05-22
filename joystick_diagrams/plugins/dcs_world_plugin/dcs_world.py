@@ -8,14 +8,14 @@ from pathlib import Path
 from ply import lex, yacc
 
 from joystick_diagrams.exceptions import JoystickDiagramsError
-from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
-from joystick_diagrams.input.button import Button  # type: ignore
 
 #################
 from joystick_diagrams.input.device import Device_
-from joystick_diagrams.input.hat import Hat, HatDirection
-from joystick_diagrams.input.profile import Profile_
-from joystick_diagrams.input.profile_collection import ProfileCollection
+from joystick_diagrams.input.types.axis import Axis, AxisDirection, AxisSlider
+from joystick_diagrams.input.types.button import Button  # type: ignore
+from joystick_diagrams.input.types.hat import Hat, HatDirection
+from joystick_diagrams.profile.profile import Profile_
+from joystick_diagrams.profile.profile_collection import ProfileCollection
 
 _logger = logging.getLogger(__name__)
 

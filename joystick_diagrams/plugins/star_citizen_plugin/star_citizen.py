@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import Union
 from xml.dom import minidom
 
-from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
-from joystick_diagrams.input.button import Button
-from joystick_diagrams.input.hat import Hat, HatDirection
-from joystick_diagrams.input.profile_collection import ProfileCollection
+from joystick_diagrams.input.types.axis import Axis, AxisDirection, AxisSlider
+from joystick_diagrams.input.types.button import Button
+from joystick_diagrams.input.types.hat import Hat, HatDirection
+from joystick_diagrams.profile.profile_collection import ProfileCollection
 
 _logger = logging.getLogger(__name__)
 
