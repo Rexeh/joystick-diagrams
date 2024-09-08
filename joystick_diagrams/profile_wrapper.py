@@ -53,8 +53,9 @@ class ProfileWrapper:
             _wrapper = [
                 x for x in _state.profile_wrappers if x.profile_key == parent_key
             ]
-            _logger.debug(f"Profiles fond {_wrapper}")
+            _logger.debug(f"Profiles found {_wrapper}")
             if _wrapper:
+                _logger.debug(f"Appending profile to parents {_wrapper}")
                 self.parents.append(_wrapper[0])
 
     def update_parents_for_profile(self, parents: list["ProfileWrapper"]):
@@ -70,9 +71,12 @@ class ProfileWrapper:
         _parents = self.parents  # Reverse list to flip obj >> parent
         _parents.reverse()
 
+        _logger.debug(f"Parents are {_parents}")
+
         merged_profiles = deepcopy(self.original_profile)
 
-        for parent in _parents[:1]:
+        for parent in _parents:
+            _logger.debug(f"Processing {parent=}")
             obj = deepcopy(parent.original_profile)
             merged_profiles = merged_profiles.merge_profiles(obj)
 

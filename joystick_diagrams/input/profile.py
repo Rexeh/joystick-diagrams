@@ -43,21 +43,30 @@ class Profile_:  # noqa: N801
         src_profile = deepcopy(self)
 
         for guid, device in profile.devices.items():
+            _logger.debug(f"Handling {guid=} and {device=}")
             if guid not in src_profile.devices:
                 # If the device is not in the current profile, deepcopy the entire device
+                _logger.debug(f"Device {guid=} not found so adding whole device")
                 src_profile.devices[guid] = deepcopy(device)
             else:
                 # If the device exists in the current profile, merge inputs
                 existing_device = src_profile.devices[guid]
+                _logger.debug(f"Existing device is {existing_device=}")
                 for input_type, inputs in device.inputs.items():
+                    _logger.debug(f"Processing {input_type} and {inputs=}")
                     for input_key, input_ in inputs.items():
+                        _logger.debug(f"Processing {input_key} and {input_=}")
                         if input_key not in existing_device.inputs[input_type]:
+                            _logger.debug(
+                                f"Input key not found, so adding whole key {input_key=}"
+                            )
                             # If the input is not in the existing device, deepcopy the input
                             existing_device.inputs[input_type][input_key] = deepcopy(
                                 input_
                             )
                         else:
                             # If the input exists, merge modifiers
+                            _logger.debug(f"Input key exists {input_key=}")
                             existing_input = existing_device.inputs[input_type][
                                 input_key
                             ]
