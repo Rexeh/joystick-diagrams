@@ -46,6 +46,9 @@ class Device_:  # noqa: N801
             INPUT_HAT_KEY: {},
         }
 
+    def __repr__(self) -> str:
+        return f"{self.guid[:8]} | {self.name}"
+
     @staticmethod
     def validate_guid(guid: str) -> str:
         """Validates a guid using UUID library, returning str representation
@@ -54,7 +57,7 @@ class Device_:  # noqa: N801
         """
 
         try:
-            return UUID(guid.strip()).__str__()
+            return str(UUID(guid.strip()))
         except ValueError as e:
             raise ValueError(f"GUID {guid} is not valid: {e}") from e
 

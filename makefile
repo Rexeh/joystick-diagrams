@@ -27,3 +27,9 @@ make-version:
 ui:
 	@echo "Generating UI python"
 	@cmd /C ".\scripts\convert_ui.bat"
+
+pub:
+	@poetry publish
+
+pub-test:
+	@poetry publish -r test-pypi

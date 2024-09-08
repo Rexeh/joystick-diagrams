@@ -15,11 +15,10 @@ qt-material = "^2.14"
 dynaconf = "^3.2.4"
 pyside6 = "^6.6.1"
 semver = "^3.0.2"
-pre-commit = "^3.6.0"
 qtawesome = "^1.3.0"
 
 [tool.poetry.group.dev.dependencies]
-pyuic5-tool = "^0.0.1"
+pre-commit = "^3.6.0"
 pytest = "^7.2.0"
 pytest-qt = "^4.2.0"
 pytest-cov = "^4.0.0"
@@ -45,7 +44,7 @@ dynamic = ["version", "readme"]
 packages  = ["joystick_diagrams"]
 
 [tool.setuptools.dynamic]
-version = { attr = "joystick_diagrams.version.VERSION" }
+version = {file = "version.txt"}
 readme = { file = "readme.md" }
 
 [tool.distutils.build_exe]

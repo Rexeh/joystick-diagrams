@@ -28,7 +28,7 @@ class Input_:  # noqa: N801
         return f"{self.input_control} - {self.command} - {self.modifiers}"
 
     def __str__(self):
-        mod_to_string = [x.__str__() for x in self.modifiers]
+        mod_to_string = [str(x) for x in self.modifiers]
         return f"{self.command} - {str(mod_to_string)}"
 
     def __post_init__(self):
