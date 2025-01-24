@@ -482,6 +482,10 @@ class PluginExecutor(QRunnable):
         self.signals.started.emit()
 
         for plugin in self.plugin_wrappers:
+            if not plugin.enabled:  # Added to prevent processing disabled plugins
+                _logger.info(f"Plugin: {plugin.name} was disabled - skipping")
+                continue
+
             process_state = plugin.process()
 
             if not process_state:
