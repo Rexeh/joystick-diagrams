@@ -772,7 +772,7 @@ def find_control_type(control_input: str) -> Union[Axis, Button, Hat, AxisSlider
 
     # Rotation Axis
     if "rot" in control_input:
-        axis_string = control_input[3].upper()
+        axis_string = f"R{control_input[3].upper()}"
         return Axis(AxisDirection[axis_string])
 
     # Slider Controls
