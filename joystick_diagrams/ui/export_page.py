@@ -97,7 +97,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
     def select_template(self):
         _file = QFileDialog.getOpenFileName(
             self,
-            caption="Select an SVG file to use as a template",
+            caption=f"Select an SVG file to use as a template - {self.device_widget.treeWidget.currentItem().text(0)}",
             filter=("SVG Files (*.svg)"),
             dir=os.path.join(install_root(), "templates"),
         )
