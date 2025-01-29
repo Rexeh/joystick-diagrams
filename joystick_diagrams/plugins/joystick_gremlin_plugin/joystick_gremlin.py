@@ -8,6 +8,7 @@ from xml.dom import minidom
 
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.input.button import Button
+from joystick_diagrams.input.axis import Axis, AxisDirection
 from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
@@ -91,10 +92,10 @@ class JoystickGremlinParser:
 
                     match bind_type:
                         case "axis":
-                            # TODO Axis Support requires DILL AxisMap to infer from identifiers to types
-                            _logger.info(
-                                f"AXIS binds not currently supported for {bind_type} {bind_identifier}"
-                            )
+                            if bind_description:
+                                _device_obj.create_input(
+                                    Axis(self.map_axis(bind_identifier)), bind_description
+                                )
                         case "button":
                             if bind_description:
                                 _device_obj.create_input(
@@ -112,6 +113,24 @@ class JoystickGremlinParser:
                             )
 
         return profile_collection
+
+    def map_axis(self, id):
+        match id:
+            case 1:
+                return AxisDirection.X
+            case 2:
+                return AxisDirection.Y
+            case 3:
+                return AxisDirection.Z
+            case 4:
+                return AxisDirection.RX
+            case 5:
+                return AxisDirection.RY
+            case 6:
+                return AxisDirection.RZ
+            case 7:
+                return AxisDirection.SLIDER
+
 
     def extract_hats(self, hat_node: minidom.Element) -> list[tuple[Hat, str]]:
         """Extract the hat positions for a given HAT node.
@@ -146,19 +165,21 @@ class JoystickGremlinParser:
         _logger.debug(f"Hat Containers: {len(filtered_hat_containers)}")
 
         if filtered_hat_containers:
-            hat_mappings = self.handle_hat_button_container(
-                hat_id, filtered_hat_containers
+            self.handle_hat_button_container(
+                hat_id, filtered_hat_containers, hat_mappings
             )
 
         if basic_containers:
-            hat_mappings = self.handle_virtual_button_container(hat_id, hat_containers)
+            self.handle_virtual_button_container(
+                hat_id, hat_containers, hat_mappings
+            )
 
+        _logger.debug(f"Hat Mappings: {hat_mappings}")
         return hat_mappings
 
     def handle_virtual_button_container(
-        self, hat_id, containers: minidom.NodeList[minidom.Element]
+        self, hat_id, containers: minidom.NodeList[minidom.Element], hat_mappings
     ):
-        hat_mappings = []
         for container in containers:
             # Check if we have a top level description
             container_description = (
@@ -178,7 +199,7 @@ class JoystickGremlinParser:
 
             # Skip processing if we have no descriptions
             if not container_description:
-                print("No point continuing")
+                _logger.debug(f"No point continuing")
                 continue
 
             virtual_buttons: minidom.Element = container.getElementsByTagName(
@@ -190,7 +211,7 @@ class JoystickGremlinParser:
                 continue
 
             if len(virtual_buttons) != 1:
-                print("Not expected number of virtual button elements")
+                _logger.debug(f"Not expected number of virtual button elements")
                 continue
 
             attributes = [x for x in virtual_buttons[0].attributes.keys()]
@@ -202,11 +223,10 @@ class JoystickGremlinParser:
                         container_description,
                     )
                 )
-
-        return hat_mappings
+        _logger.debug(f"Hat Mappings from Virtual Button: {hat_mappings}")
 
     def handle_hat_button_container(
-        self, hat_id, hat_containers: minidom.NodeList[minidom.Element]
+        self, hat_id, hat_containers: minidom.NodeList[minidom.Element], hat_mappings
     ):
         four_way_hat = 4
 
@@ -215,13 +235,14 @@ class JoystickGremlinParser:
 
             hat_positions = container.getElementsByTagName("action-set")
 
-            hat_mappings = []
+            _logger.debug(f"Hat Positions: {hat_positions}")
 
             # Iterate each ACTION_SET, for the HAT_BUTTONS
             for hat_direction_no, position in enumerate(hat_positions, 1):
                 # Get the description node if exists
                 hat_description_node = position.getElementsByTagName("description")
 
+                _logger.debug(f"Hat Description Node: {hat_description_node}")
                 hat_direction = hat_direction_no
 
                 if button_count == four_way_hat:
@@ -234,6 +255,7 @@ class JoystickGremlinParser:
                 # What if multiple hat_description_nodes
 
                 hat_description = hat_description_node[0].getAttribute("description")
+                _logger.debug(f"Hat Description: {hat_description}")
 
                 if not hat_description:
                     # If we don't have a description then no point using the item
@@ -244,7 +266,7 @@ class JoystickGremlinParser:
                     (Hat(hat_id, HatDirection[hat_position_to_string]), hat_description)
                 )
 
-        return hat_mappings
+        _logger.debug(f"Hat Mappings from Hat Button Container: {hat_mappings}")
 
 
 if __name__ == "__main__":
