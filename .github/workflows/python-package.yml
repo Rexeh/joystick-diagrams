@@ -32,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: py_package
-        path: ${{ github.workspace }}\build\exe.win-amd64-3.11
+        path: ${{ github.workspace }}/build/exe.win-amd64-3.11
