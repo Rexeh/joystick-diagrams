@@ -1,22 +1,18 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Python package
 
 on: workflow_dispatch
 
 jobs:
   build:
-
     runs-on: windows-latest
     strategy:
       matrix:
         python-version: [3.11]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4  # Updated to v4 for consistency
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -29,7 +25,8 @@ jobs:
       run: |
         make build-exe
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: py_package
         path: ${{ github.workspace }}/build/exe.win-amd64-3.11
+        if-no-files-found: error
