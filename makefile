@@ -16,7 +16,7 @@ lint:
 
 build-exe: make-version
 	@echo "Making Frozen Executable"
-	@python setup.py build
+	@poetry run python setup.py build
 	@echo "Creating Installer"
 	@cmd /C "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /Qp ./installer/config.iss
 
