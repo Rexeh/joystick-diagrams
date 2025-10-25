@@ -55,12 +55,14 @@ includes = [
     "joystick_diagrams.plugins.star_citizen_plugin",
     "joystick_diagrams.plugins.joystick_gremlin_plugin",
     "joystick_diagrams.plugins.fs2020_plugin",
+    "joystick_diagrams.plugins.il2_sturmovik_plugin",
 ]
 packages = [
     "joystick_diagrams.plugins.dcs_world_plugin",
     "joystick_diagrams.plugins.star_citizen_plugin",
     "joystick_diagrams.plugins.joystick_gremlin_plugin",
     "joystick_diagrams.plugins.fs2020_plugin",
+    "joystick_diagrams.plugins.il2_sturmovik_plugin",
 ]
 include_files = [
     "./img",
