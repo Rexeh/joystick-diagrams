@@ -1,0 +1,513 @@
+// Input map preset.
+// It is not recommended to change anything here,
+// but it is still possible on your own risk.
+ 
+&actions=action,command,invert|
+screenshot,                                       key_sysrq,                                        0| // Capture d'écran
+screenshot,                                       joy3_b41,                                         0|
+timepause,                                        key_p,                                            0| // Jeu en pause marche/arrêt
+timepause,                                        joy6_b6,                                          0|
+timefaster,                                       key_rbracket,                                     0| // Accélérer le jeu en mission
+timefaster,                                       joy6_b10,                                         0|
+timeslower,                                       key_lbracket,                                     0| // Décélérer le jeu en mission
+timeslower,                                       joy6_b11,                                         0|
+record,                                           key_lcontrol+key_r,                               0| // Enregistreur de vol
+fps_counter,                                      key_back,                                         0| // FPS counter toggle
+fps_counter,                                      joy5_b22,                                         0|
+escape,                                           key_escape,                                       0| // Menu Ech.
+escape,                                           joy3_b34,                                         0|
+lobby,                                            key_tab,                                          0| // Lobby
+lobby,                                            joy3_b30,                                         0|
+missionbriefing,                                  key_o,                                            0| // Montrer/cacher le briefing de la mission
+missionbriefing,                                  joy9_b36,                                         0|
+switchmap,                                        key_m,                                            0| // Changer le mode carte du jeu
+switchmap,                                        joy3_b31,                                         0|
+switchgauges,                                     key_i,                                            0| // Montrer/cacher l'aide de jeu
+aiminghelp,                                       key_rcontrol+key_i,                               0| // Aide à la visée
+chattoall,                                        key_return,                                       0| // Message chat à tous
+chattofriendly,                                   key_rcontrol+key_return,                          0| // Message chat à son camp
+hidehud,                                          key_h,                                            0| // Montrer/cacher lâ€™ATH complet
+hidehud,                                          joy3_b36,                                         0|
+commandmenu,                                      key_grave,                                        0| // Menu des ordres
+commandmenu,                                      joy3_b32,                                         0|
+ipdinc,                                           key_lshift+key_add,                               0| // +IPD correction for fixed IPD HMDs (directly shifts the VR image)
+ipddec,                                           key_lshift+key_numpadenter,                       0| // -IPD correction for fixed IPD HMDs (directly shifts the VR image)
+cam_reset,                                        joy3_b37,                                         0| // Réinitialiser caméra
+cam_ext_free_reset,                               key_c,                                            0| // Réinitialiser caméra libre externe
+cam_free_slow_mode,                               key_numpad0,                                      0| // Caméra libre â€“ mode ralenti
+cam_zoom,                                         ,                                                 0| // Zoom caméra
+cam_zoom,                                         mouse_axis_z,                                     0|
+cam_rotate_pitch,                                 key_numpad2/key_numpad8,                          0| // Rotation caméra haut/bas
+cam_rotate_pitch,                                 mouse_axis_y,                                     0|
+cam_rotate_yaw,                                   key_numpad6/key_numpad4,                          0| // Rotation caméra gauche/droite
+cam_rotate_yaw,                                   mouse_axis_x,                                     0|
+cam_rotate_ext_pitch,                             key_lshift+mouse_axis_y,                          0| // Caméra locale rotation haut/bas
+cam_rotate_ext_yaw,                               key_lshift+mouse_axis_x,                          0| // Caméra locale rotation gauche/droite
+cam_trans_fb,                                     key_w/key_s,                                      0| // Mouvement caméra libre avant/arrière
+cam_trans_fb,                                     mouse_b1+mouse_axis_y,                            0|
+cam_trans_fb,                                     joy9_axis_s,                                      1|
+cam_trans_lr,                                     key_d/key_a,                                      0| // Mouvement caméra libre gauche/droite
+cam_trans_lr,                                     mouse_b1+mouse_axis_x,                            0|
+cam_trans_lr,                                     joy9_axis_w,                                      0|
+cam_trans_ud,                                     key_r/key_f,                                      0| // Mouvement caméra libre haut/bas
+cam_trans_ud,                                     mouse_b1+mouse_axis_z,                            0|
+cam_switch_cockpitview_self,                      key_f1,                                           0| // Caméra: cockpit du joueur
+cam_switch_cockpitview_self,                      joy9_b35,                                         0|
+cam_switch_default_opposite,                      key_lcontrol+key_f12,                             0| // Caméra opérateur: ennemi
+cam_switch_default_order,                         key_f12,                                          0| // Caméra opérateur: ami
+cam_switch_ext_chase_allied_air,                  key_rshift+key_f8,                                0| // Caméra verrouillée: avion ami
+cam_switch_ext_chase_enemy_air,                   key_f8,                                           0| // Caméra verrouillée: avion ennemi
+cam_switch_ext_chase_enemy_air_danger,            key_rcontrol+key_f8,                              0| // Caméra verrouillée: proche de lâ€™avion
+cam_switch_ext_chase_allied_land,                 key_rshift+key_f7,                                0| // Caméra verrouillée: unité terrestre amie
+cam_switch_ext_chase_enemy_land,                  key_rcontrol+key_f7,                              0| // Caméra verrouillée: unité terrestre ennemie
+cam_switch_sight_target,                          key_lcontrol+key_f4,                              0| // Caméra: caméra de combat
+cam_switch_sight_target,                          key_f4,                                           0|
+cam_switch_sight_target,                          joy9_b20,                                         0|
+cam_switch_ext_free_self,                         key_f2,                                           0| // Caméra libre externe de lâ€™avion du joueur
+cam_switch_ext_free_self,                         joy9_b39,                                         0|
+cam_switch_ext_free_allied,                       key_lshift+key_f2,                                0| // Caméra libre externe des avions amis
+cam_switch_ext_free_allied,                       joy9_b37,                                         0|
+cam_switch_ext_free_enemy,                        key_lcontrol+key_f2,                              0| // Caméra libre externe des avions ennemis
+cam_switch_ext_free_land_all,                     key_f5,                                           0| // Caméra libre externe des unités terrestres
+cam_switch_ext_free_land_allied,                  key_lshift+key_f5,                                0| // Caméra libre externe des unités terrestres amies
+cam_switch_ext_free_land_enemy,                   key_lcontrol+key_f5,                              0| // Caméra libre externe des unités terrestres ennemis
+cam_switch_ext_free_bomb_all,                     key_f6,                                           0| // Caméra libre externe des bombes
+cam_switch_ext_free_bomb_all,                     joy9_b38,                                         0|
+cam_switch_ext_free_bomb_allied,                  key_lshift+key_f6,                                0| // Caméra libre externe des bombes amies
+cam_switch_ext_free_bomb_enemy,                   key_lcontrol+key_f6,                              0| // Caméra libre externe des bombes ennemies
+cam_switch_flyby_target,                          key_f3,                                           0| // Caméra: vue de passage
+cam_switch_flyby_target,                          joy9_b24,                                         0|
+cam_switch_free,                                  key_f11,                                          0| // Caméra: libre
+cam_switch_free,                                  joy9_b23,                                         0|
+cam_switch_gopro,                                 key_lmenu+key_f2,                                 0| // Basculer sur les caméras attachées
+cam_switch_track,                                 key_lcontrol+key_f1,                              0| // Caméra: piste
+cam_switch_head_free,                             key_lmenu+key_f1,                                 0| // Caméra: cockpit dissocié de la tête
+freelook,                                         ,                                                 0| // Vue libre
+freelook,                                         joy9_b22,                                         0|
+bc_head_zoom,                                     key_lshift+mouse_axis_z,                          0| // Tête du pilote: zoom
+bc_head_cfovi,                                    key_add,                                          0| // Tête du pilote: zoomer
+bc_head_cfovo,                                    key_subtract,                                     0| // Tête du pilote: dézoomer
+bc_head_cfovr,                                    key_multiply,                                     0| // Tête du pilote: réinitialiser le zoom
+bc_head_fov0,                                     key_rcontrol+key_decimal,                         0| // Quick zoom: minimum
+bc_head_fov1,                                     key_rcontrol+key_numpad1,                         0| // Quick zoom: level 1
+bc_head_fov2,                                     key_rcontrol+key_numpad2,                         0| // Quick zoom: level 2
+bc_head_fov3,                                     key_rcontrol+key_numpad3,                         0| // Quick zoom: level 3
+bc_head_fov4,                                     key_rcontrol+key_numpad0,                         0| // Quick zoom: maximum
+bc_head_fov4,                                     joy8_b10,                                         0|
+rb_zoom,                                          key_lshift+mouse_axis_z,                          0| // Changer zoom de la  tourelle véhicule
+rb_zoom,                                          key_add/key_subtract,                             0|
+rb_zoom,                                          mouse_axis_z,                                     0|
+mc_zoom,                                          key_lshift+mouse_axis_z,                          0| // Changer le zoom du véhicule
+mc_zoom,                                          key_rmenu+mouse_axis_z,                           0|
+mc_zoom,                                          key_add/key_subtract,                             0|
+bc_head_pitch,                                    mouse_axis_y,                                     0| // Incliner la tête du pilote verticalement
+bc_head_pitch,                                    mouse_axis_y+mouse_b1,                            0|
+bc_head_yaw,                                      mouse_axis_x,                                     0| // Tourner la tête du pilote horizontalement
+bc_head_yaw,                                      mouse_axis_x+mouse_b1,                            0|
+bc_head_yaw_wrapped,                              mouse_axis_x,                                     0| // Tourner la tête du mitrailleur horizontalement
+resethmd,                                         ,                                                 0| // Vue RV par défaut
+resethmd,                                         joy3_b37,                                         0|
+bc_head_cvmodes,                                  key_f9,                                           0| // Changer la méthode de contrôle de la tête du pilote: centré instantané - fixe instantané - additionnel instantané â€“ vue panoramique
+bc_head_cvss,                                     key_f10,                                          0| // Sauvegarder la position instantanée actuelle de la tête
+bc_head_cvss,                                     joy3_b4,                                          0|
+bc_head_cvc,                                      key_numpad5,                                      0| // Position instantanée de la tête du pilote: centrée
+bc_head_cvc,                                      joy3_b37,                                         0|
+bc_head_cvu,                                      ,                                                 0| // Modifier la position instantanée de la tête du pilote: supérieur
+bc_head_cvd,                                      key_numpad2,                                      0| // Modifier la position instantanée de la tête du pilote: inférieur
+bc_head_cva,                                      key_decimal,                                      0| // Modifier la position instantanée de la tête du pilote: personnalisé
+bc_head_cv0,                                      key_numpad8,                                      0| // Position instantanée de la tête du pilote: avant
+bc_head_cv45,                                     key_numpad9,                                      0| // Position instantanée de la tête du pilote: avant-droite
+bc_head_cv90,                                     key_numpad6,                                      0| // Position instantanée de la tête du pilote: droite
+bc_head_cv135,                                    key_numpad3,                                      0| // Position instantanée de la tête du pilote: arrière-droite
+bc_head_cv180,                                    key_numpad2,                                      0| // Position instantanée de la tête du pilote: arrière
+bc_head_cv225,                                    key_numpad1,                                      0| // Position instantanée de la tête du pilote: arrière-gauche
+bc_head_cv270,                                    key_numpad4,                                      0| // Position instantanée de la tête du pilote: gauche
+bc_head_cv315,                                    key_numpad7,                                      0| // Position instantanée de la tête du pilote: avant-gauche
+bc_head_pos,                                      key_lcontrol+mouse_axis_z,                        0| // Changer position vue de la tourelle véhicule
+bc_head_cvmf,                                     key_insert,                                       0| // Avancer la tête du pilote
+bc_head_cvmb,                                     key_home,                                         0| // Reculer la tête du pilote
+bc_head_cvml,                                     key_delete,                                       0| // Tourner la tête du pilote à gauche
+bc_head_cvmr,                                     key_end,                                          0| // Tourner la tête du pilote à droite
+bc_head_cvmu,                                     key_prior,                                        0| // Lever la tête du pilote
+bc_head_cvmd,                                     key_next,                                         0| // Baisser la tête du pilote
+cam_turret_pitch_center,                          key_numpad5,                                      0| // Tourelle, vue visée: réinitialiser vue verticale de visée
+cam_turret_pitch,                                 key_lshift+mouse_axis_y,                          0| // Tourelle, vue visée: vue verticale
+cam_turret_yaw_center,                            key_numpad5,                                      0| // Tourelle, vue visée: réinitialiser vue horizontale de visée
+cam_turret_yaw,                                   key_lshift+mouse_axis_x,                          0| // Tourelle, vue visée: vue horizontale
+cam_rotate_hf_yaw,                                mouse_axis_x,                                     0| // Vue libre à gauche/droite
+cam_rotate_hf_pitch,                              mouse_axis_y,                                     0| // Vue libre haut/bas
+cam_rotate_hf_yaw_center,                         key_numpad5,                                      0| // Centrer vue libre horizontalement
+cam_rotate_hf_pitch_center,                       key_numpad5,                                      0| // Center vue libre verticalement
+autopilot,                                        key_a,                                            0| // IA-pilote automatique marche/arrêt
+autopilot,                                        joy8_b91,                                         0|
+autolevelflight,                                  key_lshift+key_a,                                 0| // IA-pilote automatique vol en palier: marche/arrêt
+autolevelflight,                                  joy8_b89,                                         0|
+autolevelflight_to_left,                          key_lshift+key_z,                                 0| // IA-pilote automatique vol en palier: tourner à gauche
+autolevelflight_to_right,                         key_lshift+key_x,                                 0| // IA-pilote automatique vol en palier: tourner à droite
+rpc_pitch,                                        key_down/key_up,                                  0| // Contrôle de lâ€™avion: tangage
+rpc_pitch,                                        key_rshift+mouse_axis_y,                          0|
+rpc_pitch,                                        joy9_axis_y,                                      0|
+rpc_roll,                                         key_right/key_left,                               0| // Contrôle de lâ€™avion: roulis
+rpc_roll,                                         key_rshift+mouse_axis_x,                          0|
+rpc_roll,                                         joy9_axis_x,                                      0|
+rpc_yaw,                                          key_x/key_z,                                      0| // Contrôle de lâ€™avion: lacet
+rpc_yaw,                                          joy1_axis_z,                                      0|
+yaw_reset,                                        key_d,                                            0| // Contrôle de lâ€™avion: réinitialiser lacet
+rpc_yaw_trim,                                     key_lcontrol+key_x/key_lcontrol+key_z,            0| // Axe de trim du lacet
+yaw_trim_switch_left,                             key_lcontrol+key_z,                               0| // Bouton de trim du lacet : gauche
+yaw_trim_switch_right,                            key_lcontrol+key_x,                               0| // Bouton de trim du lacet : droit
+rpc_pitch_trim,                                   key_rcontrol+key_down/key_rcontrol+key_up,        0| // Pitch trim axis
+rpc_pitch_trim,                                   joy9_pov0_0/joy9_pov0_180,                        0|
+pitch_trim_switch_up,                             key_rcontrol+key_down,                            0| // Axe de trim de profondeur : levé
+pitch_trim_switch_dn,                             key_rcontrol+key_up,                              0| // Axe de trim de profondeur : baissé
+rpc_roll_trim,                                    key_rcontrol+key_right/key_rcontrol+key_left,     0| // Axe de trim de roulis
+rpc_roll_trim,                                    joy9_pov0_270/joy9_pov0_90,                       0|
+roll_trim_switch_left,                            key_rcontrol+key_left,                            0| // Bouton de trim de roulis : gauche
+roll_trim_switch_right,                           key_rcontrol+key_right,                           0| // Bouton de trim de roulis : droit
+trims_reset,                                      key_lcontrol+key_t,                               0| // Réinitialiser tous les compensateurs
+trims_reset,                                      joy9_b18,                                         0|
+rpc_adjustable_stabilizer,                        key_rcontrol+key_down/key_rcontrol+key_up,        0| // Axe du stabilisateur réglable
+adjustable_stabilizer_up,                         key_rcontrol+key_down,                            0| // Bouton du stabilisateur réglable : levé
+adjustable_stabilizer_dn,                         key_rcontrol+key_up,                              0| // Bouton du stabilisateur réglable : baissé
+flaps_up,                                         key_lshift+key_f,                                 0| // Volets relevés
+flaps_up,                                         joy2_b4,                                          0|
+flaps_dn,                                         key_f,                                            0| // Volets abaissés
+flaps_dn,                                         joy2_b5,                                          0|
+airbrakes,                                        key_rmenu+key_b,                                  0| // Aérofrein déployés/rétractés
+airbrakes_on,                                     ,                                                 0| // Aérofrein déployés
+airbrakes_on,                                     joy8_b23,                                         0|
+airbrakes_off,                                    ,                                                 0| // Aérofrein rétractés
+airbrakes_off,                                    joy8_b21,                                         0|
+attacksiren,                                      key_lmenu+key_s,                                  0| // Sirène dâ€™attaque marche/arrêt
+attacksiren_on,                                   ,                                                 0| // Sirène dâ€™attaque marche
+attacksiren_off,                                  ,                                                 0| // Sirène dâ€™attaque arrêt
+windscreenwipers,                                 key_lmenu+key_w,                                  0| // Essuie-glaces marche/arrêt
+divesystem,                                       key_lcontrol+key_d,                               0| // Dive recovery system: on/off
+gear,                                             key_g,                                            0| // Train d'atterrissage rentré/sorti
+gear_up,                                          key_lmenu+key_g,                                  0| // Train rentré
+gear_up,                                          joy2_b34,                                         0|
+gear_dn,                                          key_lcontrol+key_g,                               0| // Train sorti
+gear_dn,                                          joy2_b36,                                         0|
+tailwheel_lock,                                   key_lshift+key_g,                                 0| // Roulette de queue verrouillée/déverrouillée
+tailwheel_lock,                                   joy9_b5,                                          0|
+tailwheel_lock_on,                                ,                                                 0| // Roulette de queue verrouillée
+tailwheel_lock_off,                               ,                                                 0| // Roulette de queue déverrouillée
+rpc_wheel_brakes,                                 key_slash,                                        0| // Freins de roues
+rpc_wheel_brakes,                                 joy9_axis_p,                                      0|
+rpc_wheel_brakes_left,                            key_comma,                                        0| // Frein de la roue gauche
+rpc_wheel_brakes_left,                            joy1_axis_y,                                      1|
+rpc_wheel_brakes_right,                           key_period,                                       0| // Frein de la roue droite
+rpc_wheel_brakes_right,                           joy1_axis_x,                                      1|
+rpc_wheel_brakes_central,                         key_rwin+key_slash,                               0| // Frein de la roue avant/arrière
+parking_brakes,                                   key_lshift+key_slash,                             0| // Frein de parking serré/desserré
+parking_brakes,                                   joy2_b37,                                         0|
+parking_brakes_on,                                ,                                                 0| // Frein de parking serré
+parking_brakes_on,                                joy2_b40,                                         0|
+parking_brakes_off,                               ,                                                 0| // Frein de parking desserré
+parking_brakes_off,                               joy2_b39,                                         0|
+drogue_chute,                                     key_lmenu+key_d,                                  0| // Drogue chute: release/drop
+canopy_open_close,                                key_rmenu+key_c,                                  0| // Verrière ouverte/fermée
+canopy_open,                                      ,                                                 0| // Verrière ouverte
+canopy_open,                                      joy2_b10,                                         0|
+canopy_close,                                     ,                                                 0| // Verrière fermée
+canopy_close,                                     joy2_b9,                                          0|
+window_open_close,                                key_lwin+key_c,                                   0| // Window open/close (Ar 234 B-2: mirrors fold/unfold)
+landing_lights,                                   key_rshift+key_l,                                 0| // Phare dâ€™atterrissage marche/arrêt
+landing_lights,                                   joy8_b76,                                         0|
+navigation_lights,                                key_rcontrol+key_l,                               0| // Feux de navigation marche/arrêt
+navigation_lights,                                joy8_b65,                                         0|
+cockpit_lights,                                   key_l,                                            0| // Éclairage cockpit marche/arrêt
+cockpit_lights,                                   joy8_b72,                                         0|
+formation_lights,                                 key_rmenu+key_l,                                  0| // Formation lights on/off
+formation_lights,                                 joy8_b67,                                         0|
+autopilot_device,                                 key_rmenu+key_a,                                  0| // Autopilot on/off
+autopilot_yaw,                                    key_rmenu+key_y,                                  0| // Autopilot yaw channel on/off
+autopilot_pitch,                                  key_rmenu+key_p,                                  0| // Autopilot pitch channel on/off
+autopilot_roll,                                   key_rmenu+key_r,                                  0| // Autopilot roll channel on/off
+autopilot_yaw_trim_switch_left,                   key_rmenu+key_left,                               0| // Autopilot yaw channel trim: left
+autopilot_yaw_trim_switch_right,                  key_rmenu+key_right,                              0| // Autopilot yaw channel trim: right
+rpc_autopilot_pitch_trim,                         key_rmenu+key_down/key_rmenu+key_up,              0| // Autopilot pitch channel trim axis
+autopilot_pitch_trim_switch_up,                   key_rmenu+key_up,                                 0| // Autopilot pitch channel trim switch: up
+autopilot_pitch_trim_switch_dn,                   key_rmenu+key_down,                               0| // Autopilot pitch channel trim switch: down
+rpc_autopilot_roll_trim,                          key_rshift+key_right/key_rshift+key_left,         0| // Autopilot roll channel trim axis
+autopilot_roll_trim_switch_left,                  key_rshift+key_left,                              0| // Autopilot roll channel trim switch: left
+autopilot_roll_trim_switch_right,                 key_rshift+key_right,                             0| // Autopilot roll channel trim switch: right
+autopilot_trims_reset,                            key_rshift+key_a,                                 0| // Autopilot trim reset
+set_altimeter_reference_pressure,                 key_lmenu+key_a,                                  0| // Altimètre: niveau de la mer ou aérodrome
+contact_altimeter_target_altitude_increase,       key_rshift+key_k,                                 0| // Contact altimeter: target altitude increase
+contact_altimeter_target_altitude_decrease,       key_rcontrol+key_k,                               0| // Contact altimeter: target altitude decrease
+radio_volume_decrease,                            key_lmenu+key_subtract,                           0| // Radio receiver volume: decrease
+radio_volume_decrease,                            joy8_b82,                                         0|
+radio_volume_increase,                            key_lmenu+key_add,                                0| // Radio receiver volume: increase
+radio_volume_increase,                            joy8_b83,                                         0|
+switch_radio_channel,                             key_lmenu+key_c,                                  0| // Basculer sur le canal radio ( alliés / ennemis )
+switch_radio_channel,                             joy8_b84,                                         0|
+bc_eject,                                         joy3_b39,                                         0| // Éjection
+autoaltitudinalcorrection,                        key_lshift+key_m,                                 0| // Mélanges automatiques et contrôle des surpresseurs
+autoradiators,                                    key_lshift+key_r,                                 0| // Contrôle automatique des radiateurs
+autorpmlimiter,                                   key_lshift+key_n,                                 0| // Contrôle automatique du limiteur de régime
+all_engines_switch,                               key_e,                                            0| // Engager la procédure de démarrage moteur / Arrêt moteur
+all_engines_switch,                               joy2_b0,                                          0|
+all_engines_ignition,                             key_rshift+key_e,                                 0| // Engines ignition (Me 262)
+all_engines_ignition,                             joy2_b1,                                          0|
+engine_blip_switch,                               key_lshift+key_e,                                 0| // Interrupteur d'allumage
+engine_blip_switch,                               joy2_b11,                                         0|
+rpc_all_engines_throttles,                        key_equals/key_minus,                             0| // Manette des gaz
+rpc_all_engines_throttles,                        joy8_axis_w,                                      1|
+rpc_all_engines_mixtures,                         key_rmenu+key_equals/key_rmenu+key_minus,         0| // Richesse du carburant
+rpc_all_engines_mixtures,                         joy8_axis_q,                                      1|
+all_engines_superchargers,                        key_lshift+key_s,                                 0| // Étage du compresseur
+all_engines_superchargers,                        joy8_b55,                                         0|
+all_engines_superchargers_higher,                 ,                                                 0| // Augmentation du mode compresseur
+all_engines_superchargers_higher,                 joy8_b56,                                         0|
+all_engines_superchargers_lower,                  ,                                                 0| // Réduction du mode compresseur
+all_engines_superchargers_lower,                  joy8_b57,                                         0|
+rpc_all_engines_turbosuperchargers,               key_lshift+key_equals/key_lshift+key_minus,       0| // Engines turbosupercharger control
+rpc_all_engines_turbosuperchargers,               joy8_b31/joy8_b27,                                0|
+all_engines_boost,                                key_lshift+key_b,                                 0| // Suralimentation
+all_engines_boost,                                joy8_b49,                                         0|
+all_engines_boost_on,                             ,                                                 0| // Commuter suralimentation marche
+all_engines_boost_off,                            ,                                                 0| // Commuter suralimentation arrêt
+rpc_all_engines_props_pitch,                      key_rshift+key_equals/key_rshift+key_minus,       0| // Contrôle du pas dâ€™hélice
+rpc_all_engines_props_pitch,                      joy8_axis_s,                                      1|
+all_engines_props_pitch_control_mode,             key_rshift+key_p,                                 0| // Commuter mode pas dâ€™hélice: manuel/auto
+all_engines_props_pitch_increase,                 key_rshift+key_equals,                            0| // Pas dâ€™hélice: grand pas
+all_engines_props_pitch_decrease,                 key_rshift+key_minus,                             0| // Pas dâ€™hélice: petit pas
+all_engines_props_feathering,                     key_lcontrol+key_f,                               0| // Hélice en drapeau: marche/arrêt
+all_engines_props_feathering_on,                  ,                                                 0| // Hélice en drapeau: marche
+all_engines_props_feathering_off,                 ,                                                 0| // Hélice en drapeau: arrêt
+rpc_all_engines_oil_radiators_shutters,           key_rwin+key_equals/key_rwin+key_minus,           0| // Axe de contrôle des volets des radiateurs dâ€™huile
+rpc_all_engines_oil_radiators_shutters,           joy8_b5/joy8_b7,                                  0|
+all_engines_oil_radiators_control_mode,           key_rwin+key_r,                                   0| // Commuter les radiateurs dâ€™huile en mode: manuel/auto
+all_engines_oil_radiators_open,                   key_rwin+key_equals,                              0| // He-111, Bf-110 radiateur dâ€™huile : ouvrir dâ€™un cran
+all_engines_oil_radiators_open,                   joy8_b5,                                          0|
+all_engines_oil_radiators_close,                  key_rwin+key_minus,                               0| // He-111, Bf-110 radiateur dâ€™huile : fermer dâ€™un cran
+all_engines_oil_radiators_close,                  joy8_b7,                                          0|
+rpc_all_engines_water_radiators_shutters,         key_rcontrol+key_equals/key_rcontrol+key_minus,   0| // Axe de contrôle des volets des radiateurs dâ€™eau
+rpc_all_engines_water_radiators_shutters,         joy8_b6/joy8_b8,                                  0|
+all_engines_water_radiators_control_mode,         key_rcontrol+key_r,                               0| // Commuter les radiateurs dâ€™eau en mode: manuel/auto
+all_engines_water_radiators_open,                 key_rcontrol+key_equals,                          0| // Bf-109/110 et avions britanniques radiateur dâ€™eau : ouvert
+all_engines_water_radiators_open,                 joy8_b6,                                          0|
+all_engines_water_radiators_close,                key_rcontrol+key_minus,                           0| // Bf-109/110 et avions britanniques radiateur dâ€™eau : fermé
+all_engines_water_radiators_close,                joy8_b8,                                          0|
+rpc_all_engines_in_cowls_shutters,                key_lcontrol+key_equals/key_lcontrol+key_minus,   0| // Contrôle des volets dâ€™entrée dâ€™air du capot moteur (I-153, I-16, La-5, Ju 52), Engines upper cowl flaps (A-20), Engines intercooler shutter (P-47)
+rpc_all_engines_in_cowls_shutters,                joy8_b11/joy8_b13,                                0|
+rpc_all_engines_out_cowls_shutters,               key_lmenu+key_equals/key_lmenu+key_minus,         0| // Contrôle des volets de sortie dâ€™air du capot moteur (A-20, Fw 190 A-5, A-6, A-8, La-5, Ju 88, P-40, P-47, C-47, IAR80)
+rpc_all_engines_out_cowls_shutters,               joy8_b14/joy8_b12,                                0|
+all_engines_out_cowl_shutters_control_mode,       key_lmenu+key_o,                                  0| // Switch outlet cowl shutters control mode: manual/auto
+select_all_engines,                               key_0,                                            0| // Sélectionner tous les moteurs
+select_engine_1,                                  key_1,                                            0| // Sélectionner le moteur 1
+select_engine_2,                                  key_2,                                            0| // Sélectionner le moteur 2
+select_engine_3,                                  key_3,                                            0| // Sélectionner le moteur 3
+engine_1_switch,                                  key_rcontrol+key_1,                               0| // Engager la procédure de démarrage moteur 1 / Arrêt moteur
+engine_1_ignition,                                key_rshift+key_numpad1,                           0| // Engine 1 ignition (Me 262)
+engine_1_prop_feathering,                         ,                                                 0| // Moteur 1 pas dâ€™hélice: en drapeau: marche/arrêt
+engine_1_prop_feathering_on,                      ,                                                 0| // Moteur 1 pas dâ€™hélice: en drapeau: marche
+engine_1_prop_feathering_off,                     ,                                                 0| // Moteur 1 pas dâ€™hélice: en drapeau: arrêt
+rpc_engine_1_throttle,                            ,                                                 0| // Moteur 1 - Commande des gaz
+rpc_engine_1_altitude_throttle,                   key_lshift+key_equals/key_lshift+key_minus,       0| // Fokker D.VIIF commande moteur: Manette des gaz d'altitude
+rpc_engine_1_mixture,                             ,                                                 0| // Moteur 1 - Contrôle mélange
+engine_1_supercharger,                            ,                                                 0| // Moteur 1 - sélection du mode du compresseur
+rpc_engine_1_turbosupercharger,                   ,                                                 0| // Engine 1 turbosupercharger control
+engine_1_boost,                                   ,                                                 0| // Commuter suralimentation moteur 1: marche/arrêt
+engine_1_boost_on,                                ,                                                 0| // Commuter suralimentation moteur 1: marche
+engine_1_boost_off,                               ,                                                 0| // Commuter suralimentation moteur 1: arrêt
+rpc_engine_1_prop_pitch,                          ,                                                 0| // Moteur 1 - contrôle du pas dâ€™hélice
+engine_1_prop_pitch_control_mode,                 ,                                                 0| // Moteur 1 commuter mode pas dâ€™hélice: manuel/auto
+engine_1_prop_pitch_increase,                     ,                                                 0| // Moteur 1 pas dâ€™hélice: grand pas en manuel
+engine_1_prop_pitch_decrease,                     ,                                                 0| // Moteur 1 pas dâ€™hélice: petit pas en manuel
+rpc_engine_1_oil_radiator_shutter,                ,                                                 0| // Moteur 1 - Contrôle des volets du radiateur dâ€™huile
+rpc_engine_1_water_radiator_shutter,              ,                                                 0| // Moteur 1 - Contrôle des volets du radiateur dâ€™eau
+rpc_engine_1_in_cowl_shutter,                     ,                                                 0| // Moteur 1 - Contrôle des volets dâ€™entrée dâ€™air du capot
+rpc_engine_1_out_cowl_shutter,                    ,                                                 0| // Moteur 1 - Contrôle des volets de sortie dâ€™air du capot
+engine_2_switch,                                  key_rcontrol+key_2,                               0| // Engager la procédure de démarrage moteur 2 / Arrêt moteur
+engine_2_ignition,                                key_rshift+key_numpad2,                           0| // Engine 2 ignition (Me 262)
+engine_2_prop_feathering,                         ,                                                 0| // Moteur 2 pas dâ€™hélice: en drapeau: marche/arrêt
+engine_2_prop_feathering_on,                      ,                                                 0| // Moteur 2 pas dâ€™hélice: en drapeau: marche
+engine_2_prop_feathering_off,                     ,                                                 0| // Moteur 2 pas dâ€™hélice: en drapeau: arrêt
+rpc_engine_2_throttle,                            ,                                                 0| // Moteur 2 - Commande des gaz
+rpc_engine_2_mixture,                             ,                                                 0| // Moteur 2 - Contrôle mélange
+engine_2_supercharger,                            ,                                                 0| // Moteur 2 - sélection du mode du compresseur
+rpc_engine_2_turbosupercharger,                   ,                                                 0| // Engine 2 turbosupercharger control
+engine_2_boost,                                   ,                                                 0| // Commuter suralimentation moteur 2: marche/arrêt
+engine_2_boost_on,                                ,                                                 0| // Commuter suralimentation moteur 2: marche
+engine_2_boost_off,                               ,                                                 0| // Commuter suralimentation moteur 2: arrêt
+rpc_engine_2_prop_pitch,                          ,                                                 0| // Moteur 2 - contrôle du pas dâ€™hélice
+engine_2_prop_pitch_control_mode,                 ,                                                 0| // Moteur 2 commuter mode pas dâ€™hélice: manuel/auto
+engine_2_prop_pitch_increase,                     ,                                                 0| // Moteur 2 pas dâ€™hélice: grand pas en manuel
+engine_2_prop_pitch_decrease,                     ,                                                 0| // Moteur 2 pas dâ€™hélice: petit pas en manuel
+rpc_engine_2_oil_radiator_shutter,                ,                                                 0| // Moteur 2 - Contrôle des volets du radiateur dâ€™huile
+rpc_engine_2_water_radiator_shutter,              ,                                                 0| // Moteur 2 - Contrôle des volets du radiateur dâ€™eau
+rpc_engine_2_in_cowl_shutter,                     ,                                                 0| // Moteur 2 - Contrôle des volets dâ€™entrée dâ€™air du capot
+rpc_engine_2_out_cowl_shutter,                    ,                                                 0| // Moteur 2 - Contrôle des volets de sortie dâ€™air du capot
+engine_3_switch,                                  key_rcontrol+key_3,                               0| // Engager la procédure de démarrage moteur 3 / Arrêt moteur
+rpc_engine_3_throttle,                            ,                                                 0| // Moteur 3 - Commande des gaz
+rpc_engine_3_mixture,                             ,                                                 0| // Moteur 3 - Contrôle mélange
+rpc_engine_3_oil_radiator_shutter,                ,                                                 0| // Moteur 3 - Contrôle des volets du radiateur dâ€™huile
+rpc_engine_3_in_cowl_shutter,                     ,                                                 0| // Moteur 3 - Contrôle des volets dâ€™entrée dâ€™air du capot
+engine_interconnect_prop,                         key_lshift+key_i,                                 0| // Interconnect throttle and prop controls on/off
+engine_interconnect_turbo,                        key_lmenu+key_i,                                  0| // Interconnect throttle and turbo controls on/off
+engine_interconnect_turbo,                        joy8_b25,                                         0|
+jet_boosters,                                     key_r,                                            0| // Jet boosters
+jettison_jet_boosters,                            key_lshift+key_d,                                 0| // Jettison jet boosters
+jettison_jet_boosters,                            joy2_b21,                                         0|
+select_fuel_selector,                             key_rshift+key_s,                                 0| // Switch to the next fuel selector
+turn_fuel_selector,                               key_lcontrol+key_s,                               0| // Turn chosen fuel selector
+select_fuel_pump,                                 key_lshift+key_p,                                 0| // Switch to the next fuel pump
+switch_fuel_pump,                                 key_lcontrol+key_p,                               0| // Switch chosen fuel pump
+fuel_dumping,                                     key_rshift+key_d,                                 0| // Fuel dumping
+jettison_fueltank,                                key_rshift+key_f,                                 0| // Auxiliary fuel tank jettison
+switch_fuel_indicator,                            key_rshift+key_i,                                 0| // Switch fuel indicator
+switch_fuel_indicator,                            joy2_b3,                                          0|
+toggle_refuel,                                    key_rcontrol+key_f,                               0| // Démarrage/arrêt du ravitaillement d'essence (à l'intérieur de la zone de service)
+all_guns_fire,                                    key_space,                                        0| // Tirer avec toutes les armes
+all_guns_fire,                                    joy9_b3,                                          0|
+weapon_group_1_fire,                              key_rmenu+key_space,                              0| // Faire feu avec le groupe dâ€™armes 1
+weapon_group_1_fire,                              joy9_b15,                                         0|
+weapon_group_2_fire,                              key_lmenu+key_space,                              0| // Faire feu avec le groupe dâ€™armes 2
+weapon_group_2_fire,                              joy9_b17,                                         0|
+weapon_group_3_fire,                              key_rcontrol+key_space,                           0| // Faire feu avec le groupe dâ€™armes 3
+weapon_group_3_fire,                              joy9_b14,                                         0|
+cam_switch_bombaim,                               key_v,                                            0| // Viseur de bombardement
+cam_switch_bombaim,                               joy9_b30,                                         0|
+cam_switch_visor,                                 key_lshift+key_v,                                 0| // Nestle to the visor / Dive bomb sight
+throw_bombs_mode,                                 key_lwin+key_b,                                   0| // Sélectionner le nombre de bombes larguées
+throw_bombs_mode,                                 joy8_b100,                                        0|
+throw_bombs_delay,                                key_lcontrol+key_b,                               0| // Intervalle de largage des bombes
+throw_bombs_delay,                                joy8_b103,                                        0|
+throw_bombs_command,                              key_b,                                            0| // Larguer les bombes, aiguiller générateur de fumée
+throw_bombs_command,                              joy9_b19,                                         0|
+launch_rockets_mode,                              key_lwin+key_r,                                   0| // Nombre de roquettes tirées
+launch_rockets_mode,                              joy8_b97,                                         0|
+launch_rockets_command,                           key_r,                                            0| // Tirer les roquettes
+launch_rockets_command,                           joy9_b40,                                         0|
+jettison_stores_command,                          key_lshift+key_d,                                 0| // Jettison Stores (CG-4A hook/unhook tow rope, C-47 unhook tow rope, Ju 87 D-5 landing gear jettison)
+jettison_stores_command,                          joy2_b21,                                         0|
+bombdoors_toggle,                                 key_n,                                            0| // Ouvrir/Fermer soute(s) à bombes (IAR80 bomb release system switch, Li-2 side door)
+bombdoors_open,                                   ,                                                 0| // Ouvrir soute(s) à bombes
+bombdoors_open,                                   joy9_b31,                                         0|
+bombdoors_close,                                  ,                                                 0| // Fermer soute(s) à bombes
+bombdoors_close,                                  joy9_b33,                                         0|
+bombsafety_toggle,                                key_lwin+key_s,                                   0| // Armer/désarmer les bombes
+bombsafety_on,                                    ,                                                 0| // Armer les bombes
+bombsafety_on,                                    joy9_b32,                                         0|
+bombsafety_off,                                   ,                                                 0| // Désarmer les bombes
+bombsafety_off,                                   joy9_b34,                                         0|
+all_guns_reload,                                  key_lmenu+key_r,                                  0| // Recharger toutes les armes
+all_guns_reload,                                  mouse_b2,                                         0|
+all_guns_reload,                                  joy9_b0,                                          0|
+bc_gun0,                                          key_lcontrol+key_grave,                           0| // Dégainer le pistolet lance-fusées
+bc_gun0,                                          joy3_b0,                                          0|
+bc_gun1,                                          key_lcontrol+key_1,                               0| // Fusée rouge
+bc_gun1,                                          joy3_b1,                                          0|
+bc_gun2,                                          key_lcontrol+key_2,                               0| // Fusée verte
+bc_gun2,                                          joy3_b2,                                          0|
+bc_gun3,                                          key_lcontrol+key_3,                               0| // Fusée blanche
+bc_gun3,                                          joy3_b3,                                          0|
+bc_gun4,                                          key_lcontrol+key_4,                               0| // Pistolet personnel
+bc_gun5,                                          key_lcontrol+key_5,                               0| // Jumelle
+bc_gun5,                                          joy3_b4,                                          0|
+bc_gunfire,                                       key_lcontrol+key_space,                           0| // Tirer avec lâ€™arme personnelle / pistolet à fusées
+bc_gunfire,                                       mouse_b0,                                         0|
+switchpilot,                                      key_lcontrol+key_c,                               0| // Basculer vers le prochain poste de combat disponible
+tc_guard,                                         key_lshift+key_c,                                 0| // Changer la position de tir
+switchgunpos0,                                    key_rshift+key_0,                                 0| // Switch to default position
+switchgunpos1,                                    key_rshift+key_1,                                 0| // Switch to 1st firing point
+switchgunpos2,                                    key_rshift+key_2,                                 0| // Switch to 2nd firing point
+switchgunpos3,                                    key_rshift+key_3,                                 0| // Switch to 3rd firing point
+switchgunpos4,                                    key_rshift+key_4,                                 0| // Switch to 4th firing point
+switchgunpos5,                                    key_rshift+key_5,                                 0| // Switch to 5th firing point
+switchgunpos6,                                    key_rshift+key_6,                                 0| // Switch to 6th firing point
+switchgunpos7,                                    key_rshift+key_7,                                 0| // Switch to 7th firing point
+switchgunpos8,                                    key_rshift+key_8,                                 0| // Switch to 8th firing point
+switchgunpos9,                                    key_rshift+key_9,                                 0| // Switch to 9th firing point
+tc_aiming,                                        key_t,                                            0| // Turret: take/leave control
+cam_switch_turret,                                key_lshift+key_t,                                 0| // Tourelle: se coller contre le viseur
+tc_fire,                                          mouse_b0,                                         0| // Fire primary turret guns
+tc_fire_secondary,                                mouse_b1,                                         0| // Fire secondary turret guns
+tc_reload,                                        key_lmenu+key_r,                                  0| // Recharger lâ€™armement de tourelle
+tc_reload,                                        mouse_b2,                                         0|
+gunsight_filter,                                  key_lmenu+key_f,                                  0| // Pare soleil monté
+gunsight_adjustment,                              key_rmenu+key_f,                                  0| // Position du viseur
+gunsight_mode,                                    key_lmenu+key_m,                                  0| // Gunsight mode switcher
+gs_distance,                                      key_rmenu+key_semicolon/key_rmenu+key_period,     0| // Ajustement de la hausse du réticule de visée / Viseur : vitesse du vent
+gs_yaw,                                           key_rmenu+key_slash/key_rmenu+key_comma,          0| // Ajustement de la dérive du réticule de visée
+gs_reset,                                         key_rmenu+key_apostrophe,                         0| // Remize à zéro du réticule de visée
+bs_wind_direction_left,                           key_rmenu+key_comma,                              0| // Viseur : direction du vent - gauche
+bs_wind_direction_right,                          key_rmenu+key_slash,                              0| // Viseur : direction du vent - droite
+tc_visor_pitch,                                   key_rshift+key_semicolon/key_rshift+key_period,   0| // Réglage du réticule de visée verticale / Viseur : hauteur cible
+tc_visor_yaw,                                     key_rshift+key_slash/key_rshift+key_comma,        0| // Réglage du réticule de visée horizontale / Viseur : vitesse réelle de l'avion
+tc_visor_reset,                                   key_rshift+key_apostrophe,                        0| // Réinitialiser le réticule de visée
+tc_switchgun,                                     key_rmenu+key_g,                                  0| // Sélection de la munition
+ai_turret_act_by_yourself,                        key_rmenu+key_1,                                  0| // Mitrailleurs: Feu à volonté
+ai_turret_back_fire,                              key_rmenu+key_2,                                  0| // Mitrailleurs: Tirs de riposte
+ai_turret_cease_fire,                             key_rmenu+key_3,                                  0| // Mitrailleurs: Cesser le feu
+ai_turret_cease_heavy_fire,                       key_rmenu+key_4,                                  0| // Mitrailleurs: Cesser les tirs dâ€™armes lourdes
+ai_turret_attack_balloons,                        key_rmenu+key_5,                                  0| // Mitrailleurs: Attaquer les ballons
+ai_turret_attack_ground,                          key_rmenu+key_6,                                  0| // Mitrailleurs: Attaquer cible terrestre
+ai_turret_short_distance,                         key_rmenu+key_7,                                  0| // Mitrailleurs: Attaque à courte distance
+ai_turret_normal_distance,                        key_rmenu+key_8,                                  0| // Mitrailleurs: Attaque à distance normale
+ai_turret_medium_distance,                        key_rmenu+key_9,                                  0| // Mitrailleurs: Attaque à longue distance
+toggle_rearm,                                     key_rcontrol+key_a,                               0| // Démarrage/arrêt du réarmement (à l'intérieur de la zone de service)
+bc_signal_stay_here,                              key_lcontrol+key_0,                               0| // Maintenir la position et attendre
+bc_signal_attack_nearest_air_target,              key_lmenu+key_1,                                  0| // Attaquer la cible aérienne la plus proche
+bc_signal_attack_nearest_ground_target,           key_lmenu+key_2,                                  0| // Attaquer la cible terrestre la plus proche
+bc_signal_back_to_mission,                        key_lmenu+key_3,                                  0| // Poursuivre la mission
+bc_signal_do_like_me,                             key_lmenu+key_4,                                  0| // Faites comme moi (copiez mes actions)
+bc_signal_formation_column,                       key_lcontrol+key_6,                               0| // Formation en colonne
+bc_signal_formation_left_arrow,                   key_lcontrol+key_7,                               0| // Formation échelon gauche
+bc_signal_formation_right_arrow,                  key_lcontrol+key_8,                               0| // Formation échelon droit
+bc_signal_formation_v,                            key_lcontrol+key_9,                               0| // Formation en V
+bc_signal_hold_formation,                         key_lmenu+key_5,                                  0| // Couvrez-moi
+bc_signal_patrol,                                 key_lmenu+key_6,                                  0| // Patrouiller la zone
+bc_signal_patrol_air,                             key_lmenu+key_7,                                  0| // Patrouiller pour intercepter des cibles aériennes ennemies
+bc_signal_patrol_ground,                          key_lmenu+key_8,                                  0| // Patrouiller pour intercepter des cibles terrestres ennemies
+bc_signal_return_to_base,                         key_lmenu+key_0,                                  0| // Retournez à la base
+bc_signal_attack,                                 key_lshift+key_1,                                 0| // Gestuelle pilote: Regarder devant vous !
+bc_signal_denote_enemy,                           key_lshift+key_2,                                 0| // Gestuelle pilote: Ok !
+bc_signal_flap_to_head,                           key_lshift+key_3,                                 0| // Gestuelle pilote: Détruire !
+vc_gas,                                           key_up/key_down,                                  0| // Accélération/freinage du véhicule
+vc_turn,                                          key_right/key_left,                               0| // Virage du véhicule
+vc_gearup,                                        key_x,                                            0| // Gear limiter switch up
+vc_geardown,                                      key_z,                                            0| // Gear limiter switch down
+gunsight_power,                                   key_lmenu+key_l,                                  0| // Gunsight power toggle
+tc_aim_x,                                         key_d/key_a,                                      0| // Turret control: horizontal (direct mode)
+tc_aim_y,                                         key_w/key_s,                                      0| // Turret control: vertical (direct mode)
+rb_pitch,                                         mouse_axis_y,                                     0| // inprb_pitch
+rb_yaw,                                           mouse_axis_x,                                     0| // inprb_yaw
+mc_pitch,                                         mouse_axis_y,                                     0| // inpmc_pitch
+mc_yaw,                                           mouse_axis_x,                                     0| // inpmc_yaw
+mc_pitch_free,                                    mouse_axis_y+mouse_b1,                            0| // inpmc_pitch_free
+mc_yaw_free,                                      mouse_axis_x+mouse_b1,                            0| // inpmc_yaw_free
+vc_engine_switch,                                 key_e,                                            0| // Engager la procédure de démarrage moteur / Arrêt moteur
+vc_brake,                                         key_space,                                        0| // inpvc_brake
+cam_switch_mc_far,                                key_f4,                                           0| // inpcam_switch_mc_far
+cam_switch_mc_close,                              key_f1,                                           0| // inpcam_switch_mc_close
+ext_action1,                                      key_lwin+key_1,                                   0| // inpext_action1
+ext_action1,                                      key_rwin+key_1,                                   0|
+ext_action2,                                      key_lwin+key_2,                                   0| // inpext_action2
+ext_action2,                                      key_rwin+key_2,                                   0|
+ext_action3,                                      key_lwin+key_3,                                   0| // inpext_action3
+ext_action3,                                      key_rwin+key_3,                                   0|
+ext_action4,                                      key_lwin+key_4,                                   0| // inpext_action4
+ext_action4,                                      key_rwin+key_4,                                   0|
+ext_action5,                                      key_lwin+key_5,                                   0| // inpext_action5
+ext_action5,                                      key_rwin+key_5,                                   0|
+ext_action6,                                      key_lwin+key_6,                                   0| // inpext_action6
+ext_action6,                                      key_rwin+key_6,                                   0|
+ext_action7,                                      key_lwin+key_7,                                   0| // inpext_action7
+ext_action7,                                      key_rwin+key_7,                                   0|
+ext_action8,                                      key_lwin+key_8,                                   0| // inpext_action8
+ext_action8,                                      key_rwin+key_8,                                   0|
+ext_action9,                                      key_lwin+key_9,                                   0| // inpext_action9
+ext_action9,                                      key_rwin+key_9,                                   0|
+ext_action0,                                      key_lwin+key_0,                                   0| // inpext_action0
+ext_action0,                                      key_rwin+key_0,                                   0|
+cam_rotate_gopro_yaw,                             mouse_axis_x,                                     0| // inpcam_rotate_gopro_yaw
+cam_rotate_gopro_yaw_center,                      key_numpad5,                                      0| // inpcam_rotate_gopro_yaw_center
+gui_mouse_x,                                      mouse_axis_x,                                     0| // Interface graphique: axe X de la souris
+gui_mouse_y,                                      mouse_axis_y,                                     0| // Interface graphique: axe Y de la souris
+gui_mouse_z,                                      mouse_axis_z,                                     0| // Interface graphique: Molette de la souris
+gui_mouse_lb,                                     mouse_b0,                                         0| // Interface graphique: bouton gauche de la souris
+gui_mouse_rb,                                     mouse_b1,                                         0| // Interface graphique: bouton droit de la souris
+gui_mouse_mb,                                     mouse_b2,                                         0| // Interface graphique: bouton central de la souris
