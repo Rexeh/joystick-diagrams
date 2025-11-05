@@ -29,7 +29,9 @@ def test_comprehensive_french_descriptions():
     total_inputs = 0
 
     for profile_name, profile in profile_collection.profiles.items():
-        assert len(profile.devices) > 0, f"Profile '{profile_name}' should have at least one device"
+        assert (
+            len(profile.devices) > 0
+        ), f"Profile '{profile_name}' should have at least one device"
 
         for device_guid, device in profile.devices.items():
             for input_type, inputs in device.inputs.items():
@@ -39,7 +41,9 @@ def test_comprehensive_french_descriptions():
                     control = input_obj.input_control
 
                     # Verify control has identifier
-                    assert hasattr(control, 'identifier'), f"Control should have identifier for command '{command}'"
+                    assert hasattr(
+                        control, "identifier"
+                    ), f"Control should have identifier for command '{command}'"
 
                     # Check if command contains French description (has special characters or known French words)
                     is_french = any(
@@ -71,7 +75,9 @@ def test_comprehensive_french_descriptions():
     assert total_inputs > 0, "Should have parsed at least one input"
 
     # Verify French descriptions are present
-    assert french_count > 0, "Should have at least some French descriptions in the test data"
+    assert (
+        french_count > 0
+    ), "Should have at least some French descriptions in the test data"
 
     # Verify encoding is correct (no double-encoded UTF-8 artifacts)
     for profile_name, profile in profile_collection.profiles.items():
@@ -79,8 +85,12 @@ def test_comprehensive_french_descriptions():
             for input_type, inputs in device.inputs.items():
                 for input_obj in inputs.values():
                     command = input_obj.command
-                    assert "â€™" not in command, f"Command should not contain double-encoded UTF-8: {command}"
-                    assert "dâ€™" not in command, f"Command should not contain malformed apostrophes: {command}"
+                    assert (
+                        "â€™" not in command
+                    ), f"Command should not contain double-encoded UTF-8: {command}"
+                    assert (
+                        "dâ€™" not in command
+                    ), f"Command should not contain malformed apostrophes: {command}"
 
 
 if __name__ == "__main__":
