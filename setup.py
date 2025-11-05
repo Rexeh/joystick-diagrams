@@ -11,7 +11,7 @@ executables = [
         base=BASE,
         target_name=TARGET_NAME,
         copyright="Robert Cox - joystick-diagrams.com",
-        icon="./img/logo.ico",
+        icon="./img/logo",
     )
 ]
 

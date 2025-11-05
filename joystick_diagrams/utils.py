@@ -11,8 +11,10 @@ JOYSTICK_DIAGRAMS_DATA_DIR = "Joystick Diagrams"
 def data_root() -> Path:
     """Returns the user data path for storage of data"""
 
-    root = Path.joinpath(
-        Path().home(), "AppData", "Roaming", JOYSTICK_DIAGRAMS_DATA_DIR
+    root = (
+        Path.joinpath(Path().home(), "AppData", "Roaming", JOYSTICK_DIAGRAMS_DATA_DIR)
+        if sys.platform == "win32"
+        else Path.joinpath(Path().home(), ".local", "share", JOYSTICK_DIAGRAMS_DATA_DIR)
     )
 
     if not root.exists():

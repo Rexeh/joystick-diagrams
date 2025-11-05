@@ -429,7 +429,7 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         worker.signals.started.connect(self.update_run_button_on_start)
         worker.signals.finished.connect(self.calculate_total_profile_count)
         worker.signals.finished.connect(self.update_run_button_on_finish)
-        worker.signals.finished.connect(self.profileCollectionChange.emit)
+        worker.signals.finished.connect(self.profileCollectionChange)
         worker.signals.processed.connect(self.update_plugin_execute_state)
         worker.signals.process_error.connect(self.update_plugin_error_state)
         self.threadPool.start(worker)
