@@ -57,7 +57,7 @@ class PluginWrapper:
             self.set_ready(path_set)
             return path_set
         except Exception as e:  # Bare except required to handle error types
-            _logger.error(e)
+            _logger.error(f"Set path failed for plugin {self.plugin.name}", exc_info=e)
             self.set_ready(False)
             self.push_error(str(e))
 

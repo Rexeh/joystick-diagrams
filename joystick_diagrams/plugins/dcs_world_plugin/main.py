@@ -30,7 +30,8 @@ class ParserPlugin(PluginInterface):
             self.path = path
             self.save_plugin_state()
 
-        except Exception:
+        except Exception as e:
+            _logger.error("Exception occured with DCS World:", exc_info=e)
             return False
 
         return True
