@@ -2,6 +2,7 @@ import logging
 
 import qtawesome as qta
 from PySide6.QtCore import QSize, Qt, Slot
+from PySide6.QtWidgets import QTreeWidgetItem
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -56,6 +57,9 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.viewBindsProfileList.setProperty("class", "view-binds-list")
 
         self.viewBindsProfileList.setIconSize(QSize(25, 25))
+
+        # Register callback for profile updates
+        self.appState.register_profile_update_callback(self.refresh_profiles)
 
         # UI Setup
         self.device_header = QTreeWidgetItem()
@@ -187,6 +191,18 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
                     modifier_node.setText(1, modifier_obj.command)
 
             self.viewBindsTreeWidget.addTopLevelItem(device_root)
+
+    @Slot()
+    def refresh_profiles(self):
+        """Refresh the profile lists when profiles are updated"""
+        _logger.info("Refreshing profiles in configure page")
+        _logger.info(f"AppState has {len(self.appState.profile_wrappers)} profile wrappers")
+        for i, wrapper in enumerate(self.appState.profile_wrappers):
+            _logger.info(f"  Wrapper {i}: {wrapper.profile_name} from {wrapper.profile_origin.name}")
+        self.initialise_available_profiles()
+        self.initialise_customise_binds()
+        _logger.info(f"Profile dropdown now has {self.viewBindsProfileList.count()} items")
+        _logger.info("Profile refresh completed")
 
     @Slot()
     def handle_clicked_profile(self, item):
