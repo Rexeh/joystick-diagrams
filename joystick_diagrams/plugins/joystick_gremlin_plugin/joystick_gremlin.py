@@ -7,7 +7,9 @@ from pathlib import Path
 from xml.dom import minidom
 
 from joystick_diagrams.exceptions import JoystickDiagramsError
+from joystick_diagrams.input.axis import Axis, AxisDirection
 from joystick_diagrams.input.button import Button
+from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.hat import Hat, HatDirection
 from joystick_diagrams.input.profile_collection import ProfileCollection
 
@@ -22,6 +24,16 @@ HAT_POSITIONS = {
     6: "DL",
     7: "L",
     8: "UL",
+}
+
+AXIS_ID_MAP = {
+    1: AxisDirection.X,
+    2: AxisDirection.Y,
+    3: AxisDirection.Z,
+    4: AxisDirection.RX,
+    5: AxisDirection.RY,
+    6: AxisDirection.RZ,
+    7: AxisDirection.SLIDER,
 }
 
 VIRTUAL_HAT_POSITIONS = {
@@ -69,49 +81,146 @@ class JoystickGremlinParser:
         # Get all the modes
         modes = self.file.getElementsByTagName("mode")
 
+        # Track inheritance per (device_guid, mode_name) -> parent_mode_name
+        # Inheritance is defined per-device in Joystick Gremlin XML
+        inherit_map: dict[tuple[str, str], str] = {}
+
         for mode in modes:
+            mode_name = mode.getAttribute("name")
+            inherit = mode.getAttribute("inherit")
+
             # Create a profile for the mode using NAME
-            _active_profile = profile_collection.create_profile(
-                mode.getAttribute("name")
-            )
+            _active_profile = profile_collection.create_profile(mode_name)
 
             # Create DEVICE from PARENT node
             _device_guid = mode.parentNode.getAttribute("device-guid")
             _device_name = mode.parentNode.getAttribute("name")
+
+            if inherit:
+                normalized_guid = Device_.validate_guid(_device_guid)
+                inherit_map[(normalized_guid, mode_name.lower())] = inherit.lower()
             _device_obj = _active_profile.add_device(_device_guid, _device_name)
 
-            # Iterate each AXIS / Button
-            bindings = mode.childNodes
-
-            for bind in bindings:
+            # Process each binding element (axis/button/hat)
+            for bind in mode.childNodes:
                 if bind.nodeType == bind.ELEMENT_NODE:
-                    bind_type = bind.tagName
-                    bind_description = bind.getAttribute("description")
-                    bind_identifier = int(bind.getAttribute("id"))
+                    self._process_bind(_device_obj, bind, _device_guid)
 
-                    match bind_type:
-                        case "axis":
-                            # TODO Axis Support requires DILL AxisMap to infer from identifiers to types
-                            _logger.info(
-                                f"AXIS binds not currently supported for {bind_type} {bind_identifier}"
-                            )
-                        case "button":
-                            if bind_description:
-                                _device_obj.create_input(
-                                    Button(bind_identifier), bind_description
-                                )
-                        case "hat":
-                            hats = self.extract_hats(bind)
-
-                            if hats:
-                                for hat_control, hat_action in hats:
-                                    _device_obj.create_input(hat_control, hat_action)
-                        case _:
-                            _logger.warning(
-                                f"Unknown bind type ({bind_type}) detected while processing {_device_guid}"
-                            )
+        # Resolve mode inheritance
+        self._resolve_inheritance(profile_collection, inherit_map)
 
         return profile_collection
+
+    def _process_bind(
+        self, device_obj: Device_, bind: minidom.Element, device_guid: str
+    ) -> None:
+        """Process a single binding element (axis, button, or hat)."""
+        bind_type = bind.tagName
+        bind_description = bind.getAttribute("description")
+        bind_identifier = int(bind.getAttribute("id"))
+
+        match bind_type:
+            case "axis":
+                axis_direction = AXIS_ID_MAP.get(bind_identifier)
+                if axis_direction and bind_description:
+                    device_obj.create_input(Axis(axis_direction), bind_description)
+                elif not axis_direction:
+                    _logger.warning(
+                        f"Unknown axis ID {bind_identifier} for device {device_guid}"
+                    )
+            case "button":
+                if bind_description:
+                    device_obj.create_input(Button(bind_identifier), bind_description)
+            case "hat":
+                for hat_control, hat_action in self.extract_hats(bind):
+                    device_obj.create_input(hat_control, hat_action)
+            case _:
+                _logger.warning(
+                    f"Unknown bind type ({bind_type}) detected while processing {device_guid}"
+                )
+
+    def _resolve_inheritance(
+        self,
+        profile_collection: ProfileCollection,
+        inherit_map: dict[tuple[str, str], str],
+    ) -> None:
+        """Resolve mode inheritance per-device.
+
+        Inheritance in Joystick Gremlin is per (device, mode) pair. For each
+        inherited device-mode, parent bindings are added to the child where
+        the child does not already have a binding for that input.
+        """
+        resolved: set[tuple[str, str]] = set()
+        for key in inherit_map:
+            self._resolve_device_inheritance(
+                key, profile_collection, inherit_map, resolved
+            )
+
+    def _resolve_device_inheritance(
+        self,
+        key: tuple[str, str],
+        profile_collection: ProfileCollection,
+        inherit_map: dict[tuple[str, str], str],
+        resolved: set[tuple[str, str]],
+    ) -> None:
+        """Resolve inheritance for a single (device_guid, mode_name) pair."""
+        if key in resolved:
+            return
+
+        device_guid, child_mode = key
+        parent_mode = inherit_map.get(key)
+        if parent_mode is None or parent_mode == child_mode:
+            if parent_mode == child_mode:
+                _logger.warning(
+                    f"Mode '{child_mode}' inherits from itself on device {device_guid}, skipping"
+                )
+            resolved.add(key)
+            return
+
+        # Resolve parent first if it also inherits on this device
+        parent_key = (device_guid, parent_mode)
+        if parent_key in inherit_map and parent_key not in resolved:
+            self._resolve_device_inheritance(
+                parent_key, profile_collection, inherit_map, resolved
+            )
+
+        self._merge_parent_into_child(
+            profile_collection, device_guid, parent_mode, child_mode
+        )
+        resolved.add(key)
+
+    def _merge_parent_into_child(
+        self,
+        profile_collection: ProfileCollection,
+        device_guid: str,
+        parent_mode: str,
+        child_mode: str,
+    ) -> None:
+        """Copy parent device inputs into child device where child has no binding."""
+        parent_profile = profile_collection.get_profile(parent_mode)
+        child_profile = profile_collection.get_profile(child_mode)
+
+        if not parent_profile or not child_profile:
+            return
+
+        parent_device = parent_profile.get_device(device_guid)
+        if not parent_device:
+            return
+
+        child_device = child_profile.get_device(device_guid)
+        if not child_device:
+            child_device = child_profile.add_device(device_guid, parent_device.name)
+
+        for input_type, inputs in parent_device.get_inputs().items():
+            for input_key, input_obj in inputs.items():
+                if child_device.get_input(input_type, input_key) is None:
+                    child_device.create_input(
+                        input_obj.input_control, input_obj.command
+                    )
+
+        _logger.debug(
+            f"Inherited '{parent_mode}' into '{child_mode}' for device {device_guid}"
+        )
 
     def extract_hats(self, hat_node: minidom.Element) -> list[tuple[Hat, str]]:
         """Extract the hat positions for a given HAT node.
@@ -245,20 +354,3 @@ class JoystickGremlinParser:
                 )
 
         return hat_mappings
-
-
-if __name__ == "__main__":
-    pars = JoystickGremlinParser(
-        Path(
-            r"D:\Git Repos\joystick-diagrams\tests\data\joystick_gremlin\gremlin_pov_container_hat_buttons.xml"
-        )
-    )
-    # pars = JoystickGremlinParser(
-    #     Path(
-    #         r"D:\Git Repos\joystick-diagrams\tests\data\joystick_gremlin\gremlin_hat_virtual_buttons.xml"
-    #     )
-    # )
-
-    _logger.setLevel(logging.DEBUG)
-    data = pars.create_dictionary()
-    print(data)
