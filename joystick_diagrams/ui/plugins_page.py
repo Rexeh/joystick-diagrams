@@ -210,12 +210,10 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         button.setProperty("class", "ready-button")
 
         if state:
-            button.setIcon(
-                qta.icon("fa5s.check-circle", color="green", background="white")
-            )
+            button.setIcon(qta.icon("fa5s.check-circle", color="#34D399"))
             return button
 
-        button.setIcon(qta.icon("fa5s.times-circle", color="red"))
+        button.setIcon(qta.icon("fa5s.times-circle", color="#EF4444"))
         return button
 
     def populate_available_plugin_list(self):

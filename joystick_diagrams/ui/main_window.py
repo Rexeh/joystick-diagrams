@@ -102,20 +102,21 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
 
         # TODO move this out into styles
 
-        self.setupSectionButton.setIcon(
-            qta.icon("fa5s.cog", color="black", color_active="white")
-        )
-        self.setupSectionButton.setToolTip("Manage plugins")
-        self.setupSectionButton.setIconSize(QSize(32, 32))
-        self.setupSectionButton.setProperty("class", "nav-button left")
+        nav_icon_size = QSize(24, 24)
 
+        self.setup_icon_default = qta.icon("fa5s.cog", color="#9AA0A6")
+        self.setup_icon_active = qta.icon("fa5s.cog", color="white")
+        self.setupSectionButton.setIcon(self.setup_icon_default)
+        self.setupSectionButton.setToolTip("Manage plugins")
+        self.setupSectionButton.setIconSize(nav_icon_size)
+        self.setupSectionButton.setProperty("class", "nav-button left")
         self.setupSectionButton.setCheckable(True)
 
-        # Customise Menu  Controls
-        self.customiseSectionButton.setIcon(
-            qta.icon("fa5s.tools", color="black", color_active="white")
-        )
-        self.customiseSectionButton.setIconSize(QSize(32, 32))
+        # Customise Menu Controls
+        self.customise_icon_default = qta.icon("fa5s.tools", color="#9AA0A6")
+        self.customise_icon_active = qta.icon("fa5s.tools", color="white")
+        self.customiseSectionButton.setIcon(self.customise_icon_default)
+        self.customiseSectionButton.setIconSize(nav_icon_size)
         self.customiseSectionButton.setToolTip(
             "Setup your profiles, and customise your binds"
         )
@@ -123,10 +124,10 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.customiseSectionButton.setCheckable(True)
 
         # Export Menu Controls
-        self.exportSectionButton.setIcon(
-            qta.icon("fa5s.file-export", color="black", color_active="white")
-        )
-        self.exportSectionButton.setIconSize(QSize(32, 32))
+        self.export_icon_default = qta.icon("fa5s.file-export", color="#9AA0A6")
+        self.export_icon_active = qta.icon("fa5s.file-export", color="white")
+        self.exportSectionButton.setIcon(self.export_icon_default)
+        self.exportSectionButton.setIconSize(nav_icon_size)
         self.exportSectionButton.setToolTip("Export your profiles to diagrams")
         self.exportSectionButton.setProperty("class", "nav-button right")
         self.exportSectionButton.setCheckable(True)
@@ -181,8 +182,23 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
     def update_menus_from_profile_count(self, data: int):
         self.enable_additional_menus() if data > 0 else self.disable_additional_menus()
 
+    def _update_nav_icons(self, active: str):
+        """Update nav button icons to show white when active, gray when inactive."""
+        self.setupSectionButton.setIcon(
+            self.setup_icon_active if active == "setup" else self.setup_icon_default
+        )
+        self.customiseSectionButton.setIcon(
+            self.customise_icon_active
+            if active == "customise"
+            else self.customise_icon_default
+        )
+        self.exportSectionButton.setIcon(
+            self.export_icon_active if active == "export" else self.export_icon_default
+        )
+
     def load_setting_widget(self):
         self.setupSectionButton.setChecked(True)
+        self._update_nav_icons("setup")
 
         if self.window_content:
             self.window_content.hide()
@@ -195,6 +211,7 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
 
     def load_customise_page(self):
         self.customiseSectionButton.setChecked(True)
+        self._update_nav_icons("customise")
         if self.window_content:
             self.window_content.hide()
         self.window_content = configure_page.configurePage()
@@ -203,6 +220,7 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
 
     def load_export_page(self):
         self.exportSectionButton.setChecked(True)
+        self._update_nav_icons("export")
         if self.window_content:
             self.window_content.hide()
         self.window_content = export_page.ExportPage()

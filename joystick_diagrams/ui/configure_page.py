@@ -84,7 +84,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         # Icons
         self.device_icon = qta.icon(
             "fa5s.gamepad",
-            color="#120303",
+            color="#9AA0A6",
         )
 
         self.initialise_available_profiles()
