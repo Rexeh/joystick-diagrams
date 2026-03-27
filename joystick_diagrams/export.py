@@ -116,7 +116,7 @@ def replace_input_modifier_id_key(
     """Replaces instances where a particular Modifier key has been used, either with an overall ID, or with specific ID/Value combinations"""
     # Handle INPUT_KEY_MODIFIER_X
     search = re.compile(rf"\b{input_key}_Modifier_{modifier_number}\b", re.IGNORECASE)
-    replacement = f"{modifier.modifiers} - {modifier.command}"
+    replacement = str(modifier)
 
     data = re.sub(search, sanitize_string_for_svg(replacement), data)
 
@@ -124,7 +124,7 @@ def replace_input_modifier_id_key(
     search = re.compile(
         rf"\b{input_key}_Modifier_{modifier_number}_Key\b", re.IGNORECASE
     )
-    replacement = f"{modifier.modifiers}"
+    replacement = "+".join(modifier.modifiers)
     data = re.sub(search, sanitize_string_for_svg(replacement), data)
 
     # INPUT_KEY_Modifier_1_ACTION

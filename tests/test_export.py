@@ -134,9 +134,9 @@ def test_replace_specific_modifier_identifier():
         test_case = [
             (
                 f"{control}_modifier_{mod_id}",
-                f"{modifier.modifiers} - {modifier.command}",
+                str(modifier),
             ),
-            (f"{control}_modifier_{mod_id}_key", f"{modifier.modifiers}"),
+            (f"{control}_modifier_{mod_id}_key", "+".join(modifier.modifiers)),
             (f"{control}_modifier_{mod_id}_action", f"{modifier.command}"),
         ]
 
@@ -145,6 +145,32 @@ def test_replace_specific_modifier_identifier():
             expected_string = f'<testData>STRING="ABC">{expected}<testData>'
             rep = replace_input_modifier_id_key(control, mod_id, modifier, test_string)
             assert rep == expected_string
+
+
+def test_replace_specific_modifier_identifier_joystick_button():
+    """Test that joystick button modifiers (e.g. JOY_BTN3) are formatted correctly, not as Python set repr"""
+    controls = [
+        ("BUTTON_1", 1, Modifier({"JOY_BTN3"}, "Fire Weapon")),
+        ("BUTTON_5", 1, Modifier({"JOY_BTN3", "LAlt"}, "Alt Fire")),
+    ]
+
+    for control, mod_id, modifier in controls:
+        test_case = [
+            (
+                f"{control}_modifier_{mod_id}",
+                str(modifier),
+            ),
+            (f"{control}_modifier_{mod_id}_key", "+".join(modifier.modifiers)),
+            (f"{control}_modifier_{mod_id}_action", f"{modifier.command}"),
+        ]
+
+        for case, expected in test_case:
+            test_string = f'<testData>STRING="ABC">{case}<testData>'
+            expected_string = f'<testData>STRING="ABC">{expected}<testData>'
+            rep = replace_input_modifier_id_key(control, mod_id, modifier, test_string)
+            assert rep == expected_string
+            # Verify no Python set notation in output
+            assert "{'" not in rep, f"Python set notation found in output: {rep}"
 
 
 def test_replace_input_all_modifiers():
