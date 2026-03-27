@@ -361,13 +361,10 @@ class IL2Parser:
             return None
 
         binding_parts = line.split("|", 1)  # Split only on first |
-        binding_part = binding_parts[0] + "|"  # Keep only the part before |, add | back
-
-        if not binding_part.endswith("|"):
-            return None
+        binding_part = binding_parts[0]  # Keep only the part before |
 
         # Remove the trailing | and split by comma
-        parts = binding_part[:-1].split(",")
+        parts = binding_part.split(",")
         if len(parts) < 2:
             return None
 
@@ -618,7 +615,6 @@ class IL2Parser:
                         _logger.warning(
                             f"Invalid slider axis_id format: {axis_id}, error: {e}"
                         )
-                        return None
 
             elif control_type == "hat":
                 hat_id_str = binding["hat_id"]  # e.g., "POV_1_U"
@@ -773,8 +769,6 @@ class IL2Parser:
 
     def _find_il2_reference_for_input(self, input_item, device_name: str) -> str:
         """Find the original IL-2 reference (like joy3_b34) for an input"""
-        identifier = getattr(input_item, "identifier", "")
-
         # Try to find matching binding
         for binding in self.bindings:
             if self._binding_matches_input(binding, input_item):
