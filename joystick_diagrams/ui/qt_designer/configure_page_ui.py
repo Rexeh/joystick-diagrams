@@ -8,7 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize
+from PySide6.QtCore import QCoreApplication, QMetaObject, QSize
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -37,23 +37,21 @@ class Ui_Form(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QSize(1100, 700))
-        Form.setMaximumSize(QSize(1100, 700))
+        Form.setMinimumSize(QSize(600, 400))
         font = QFont()
         font.setFamilies(["Roboto"])
         Form.setFont(font)
-        self.layoutWidget = QWidget(Form)
-        self.layoutWidget.setObjectName("layoutWidget")
-        self.layoutWidget.setGeometry(QRect(0, 0, 1081, 691))
-        self.verticalLayout = QVBoxLayout(self.layoutWidget)
+        self._centralWidget = QWidget(Form)
+        self._centralWidget.setObjectName("_centralWidget")
+        self.verticalLayout = QVBoxLayout(self._centralWidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayout.setContentsMargins(12, 8, 12, 8)
-        self.heading_label = QLabel(self.layoutWidget)
+        self.heading_label = QLabel(self._centralWidget)
         self.heading_label.setObjectName("heading_label")
 
         self.verticalLayout.addWidget(self.heading_label)
 
-        self.tabWidget = QTabWidget(self.layoutWidget)
+        self.tabWidget = QTabWidget(self._centralWidget)
         self.tabWidget.setObjectName("tabWidget")
         self.tabWidget.setMouseTracking(False)
         self.view_binds_tab = QWidget()
@@ -119,6 +117,8 @@ class Ui_Form(object):
         self.tabWidget.addTab(self.profile_setup_tab, "")
 
         self.verticalLayout.addWidget(self.tabWidget)
+
+        Form.setCentralWidget(self._centralWidget)
 
         self.retranslateUi(Form)
 

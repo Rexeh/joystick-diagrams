@@ -302,8 +302,8 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
                 if child_data.errors:
                     button = QPushButton("View Warnings")
                     button.setProperty("class", "view-errors-button")
-                    button.setFixedWidth(150)
-                    button.setFixedHeight(25)
+                    button.setMinimumWidth(120)
+                    button.setMinimumHeight(25)
                     button.clicked.connect(self.view_device_errors)
                     self.treeWidget.setItemWidget(child_item, 2, button)
 

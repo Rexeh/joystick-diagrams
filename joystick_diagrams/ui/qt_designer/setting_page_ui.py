@@ -8,7 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize
+from PySide6.QtCore import QCoreApplication, QMetaObject, QSize
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -35,31 +35,29 @@ class Ui_Form(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QSize(1100, 700))
-        Form.setMaximumSize(QSize(1100, 700))
+        Form.setMinimumSize(QSize(600, 400))
         font = QFont()
         font.setFamilies(["Roboto"])
         Form.setFont(font)
-        self.verticalLayoutWidget = QWidget(Form)
-        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(0, 0, 1081, 691))
-        self.verticalLayout_2 = QVBoxLayout(self.verticalLayoutWidget)
+        self._centralWidget = QWidget(Form)
+        self._centralWidget.setObjectName("_centralWidget")
+        self.verticalLayout_2 = QVBoxLayout(self._centralWidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(12, 8, 12, 8)
-        self.heading_label = QLabel(self.verticalLayoutWidget)
+        self.heading_label = QLabel(self._centralWidget)
         self.heading_label.setObjectName("heading_label")
 
         self.verticalLayout_2.addWidget(self.heading_label)
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.pluginTreeHelpLabel = QLabel(self.verticalLayoutWidget)
+        self.pluginTreeHelpLabel = QLabel(self._centralWidget)
         self.pluginTreeHelpLabel.setObjectName("pluginTreeHelpLabel")
         self.pluginTreeHelpLabel.setEnabled(True)
 
         self.horizontalLayout_2.addWidget(self.pluginTreeHelpLabel)
 
-        self.installPlugin = QPushButton(self.verticalLayoutWidget)
+        self.installPlugin = QPushButton(self._centralWidget)
         self.installPlugin.setObjectName("installPlugin")
         self.installPlugin.setEnabled(False)
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
@@ -80,7 +78,7 @@ class Ui_Form(object):
         self.pluginContainer = QHBoxLayout()
         self.pluginContainer.setObjectName("pluginContainer")
         self.pluginContainer.setContentsMargins(0, -1, 0, -1)
-        self.pluginTreeWidget = QTreeWidget(self.verticalLayoutWidget)
+        self.pluginTreeWidget = QTreeWidget(self._centralWidget)
         self.pluginTreeWidget.headerItem().setText(4, "")
         self.pluginTreeWidget.setObjectName("pluginTreeWidget")
         sizePolicy.setHeightForWidth(
@@ -117,12 +115,14 @@ class Ui_Form(object):
 
         self.horizontalLayout.addItem(self.horizontalSpacer_2)
 
-        self.runPluginsButton = QPushButton(self.verticalLayoutWidget)
+        self.runPluginsButton = QPushButton(self._centralWidget)
         self.runPluginsButton.setObjectName("runPluginsButton")
 
         self.horizontalLayout.addWidget(self.runPluginsButton)
 
         self.verticalLayout_2.addLayout(self.horizontalLayout)
+
+        Form.setCentralWidget(self._centralWidget)
 
         self.retranslateUi(Form)
 

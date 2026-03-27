@@ -8,7 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize
+from PySide6.QtCore import QCoreApplication, QMetaObject, QSize
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -33,18 +33,16 @@ class Ui_Form(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QSize(1100, 700))
-        Form.setMaximumSize(QSize(1100, 700))
+        Form.setMinimumSize(QSize(600, 400))
         font = QFont()
         font.setFamilies(["Roboto"])
         Form.setFont(font)
-        self.layoutWidget = QWidget(Form)
-        self.layoutWidget.setObjectName("layoutWidget")
-        self.layoutWidget.setGeometry(QRect(0, 0, 1081, 691))
-        self.verticalLayout = QVBoxLayout(self.layoutWidget)
+        self._centralWidget = QWidget(Form)
+        self._centralWidget.setObjectName("_centralWidget")
+        self.verticalLayout = QVBoxLayout(self._centralWidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayout.setContentsMargins(12, 8, 12, 8)
-        self.heading_label = QLabel(self.layoutWidget)
+        self.heading_label = QLabel(self._centralWidget)
         self.heading_label.setObjectName("heading_label")
         self.heading_label.setMaximumSize(QSize(16777215, 23))
 
@@ -59,7 +57,7 @@ class Ui_Form(object):
         self.device_text_layout = QVBoxLayout()
         self.device_text_layout.setObjectName("device_text_layout")
         self.device_text_layout.setContentsMargins(5, -1, -1, -1)
-        self.device_header_label = QLabel(self.layoutWidget)
+        self.device_header_label = QLabel(self._centralWidget)
         self.device_header_label.setObjectName("device_header_label")
         font1 = QFont()
         font1.setPointSize(10)
@@ -68,7 +66,7 @@ class Ui_Form(object):
 
         self.device_text_layout.addWidget(self.device_header_label)
 
-        self.device_help_label = QLabel(self.layoutWidget)
+        self.device_help_label = QLabel(self._centralWidget)
         self.device_help_label.setObjectName("device_help_label")
 
         self.device_text_layout.addWidget(self.device_help_label)
@@ -77,7 +75,7 @@ class Ui_Form(object):
 
         self.device_controls_layout = QVBoxLayout()
         self.device_controls_layout.setObjectName("device_controls_layout")
-        self.setTemplateButton = QPushButton(self.layoutWidget)
+        self.setTemplateButton = QPushButton(self._centralWidget)
         self.setTemplateButton.setObjectName("setTemplateButton")
 
         self.device_controls_layout.addWidget(self.setTemplateButton)
@@ -105,7 +103,7 @@ class Ui_Form(object):
 
         self.export_bottom_section.addLayout(self.export_settings_container)
 
-        self.ExportButton = QPushButton(self.layoutWidget)
+        self.ExportButton = QPushButton(self._centralWidget)
         self.ExportButton.setObjectName("ExportButton")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
@@ -123,6 +121,8 @@ class Ui_Form(object):
         self.export_bottom_section.setStretch(1, 1)
 
         self.verticalLayout.addLayout(self.export_bottom_section)
+
+        Form.setCentralWidget(self._centralWidget)
 
         self.retranslateUi(Form)
 

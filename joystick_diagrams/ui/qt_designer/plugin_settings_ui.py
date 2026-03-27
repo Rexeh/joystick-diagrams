@@ -8,7 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize
+from PySide6.QtCore import QCoreApplication, QMetaObject, QSize
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -33,16 +33,14 @@ class Ui_Form(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMaximumSize(QSize(700, 16777215))
-        self.verticalLayoutWidget = QWidget(Form)
-        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(10, 10, 681, 121))
-        self.verticalLayout_3 = QVBoxLayout(self.verticalLayoutWidget)
+        self._centralWidget = QWidget(Form)
+        self._centralWidget.setObjectName("_centralWidget")
+        self.verticalLayout_3 = QVBoxLayout(self._centralWidget)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.plugin_name_label = QLabel(self.verticalLayoutWidget)
+        self.plugin_name_label = QLabel(self._centralWidget)
         self.plugin_name_label.setObjectName("plugin_name_label")
         font = QFont()
         font.setPointSize(12)
@@ -50,14 +48,14 @@ class Ui_Form(object):
 
         self.horizontalLayout.addWidget(self.plugin_name_label)
 
-        self.plugin_version_label = QLabel(self.verticalLayoutWidget)
+        self.plugin_version_label = QLabel(self._centralWidget)
         self.plugin_version_label.setObjectName("plugin_version_label")
 
         self.horizontalLayout.addWidget(self.plugin_version_label)
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
-        self.line = QFrame(self.verticalLayoutWidget)
+        self.line = QFrame(self._centralWidget)
         self.line.setObjectName("line")
         self.line.setFrameShape(QFrame.HLine)
         self.line.setFrameShadow(QFrame.Sunken)
@@ -66,7 +64,7 @@ class Ui_Form(object):
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.pluginEnabled = QCheckBox(self.verticalLayoutWidget)
+        self.pluginEnabled = QCheckBox(self._centralWidget)
         self.pluginEnabled.setObjectName("pluginEnabled")
         sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
@@ -87,7 +85,7 @@ class Ui_Form(object):
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer)
 
-        self.configureLink = QCommandLinkButton(self.verticalLayoutWidget)
+        self.configureLink = QCommandLinkButton(self._centralWidget)
         self.configureLink.setObjectName("configureLink")
         sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
@@ -104,16 +102,15 @@ class Ui_Form(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.label_3 = QLabel(self.verticalLayoutWidget)
+        self.label_3 = QLabel(self._centralWidget)
         self.label_3.setObjectName("label_3")
 
         self.horizontalLayout_3.addWidget(self.label_3)
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
 
-        self.frame = QFrame(Form)
+        self.frame = QFrame(self._centralWidget)
         self.frame.setObjectName("frame")
-        self.frame.setGeometry(QRect(9, 102, 116, 33))
         self.frame.setAutoFillBackground(False)
         self.frame.setFrameShape(QFrame.Box)
         self.frame.setFrameShadow(QFrame.Plain)
@@ -121,6 +118,10 @@ class Ui_Form(object):
         self.frame.setMidLineWidth(1)
         self.verticalLayout_2 = QVBoxLayout(self.frame)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
+
+        self.verticalLayout_3.addWidget(self.frame)
+
+        Form.setCentralWidget(self._centralWidget)
 
         self.retranslateUi(Form)
 

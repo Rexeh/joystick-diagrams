@@ -82,12 +82,15 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
 
-        self.pluginTreeWidget.header().setMinimumSectionSize(200)
+        self.pluginTreeWidget.header().setMinimumSectionSize(130)
 
         # Header Configuration
-        self.pluginTreeWidget.header().setStretchLastSection(True)
+        self.pluginTreeWidget.header().setStretchLastSection(False)
         self.pluginTreeWidget.header().setSectionResizeMode(
             QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.pluginTreeWidget.header().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.Stretch
         )
         self.pluginTreeWidget.setSelectionBehavior(
             QAbstractItemView.SelectionBehavior.SelectRows

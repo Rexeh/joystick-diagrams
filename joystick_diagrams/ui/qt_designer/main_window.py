@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1100, 900)
-        MainWindow.setMinimumSize(QSize(1100, 900))
+        MainWindow.setMinimumSize(QSize(800, 600))
         font = QFont()
         font.setFamilies(["Roboto"])
         font.setBold(True)
@@ -214,7 +214,7 @@ class Ui_MainWindow(object):
         self.main_content_layout = QHBoxLayout()
         self.main_content_layout.setObjectName("main_content_layout")
 
-        self.verticalLayout.addLayout(self.main_content_layout)
+        self.verticalLayout.addLayout(self.main_content_layout, 1)
 
         self.line = QFrame(self.centralwidget)
         self.line.setObjectName("line")

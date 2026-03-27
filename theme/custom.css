@@ -323,7 +323,7 @@ QTreeWidget.plugin-tree QHeaderView::section {{
 
 .run-button {{
     padding: 20px 40px;
-    width: 500px;
+    min-width: 300px;
     margin-right: 5px;
     margin-top: 12px;
     border: none;
