@@ -14,7 +14,10 @@ def data_root() -> Path:
     root = (
         Path.joinpath(Path().home(), "AppData", "Roaming", JOYSTICK_DIAGRAMS_DATA_DIR)
         if sys.platform == "win32"
-        else Path.joinpath(Path().home(), ".local", "share", JOYSTICK_DIAGRAMS_DATA_DIR)
+        else Path(
+            os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local" / "share"))
+        )
+        / JOYSTICK_DIAGRAMS_DATA_DIR
     )
 
     if not root.exists():
