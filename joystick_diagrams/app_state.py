@@ -13,6 +13,7 @@ class AppState:
     """appState for managing shared data for application."""
 
     _inst = None
+    _profile_update_callbacks = []
 
     def __new__(cls, *args, **kwargs):
         if not cls._inst:
@@ -49,6 +50,28 @@ class AppState:
 
         # Initialise wrappers / restoring state and customisation
         self.initialise_profile_wrappers()
+
+        # Notify listeners that profiles have been updated
+        _logger.info(f"Current profile wrappers: {len(self.profile_wrappers)}")
+        self._notify_profile_update_callbacks()
+
+    def register_profile_update_callback(self, callback):
+        """Register a callback to be called when profiles are updated"""
+        if callback not in self._profile_update_callbacks:
+            self._profile_update_callbacks.append(callback)
+
+    def unregister_profile_update_callback(self, callback):
+        """Unregister a profile update callback"""
+        if callback in self._profile_update_callbacks:
+            self._profile_update_callbacks.remove(callback)
+
+    def _notify_profile_update_callbacks(self):
+        """Notify all registered callbacks that profiles have been updated"""
+        for callback in self._profile_update_callbacks:
+            try:
+                callback()
+            except Exception as e:
+                _logger.error(f"Error calling profile update callback: {e}")
 
     def initialise_profile_wrappers(self):
         _logger.debug(f"Initialising {len(self.profile_wrappers)} profile wrappers ")

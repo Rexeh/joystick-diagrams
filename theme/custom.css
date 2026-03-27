@@ -214,12 +214,38 @@ QTabWidget.configure-tabwidget::tab-bar {{
 
 QComboBox.view-binds-list {{
     background: #3A6FCD;
-    opacity: 0.5;
-    padding: 10px;
+    color: white;
+    border: 1px solid #2d3436;
+    border-radius: 4px;
+    padding: 8px 12px;
+    selection-background-color: #2d3436;
+}}
+
+QComboBox.view-binds-list::drop-down {{
+    border: none;
+    background: transparent;
+}}
+
+QComboBox.view-binds-list::down-arrow {{
+    image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3e%3cpath fill='white' d='M6 8L2 4h8z'/%3e%3c/svg%3e");
+    margin-right: 8px;
 }}
 
 QComboBox::item.view-binds-list {{
-    color: black;
+    color: white;
+    background: #3A6FCD;
+    padding: 8px 12px;
+    border: none;
+}}
+
+QComboBox::item.view-binds-list:selected {{
+    background: #2d3436;
+    color: white;
+}}
+
+QComboBox::item.view-binds-list:hover {{
+    background: #4a7fd1;
+    color: white;
 }}
 
 

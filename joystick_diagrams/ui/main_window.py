@@ -181,6 +181,11 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
     def update_menus_from_profile_count(self, data: int):
         self.enable_additional_menus() if data > 0 else self.disable_additional_menus()
 
+    def update_profile_collections(self):
+        _logger.info("Main window: Updating profile collections from all plugins")
+        self.appState.process_profiles_from_collections()
+        _logger.info(f"Profile processing complete: {len(self.appState.profile_wrappers)} profile wrappers created")
+
     def load_setting_widget(self):
         self.setupSectionButton.setChecked(True)
 
@@ -189,6 +194,9 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.window_content = plugins_page.PluginsPage()
         self.window_content.total_parsed_profiles.connect(
             self.update_menus_from_profile_count
+        )
+        self.window_content.profileCollectionChange.connect(
+            self.update_profile_collections
         )
         self.main_content_layout.addWidget(self.window_content)
         self.window_content.show()
