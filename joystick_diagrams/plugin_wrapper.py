@@ -56,6 +56,15 @@ class PluginWrapper:
             path_set = self.plugin.set_path(path)
             self.set_ready(path_set)
             return path_set
+        except PermissionError as e:
+            _logger.error(
+                f"Permission denied for plugin {self.plugin.name}: {path}", exc_info=e
+            )
+            self.set_ready(False)
+            self.push_error(
+                f"Permission denied accessing '{path}'. "
+                f"Try running as administrator, or check folder permissions."
+            )
         except Exception as e:  # Bare except required to handle error types
             _logger.error(f"Set path failed for plugin {self.plugin.name}", exc_info=e)
             self.set_ready(False)
@@ -91,6 +100,11 @@ class PluginWrapper:
             else:
                 self.store_plugin_configuration()
 
+        except PermissionError as e:
+            _logger.error(
+                f"Permission error during plugin setup for {self.plugin.name}: {e}"
+            )
+            self.push_error(str(e))
         except JoystickDiagramsError as e:
             _logger.error(e)
 

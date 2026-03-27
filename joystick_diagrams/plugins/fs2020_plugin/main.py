@@ -38,12 +38,15 @@ class ParserPlugin(PluginInterface):
         return True
 
     def save_plugin_state(self):
-        with open(
-            Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
-            "w",
-            encoding="UTF8",
-        ) as f:
-            f.write(json.dumps({"path": str(self.path)}))
+        try:
+            with open(
+                Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
+                "w",
+                encoding="UTF8",
+            ) as f:
+                f.write(json.dumps({"path": str(self.path)}))
+        except (PermissionError, OSError) as e:
+            _logger.error(f"Failed to save plugin state for {self.name}: {e}")
 
     def load_settings(self) -> None:
         try:
@@ -56,6 +59,8 @@ class ParserPlugin(PluginInterface):
                 self.path = Path(data["path"]) if data["path"] else None
         except FileNotFoundError:
             pass
+        except (PermissionError, OSError) as e:
+            _logger.error(f"Permission error loading settings for {self.name}: {e}")
 
     @property
     def path_type(self):

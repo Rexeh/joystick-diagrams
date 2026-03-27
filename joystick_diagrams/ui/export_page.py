@@ -150,6 +150,15 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         main_window_inst.progressBar.setValue(data)
         main_window_inst.statusLabel.setText("Exporting templates")
 
+    def show_export_error(self, message: str):
+        QMessageBox.warning(
+            self,
+            "Export Error",
+            message,
+            buttons=QMessageBox.StandardButton.Ok,
+            defaultButton=QMessageBox.StandardButton.Ok,
+        )
+
     def unlock_export_button(self):
         self.ExportButton.setEnabled(True)
 
@@ -179,6 +188,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         worker.signals.finished.connect(self.export_finished)
         worker.signals.finished.connect(self.unlock_export_button)
         worker.signals.progress.connect(self.update_export_progress)
+        worker.signals.error.connect(self.show_export_error)
         self.threadPool.start(worker)
 
 
@@ -186,6 +196,7 @@ class ExportSignals(QObject):
     started = Signal()
     finished = Signal(int)
     progress = Signal(int)
+    error = Signal(str)
 
 
 class ExportDispatch(QRunnable):
@@ -213,11 +224,28 @@ class ExportDispatch(QRunnable):
         item_count = len(self.export_items)
 
         # Export SVG files first
+        exported_count = 0
         for count, item in enumerate(self.export_items, 1):
             _logger.info(
                 f"Exporting {count}/{item_count} which has profile {item.profile_wrapper.profile_name}"
             )
-            export(item, self.export_directory)
+            try:
+                export(item, self.export_directory)
+                exported_count += 1
+            except PermissionError:
+                self.signals.error.emit(
+                    f"Permission denied writing to '{self.export_directory}'. "
+                    f"Choose a different export location or check folder permissions."
+                )
+                self.signals.finished.emit(exported_count)
+                return
+            except Exception as e:
+                _logger.error(
+                    f"Failed to export {item.profile_wrapper.profile_name}: {e}"
+                )
+                self.signals.error.emit(
+                    f"Failed to export {item.profile_wrapper.profile_name}: {e}"
+                )
 
             self.signals.progress.emit(
                 round(count / item_count * 100 if item != item_count - 1 else 100)
@@ -226,7 +254,7 @@ class ExportDispatch(QRunnable):
         # After SVG export, call plugin export methods if they exist
         self._call_plugin_exports()
 
-        self.signals.finished.emit(item_count)
+        self.signals.finished.emit(exported_count)
 
     def _call_plugin_exports(self):
         """Call export_mappings method on plugins that implement it"""

@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from joystick_diagrams import utils
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.plugin_wrapper import PluginWrapper
@@ -366,6 +367,20 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             widget.setChecked(not widget.isChecked())
 
             # widget.setChecked(widget.checkStateSet())
+            return
+
+        # Check read access before attempting to set path
+        try:
+            utils.check_path_readable(new_path)
+        except PermissionError as e:
+            from PySide6.QtWidgets import QMessageBox
+
+            QMessageBox.warning(
+                self,
+                "Permission Denied",
+                str(e),
+                buttons=QMessageBox.StandardButton.Ok,
+            )
             return
 
         path_set_state = self.set_plugin_path(new_path, plugin_wrapper_object)

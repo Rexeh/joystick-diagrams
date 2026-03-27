@@ -25,9 +25,15 @@ TEMPLATE_DATING_KEY = "CURRENT_DATE"
 def export(export_device: ExportDevice, output_directory: str):
     try:
         export_device_to_templates(export_device, Path(output_directory))
-
+    except PermissionError as e:
+        _logger.error(
+            f"Permission denied exporting to '{output_directory}': {e}. "
+            f"Choose a different export location or check folder permissions."
+        )
+        raise
     except Exception as e:
-        _logger.debug(e)
+        _logger.error(f"Export failed for {export_device}: {e}")
+        raise
 
 
 def export_device_to_templates(export_device: ExportDevice, export_location: Path):
@@ -50,8 +56,14 @@ def export_device_to_templates(export_device: ExportDevice, export_location: Pat
 def save_template(template_data, file_name, export_path):
     utils.create_directory(export_path)
 
-    with open(export_path.joinpath(file_name), "w", encoding="UTF-8") as f:
-        f.write(template_data)
+    try:
+        with open(export_path.joinpath(file_name), "w", encoding="UTF-8") as f:
+            f.write(template_data)
+    except PermissionError as err:
+        raise PermissionError(
+            f"Permission denied writing to '{export_path}'. "
+            f"Choose a different export location or check folder permissions."
+        ) from err
 
 
 def populate_template(export_device: ExportDevice) -> str:

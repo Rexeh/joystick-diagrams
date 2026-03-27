@@ -38,9 +38,57 @@ def plugin_data_root() -> Path:
 def create_directory(directory) -> None:
     try:
         if not Path(directory).exists():
-            Path(directory).mkdir()
+            Path(directory).mkdir(parents=True)
+    except PermissionError:
+        _logger.error(
+            f"Permission denied creating directory: {directory}. "
+            f"Check folder permissions or run as administrator."
+        )
+        raise
     except OSError as error:
         _logger.error(f"Failed to create directory: {directory} with {error}")
+
+
+def check_path_readable(path: Path) -> bool:
+    """Check if a path is readable by the current user.
+
+    Returns True if readable, raises PermissionError with a clear message if not.
+    """
+    try:
+        if path.is_file():
+            with open(path, "r"):
+                pass
+        elif path.is_dir():
+            list(path.iterdir())
+        return True
+    except PermissionError as err:
+        raise PermissionError(
+            f"Permission denied reading '{path}'. "
+            f"This may require administrator access or adjusted folder permissions."
+        ) from err
+
+
+def check_path_writable(path: Path) -> bool:
+    """Check if a directory path is writable by the current user.
+
+    Returns True if writable, raises PermissionError with a clear message if not.
+    """
+    try:
+        test_dir = path if path.is_dir() else path.parent
+        test_file = test_dir / ".jd_write_test"
+        test_file.touch()
+        test_file.unlink()
+        return True
+    except PermissionError as err:
+        raise PermissionError(
+            f"Permission denied writing to '{path}'. "
+            f"Choose a different location or adjust folder permissions."
+        ) from err
+    except OSError as err:
+        raise PermissionError(
+            f"Cannot write to '{path}': {err}. "
+            f"Choose a different location or adjust folder permissions."
+        ) from err
 
 
 def install_root() -> str:

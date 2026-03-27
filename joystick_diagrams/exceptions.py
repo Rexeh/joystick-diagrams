@@ -29,6 +29,21 @@ class FileTypeInvalidError(JoystickDiagramsError):
         super().__init__(value)
 
 
+class PathPermissionError(JoystickDiagramsError):
+    def __init__(self, path: str = "", operation: str = "access") -> None:
+        self.path = path
+        self.operation = operation
+        super().__init__(
+            f"Permission denied: cannot {operation} '{path}'. "
+            f"Try running as administrator, or choose a location your user account can access."
+        )
+
+
+class ExportError(JoystickDiagramsError):
+    def __init__(self, value: str = "") -> None:
+        super().__init__(value)
+
+
 # -----------------------------------------------------------------------------
 # Plugin Exceptions
 # -----------------------------------------------------------------------------
