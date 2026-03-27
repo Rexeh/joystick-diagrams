@@ -44,7 +44,7 @@ class DCSWorldParser:
     def __validate_base_directory(self) -> list:
         """Validate the base directory structure, make sure there are files."""
         # TODO refactor
-        if CONFIG_DIR in os.listdir(self.path):
+        if Path(self.path).joinpath(CONFIG_DIR).exists():
             try:
                 return os.listdir(os.path.join(self.path, CONFIG_DIR, INPUT_DIR))
             except FileNotFoundError:

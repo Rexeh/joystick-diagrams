@@ -212,6 +212,7 @@ class ExportDispatch(QRunnable):
         self.signals.started.emit()
         item_count = len(self.export_items)
 
+        # Export SVG files first
         for count, item in enumerate(self.export_items, 1):
             _logger.info(
                 f"Exporting {count}/{item_count} which has profile {item.profile_wrapper.profile_name}"
@@ -221,7 +222,33 @@ class ExportDispatch(QRunnable):
             self.signals.progress.emit(
                 round(count / item_count * 100 if item != item_count - 1 else 100)
             )
+        
+        # After SVG export, call plugin export methods if they exist
+        self._call_plugin_exports()
+        
         self.signals.finished.emit(item_count)
+
+    def _call_plugin_exports(self):
+        """Call export_mappings method on plugins that implement it"""
+        try:
+            appState = AppState()
+            
+            # Get enabled plugins that have export functionality
+            for plugin_wrapper in appState.plugin_manager.get_enabled_plugin_wrappers():
+                if hasattr(plugin_wrapper.plugin, 'export_mappings'):
+                    try:
+                        _logger.info(f"Calling export for plugin: {plugin_wrapper.name}")
+                        export_path = Path(self.export_directory)
+                        success = plugin_wrapper.plugin.export_mappings(export_path)
+                        if success:
+                            _logger.info(f"Successfully exported data for plugin: {plugin_wrapper.name}")
+                        else:
+                            _logger.warning(f"Export failed for plugin: {plugin_wrapper.name}")
+                    except Exception as e:
+                        _logger.error(f"Error during export for plugin {plugin_wrapper.name}: {e}")
+                        
+        except Exception as e:
+            _logger.error(f"Error accessing plugin manager for exports: {e}")
 
 
 if __name__ == "__main__":
