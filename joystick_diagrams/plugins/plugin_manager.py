@@ -15,8 +15,6 @@ from json import JSONDecodeError
 from pathlib import Path
 from types import ModuleType
 
-from dynaconf import ValidationError  # type: ignore
-
 from joystick_diagrams.exceptions import JoystickDiagramsError, PluginNotValidError
 from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
@@ -25,7 +23,7 @@ _logger = logging.getLogger(__name__)
 
 PLUGINS_DIRECTORY: str = "."
 PLUGIN_REL_PATH: str = ".plugins."
-EXPECTED_PLUGIN_FILES: list[str] = ["__init__", "config", "main", "settings"]
+EXPECTED_PLUGIN_FILES: list[str] = ["__init__", "main"]
 EXCLUDED_PLUGIN_DIRS: list[str] = ["__pycache__"]
 
 
@@ -71,21 +69,15 @@ class ParserPluginManager:
                 # Try to instanciate the Plugin TODO add further checks
                 loaded = loaded_module.ParserPlugin()
 
-                self.validate_plugin_settings(loaded)
                 self.loaded_plugins.append(loaded)
 
             except (
                 JoystickDiagramsError,
                 JSONDecodeError,
                 AttributeError,
-                ValidationError,
+                TypeError,
             ) as e:
                 _logger.error(f"Error with Plugin: {plugin} - {e}")
-
-    def validate_plugin_settings(
-        self, plugin: PluginInterface
-    ) -> None | ValidationError:
-        return plugin.settings.validators.validate_all()
 
     def get_available_plugins(self) -> list[PluginInterface]:
         return [x for x in self.loaded_plugins]

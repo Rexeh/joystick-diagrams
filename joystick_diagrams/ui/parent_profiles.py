@@ -25,6 +25,7 @@ class parent_profile_ui(QMainWindow, parent_profile_management_ui.Ui_Form):
         self.parentUp.clicked.connect(self.change_parent_index_up)
         self.parentDown.clicked.connect(self.change_parent_index_down)
         self.deleteParent.clicked.connect(self.remove_parent_profile)
+        self.availableParentsComboBox.setMaxVisibleItems(15)
         self.currentActiveProfile: ProfileWrapper = None
         self.parentProfileChange.connect(self.save_profile_parent_maps)
         self.listWidget.clicked.connect(self.update_allowed_controls)

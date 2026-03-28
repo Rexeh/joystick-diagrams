@@ -1,75 +1,54 @@
-import json
-import logging
 from pathlib import Path
+
+from pydantic import Field
 
 from joystick_diagrams.plugins.joystick_gremlin_plugin.joystick_gremlin import (
     JoystickGremlinParser,
 )
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.plugins.plugin_settings import PluginMeta, PluginSettings
 
-from .config import settings
 
-_logger = logging.getLogger("__name__")
-CONFIG_FILE = "data.json"
+class JoystickGremlinSettings(PluginSettings):
+    profile_file: Path | None = Field(
+        default=None,
+        title="Joystick Gremlin Profile",
+        json_schema_extra={
+            "is_folder": False,
+            "default_path": "~/",
+            "extensions": [".xml"],
+        },
+    )
 
 
 class ParserPlugin(PluginInterface):
+    plugin_meta = PluginMeta(
+        name="Joystick Gremlin (2.7X)", version="2.0.0", icon_path="img/jg.ico"
+    )
+    plugin_settings_model = JoystickGremlinSettings
+
     def __init__(self):
-        self.path = None
-        self.settings = settings
-        self.settings.validators.register()
-        self.instance: JoystickGremlinParser = None
+        super().__init__()
+        self.instance: JoystickGremlinParser | None = None
 
     def process(self):
-        return self.instance.create_dictionary()
+        if self.instance:
+            return self.instance.create_dictionary()
+        return None
 
-    def set_path(self, path: Path) -> bool:
-        inst = JoystickGremlinParser(path)
+    def _rebuild_instance(self) -> None:
+        profile_file = self.get_setting("profile_file")
+        if profile_file and Path(profile_file).exists():
+            self.instance = JoystickGremlinParser(profile_file)
+        else:
+            self.instance = None
 
-        if inst:
-            self.instance = inst
-            self.path = path
-            self.save_plugin_state()
-            return True
+    def update_setting(self, key: str, value) -> None:
+        super().update_setting(key, value)
+        self._rebuild_instance()
 
-        return False
-
-    def save_plugin_state(self):
-        try:
-            with open(
-                Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
-                "w",
-                encoding="UTF8",
-            ) as f:
-                f.write(json.dumps({"path": str(self.path)}))
-        except (PermissionError, OSError) as e:
-            _logger.error(f"Failed to save plugin state for {self.name}: {e}")
-
-    def load_settings(self) -> None:
-        try:
-            with open(
-                Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
-                "r",
-                encoding="UTF8",
-            ) as f:
-                data = json.loads(f.read())
-                self.path = Path(data["path"]) if data["path"] else None
-        except FileNotFoundError:
-            pass
-        except (PermissionError, OSError) as e:
-            _logger.error(f"Permission error loading settings for {self.name}: {e}")
-
-    @property
-    def path_type(self):
-        return self.FilePath(
-            "Select your Joystick Gremlin Profile .XML file",
-            Path.home(),
-            [".xml"],
-        )
-
-    @property
-    def icon(self):
-        return f"{Path.joinpath(Path(__file__).parent,self.settings.PLUGIN_ICON)}"
+    def on_settings_loaded(self) -> None:
+        self._rebuild_instance()
 
 
 if __name__ == "__main__":

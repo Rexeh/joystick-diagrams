@@ -1,53 +1,142 @@
 # Joystick Diagrams - Plugins
 
 > [!CAUTION]
-> All information here is subject to change during the course of 2.0 pre-release. If you want to build a plugin based off this, then please get in touch on Discord to work together.
+> All information here is subject to change during the course of 2.0 pre-release. If you want to build a plugin based off this, please get in touch on Discord to work together.
 
 ## Parser Plugins
-With version 2.0, Joystick Diagrams has moved to a plugin system to allow further games to be supported faster.
+
+Version 2.0 uses a plugin system so new games can be supported without changes to the core app.
 
 ## Plugin Structure
--  plugins/ - Directory for plugins
-   - *plugin name*
-     - \__init\__.py
-     - main.py - Main interface for Joystick Diagrams
-     - config.py - Base configuration using Dynaconf for Plugin requirements
+
+```
+plugins/
+└── my_plugin/
+    ├── __init__.py
+    ├── main.py
+    └── img/
+        └── icon.ico
+```
+
+`config.py` and `settings.json` are gone. The framework handles configuration through Pydantic models now.
 
 ## main.py
-main.py **must** follow the signature of plugin_interface
 
-### set_path()
-Joystick Diagrams will orchestrate collection of a directory or file from user input, which will be injected as a [Pathlib Path](https://docs.python.org/3/library/pathlib.html) object.
+`main.py` must contain a `ParserPlugin` class that inherits from `PluginInterface`. It needs two class variables:
 
-As part of this, you should perform any relevant validation on the supplied Path, such as checking that it can be parsed.
+- `plugin_meta`: static metadata (name, version, icon)
+- `plugin_settings_model`: a `PluginSettings` subclass describing required paths and options. Omit this if your plugin needs no configuration.
 
-Plugins are responsible for **storing** this validated path for the tool to restore state on new application runs.
+### Minimal example
+
+```python
+from pathlib import Path
+from pydantic import Field
+from joystick_diagrams.input.profile_collection import ProfileCollection
+from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.plugins.plugin_settings import PluginMeta, PluginSettings
+
+
+class MySettings(PluginSettings):
+    source_dir: Path | None = Field(
+        default=None,
+        title="Source Folder",
+        json_schema_extra={"is_folder": True, "default_path": "~/Saved Games"},
+    )
+
+
+class ParserPlugin(PluginInterface):
+    plugin_meta = PluginMeta(name="My Plugin", version="1.0.0", icon_path="img/icon.ico")
+    plugin_settings_model = MySettings
+
+    def process(self) -> ProfileCollection:
+        source = self.get_setting("source_dir")
+        # parse files and return a ProfileCollection
+        return ProfileCollection()
+
+    def on_settings_loaded(self) -> None:
+        # rebuild any internal state that depends on settings (e.g. re-create a parser)
+        pass
+```
+
+## PluginMeta
+
+`PluginMeta` is a frozen Pydantic model. Declare it as a class variable on your plugin.
+
+| Field | Type | Description |
+|---|---|---|
+| `name` | `str` | Display name shown in the UI |
+| `version` | `str` | Plugin version string |
+| `icon_path` | `str` | Path to icon, relative to the plugin's own directory |
+
+## PluginSettings
+
+`PluginSettings` is a Pydantic `BaseModel` subclass. Define your path inputs and user-configurable options as fields. The framework generates the UI, persists values to disk, and computes ready state from these fields automatically.
+
+### Field types and their UI controls
+
+| Field type | UI control |
+|---|---|
+| `bool` | Checkbox |
+| `str` | Text input |
+| `Path` | Folder / file browse button (required) |
+| `Path \| None` | Folder / file browse button (optional) |
+
+### Path field options (`json_schema_extra`)
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `is_folder` | `bool` | `True` | `True` shows a folder dialog, `False` shows a file dialog |
+| `default_path` | `str` | | Starting directory for the browse dialog |
+| `extensions` | `list[str]` | | Allowed file extensions for file browse (e.g. `[".xml"]`) |
+| `required` | `bool` | `True` | If `True`, the plugin is not ready until this path is set |
+
+### Ready state
+
+A plugin is ready when every required `Path` field in its `PluginSettings` has a value. You don't need to implement this yourself.
+
+## Plugin lifecycle
 
 ### process()
-Joystick Diagrams will orchestrate your process method automatically from the UI. This will return a ProfileCollection() from your processing code.
 
-### path_type()
-As part of your Plugin creation, you must define a valid **FilePath** or **FolderPath** as part of the path_type property. This will be used to display information on the front end such as dialog help, default directories and file types.
+Called by the framework when it needs results from your plugin. Must return a `ProfileCollection`.
 
-### Example Plugin
-One is included in the library - https://github.com/Rexeh/joystick-diagrams/tree/master/joystick_diagrams/plugins/Example/examplePlugin
+### on_settings_loaded()
 
+Called after settings are restored from disk. Override this if you need to rebuild internal state from the loaded values, for example re-creating a parser instance with an updated file path.
 
-## 3rd Party Module usage
-At this time, Plugins can only use native Python packages or those utilised by 1st party modules. If you should require some additional libraries in order to write your plugin then open for discussion.
+### save_plugin_state() / load_settings()
 
-## Configuration Management
-Parser Plugins are responsible for their own configuration, choice of how to persist the data for your plugin is yours.
+Both are handled by the framework. Don't call them yourself. Settings are persisted as `data.json` in the plugin's AppData directory.
 
-- Data is stored in the Users AppData directory, for this you can use the **get_plugin_data_path** method on Plugin Interface to obtain your file path at runtime.
-- Additionally a helper method **get_plugin_data** exists to return all currently files/folders as a list[Path]
+## Settings access
 
-### load_data()
-This method should restore any relevant data to your plugin. load_data() is called as part of the plugin loading mechanism.
+| Method | Description |
+|---|---|
+| `self.get_setting("field_name")` | Returns the current value of a setting |
+| `self.update_setting("field_name", value)` | Updates a value and persists to disk |
 
-A key part of load data should be setting your path attribute to any stored value, which will trigger set_path() method to be called to automatically revalidate the path against your plugin.
+## Plugin data directory
 
-### Dynaconf
-Core Plugin Configuration is provided by Dynaconf **config.py** and the chosen format is JSON for configuration store.
+| Method | Description |
+|---|---|
+| `self.get_plugin_data_path()` | Returns the full path to the plugin's AppData directory |
+| `self.get_plugin_data()` | Returns all files/folders in the plugin's AppData directory as `list[Path]` |
 
-You can retrieve settings for your plugin using **settings.VARIABLE**, for further usage and validation see [Dynaconf Documentation](https://www.dynaconf.com/)
+## Exception helpers
+
+Raise these from `process()` when path validation fails:
+
+| Method | Exception raised |
+|---|---|
+| `self.file_not_valid_exception("message")` | `FileNotValidError` |
+| `self.directory_not_valid_exception("message")` | `DirectoryNotValidError` |
+| `self.file_type_invalid("message")` | `FileTypeInvalidError` |
+
+## Example Plugin
+
+A working example is in the repository at `joystick_diagrams/plugins/Example/example_plugin/`.
+
+## 3rd Party Modules
+
+Plugins can only use standard library packages or dependencies already pulled in by first-party plugins. If you need something else, open a discussion.

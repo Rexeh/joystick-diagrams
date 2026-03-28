@@ -1,76 +1,52 @@
-import json
-import logging
 from pathlib import Path
 
-from joystick_diagrams.plugins.plugin_interface import PluginInterface
-from joystick_diagrams.plugins.star_citizen_plugin.config import (
-    settings,  # TODO Move out plugins to separate package
-)
-from joystick_diagrams.plugins.star_citizen_plugin.star_citizen import (
-    StarCitizen,  # TODO Move out plugins to separate package
-)
+from pydantic import Field
 
-CONFIG_FILE = "data.json"
-_logger = logging.getLogger("__name__")
+from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.plugins.plugin_settings import PluginMeta, PluginSettings
+from joystick_diagrams.plugins.star_citizen_plugin.star_citizen import StarCitizen
+
+
+class StarCitizenSettings(PluginSettings):
+    actionmaps_file: Path | None = Field(
+        default=None,
+        title="actionmaps.xml",
+        json_schema_extra={
+            "is_folder": False,
+            "default_path": "~/",
+            "extensions": [".xml"],
+        },
+    )
 
 
 class ParserPlugin(PluginInterface):
+    plugin_meta = PluginMeta(
+        name="Star Citizen", version="2.0.0", icon_path="img/sc.png"
+    )
+    plugin_settings_model = StarCitizenSettings
+
     def __init__(self):
-        self.path = None
-        self.settings = settings
-        self.settings.validators.register()
-        self.instance: StarCitizen = None
+        super().__init__()
+        self.instance: StarCitizen | None = None
 
     def process(self):
-        return self.instance.parse()
+        if self.instance:
+            return self.instance.parse()
+        return None
 
-    def set_path(self, path: Path) -> bool:
-        inst = StarCitizen(path)
+    def _rebuild_instance(self) -> None:
+        actionmaps_file = self.get_setting("actionmaps_file")
+        if actionmaps_file and Path(actionmaps_file).exists():
+            self.instance = StarCitizen(actionmaps_file)
+        else:
+            self.instance = None
 
-        if inst:
-            self.instance = inst
-            self.path = path
-            self.save_plugin_state()
-            return True
+    def update_setting(self, key: str, value) -> None:
+        super().update_setting(key, value)
+        self._rebuild_instance()
 
-        return False
-
-    def save_plugin_state(self):
-        try:
-            with open(
-                Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
-                "w",
-                encoding="UTF8",
-            ) as f:
-                f.write(json.dumps({"path": str(self.path)}))
-        except (PermissionError, OSError) as e:
-            _logger.error(f"Failed to save plugin state for {self.name}: {e}")
-
-    def load_settings(self) -> None:
-        try:
-            with open(
-                Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
-                "r",
-                encoding="UTF8",
-            ) as f:
-                data = json.loads(f.read())
-                self.path = Path(data["path"]) if data["path"] else None
-        except FileNotFoundError:
-            pass
-        except (PermissionError, OSError) as e:
-            _logger.error(f"Permission error loading settings for {self.name}: {e}")
-
-    @property
-    def path_type(self):
-        return self.FilePath(
-            "Select your Star Citizen actionmaps.xml",
-            Path.home(),
-            [".xml"],
-        )
-
-    @property
-    def icon(self):
-        return f"{Path.joinpath(Path(__file__).parent,self.settings.PLUGIN_ICON)}"
+    def on_settings_loaded(self) -> None:
+        self._rebuild_instance()
 
 
 if __name__ == "__main__":

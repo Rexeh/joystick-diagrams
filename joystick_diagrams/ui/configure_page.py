@@ -61,6 +61,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.viewBindsProfileList.setProperty("class", "view-binds-list")
 
         self.viewBindsProfileList.setIconSize(QSize(25, 25))
+        self.viewBindsProfileList.setMaxVisibleItems(15)
 
         # UI Setup
         self.device_header = QTreeWidgetItem()
@@ -90,7 +91,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.viewBindsTreeWidget.setEditTriggers(
             QAbstractItemView.EditTrigger.DoubleClicked
         )
-        self.viewBindsTreeWidget.itemChanged.connect(self.on_item_changed)
+        self.viewBindsTreeWidget.itemChanged.connect(self._handle_item_changed)
 
         # Context menu
         self.viewBindsTreeWidget.setContextMenuPolicy(
@@ -253,7 +254,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.viewBindsTreeWidget.blockSignals(False)
 
     @Slot(QTreeWidgetItem, int)
-    def on_item_changed(self, item: QTreeWidgetItem, column: int):
+    def _handle_item_changed(self, item: QTreeWidgetItem, column: int):
         if column != 1:
             return
 

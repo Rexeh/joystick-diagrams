@@ -314,7 +314,33 @@ QTreeWidget.plugin-tree QHeaderView::section {{
     color: #9AA0A6;
 }}
 
+.enabled-button:hover {{
+    background: #3C4043;
+    border-color: #6B7280;
+    color: #E8EAED;
+}}
+
 .enabled-button:checked {{
+    background: rgba(76, 139, 245, 0.15);
+    border-color: #4C8BF5;
+    color: #4C8BF5;
+}}
+
+.enabled-button:checked:hover {{
+    background: rgba(76, 139, 245, 0.28);
+    border-color: #6BA1F7;
+    color: #6BA1F7;
+}}
+
+.enabled-button:focus {{
+    outline: none;
+    background: #2c2f38;
+    border-color: #3C4043;
+    color: #9AA0A6;
+}}
+
+.enabled-button:checked:focus {{
+    outline: none;
     background: rgba(76, 139, 245, 0.15);
     border-color: #4C8BF5;
     color: #4C8BF5;
@@ -335,10 +361,30 @@ QTreeWidget.plugin-tree QHeaderView::section {{
 .plugin-setup-button:hover {{
     background: #3C4043;
     border-color: #4C8BF5;
-    color: #4C8BF5;
+    color: #E8EAED;
 }}
 
 .plugin-setup-button:checked {{
+    background: rgba(76, 139, 245, 0.15);
+    border-color: #4C8BF5;
+    color: #4C8BF5;
+}}
+
+.plugin-setup-button:checked:hover {{
+    background: rgba(76, 139, 245, 0.28);
+    border-color: #6BA1F7;
+    color: #6BA1F7;
+}}
+
+.plugin-setup-button:focus {{
+    outline: none;
+    background: #2c2f38;
+    border-color: #3C4043;
+    color: #E8EAED;
+}}
+
+.plugin-setup-button:checked:focus {{
+    outline: none;
     background: rgba(76, 139, 245, 0.15);
     border-color: #4C8BF5;
     color: #4C8BF5;
@@ -423,6 +469,10 @@ QTabWidget.configure-tabwidget::tab-bar {{
 }}
 
 /* Combo Box / Dropdown */
+
+QComboBox {{
+    combobox-popup: 0;
+}}
 
 QComboBox.view-binds-list {{
     background: #252830;
@@ -589,6 +639,30 @@ QTreeWidget.device-tree QHeaderView::section {{
     border: none;
     border-bottom: 1px solid #3C4043;
     padding: 8px 4px;
+}}
+
+QTreeWidget.device-tree::indicator {{
+    width: 16px;
+    height: 16px;
+    border: 2px solid #9AA0A6;
+    border-radius: 3px;
+    background-color: #252830;
+}}
+
+QTreeWidget.device-tree::indicator:unchecked {{
+    background-color: #252830;
+    border: 2px solid #9AA0A6;
+}}
+
+QTreeWidget.device-tree::indicator:checked {{
+    background-color: #4C8BF5;
+    border: 2px solid #4C8BF5;
+    image: url(:/icons/check);
+}}
+
+QTreeWidget.device-tree::indicator:indeterminate {{
+    background-color: #4C8BF5;
+    border: 2px solid #4C8BF5;
 }}
 
 QPushButton.view-errors-button {{

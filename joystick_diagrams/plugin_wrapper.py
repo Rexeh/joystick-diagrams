@@ -5,12 +5,12 @@ Primarily handles passthrough plugin_interface concrete implementations.
 
 import logging
 from dataclasses import dataclass, field
-from pathlib import Path
 
 from joystick_diagrams.db import db_plugin_data
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.plugins.plugin_settings import PluginSettings
 
 _logger = logging.getLogger(__name__)
 
@@ -19,27 +19,23 @@ _logger = logging.getLogger(__name__)
 class PluginWrapper:
     plugin: PluginInterface
     _enabled: bool = False
-    ready: bool = False
+    _error: str = field(default_factory=str)
     plugin_profile_collection: ProfileCollection | None = field(init=False)
-    error: str = field(default_factory=str)
 
     def __post_init__(self):
         self.plugin_profile_collection = None
         self.setup_plugin()
 
     def process(self) -> bool:
-        """Runs a specific plugin, attaching the result to the wrapper"""
+        """Runs a specific plugin, attaching the result to the wrapper."""
         self.plugin_profile_collection = None
         try:
-            if self.path and self.enabled:
+            if self.ready and self.enabled:
                 result = self.plugin.process()
-
                 if isinstance(result, ProfileCollection):
                     self.plugin_profile_collection = result
-
             return True
-
-        except Exception as e:  # Base exception handling as cannot garantee plugin conformance to handle errors
+        except Exception as e:
             _logger.error(JoystickDiagramsError(f"Plugin had an unexpected error: {e}"))
             self.push_error(
                 str(JoystickDiagramsError(f"Plugin had an unexpected error: {e}"))
@@ -47,56 +43,23 @@ class PluginWrapper:
             return False
 
     def push_error(self, error: str):
-        self.error = ""
-        self.error = error
-
-    def set_path(self, path: Path) -> bool:
-        """Sets the path for a given plugin"""
-        try:
-            path_set = self.plugin.set_path(path)
-            self.set_ready(path_set)
-            return path_set
-        except PermissionError as e:
-            _logger.error(
-                f"Permission denied for plugin {self.plugin.name}: {path}", exc_info=e
-            )
-            self.set_ready(False)
-            self.push_error(
-                f"Permission denied accessing '{path}'. "
-                f"Try running as administrator, or check folder permissions."
-            )
-        except Exception as e:  # Bare except required to handle error types
-            _logger.error(f"Set path failed for plugin {self.plugin.name}", exc_info=e)
-            self.set_ready(False)
-            self.push_error(str(e))
-
-        return False
+        self._error = error
 
     def disable_plugin(self):
-        self.errors = ""
-        self.ready = False
-        self.push_error("Plugin is disabled")
+        self._error = "Plugin is disabled"
 
     def enable_plugin(self):
-        self.setup_plugin_path()
+        self._error = ""
 
     def setup_plugin(self):
-        """Sets up a pluging on first use or restores existing state"""
-
+        """Loads saved settings and restores enabled state from the database."""
         try:
-            # Load the plugins own settings
             self.plugin.load_settings()
 
-            if not self.plugin.path:
-                self.push_error("Plugin has not been setup")
-            # Call the set_path to initialise the plugin correctly
-            self.setup_plugin_path()
-
-            # Retrieve stored state for the PluginWrapper
             existing_configuration = self.get_plugin_configuration(self.plugin.name)
-
             if existing_configuration:
-                self.enabled = existing_configuration[1]
+                # Set _enabled directly to avoid triggering enable/disable side effects
+                self._enabled = bool(existing_configuration[1])
             else:
                 self.store_plugin_configuration()
 
@@ -108,23 +71,24 @@ class PluginWrapper:
         except JoystickDiagramsError as e:
             _logger.error(e)
 
-    def setup_plugin_path(self):
-        if self.plugin.path:
-            path_set = self.set_path(self.plugin.path)
-            self.set_ready(path_set)
+    @property
+    def ready(self) -> bool:
+        """Delegates to the plugin's own ready property (based on required Path fields)."""
+        return self.plugin.ready
 
-    def set_ready(self, state: bool):
-        self.ready = True if state else False
+    @property
+    def error(self) -> str:
+        return self._error
+
+    @error.setter
+    def error(self, value: str):
+        self._error = value
 
     def get_plugin_configuration(self, plugin_name: str):
         return db_plugin_data.get_plugin_configuration(plugin_name)
 
     def store_plugin_configuration(self):
         db_plugin_data.add__update_plugin_configuration(self.name, self.enabled)
-
-    @property
-    def path(self):
-        return self.plugin.path
 
     @property
     def name(self):
@@ -139,8 +103,14 @@ class PluginWrapper:
         return self.plugin.icon
 
     @property
-    def path_type(self):
-        return self.plugin.path_type
+    def plugin_settings(self) -> PluginSettings | None:
+        return self.plugin._plugin_settings
+
+    def has_settings(self) -> bool:
+        return self.plugin._plugin_settings is not None
+
+    def update_setting(self, key: str, value) -> None:
+        self.plugin.update_setting(key, value)
 
     @property
     def enabled(self) -> bool:
@@ -150,11 +120,9 @@ class PluginWrapper:
     def enabled(self, value):
         self._enabled = False if isinstance(value, property) else bool(value)
 
-        if self._enabled is True:
+        if self._enabled:
             self.enable_plugin()
-
-        if self._enabled is False:
+        else:
             self.disable_plugin()
 
         self.store_plugin_configuration()
-        return self.enabled

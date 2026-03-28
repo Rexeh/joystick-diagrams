@@ -1,76 +1,57 @@
-import json
-import logging
 from pathlib import Path
+
+from pydantic import Field
 
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.dcs_world_plugin.dcs_world import DCSWorldParser
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.plugins.plugin_settings import PluginMeta, PluginSettings
 
-from .config import settings
 
-_logger = logging.getLogger("__name__")
-
-CONFIG_FILE = "data.json"
+class DCSSettings(PluginSettings):
+    game_dir: Path | None = Field(
+        default=None,
+        title="DCS World Folder",
+        json_schema_extra={
+            "is_folder": True,
+            "default_path": "~/Saved Games",
+        },
+    )
+    remove_easy_modes: bool = Field(
+        default=True,
+        title="Remove Easy Mode Profiles",
+        description="Hides aircraft variants whose profile name ends with '_easy' (e.g. A-10A_easy). Requires re-running plugins to take effect.",
+    )
 
 
 class ParserPlugin(PluginInterface):
+    plugin_meta = PluginMeta(name="DCS World", version="2.0.0", icon_path="img/dcs.ico")
+    plugin_settings_model = DCSSettings
+
     def __init__(self):
         super().__init__()
-        self.settings = settings
-        self.settings.validators.register()
-        self.path = None
-        self.instance: DCSWorldParser = None
+        self.instance: DCSWorldParser | None = None
 
     def process(self) -> ProfileCollection:
-        return self.instance.process_profiles()
+        if self.instance:
+            return self.instance.process_profiles()
+        return ProfileCollection()
 
-    def set_path(self, path: Path) -> bool:
-        try:
-            self.instance = DCSWorldParser(path)
-            self.path = path
-            self.save_plugin_state()
+    def _rebuild_instance(self) -> None:
+        game_dir = self.get_setting("game_dir")
+        if game_dir and Path(game_dir).exists():
+            self.instance = DCSWorldParser(
+                game_dir, easy_modes=self.get_setting("remove_easy_modes")
+            )
+        else:
+            self.instance = None
 
-        except Exception as e:
-            _logger.error("Exception occured with DCS World:", exc_info=e)
-            return False
+    def update_setting(self, key: str, value) -> None:
+        super().update_setting(key, value)
+        self._rebuild_instance()
 
-        return True
-
-    def save_plugin_state(self):
-        try:
-            with open(
-                Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
-                "w",
-                encoding="UTF8",
-            ) as f:
-                f.write(json.dumps({"path": str(self.path)}))
-        except (PermissionError, OSError) as e:
-            _logger.error(f"Failed to save plugin state for {self.name}: {e}")
-
-    def load_settings(self) -> None:
-        try:
-            with open(
-                Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
-                "r",
-                encoding="UTF8",
-            ) as f:
-                data = json.loads(f.read())
-                self.path = Path(data["path"]) if data["path"] else None
-        except FileNotFoundError:
-            pass
-        except (PermissionError, OSError) as e:
-            _logger.error(f"Permission error loading settings for {self.name}: {e}")
-
-    @property
-    def path_type(self):
-        return self.FolderPath(
-            "Select your DCS World folder from saved games",
-            Path.joinpath(Path.home(), "Saved Games"),
-        )
-
-    @property
-    def icon(self):
-        return f"{Path.joinpath(Path(__file__).parent,self.settings.PLUGIN_ICON)}"
+    def on_settings_loaded(self) -> None:
+        self._rebuild_instance()
 
 
 if __name__ == "__main__":
