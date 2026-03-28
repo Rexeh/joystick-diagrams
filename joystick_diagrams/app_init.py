@@ -34,6 +34,11 @@ def init():
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     os.environ["QT_SCALE_FACTOR"] = "1"
 
+    # Required for QWebEngineView (PNG export) on some platforms
+    from PySide6.QtCore import Qt
+
+    QtWidgets.QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
+
     app = QtWidgets.QApplication(sys.argv)
 
     window = MainWindow()

@@ -165,6 +165,30 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
     def lock_export_button(self):
         self.ExportButton.setEnabled(False)
 
+    def start_png_conversion(self, conversions: list):
+        """Start converting SVGs to PNGs on the main thread using QWebEngineView."""
+        from joystick_diagrams.export_image import PngConverter
+
+        main_window_inst: main_window = self.appState.main_window
+        main_window_inst.statusLabel.setText("Converting to PNG...")
+        main_window_inst.progressBar.setValue(0)
+
+        self._pending_export_count = len(conversions)
+        self._png_converter = PngConverter(conversions)
+        self._png_converter.progress.connect(self._on_png_progress)
+        self._png_converter.finished.connect(self._on_png_finished)
+        self._png_converter.start()
+
+    def _on_png_progress(self, current: int, total: int):
+        main_window_inst: main_window = self.appState.main_window
+        main_window_inst.progressBar.setValue(round(current / total * 100))
+
+    def _on_png_finished(self):
+        self._png_converter.deleteLater()
+        self._png_converter = None
+        self.export_finished(self._pending_export_count)
+        self.unlock_export_button()
+
     def run_exporter(self):
         # Check a location is set
         if self.export_settings_widget.export_location is None:
@@ -180,8 +204,9 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         # Check what is selected / Child / Parent
         items_to_export = self.get_items_to_export()
 
+        export_format = self.export_settings_widget.get_export_format()
         worker = ExportDispatch(
-            items_to_export, self.export_settings_widget.export_location
+            items_to_export, self.export_settings_widget.export_location, export_format
         )
 
         worker.signals.started.connect(self.lock_export_button)
@@ -189,6 +214,8 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         worker.signals.finished.connect(self.unlock_export_button)
         worker.signals.progress.connect(self.update_export_progress)
         worker.signals.error.connect(self.show_export_error)
+        worker.signals.png_conversion_needed.connect(self.start_png_conversion)
+        self._pending_export_count = 0
         self.threadPool.start(worker)
 
 
@@ -197,6 +224,7 @@ class ExportSignals(QObject):
     finished = Signal(int)
     progress = Signal(int)
     error = Signal(str)
+    png_conversion_needed = Signal(list)  # list of (svg_path, png_path) tuples
 
 
 class ExportDispatch(QRunnable):
@@ -207,12 +235,17 @@ class ExportDispatch(QRunnable):
     """
 
     def __init__(
-        self, export_items: list[ExportDevice], export_directory: str, **kwargs
+        self,
+        export_items: list[ExportDevice],
+        export_directory: str,
+        export_format: str = "SVG",
+        **kwargs,
     ):
         super(ExportDispatch, self).__init__()
 
         self.export_items = export_items
         self.export_directory = export_directory
+        self.export_format = export_format
         self.signals = ExportSignals()
 
     @Slot()  # QtCore.Slot
@@ -223,15 +256,22 @@ class ExportDispatch(QRunnable):
         self.signals.started.emit()
         item_count = len(self.export_items)
 
-        # Export SVG files first
+        # Export SVG files (always generates SVGs; for PNG, conversion is post-processed)
         exported_count = 0
+        png_conversions = []
+
         for count, item in enumerate(self.export_items, 1):
             _logger.info(
                 f"Exporting {count}/{item_count} which has profile {item.profile_wrapper.profile_name}"
             )
             try:
-                export(item, self.export_directory)
+                result = export(item, self.export_directory, self.export_format)
                 exported_count += 1
+
+                # When format is PNG, export() returns (svg_path, png_path)
+                if result is not None:
+                    png_conversions.append(result)
+
             except PermissionError:
                 self.signals.error.emit(
                     f"Permission denied writing to '{self.export_directory}'. "
@@ -254,7 +294,11 @@ class ExportDispatch(QRunnable):
         # After SVG export, call plugin export methods if they exist
         self._call_plugin_exports()
 
-        self.signals.finished.emit(exported_count)
+        # If PNG format, signal main thread to do the conversion
+        if png_conversions:
+            self.signals.png_conversion_needed.emit(png_conversions)
+        else:
+            self.signals.finished.emit(exported_count)
 
     def _call_plugin_exports(self):
         """Call export_mappings method on plugins that implement it"""

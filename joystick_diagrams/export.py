@@ -12,6 +12,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape, unescape
 
 from joystick_diagrams import utils
+from joystick_diagrams.app_state import AppState
 from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.input.modifier import Modifier
 from joystick_diagrams.template import Template
@@ -22,9 +23,15 @@ TEMPLATE_NAMING_KEY = "TEMPLATE_NAME"
 TEMPLATE_DATING_KEY = "CURRENT_DATE"
 
 
-def export(export_device: ExportDevice, output_directory: str):
+def export(
+    export_device: ExportDevice, output_directory: str, export_format: str = "SVG"
+) -> tuple[str, str] | None:
+    """Export a device to SVG. Returns (svg_path, png_path) when format is PNG
+    so the caller can queue PNG conversion on the main thread."""
     try:
-        export_device_to_templates(export_device, Path(output_directory))
+        return export_device_to_templates(
+            export_device, Path(output_directory), export_format
+        )
     except PermissionError as e:
         _logger.error(
             f"Permission denied exporting to '{output_directory}': {e}. "
@@ -36,21 +43,33 @@ def export(export_device: ExportDevice, output_directory: str):
         raise
 
 
-def export_device_to_templates(export_device: ExportDevice, export_location: Path):
+def export_device_to_templates(
+    export_device: ExportDevice, export_location: Path, export_format: str = "SVG"
+) -> tuple[str, str] | None:
     """Handles the manipulation of the template."""
 
     if export_device.template is None:
         _logger.error(
             f"There was an issue getting data for the current template: {export_device}"
         )
-        return
+        return None
 
     # Replace strings in the template data with device data
     result = populate_template(export_device)
 
     # TODO handle duplicate file names due to device name clashes
-    file_name = f"{export_device.device_id[:5]}-{export_device.device.name}-{export_device.profile_wrapper.profile_name}.svg"
-    save_template(result, file_name, export_location)
+    base_name = f"{export_device.device_id[:5]}-{export_device.device.name}-{export_device.profile_wrapper.profile_name}"
+
+    # Always save SVG first
+    svg_file = f"{base_name}.svg"
+    save_template(result, svg_file, export_location)
+
+    if export_format == "PNG":
+        svg_path = str(export_location / svg_file)
+        png_path = str(export_location / f"{base_name}.png")
+        return (svg_path, png_path)
+
+    return None
 
 
 def save_template(template_data, file_name, export_path):
@@ -66,23 +85,34 @@ def save_template(template_data, file_name, export_path):
         ) from err
 
 
+def _resolve_command(command: str) -> str:
+    if AppState._inst is None:
+        return command
+    return AppState().label_service.resolve(command)
+
+
 def populate_template(export_device: ExportDevice) -> str:
     """Manipulates template_data to replace known keys with data from Device_"""
     modified_template_data = export_device.template.raw_data
 
     for input_key, input_object in export_device.device.get_combined_inputs().items():
+        resolved_command = _resolve_command(input_object.command)
         modified_template_data = replace_input_string(
             input_key,
-            sanitize_string_for_svg(input_object.command),
+            sanitize_string_for_svg(resolved_command),
             modified_template_data,
         )
 
         if input_object.modifiers:
+            resolved_modifiers = [
+                Modifier(m.modifiers, _resolve_command(m.command))
+                for m in input_object.modifiers
+            ]
             modified_template_data = replace_input_modifiers_string(
-                input_key, input_object.modifiers, modified_template_data
+                input_key, resolved_modifiers, modified_template_data
             )
 
-            for modifier_number, modifier in enumerate(input_object.modifiers, 1):
+            for modifier_number, modifier in enumerate(resolved_modifiers, 1):
                 modified_template_data = replace_input_modifier_id_key(
                     input_key, modifier_number, modifier, modified_template_data
                 )
@@ -182,9 +212,12 @@ def replace_unused_keys(data: str) -> str:
 
 def replace_template_date_string(data: str) -> str:
     """Basic replacement of the key with a date at time of run"""
-    search = re.compile(rf"\b{TEMPLATE_DATING_KEY}\b", re.IGNORECASE)
+    from joystick_diagrams.db.db_settings import get_setting
 
-    return re.sub(search, datetime.now().strftime("%d/%m/%Y"), data)
+    search = re.compile(rf"\b{TEMPLATE_DATING_KEY}\b", re.IGNORECASE)
+    date_format = get_setting("export_date_format") or "%d/%m/%Y"
+
+    return re.sub(search, datetime.now().strftime(date_format), data)
 
 
 def replace_template_name_string(replacement: str, data: str) -> str:

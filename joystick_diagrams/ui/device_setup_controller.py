@@ -42,6 +42,12 @@ def get_export_devices() -> list[ExportDevice]:
     """Retrieves profiles from global state and converts them to device trees"""
     devices = convert_profile_wrappers_to_export_devices(get_processed_profiles())
 
+    # Filter out hidden devices
+    app_state = AppState()
+    devices = [
+        d for d in devices if not app_state.device_service.is_hidden(d.device_id)
+    ]
+
     setup_export_devices(devices)
     return devices
 

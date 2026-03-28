@@ -1,5 +1,7 @@
 import logging
 
+from joystick_diagrams.db.device_service import DeviceService
+from joystick_diagrams.db.label_service import LabelService
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugin_wrapper import PluginWrapper
@@ -25,6 +27,8 @@ class AppState:
         self.plugin_manager: ParserPluginManager = plugin_manager
 
         self.main_window = None
+        self.label_service = LabelService()
+        self.device_service = DeviceService()
         # Profile map for Plugin Profiles for lookups
         self.plugin_profile_map: dict[str, Profile_] = {}
 

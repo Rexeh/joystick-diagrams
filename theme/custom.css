@@ -127,6 +127,10 @@ QProgressBar::chunk {{
     border-bottom-right-radius: 0px;
 }}
 
+.nav-button.standalone {{
+    border-radius: 10px;
+}}
+
 .nav-button:hover {{
     color: #E8EAED;
     background-color: #2c2f38;
@@ -216,6 +220,38 @@ QListWidget::item:hover {{
 QListWidget::item:selected {{
     background-color: rgba(76, 139, 245, 0.15);
     color: #E8EAED;
+}}
+
+/* Settings Sidebar Nav */
+
+QListWidget.settings-nav {{
+    background-color: #1f2128;
+    border: none;
+    border-right: 1px solid #3C4043;
+    border-radius: 0px;
+    padding: 8px 0px;
+    color: #E8EAED;
+    outline: none;
+    font-size: 13px;
+    font-weight: bold;
+}}
+
+QListWidget.settings-nav::item {{
+    padding: 10px 16px;
+    border-bottom: none;
+    border-radius: 0px;
+    margin: 0px 8px;
+    border-radius: 6px;
+}}
+
+QListWidget.settings-nav::item:hover {{
+    background-color: #2c2f38;
+}}
+
+QListWidget.settings-nav::item:selected {{
+    background-color: rgba(76, 139, 245, 0.15);
+    color: #4C8BF5;
+    border-left: 3px solid #4C8BF5;
 }}
 
 /* Separator Lines */
@@ -463,6 +499,20 @@ QTreeWidget.view-binds-tree QHeaderView::section {{
     border: none;
     border-bottom: 1px solid #3C4043;
     padding: 8px 4px;
+}}
+
+/* Inline Edit Field (appears when double-clicking Action cell) */
+
+QTreeWidget.view-binds-tree QLineEdit {{
+    color: #E8EAED;
+    background-color: #1f2128;
+    border: 1px solid #4C8BF5;
+    border-radius: 4px;
+    padding: 4px 8px;
+    min-height: 24px;
+    font-size: 12px;
+    selection-background-color: #4C8BF5;
+    selection-color: white;
 }}
 
 /* Device Control Pills */

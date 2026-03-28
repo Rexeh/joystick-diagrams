@@ -10,11 +10,19 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QProgressBar,
     QPushButton,
+    QSizePolicy,
+    QSpacerItem,
 )
 
 from joystick_diagrams import version
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.ui import configure_page, export_page, plugins_page, ui_consts
+from joystick_diagrams.ui import (
+    configure_page,
+    export_page,
+    plugins_page,
+    settings_page,
+    ui_consts,
+)
 from joystick_diagrams.ui.qt_designer import main_window
 
 _logger = logging.getLogger(__name__)
@@ -132,6 +140,24 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.exportSectionButton.setProperty("class", "nav-button right")
         self.exportSectionButton.setCheckable(True)
 
+        # Spacer to separate workflow buttons from settings
+        self.topnav_layout.addItem(
+            QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        )
+
+        # Settings - visually separated from the workflow flow
+        self.settings_icon_default = qta.icon("fa5s.sliders-h", color="#9AA0A6")
+        self.settings_icon_active = qta.icon("fa5s.sliders-h", color="white")
+        self.settingsSectionButton = QPushButton(self.centralwidget)
+        self.settingsSectionButton.setText("Settings")
+        self.settingsSectionButton.setIcon(self.settings_icon_default)
+        self.settingsSectionButton.setIconSize(nav_icon_size)
+        self.settingsSectionButton.setToolTip("Application settings")
+        self.settingsSectionButton.setProperty("class", "nav-button standalone")
+        self.settingsSectionButton.setCheckable(True)
+        self.settingsSectionButton.clicked.connect(self.load_settings_page)
+        self.topnav_layout.addWidget(self.settingsSectionButton)
+
         # Disable Additional Menu Controls
 
         self.additional_menus = [self.exportSectionButton, self.customiseSectionButton]
@@ -195,8 +221,14 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.exportSectionButton.setIcon(
             self.export_icon_active if active == "export" else self.export_icon_default
         )
+        self.settingsSectionButton.setIcon(
+            self.settings_icon_active
+            if active == "settings"
+            else self.settings_icon_default
+        )
 
     def load_setting_widget(self):
+        self.settingsSectionButton.setChecked(False)
         self.setupSectionButton.setChecked(True)
         self._update_nav_icons("setup")
 
@@ -210,6 +242,7 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.window_content.show()
 
     def load_customise_page(self):
+        self.settingsSectionButton.setChecked(False)
         self.customiseSectionButton.setChecked(True)
         self._update_nav_icons("customise")
         if self.window_content:
@@ -219,11 +252,30 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.window_content.show()
 
     def load_export_page(self):
+        self.settingsSectionButton.setChecked(False)
         self.exportSectionButton.setChecked(True)
         self._update_nav_icons("export")
         if self.window_content:
             self.window_content.hide()
         self.window_content = export_page.ExportPage()
+        self.main_content_layout.addWidget(self.window_content)
+        self.window_content.show()
+
+    def _uncheck_workflow_buttons(self):
+        """Uncheck the Setup/Customise/Export button group."""
+        self.buttonGroup_2.setExclusive(False)
+        for button in self.buttonGroup_2.buttons():
+            button.setChecked(False)
+        self.buttonGroup_2.setExclusive(True)
+
+    def load_settings_page(self):
+        self._uncheck_workflow_buttons()
+        self.settingsSectionButton.setChecked(True)
+        self._update_nav_icons("settings")
+
+        if self.window_content:
+            self.window_content.hide()
+        self.window_content = settings_page.SettingsPage()
         self.main_content_layout.addWidget(self.window_content)
         self.window_content.show()
 
