@@ -7,6 +7,7 @@ DB_NAME = "joystick_diagrams.db"
 
 
 def connection() -> Connection:
-    path = str(data_root().joinpath(DB_DIR, DB_NAME))
-    connection = connect(path)
+    path = data_root().joinpath(DB_DIR, DB_NAME)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    connection = connect(str(path))
     return connection
