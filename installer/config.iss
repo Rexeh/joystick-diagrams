@@ -73,6 +73,16 @@ begin
 
   if CurStep = ssInstall then
   begin
+    // Unconditionally wipe lib\ so stale bytecode from any previous version
+    // cannot mix with the new build.  The dependencies.log fallback is kept
+    // below for belt-and-suspenders on the first run after this change.
+    AppPath := ExpandConstant('{app}');
+    if DirExists(AppPath + '\lib') then
+    begin
+      Log('Removing existing lib directory before upgrade');
+      DelTree(AppPath + '\lib', True, True, True);
+    end;
+
     if LoadStringsFromFile(DependenciesLogPath, Dependencies) then
     begin
       Count := GetArrayLength(Dependencies);

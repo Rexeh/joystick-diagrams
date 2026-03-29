@@ -1,3 +1,20 @@
+import os
+import sys
+
+if getattr(sys, "frozen", False):
+    from pathlib import Path as _Path
+
+    _lib = _Path(sys.executable).parent / "lib"
+    _pyside6 = _lib / "PySide6"
+
+    for _dll_dir in (_lib, _pyside6):
+        if _dll_dir.is_dir():
+            os.add_dll_directory(str(_dll_dir))
+
+    _plugins = _pyside6 / "plugins"
+    if _plugins.is_dir():
+        os.environ.setdefault("QT_PLUGIN_PATH", str(_plugins))
+
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path

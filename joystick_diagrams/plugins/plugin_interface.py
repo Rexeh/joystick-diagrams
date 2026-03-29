@@ -141,6 +141,10 @@ class PluginInterface(ABC):
             self.on_settings_loaded()
         except FileNotFoundError:
             pass
+        except (ValueError, KeyError) as e:
+            _logger.warning(
+                f"Discarding unreadable settings for {self.name} (old format?): {e}"
+            )
         except (PermissionError, OSError) as e:
             _logger.error(f"Permission error loading settings for {self.name}: {e}")
 
