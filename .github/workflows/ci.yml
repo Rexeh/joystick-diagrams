@@ -33,7 +33,3 @@ jobs:
         poetry run ruff ./joystick_diagrams ./tests
     - name: Run tests
       run: poetry run pytest --cov-report=term-missing --cov=joystick_diagrams ./tests --cov-report=xml
-    - name: Run Upload coverage
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
