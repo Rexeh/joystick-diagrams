@@ -2,18 +2,44 @@
 
 Output plugins are post-processing hooks that run automatically after every export. They receive the exported files, device metadata, and the full input binding model, allowing you to deliver diagrams to other tools, generate alternative output formats, or extract binding data for any purpose.
 
+## Installing User Plugins
+
+Output plugins can be installed by users without modifying the application itself. User plugins are stored separately from bundled plugins and survive application updates.
+
+### Via the Settings UI
+
+1. Go to **Settings > Output Plugins**
+2. Click **Install Plugin** and select a `.zip` file containing your plugin
+3. The plugin is validated and appears immediately in the plugin list
+
+### Via the plugins folder
+
+1. Go to **Settings > Output Plugins** and click **Open Plugins Folder** (or navigate to `%APPDATA%/Roaming/Joystick Diagrams/output_plugins/` manually)
+2. Drop your plugin folder into this directory
+3. Restart the application to pick up the new plugin
+
+### Uninstalling
+
+User-installed plugins show a trash icon in their Settings card. Click it to remove the plugin. Plugin settings are preserved, so reinstalling the same plugin will recover its configuration.
+
+### Constraints
+
+- Plugins can only use standard library packages or dependencies already shipped with Joystick Diagrams. If you need something else, open a discussion.
+- A user plugin cannot have the same name as a bundled plugin. If there is a conflict, the bundled plugin takes priority and the user plugin is skipped.
+
 ## Creating an Output Plugin
 
-Create a directory under `joystick_diagrams/plugins/output_plugins/` with this structure:
+Create a directory with this structure:
 
 ```
-output_plugins/
-  your_plugin/
-    __init__.py
-    main.py
-    img/
-      icon.ico
+your_plugin/
+  __init__.py
+  main.py
+  img/
+    icon.ico
 ```
+
+For development, place this under `joystick_diagrams/plugins/output_plugins/`. For distribution, zip the folder and share the `.zip` file.
 
 `main.py` must define a class called `OutputPlugin` that inherits from `OutputPluginInterface`:
 
@@ -38,7 +64,7 @@ class OutputPlugin(OutputPluginInterface):
         return True
 ```
 
-The plugin is automatically discovered and appears in Settings > Output Plugins.
+The plugin is automatically discovered and appears in **Settings > Output Plugins**.
 
 ## ExportResult
 
