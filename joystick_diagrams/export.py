@@ -25,9 +25,12 @@ TEMPLATE_DATING_KEY = "CURRENT_DATE"
 
 def export(
     export_device: ExportDevice, output_directory: str, export_format: str = "SVG"
-) -> tuple[str, str] | None:
-    """Export a device to SVG. Returns (svg_path, png_path) when format is PNG
-    so the caller can queue PNG conversion on the main thread."""
+) -> tuple[str, str | None] | None:
+    """Export a device. Returns (svg_path, png_path_or_None) on success, None on failure.
+
+    For SVG format: returns (svg_path, None).
+    For PNG format: returns (svg_path, png_path) so the caller can queue conversion.
+    """
     try:
         return export_device_to_templates(
             export_device, Path(output_directory), export_format
@@ -45,7 +48,7 @@ def export(
 
 def export_device_to_templates(
     export_device: ExportDevice, export_location: Path, export_format: str = "SVG"
-) -> tuple[str, str] | None:
+) -> tuple[str, str | None] | None:
     """Handles the manipulation of the template."""
 
     if export_device.template is None:
@@ -63,13 +66,13 @@ def export_device_to_templates(
     # Always save SVG first
     svg_file = f"{base_name}.svg"
     save_template(result, svg_file, export_location)
+    svg_path = str(export_location / svg_file)
 
     if export_format == "PNG":
-        svg_path = str(export_location / svg_file)
         png_path = str(export_location / f"{base_name}.png")
         return (svg_path, png_path)
 
-    return None
+    return (svg_path, None)
 
 
 def save_template(template_data, file_name, export_path):

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from joystick_diagrams import utils
+from joystick_diagrams.input.device import Device_
 from joystick_diagrams.plugins.plugin_interface import clean_plugin_name
 from joystick_diagrams.plugins.plugin_settings import PluginMeta, PluginSettings
 
@@ -15,13 +16,21 @@ _logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class ExportResult:
-    """Metadata for a single exported PNG file, passed to output plugins."""
+    """Metadata and data for a single exported file, passed to output plugins.
+
+    Provides both export context (paths, format) and the full device input model
+    so output plugins can work with binding data directly without needing images.
+    """
 
     profile_name: str
     device_name: str
+    device_guid: str
+    source_plugin: str
     template_name: str | None
-    png_path: Path
+    export_format: str  # "SVG" or "PNG"
+    file_path: Path  # the primary output file (SVG or PNG)
     export_directory: Path
+    device: Device_  # full device model with all inputs, axes, hats, modifiers
 
 
 class OutputPluginInterface(ABC):
@@ -40,7 +49,7 @@ class OutputPluginInterface(ABC):
 
     @abstractmethod
     def process_export(self, results: list[ExportResult]) -> bool:
-        """Called after all PNGs are written. Return True on success."""
+        """Called after export completes (SVG or PNG). Return True on success."""
         ...
 
     @property

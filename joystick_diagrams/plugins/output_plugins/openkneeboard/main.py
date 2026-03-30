@@ -40,7 +40,8 @@ FOLDER_TAB = "FOLDER_TAB"
 class OpenKneeboardSettings(PluginSettings):
     saved_games_path: Path | None = Field(
         default=None,
-        title="DCS Saved Games Folder",
+        title="DCS Instance Folder",
+        description="e.g. C:\\Users\\You\\Saved Games\\DCS",
         json_schema_extra={
             "is_folder": True,
             "default_path": "~/Saved Games",
@@ -117,34 +118,34 @@ class OutputPlugin(OutputPluginInterface):
             _logger.error("OpenKneeboard: saved_games_path is not configured")
             return False
 
-        kneeboard_root = Path(saved_games) / "DCS.openbeta" / "KNEEBOARD"
+        kneeboard_root = Path.joinpath(Path(saved_games), "KNEEBOARD")
         success = True
 
         for result in results:
-            if not result.png_path.exists():
+            if not result.file_path.exists():
                 _logger.warning(
-                    f"OpenKneeboard: PNG not found, skipping: {result.png_path}"
+                    f"OpenKneeboard: file not found, skipping: {result.file_path}"
                 )
                 continue
 
             if organize:
                 aircraft_name = self._resolve_aircraft_name(result.profile_name)
-                dest_dir = kneeboard_root / aircraft_name
+                dest_dir = Path.joinpath(kneeboard_root, aircraft_name)
             else:
                 dest_dir = kneeboard_root
 
             if use_subfolder:
-                dest_dir = dest_dir / "JoystickDiagrams"
+                dest_dir = Path.joinpath(dest_dir, "JoystickDiagrams")
 
             try:
                 dest_dir.mkdir(parents=True, exist_ok=True)
-                dest_path = dest_dir / result.png_path.name
-                shutil.copy2(result.png_path, dest_path)
+                dest_path = Path.joinpath(dest_dir, result.file_path.name)
+                shutil.copy2(result.file_path, dest_path)
                 _logger.info(
-                    f"OpenKneeboard: copied {result.png_path.name} → {dest_path}"
+                    f"OpenKneeboard: copied {result.file_path.name} -> {dest_path}"
                 )
             except (PermissionError, OSError) as e:
-                _logger.error(f"OpenKneeboard: failed to copy {result.png_path}: {e}")
+                _logger.error(f"OpenKneeboard: failed to copy {result.file_path}: {e}")
                 success = False
 
         return success
@@ -160,29 +161,31 @@ class OutputPlugin(OutputPluginInterface):
         success = True
 
         for result in results:
-            if not result.png_path.exists():
+            if not result.file_path.exists():
                 _logger.warning(
-                    f"OpenKneeboard: PNG not found, skipping: {result.png_path}"
+                    f"OpenKneeboard: file not found, skipping: {result.file_path}"
                 )
                 continue
 
             if organize:
-                dest_dir = Path(output_folder) / _safe_folder_name(result.profile_name)
+                dest_dir = Path.joinpath(
+                    Path(output_folder), _safe_folder_name(result.profile_name)
+                )
             else:
                 dest_dir = Path(output_folder)
 
             if use_subfolder:
-                dest_dir = dest_dir / "JoystickDiagrams"
+                dest_dir = Path.joinpath(dest_dir, "JoystickDiagrams")
 
             try:
                 dest_dir.mkdir(parents=True, exist_ok=True)
-                dest_path = dest_dir / result.png_path.name
-                shutil.copy2(result.png_path, dest_path)
+                dest_path = Path.joinpath(dest_dir, result.file_path.name)
+                shutil.copy2(result.file_path, dest_path)
                 _logger.info(
-                    f"OpenKneeboard: copied {result.png_path.name} → {dest_path}"
+                    f"OpenKneeboard: copied {result.file_path.name} -> {dest_path}"
                 )
             except (PermissionError, OSError) as e:
-                _logger.error(f"OpenKneeboard: failed to copy {result.png_path}: {e}")
+                _logger.error(f"OpenKneeboard: failed to copy {result.file_path}: {e}")
                 success = False
 
         return success

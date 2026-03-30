@@ -304,6 +304,7 @@ class ExportDispatch(QRunnable):
         # Export SVG files (always generates SVGs; for PNG, conversion is post-processed)
         exported_count = 0
         png_conversions = []
+        export_results = []
 
         for count, item in enumerate(self.export_items, 1):
             _logger.info(
@@ -313,17 +314,25 @@ class ExportDispatch(QRunnable):
                 result = export(item, self.export_directory, self.export_format)
                 exported_count += 1
 
-                # When format is PNG, export() returns (svg_path, png_path)
                 if result is not None:
                     svg_path, png_path = result
+                    is_png = png_path is not None
+
                     export_result = ExportResult(
                         profile_name=item.profile_wrapper.profile_name,
                         device_name=item.device_name,
+                        device_guid=item.device_id,
+                        source_plugin=item.profile_wrapper.profile_origin.name,
                         template_name=item.template_file_name,
-                        png_path=Path(png_path),
+                        export_format="PNG" if is_png else "SVG",
+                        file_path=Path(png_path if is_png else svg_path),
                         export_directory=Path(self.export_directory),
+                        device=item.device,
                     )
-                    png_conversions.append((svg_path, png_path, export_result))
+                    export_results.append(export_result)
+
+                    if is_png:
+                        png_conversions.append((svg_path, png_path, export_result))
 
             except PermissionError:
                 self.signals.error.emit(
@@ -347,10 +356,12 @@ class ExportDispatch(QRunnable):
         # After SVG export, call plugin export methods if they exist
         self._call_plugin_exports()
 
-        # If PNG format, signal main thread to do the conversion
+        # If PNG format, signal main thread to do the conversion + output plugins after
         if png_conversions:
             self.signals.png_conversion_needed.emit(png_conversions)
         else:
+            # SVG format: dispatch output plugins directly on this worker thread
+            self._dispatch_output_plugins(export_results)
             self.signals.finished.emit(exported_count)
 
     def _call_plugin_exports(self):
@@ -382,6 +393,25 @@ class ExportDispatch(QRunnable):
 
         except Exception as e:
             _logger.error(f"Error accessing plugin manager for exports: {e}")
+
+    def _dispatch_output_plugins(self, results: list):
+        """Run enabled output plugins with the given export results."""
+        if not results:
+            return
+        try:
+            app_state = AppState()
+            if app_state.output_plugin_manager:
+                for (
+                    wrapper
+                ) in app_state.output_plugin_manager.get_enabled_plugin_wrappers():
+                    try:
+                        wrapper.run(results)
+                    except Exception as e:
+                        _logger.error(
+                            f"Output plugin '{wrapper.name}' raised an exception: {e}"
+                        )
+        except Exception as e:
+            _logger.error(f"Error dispatching output plugins: {e}")
 
 
 if __name__ == "__main__":
