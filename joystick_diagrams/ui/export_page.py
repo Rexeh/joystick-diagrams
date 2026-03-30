@@ -14,6 +14,7 @@ from joystick_diagrams.db.db_device_management import (
 )
 from joystick_diagrams.export import export
 from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.plugins.output_plugin_interface import ExportResult
 from joystick_diagrams.ui import main_window, ui_consts
 from joystick_diagrams.ui.device_setup import DeviceSetup
 from joystick_diagrams.ui.export_settings import ExportSettings
@@ -174,7 +175,11 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         main_window_inst.progressBar.setValue(0)
 
         self._pending_export_count = len(conversions)
-        self._png_converter = PngConverter(conversions)
+        # Extract ExportResult objects from the (svg, png, export_result) tuples
+        self._pending_export_results = [t[2] for t in conversions if len(t) == 3]
+        # Pass only (svg, png) pairs to PngConverter
+        png_pairs = [(t[0], t[1]) for t in conversions]
+        self._png_converter = PngConverter(png_pairs)
         self._png_converter.progress.connect(self._on_png_progress)
         self._png_converter.finished.connect(self._on_png_finished)
         self._png_converter.start()
@@ -186,6 +191,16 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
     def _on_png_finished(self):
         self._png_converter.deleteLater()
         self._png_converter = None
+
+        export_results = getattr(self, "_pending_export_results", [])
+        if export_results and self.appState.output_plugin_manager:
+            output_worker = OutputPluginDispatch(export_results)
+            output_worker.signals.finished.connect(self._finish_export)
+            self.threadPool.start(output_worker)
+        else:
+            self._finish_export()
+
+    def _finish_export(self):
         self.export_finished(self._pending_export_count)
         self.unlock_export_button()
 
@@ -224,7 +239,37 @@ class ExportSignals(QObject):
     finished = Signal(int)
     progress = Signal(int)
     error = Signal(str)
-    png_conversion_needed = Signal(list)  # list of (svg_path, png_path) tuples
+    png_conversion_needed = Signal(
+        list
+    )  # list of (svg_path, png_path, ExportResult) tuples
+
+
+class OutputPluginSignals(QObject):
+    finished = Signal()
+
+
+class OutputPluginDispatch(QRunnable):
+    """Runs enabled output plugins after PNG conversion completes."""
+
+    def __init__(self, results: list):
+        super().__init__()
+        self.results = results
+        self.signals = OutputPluginSignals()
+
+    @Slot()
+    def run(self):
+        app_state = AppState()
+        if app_state.output_plugin_manager:
+            for (
+                wrapper
+            ) in app_state.output_plugin_manager.get_enabled_plugin_wrappers():
+                try:
+                    wrapper.run(self.results)
+                except Exception as e:
+                    _logger.error(
+                        f"Output plugin '{wrapper.name}' raised an exception: {e}"
+                    )
+        self.signals.finished.emit()
 
 
 class ExportDispatch(QRunnable):
@@ -270,7 +315,15 @@ class ExportDispatch(QRunnable):
 
                 # When format is PNG, export() returns (svg_path, png_path)
                 if result is not None:
-                    png_conversions.append(result)
+                    svg_path, png_path = result
+                    export_result = ExportResult(
+                        profile_name=item.profile_wrapper.profile_name,
+                        device_name=item.device_name,
+                        template_name=item.template_file_name,
+                        png_path=Path(png_path),
+                        export_directory=Path(self.export_directory),
+                    )
+                    png_conversions.append((svg_path, png_path, export_result))
 
             except PermissionError:
                 self.signals.error.emit(

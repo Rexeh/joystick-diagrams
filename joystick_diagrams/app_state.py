@@ -5,6 +5,7 @@ from joystick_diagrams.db.label_service import LabelService
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugin_wrapper import PluginWrapper
+from joystick_diagrams.plugins.output_plugin_manager import OutputPluginManager
 from joystick_diagrams.plugins.plugin_manager import ParserPluginManager
 from joystick_diagrams.profile_wrapper import ProfileWrapper
 
@@ -20,11 +21,19 @@ class AppState:
         if not cls._inst:
             cls._inst = super(AppState, cls).__new__(cls)
 
-            cls._inst._init(plugin_manager=kwargs["plugin_manager"])
+            cls._inst._init(
+                plugin_manager=kwargs["plugin_manager"],
+                output_plugin_manager=kwargs.get("output_plugin_manager"),
+            )
         return cls._inst
 
-    def _init(self, plugin_manager: ParserPluginManager) -> None:
+    def _init(
+        self,
+        plugin_manager: ParserPluginManager,
+        output_plugin_manager: OutputPluginManager | None = None,
+    ) -> None:
         self.plugin_manager: ParserPluginManager = plugin_manager
+        self.output_plugin_manager: OutputPluginManager | None = output_plugin_manager
 
         self.main_window = None
         self.label_service = LabelService()

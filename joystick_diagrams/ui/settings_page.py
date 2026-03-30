@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QFormLayout,
+    QFrame,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -24,6 +25,7 @@ from PySide6.QtWidgets import (
 
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db.db_settings import add_update_setting_value, get_setting
+from joystick_diagrams.output_plugin_wrapper import OutputPluginWrapper
 
 _logger = logging.getLogger(__name__)
 
@@ -61,6 +63,7 @@ class SettingsPage(QMainWindow):
             ("fa5s.cog", "General"),
             ("fa5s.eye-slash", "Hidden Devices"),
             ("fa5s.tags", "Custom Labels"),
+            ("fa5s.plug", "Output Plugins"),
         ]
         for icon_name, label in nav_items:
             item = QListWidgetItem(qta.icon(icon_name, color="#9AA0A6"), label)
@@ -74,6 +77,7 @@ class SettingsPage(QMainWindow):
         self.stack.addWidget(self._create_general_tab())
         self.stack.addWidget(self._create_hidden_devices_tab())
         self.stack.addWidget(self._create_custom_labels_tab())
+        self.stack.addWidget(self._create_output_plugins_tab())
         root_layout.addWidget(self.stack, 1)
 
         self.nav_list.currentRowChanged.connect(self.stack.setCurrentIndex)
@@ -362,6 +366,140 @@ class SettingsPage(QMainWindow):
     def reset_all_labels(self):
         self.appState.label_service.remove_all_labels()
         self.populate_table()
+
+    # ── Output Plugins Tab ──
+
+    def _create_output_plugins_tab(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(16)
+
+        help_text = QLabel(
+            "Output plugins run automatically after PNG export to deliver your diagrams "
+            "to other applications (e.g. OpenKneeboard)."
+        )
+        help_text.setObjectName("device_help_label")
+        help_text.setWordWrap(True)
+        layout.addWidget(help_text)
+
+        if self.appState.output_plugin_manager:
+            for wrapper in self.appState.output_plugin_manager.plugin_wrappers:
+                card = OutputPluginCard(wrapper)
+                layout.addWidget(card)
+
+        layout.addStretch(1)
+        return tab
+
+
+class OutputPluginCard(QWidget):
+    """A card showing a single output plugin with enable toggle and setup button."""
+
+    def __init__(self, wrapper: OutputPluginWrapper, parent=None):
+        super().__init__(parent)
+        self._wrapper = wrapper
+        self._config_panel = None
+        self._build_ui()
+
+    def _build_ui(self):
+        from PySide6.QtGui import QFont, QIcon
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(4)
+
+        # Card frame
+        frame = QFrame()
+        frame.setFrameShape(QFrame.Shape.StyledPanel)
+        frame_layout = QVBoxLayout(frame)
+        frame_layout.setContentsMargins(12, 10, 12, 10)
+        frame_layout.setSpacing(8)
+
+        # Header row: icon + name + enable toggle
+        header_row = QHBoxLayout()
+        header_row.setSpacing(10)
+
+        icon_label = QLabel()
+        icon_label.setPixmap(QIcon(self._wrapper.icon).pixmap(QSize(24, 24)))
+        icon_label.setFixedSize(24, 24)
+        header_row.addWidget(icon_label)
+
+        name_font = QFont()
+        name_font.setBold(True)
+        name_label = QLabel(f"{self._wrapper.name}  v{self._wrapper.version}")
+        name_label.setFont(name_font)
+        header_row.addWidget(name_label, stretch=1)
+
+        self._enable_btn = QPushButton(
+            "Enabled" if self._wrapper.enabled else "Disabled"
+        )
+        self._enable_btn.setCheckable(True)
+        self._enable_btn.setChecked(self._wrapper.enabled)
+        self._enable_btn.setProperty("class", "enabled-button")
+        self._enable_btn.clicked.connect(self._toggle_enabled)
+        header_row.addWidget(self._enable_btn)
+
+        frame_layout.addLayout(header_row)
+
+        # Ready indicator + setup button row
+        action_row = QHBoxLayout()
+        action_row.setSpacing(8)
+
+        self._ready_label = QLabel()
+        self._update_ready_label()
+        action_row.addWidget(self._ready_label)
+        action_row.addStretch(1)
+
+        if self._wrapper.has_settings():
+            setup_btn = QPushButton("Setup" if not self._wrapper.ready else "Update")
+            setup_btn.setProperty("class", "plugin-setup-button")
+            setup_btn.clicked.connect(self._toggle_config_panel)
+            action_row.addWidget(setup_btn)
+
+        frame_layout.addLayout(action_row)
+
+        # Config panel placeholder (shown below the card when opened)
+        self._panel_container = QVBoxLayout()
+        self._panel_container.setContentsMargins(0, 0, 0, 0)
+
+        outer.addWidget(frame)
+        outer.addLayout(self._panel_container)
+
+    def _update_ready_label(self):
+        if self._wrapper.ready:
+            self._ready_label.setText(
+                qta.icon("fa5s.check-circle", color="#34D399").pixmap(14, 14).isNull()
+                and "Ready"
+                or "Ready"
+            )
+            self._ready_label.setStyleSheet("color: #34D399;")
+        else:
+            self._ready_label.setText("Not configured")
+            self._ready_label.setStyleSheet("color: #EF4444;")
+
+    def _toggle_enabled(self, checked: bool):
+        self._wrapper.enabled = checked
+        self._enable_btn.setText("Enabled" if checked else "Disabled")
+
+    def _toggle_config_panel(self):
+        from joystick_diagrams.ui.plugins_page import PluginConfigPanel
+
+        # Clear any existing panel
+        while self._panel_container.count():
+            item = self._panel_container.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        if self._config_panel is not None:
+            self._config_panel = None
+            return
+
+        # Open a new panel (pass self as the "page" — PluginConfigPanel uses it for dialogs)
+        panel = PluginConfigPanel(self._wrapper, self)
+        panel.settings_changed.connect(self._update_ready_label)
+        panel.close_requested.connect(self._toggle_config_panel)
+        self._panel_container.addWidget(panel)
+        self._config_panel = panel
 
 
 if __name__ == "__main__":

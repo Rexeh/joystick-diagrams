@@ -7,6 +7,7 @@ from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
+    QComboBox,
     QFileDialog,
     QFrame,
     QHBoxLayout,
@@ -536,6 +537,21 @@ class PluginConfigPanel(QWidget):
             return widget
 
         if annotation is str:
+            extra = field_info.json_schema_extra or {}
+            options = extra.get("options")
+            if options:
+                widget = QComboBox()
+                widget.setProperty("class", "view-binds-list")
+                for option in options:
+                    widget.addItem(option)
+                current_index = widget.findText(str(current_value or ""))
+                if current_index >= 0:
+                    widget.setCurrentIndex(current_index)
+                widget.currentTextChanged.connect(
+                    lambda text, k=field_name: self._on_setting_changed(k, text)
+                )
+                return widget
+
             widget = QLineEdit(str(current_value or ""))
             widget.editingFinished.connect(
                 lambda k=field_name, w=widget: self._on_setting_changed(k, w.text())
