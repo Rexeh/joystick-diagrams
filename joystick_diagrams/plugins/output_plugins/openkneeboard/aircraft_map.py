@@ -43,4 +43,6 @@ KNOWN_DCS_AIRCRAFT: dict[str, str] = {
     "tf-51d mustang": "TF-51D",
     "uh-1h huey": "UH-1H",
     "yak-52": "Yak-52",
+    "ah-64d_blk_ii_cpg": "AH-64D_BLK_II",
+    "ah-64d_blk_ii_plt": "AH-64D_BLK_II",
 }
