@@ -1,7 +1,7 @@
 import logging
 import os
 
-import qtawesome as qta  # type:  ignore
+import qtawesome as qta
 from PySide6.QtCore import QCoreApplication, QSize, Qt
 from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (

@@ -9,7 +9,7 @@ from ply import lex, yacc
 
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.input.axis import Axis, AxisDirection, AxisSlider
-from joystick_diagrams.input.button import Button  # type: ignore
+from joystick_diagrams.input.button import Button
 
 #################
 from joystick_diagrams.input.device import Device_
@@ -197,7 +197,7 @@ class DCSWorldParser:
                 f"DCS: File {item} no longer found - \
                     It has been moved/deleted from directory. {err}"
             )
-            raise JoystickDiagramsError(err) from err
+            raise JoystickDiagramsError(str(err)) from err
 
         else:
             parsed_config = self.parse_config(file_data)  ##Better handling - decompose

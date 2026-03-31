@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 
-import requests  # type: ignore
+import requests
 import semver
 
 _LOGGER = logging.getLogger(__name__)

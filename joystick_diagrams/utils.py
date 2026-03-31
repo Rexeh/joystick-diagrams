@@ -117,5 +117,5 @@ def install_root() -> str:
     return (
         os.path.dirname(sys.executable)
         if getattr(sys, "frozen", False)
-        else os.path.dirname(__package__)
+        else os.path.dirname(__package__ or "")
     )

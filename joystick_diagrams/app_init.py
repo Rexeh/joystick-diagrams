@@ -5,7 +5,7 @@ import sys
 from PySide6 import QtWidgets
 from qt_material import apply_stylesheet
 
-from joystick_diagrams import utils  # type: ignore
+from joystick_diagrams import utils
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db import db_handler
 from joystick_diagrams.plugins.output_plugin_manager import OutputPluginManager

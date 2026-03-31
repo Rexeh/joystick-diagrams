@@ -133,7 +133,10 @@ class PluginInterface(ABC):
         try:
             with open(config_file, "r", encoding="UTF8") as f:
                 data = json.load(f)
-            if self._plugin_settings is not None:
+            if (
+                self._plugin_settings is not None
+                and self.plugin_settings_model is not None
+            ):
                 settings_data = data.get("settings", {})
                 self._plugin_settings = self.plugin_settings_model.model_validate(
                     settings_data

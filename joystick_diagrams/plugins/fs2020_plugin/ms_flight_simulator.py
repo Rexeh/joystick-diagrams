@@ -75,12 +75,15 @@ def process_device(device_xml: eT.Element, collection: ProfileCollection):
     device_name = device_xml.get("DeviceName")
     device_guid = device_xml.get("GUID")
 
-    if (device_name or device_guid) is None:
+    if device_name is None or device_guid is None:
         return
 
     profile = collection.get_profile(default_profile_name)
 
-    dev = profile.add_device(device_guid, device_name)  # type: ignore
+    if profile is None:
+        return
+
+    dev = profile.add_device(device_guid, device_name)
 
     contexts = device_xml.findall("Context")
 
@@ -124,14 +127,17 @@ def process_contexts(contexts: list[eT.Element]) -> list["Control"]:
 
         # Multiple contexts can be linked, i.e. X- and X+ are just X
         for action in actions:
-            if action.get("ActionName") is None:
+            action_name_raw = action.get("ActionName")
+            if action_name_raw is None:
                 continue
 
-            action_name = split_action_name(action.get("ActionName"))  # type: ignore
+            action_name = split_action_name(action_name_raw)
 
-            primary_action_keys = action.find("Primary").findall(
-                "KEY"
-            )  # TODO could fail
+            primary = action.find("Primary")
+            if primary is None:
+                continue
+
+            primary_action_keys = primary.findall("KEY")
 
             if primary_action_keys:
                 control, modifiers = process_action_keys(primary_action_keys)
@@ -164,10 +170,12 @@ def process_action_keys(keys: list[eT.Element]) -> tuple:
         return (None, None)
 
 
-def parse_joystick_bind_information(bind_information: str):
+def parse_joystick_bind_information(bind_information: str | None):
     """Process the particular bind key from information block.
 
     The data here is inconsistent from FS2020, so proceeding cautiously"""
+    if bind_information is None:
+        return None
     data = bind_information.replace("Joystick", "").strip()
 
     parts = data.split(" ")

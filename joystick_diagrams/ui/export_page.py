@@ -3,7 +3,7 @@ import os
 import webbrowser
 from pathlib import Path
 
-import qtawesome as qta  # type: ignore
+import qtawesome as qta
 from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
@@ -237,7 +237,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
 
     def export_finished(self, data):
         # TODO handle MW interaction better
-        main_window_inst: main_window = self.appState.main_window
+        main_window_inst: main_window.MainWindow = self.appState.main_window
         main_window_inst.progressBar.setRange(0, 100)
         main_window_inst.progressBar.setValue(0)
         main_window_inst.statusLabel.setText("Waiting...")
@@ -252,18 +252,19 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
 
         msg_box.exec()
-        if get_setting("open_after_export") != "false":
-            webbrowser.open(self.export_settings_widget.export_location)
+        export_loc = self.export_settings_widget.export_location
+        if get_setting("open_after_export") != "false" and export_loc is not None:
+            webbrowser.open(export_loc)
 
     def update_export_progress(self, data):
         # TODO handle MW interaction better
-        main_window_inst: main_window = self.appState.main_window
+        main_window_inst: main_window.MainWindow = self.appState.main_window
         main_window_inst.progressBar.setValue(data)
         main_window_inst.statusLabel.setText("Exporting templates")
 
     def _set_indeterminate_status(self, text: str):
         """Switch progress bar to indeterminate (barber pole) with a status message."""
-        main_window_inst: main_window = self.appState.main_window
+        main_window_inst: main_window.MainWindow = self.appState.main_window
         main_window_inst.progressBar.setRange(0, 0)
         main_window_inst.statusLabel.setText(text)
 
@@ -286,7 +287,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         """Start converting SVGs to PNGs on the main thread using QWebEngineView."""
         from joystick_diagrams.export_image import PngConverter
 
-        main_window_inst: main_window = self.appState.main_window
+        main_window_inst: main_window.MainWindow = self.appState.main_window
         main_window_inst.statusLabel.setText("Converting to PNG...")
         main_window_inst.progressBar.setValue(0)
 
@@ -301,7 +302,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         self._png_converter.start()
 
     def _on_png_progress(self, current: int, total: int):
-        main_window_inst: main_window = self.appState.main_window
+        main_window_inst: main_window.MainWindow = self.appState.main_window
         main_window_inst.progressBar.setValue(round(current / total * 100))
 
     def _on_png_finished(self):

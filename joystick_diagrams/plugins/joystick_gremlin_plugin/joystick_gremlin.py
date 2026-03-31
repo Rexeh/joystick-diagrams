@@ -93,8 +93,9 @@ class JoystickGremlinParser:
             _active_profile = profile_collection.create_profile(mode_name)
 
             # Create DEVICE from PARENT node
-            _device_guid = mode.parentNode.getAttribute("device-guid")
-            _device_name = mode.parentNode.getAttribute("name")
+            parent = mode.parentNode
+            _device_guid = parent.getAttribute("device-guid") if parent else ""
+            _device_name = parent.getAttribute("name") if parent else ""
 
             if inherit:
                 normalized_guid = Device_.validate_guid(_device_guid)
@@ -265,7 +266,7 @@ class JoystickGremlinParser:
         return hat_mappings
 
     def handle_virtual_button_container(
-        self, hat_id, containers: minidom.NodeList[minidom.Element]
+        self, hat_id, containers: list[minidom.Element]
     ):
         hat_mappings = []
         for container in containers:
@@ -315,7 +316,7 @@ class JoystickGremlinParser:
         return hat_mappings
 
     def handle_hat_button_container(
-        self, hat_id, hat_containers: minidom.NodeList[minidom.Element]
+        self, hat_id, hat_containers: list[minidom.Element]
     ):
         four_way_hat = 4
 

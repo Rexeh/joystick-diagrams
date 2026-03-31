@@ -562,7 +562,7 @@ class StarCitizen:
 
     def get_human_readable_name(self, name) -> str:
         if name in self.custom_labels:
-            return self.name_format(self.custom_labels.get(name))
+            return self.name_format(self.custom_labels[name])
 
         return self.name_format(name)
 

@@ -50,7 +50,7 @@ class ExportError(JoystickDiagramsError):
 
 
 class PluginNotValidError(JoystickDiagramsError):
-    def __init__(self, value: str = "", error: str = "") -> None:
+    def __init__(self, value: str = "", error: str | Exception = "") -> None:
         super().__init__(value)
         self.error = error
 

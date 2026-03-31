@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-import qtawesome as qta  # type:  ignore
+import qtawesome as qta
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QIcon
 from PySide6.QtWidgets import (

@@ -23,7 +23,7 @@ class Profile_:  # noqa: N801
         else:
             _logger.warning(f"Device {guid} already exists and will not be re-added")
 
-        return self.get_device(guid)  # type: ignore
+        return self.devices[guid]
 
     def get_devices(self) -> dict[str, Device_] | None:
         return self.devices

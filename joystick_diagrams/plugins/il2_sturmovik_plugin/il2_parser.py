@@ -98,7 +98,7 @@ class IL2Parser:
                     continue
 
             if content is None:
-                raise UnicodeDecodeError(
+                raise ValueError(
                     "Failed to read devices file with any supported encoding"
                 )
 
@@ -132,7 +132,7 @@ class IL2Parser:
                     continue
 
             if content is None:
-                raise UnicodeDecodeError(
+                raise ValueError(
                     "Failed to read global.actions file with any supported encoding"
                 )
 
@@ -652,7 +652,9 @@ class IL2Parser:
         return None
 
     def export_mapping_to_file(
-        self, output_file_path: Path, profile_collection: ProfileCollection = None
+        self,
+        output_file_path: Path,
+        profile_collection: ProfileCollection | None = None,
     ) -> bool:
         """Export IL-2 mappings to a CSV file
 

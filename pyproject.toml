@@ -9,7 +9,6 @@ dependencies = [
     "ply>=3.11,<4",
     "requests>=2.31.0,<3",
     "qt-material>=2.14,<3",
-    "dynaconf>=3.2.4,<4",
     "pydantic>=2.0,<3",
     "pyside6>=6.9.0,<7",
     "semver>=3.0.2,<4",
@@ -64,7 +63,7 @@ include_files = [
     "version_manifest.json",
     "./theme"
 ]
-zip_include_packages = ["encodings", "dynaconf"]
+zip_include_packages = ["encodings"]
 bin_excludes =  ["Qt6Pdf.dll", "QtOpenGL.pyd"]
 excludes = [
     "tkinter",
@@ -143,3 +142,33 @@ unfixable = ["B"]
 [tool.ruff.format]
 quote-style = "double"
 docstring-code-format = true
+
+[tool.ty.rules]
+unresolved-attribute = "ignore"
+
+[[tool.ty.overrides]]
+include = ["joystick_diagrams/input/", "joystick_diagrams/export*.py", "joystick_diagrams/template.py", "joystick_diagrams/version.py", "joystick_diagrams/utils.py", "joystick_diagrams/plugins/"]
+exclude = ["joystick_diagrams/plugins/joystick_gremlin_plugin/"]
+[tool.ty.overrides.rules]
+unresolved-attribute = "error"
+
+# minidom stubs are incomplete - suppress false positives
+[[tool.ty.overrides]]
+include = ["joystick_diagrams/plugins/joystick_gremlin_plugin/"]
+[tool.ty.overrides.rules]
+unresolved-attribute = "ignore"
+invalid-argument-type = "ignore"
+invalid-assignment = "ignore"
+not-subscriptable = "ignore"
+
+[[tool.ty.overrides]]
+include = ["joystick_diagrams/ui/"]
+[tool.ty.overrides.rules]
+invalid-argument-type = "ignore"
+invalid-assignment = "ignore"
+
+[[tool.ty.overrides]]
+include = ["tests/"]
+[tool.ty.overrides.rules]
+invalid-argument-type = "ignore"
+invalid-assignment = "ignore"
