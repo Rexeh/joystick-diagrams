@@ -54,44 +54,42 @@ QProgressBar::chunk {{
 
 /* ===== Main Navigation ===== */
 
-.pill-button {{
-    max-height: 28px;
-    max-width: 80px;
-    font-size: 11px;
-    font-weight: bold;
+/* Icon-only utility buttons (Settings, Discord, Website) */
+
+.nav-icon-button {{
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px;
+    margin: 0px 2px;
+}}
+
+.nav-icon-button:hover {{
     background: #2c2f38;
-    border: 1px solid #3C4043;
-    border-radius: 14px;
-    color: #E8EAED;
-    padding: 4px 12px;
 }}
 
-.pill-button:hover {{
-    background: #3C4043;
-    border-color: #4C8BF5;
+.nav-icon-button:checked {{
+    background: rgba(76, 139, 245, 0.15);
+    border: 1px solid rgba(76, 139, 245, 0.3);
 }}
 
-.pill-button.discord {{
-    background: #5865F2;
-    border-color: #5865F2;
-    color: white;
-}}
-
-.pill-button.discord:hover {{
-    background: #6D77F7;
-    border-color: #6D77F7;
-}}
+/* Update notification pill — stays prominent (rare, important) */
 
 .pill-button.update {{
-    background: #34D399;
-    border-color: #34D399;
-    color: #1a1d23;
+    max-height: 28px;
     max-width: 160px;
+    font-size: 11px;
     font-weight: bold;
+    background: #34D399;
+    border: 1px solid #34D399;
+    border-radius: 14px;
+    color: #1a1d23;
+    padding: 4px 12px;
 }}
 
 .pill-button.update:hover {{
     background: #4EEAB3;
+    border-color: #4EEAB3;
 }}
 
 /* Section Navigation Tabs */
@@ -153,8 +151,8 @@ QProgressBar::chunk {{
 }}
 
 .nav-button:disabled {{
-    color: #6B7280;
-    background-color: #1f2128;
+    color: #515761;
+    background-color: #252830;
 }}
 
 .nav-button::menu-indicator {{

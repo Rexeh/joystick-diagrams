@@ -6,6 +6,7 @@ from PySide6.QtCore import QCoreApplication, QSize, Qt
 from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (
     QCheckBox,
+    QFrame,
     QLabel,
     QMainWindow,
     QProgressBar,
@@ -63,7 +64,7 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         # Chevron connectors between workflow buttons
         self.chevron_1 = QLabel()
         self.chevron_1.setPixmap(
-            qta.icon("fa5s.chevron-right", color="#3C4043").pixmap(QSize(14, 14))
+            qta.icon("fa5s.chevron-right", color="#515761").pixmap(QSize(14, 14))
         )
         self.chevron_1.setFixedSize(14, 14)
         self.chevron_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -71,7 +72,7 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
 
         self.chevron_2 = QLabel()
         self.chevron_2.setPixmap(
-            qta.icon("fa5s.chevron-right", color="#3C4043").pixmap(QSize(14, 14))
+            qta.icon("fa5s.chevron-right", color="#515761").pixmap(QSize(14, 14))
         )
         self.chevron_2.setFixedSize(14, 14)
         self.chevron_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -80,14 +81,14 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         # Insert chevrons between the buttons in topnav_layout
         # Layout order after setupUi: [Setup(0), Customise(1), Export(2)]
         # Insert at index 1 (between Setup and Customise) and index 3 (between Customise and Export)
-        self.topnav_layout.insertWidget(1, self.chevron_1)
-        self.topnav_layout.insertWidget(3, self.chevron_2)
+        self.topnav_layout.insertWidget(
+            1, self.chevron_1, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+        self.topnav_layout.insertWidget(
+            3, self.chevron_2, 0, Qt.AlignmentFlag.AlignVCenter
+        )
 
-        # Menu Bars
-
-        ## Menu Icons - Defined in instance as QTAwesome requires QApplication
-        discord_icon = qta.icon("fa5b.discord", color="white", color_active="green")
-
+        # Status Bar
         self.progressBar = QProgressBar()
         self.statusLabel = QLabel()
         self.statusLabel.setText("Waiting...")
@@ -101,20 +102,23 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.statusBar().addPermanentWidget(self.statusLabel, 1)
         self.statusBar().addPermanentWidget(self.progressBar, 1)
 
-        # Top Additional Nav Setup
-
+        # Nav bar setup
         self.topnav_layout.setSpacing(0)
         self.topnav_layout.setContentsMargins(0, 5, 0, 5)
 
         self.discord_pill = QPushButton()
-        self.discord_pill.setText("Discord")
-        self.discord_pill.setIcon(discord_icon)
-        self.discord_pill.setProperty("class", "pill-button discord")
+        self.discord_pill.setIcon(qta.icon("fa5b.discord", color="#6B7280"))
+        self.discord_pill.setIconSize(QSize(16, 16))
+        self.discord_pill.setFixedSize(QSize(32, 32))
+        self.discord_pill.setToolTip("Discord Community")
+        self.discord_pill.setProperty("class", "nav-icon-button")
 
         self.website_pill = QPushButton()
-        self.website_pill.setText("Website")
-        self.website_pill.setIcon(QIcon(ui_consts.JD_ICON))
-        self.website_pill.setProperty("class", "pill-button web")
+        self.website_pill.setIcon(qta.icon("fa5s.globe", color="#6B7280"))
+        self.website_pill.setIconSize(QSize(16, 16))
+        self.website_pill.setFixedSize(QSize(32, 32))
+        self.website_pill.setToolTip("Joystick Diagrams Website")
+        self.website_pill.setProperty("class", "nav-icon-button")
 
         self.update_pill = QPushButton()
         self.update_pill.setText("An update is available!")
@@ -126,21 +130,8 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.website_pill.clicked.connect(self.open_website_link)
         self.update_pill.clicked.connect(self.open_website_link)
 
-        self.topnav_additional_layout.addStretch(1)
-
-        # Top Nav Dev Refresh Button
-        # self.styleButton = QPushButton("Refresh Style")
-        # self.styleButton.clicked.connect(self.set_style)
-
-        # self.styleTimer = QTimer()
-        # self.styleTimer.setInterval(10000)
-        # self.styleTimer.timeout.connect(self.set_style)
-        # self.styleTimer.start()
-
-        # self.topnav_additional_layout.addWidget(self.styleButton)
-        self.topnav_additional_layout.addWidget(self.update_pill)
-        self.topnav_additional_layout.addWidget(self.discord_pill)
-        self.topnav_additional_layout.addWidget(self.website_pill)
+        # Collapse the unused additional layout from Qt Designer
+        self.topnav_additional_layout.setContentsMargins(0, 0, 0, 0)
 
         # Plugins Menu Controls
 
@@ -181,18 +172,36 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
             QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         )
 
-        # Settings - visually separated from the workflow flow
+        # Settings — icon-only, secondary prominence
         self.settings_icon_default = qta.icon("fa5s.sliders-h", color="#9AA0A6")
         self.settings_icon_active = qta.icon("fa5s.sliders-h", color="white")
         self.settingsSectionButton = QPushButton(self.centralwidget)
-        self.settingsSectionButton.setText("Settings")
         self.settingsSectionButton.setIcon(self.settings_icon_default)
-        self.settingsSectionButton.setIconSize(nav_icon_size)
-        self.settingsSectionButton.setToolTip("Application settings")
-        self.settingsSectionButton.setProperty("class", "nav-button standalone")
+        self.settingsSectionButton.setIconSize(QSize(24, 24))
+        self.settingsSectionButton.setFixedSize(QSize(50, 50))
+        self.settingsSectionButton.setToolTip("Settings")
+        self.settingsSectionButton.setProperty("class", "nav-icon-button")
         self.settingsSectionButton.setCheckable(True)
         self.settingsSectionButton.clicked.connect(self.load_settings_page)
-        self.topnav_layout.addWidget(self.settingsSectionButton)
+        self.topnav_layout.addWidget(
+            self.settingsSectionButton, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+
+        # Separator between Settings and external links
+        nav_separator = QFrame()
+        nav_separator.setFrameShape(QFrame.Shape.VLine)
+        nav_separator.setFixedHeight(20)
+        nav_separator.setStyleSheet("color: #3C4043;")
+        self.topnav_layout.addWidget(nav_separator, 0, Qt.AlignmentFlag.AlignVCenter)
+
+        # External link icons — tertiary prominence
+        self.topnav_layout.addWidget(
+            self.discord_pill, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+        self.topnav_layout.addWidget(
+            self.website_pill, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+        self.topnav_layout.addWidget(self.update_pill, 0, Qt.AlignmentFlag.AlignVCenter)
 
         # Disable Additional Menu Controls
 
@@ -241,10 +250,10 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
             x.setToolTip("Run plugins in Setup first to unlock")
         # Reset chevrons to default gray
         self.chevron_1.setPixmap(
-            qta.icon("fa5s.chevron-right", color="#3C4043").pixmap(QSize(14, 14))
+            qta.icon("fa5s.chevron-right", color="#515761").pixmap(QSize(14, 14))
         )
         self.chevron_2.setPixmap(
-            qta.icon("fa5s.chevron-right", color="#3C4043").pixmap(QSize(14, 14))
+            qta.icon("fa5s.chevron-right", color="#515761").pixmap(QSize(14, 14))
         )
 
     def enable_additional_menus(self):

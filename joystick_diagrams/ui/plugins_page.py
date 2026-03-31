@@ -305,6 +305,9 @@ class PluginCard(QFrame):
         self._profile_count = 0
         self._build_ui()
         self.refresh_status()
+        # Restore profile count from any previous plugin execution
+        if plugin_wrapper.plugin_profile_collection:
+            self.set_profile_count(len(plugin_wrapper.plugin_profile_collection))
 
     def _build_ui(self):
         self.setProperty("class", "plugin-card")
