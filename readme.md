@@ -95,7 +95,7 @@ For setup guidance, see the [documentation](https://joystick-diagrams.com/setup/
 ```bash
 git clone https://github.com/Rexeh/joystick-diagrams.git
 cd joystick-diagrams
-poetry install
+uv sync
 ```
 
 ## Community
