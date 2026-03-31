@@ -565,27 +565,8 @@ QTreeWidget.view-binds-tree QLineEdit {{
     selection-color: white;
 }}
 
-/* Device Control Pills */
-
-QLabel.device-control-pill {{
-    border-radius: 4px;
-    padding: 3px 8px;
-    font-size: 10px;
-    font-weight: bold;
-    color: white;
-}}
-
-QLabel.device-control-pill.button {{
-    background: #16a085;
-}}
-
-QLabel.device-control-pill.hat {{
-    background: #5865F2;
-}}
-
-QLabel.device-control-pill.axis {{
-    background: #2980b9;
-}}
+/* Control type tag colors are applied via setForeground/setBackground in Python.
+   No QSS needed for type column cells — they use per-item QBrush coloring. */
 
 /* ===== Export Page ===== */
 
@@ -668,16 +649,17 @@ QTreeWidget.device-tree::indicator:indeterminate {{
 QPushButton.view-errors-button {{
     margin-top: 5px;
     margin-left: 10px;
-    background: #EF4444;
-    color: white;
-    border: none;
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.3);
     border-radius: 4px;
     padding: 6px 12px;
     font-weight: bold;
 }}
 
 QPushButton.view-errors-button:hover {{
-    background: #F87171;
+    background: rgba(245, 158, 11, 0.25);
+    border-color: #F59E0B;
 }}
 
 #export_format {{
@@ -738,4 +720,282 @@ QPushButton.export-location-button:hover {{
 
 .export-button:enabled:hover {{
     background: #6BA1F7;
+}}
+
+/* ===== Reusable Widgets ===== */
+
+/* Section Header */
+
+.section-header {{
+    background: transparent;
+    border-bottom: 2px solid #4C8BF5;
+    padding: 8px 0px;
+    margin-bottom: 8px;
+}}
+
+.section-header-title {{
+    color: #E8EAED;
+    font-size: 16px;
+    font-weight: bold;
+    background: transparent;
+}}
+
+.section-header-subtitle {{
+    color: #9AA0A6;
+    font-size: 12px;
+    background: transparent;
+}}
+
+/* Surface Card */
+
+.surface-card {{
+    background: #252830;
+    border: 1px solid #3C4043;
+    border-radius: 8px;
+    padding: 12px;
+}}
+
+.surface-card-title {{
+    color: #9AA0A6;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #3C4043;
+    margin-bottom: 8px;
+    background: transparent;
+}}
+
+/* ===== Navigation Chevrons ===== */
+
+.nav-chevron {{
+    color: #3C4043;
+    background: transparent;
+    padding: 0px 2px;
+    border: none;
+}}
+
+.nav-chevron.completed {{
+    color: #34D399;
+}}
+
+/* ===== Plugin Cards ===== */
+
+.plugin-card {{
+    background: #252830;
+    border: 1px solid #3C4043;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 4px;
+}}
+
+.plugin-card:hover {{
+    border-color: #4C8BF5;
+}}
+
+.plugin-card.ready {{
+    border-left: 3px solid #34D399;
+}}
+
+.plugin-card.not-ready {{
+    border-left: 3px solid #F59E0B;
+}}
+
+.plugin-card.error {{
+    border-left: 3px solid #EF4444;
+}}
+
+.plugin-card-name {{
+    color: #E8EAED;
+    font-size: 13px;
+    font-weight: bold;
+    background: transparent;
+}}
+
+.plugin-card-version {{
+    color: #9AA0A6;
+    font-size: 11px;
+    background: transparent;
+}}
+
+.plugin-card-status {{
+    font-size: 11px;
+    background: transparent;
+}}
+
+.plugin-card-status.ready {{
+    color: #34D399;
+}}
+
+.plugin-card-status.not-ready {{
+    color: #F59E0B;
+}}
+
+.plugin-card-status.error {{
+    color: #EF4444;
+}}
+
+.profile-count-badge {{
+    background: #4C8BF5;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 20px;
+}}
+
+/* ===== Plugin Config Panel ===== */
+
+.plugin-config-panel {{
+    background: #2c2f38;
+    border-left: 2px solid #4C8BF5;
+}}
+
+/* ===== Guidance Banner ===== */
+
+.guidance-banner {{
+    background: rgba(76, 139, 245, 0.08);
+    border: 1px solid rgba(76, 139, 245, 0.25);
+    border-radius: 6px;
+    padding: 10px 14px;
+}}
+
+.guidance-banner QLabel {{
+    color: #E8EAED;
+    font-size: 12px;
+    background: transparent;
+}}
+
+.guidance-banner-close {{
+    background: transparent;
+    border: none;
+    color: #9AA0A6;
+}}
+
+.guidance-banner-close:hover {{
+    color: #E8EAED;
+}}
+
+/* ===== Modifier Pills ===== */
+
+QLabel.modifier-pill {{
+    background: #2c2f38;
+    border: 1px solid #3C4043;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #E8EAED;
+}}
+
+/* ===== Binds Search Field ===== */
+
+.binds-search {{
+    color: #E8EAED;
+    background-color: #252830;
+    border: 1px solid #3C4043;
+    border-radius: 6px;
+    padding: 8px 12px 8px 32px;
+    font-size: 12px;
+}}
+
+.binds-search:focus {{
+    border-color: #4C8BF5;
+}}
+
+.binds-search::placeholder {{
+    color: #6B7280;
+}}
+
+/* ===== Global Enhancements ===== */
+
+/* Scrollbars */
+
+QScrollBar:vertical {{
+    background: #1a1d23;
+    width: 8px;
+    margin: 0px;
+    border: none;
+}}
+
+QScrollBar::handle:vertical {{
+    background: #3C4043;
+    border-radius: 4px;
+    min-height: 30px;
+}}
+
+QScrollBar::handle:vertical:hover {{
+    background: #4C8BF5;
+}}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+    height: 0px;
+    border: none;
+}}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+    background: none;
+}}
+
+QScrollBar:horizontal {{
+    background: #1a1d23;
+    height: 8px;
+    margin: 0px;
+    border: none;
+}}
+
+QScrollBar::handle:horizontal {{
+    background: #3C4043;
+    border-radius: 4px;
+    min-width: 30px;
+}}
+
+QScrollBar::handle:horizontal:hover {{
+    background: #4C8BF5;
+}}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+    width: 0px;
+    border: none;
+}}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
+    background: none;
+}}
+
+/* Tooltips */
+
+QToolTip {{
+    background: #2c2f38;
+    color: #E8EAED;
+    border: 1px solid #4C8BF5;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
+}}
+
+/* Message Boxes */
+
+QMessageBox {{
+    background: #252830;
+}}
+
+QMessageBox QLabel {{
+    color: #E8EAED;
+}}
+
+QMessageBox QPushButton {{
+    min-width: 80px;
+    padding: 8px 16px;
+}}
+
+/* Focus States */
+
+QLineEdit:focus {{
+    border-color: #4C8BF5;
+}}
+
+QComboBox:focus {{
+    border-color: #4C8BF5;
 }}

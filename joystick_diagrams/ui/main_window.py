@@ -2,7 +2,7 @@ import logging
 import os
 
 import qtawesome as qta  # type:  ignore
-from PySide6.QtCore import QCoreApplication, QSize
+from PySide6.QtCore import QCoreApplication, QSize, Qt
 from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -46,6 +46,34 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.customiseSectionButton.clicked.connect(self.load_customise_page)
         self.exportSectionButton.clicked.connect(self.load_export_page)
         self.window_content = None
+
+        # Step numbers on workflow buttons
+        self.setupSectionButton.setText("1. Setup")
+        self.customiseSectionButton.setText("2. Customise")
+        self.exportSectionButton.setText("3. Export")
+
+        # Chevron connectors between workflow buttons
+        self.chevron_1 = QLabel()
+        self.chevron_1.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#3C4043").pixmap(QSize(14, 14))
+        )
+        self.chevron_1.setFixedSize(14, 14)
+        self.chevron_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.chevron_1.setProperty("class", "nav-chevron")
+
+        self.chevron_2 = QLabel()
+        self.chevron_2.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#3C4043").pixmap(QSize(14, 14))
+        )
+        self.chevron_2.setFixedSize(14, 14)
+        self.chevron_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.chevron_2.setProperty("class", "nav-chevron")
+
+        # Insert chevrons between the buttons in topnav_layout
+        # Layout order after setupUi: [Setup(0), Customise(1), Export(2)]
+        # Insert at index 1 (between Setup and Customise) and index 3 (between Customise and Export)
+        self.topnav_layout.insertWidget(1, self.chevron_1)
+        self.topnav_layout.insertWidget(3, self.chevron_2)
 
         # Menu Bars
 
@@ -200,10 +228,28 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         QDesktopServices.openUrl("https://joystick-diagrams.com")
 
     def disable_additional_menus(self):
-        [x.setDisabled(True) for x in self.additional_menus]
+        for x in self.additional_menus:
+            x.setDisabled(True)
+            x.setToolTip("Run plugins in Setup first to unlock")
+        # Reset chevrons to default gray
+        self.chevron_1.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#3C4043").pixmap(QSize(14, 14))
+        )
+        self.chevron_2.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#3C4043").pixmap(QSize(14, 14))
+        )
 
     def enable_additional_menus(self):
-        [x.setDisabled(False) for x in self.additional_menus]
+        for x in self.additional_menus:
+            x.setDisabled(False)
+            x.setToolTip("")
+        # Light up chevrons to show workflow progression
+        self.chevron_1.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#34D399").pixmap(QSize(14, 14))
+        )
+        self.chevron_2.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#34D399").pixmap(QSize(14, 14))
+        )
 
     def update_menus_from_profile_count(self, data: int):
         self.enable_additional_menus() if data > 0 else self.disable_additional_menus()

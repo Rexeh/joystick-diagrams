@@ -3,7 +3,7 @@ import logging
 import qtawesome as qta
 from PySide6.QtCore import QModelIndex, Qt, Signal
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QListWidgetItem, QMainWindow
+from PySide6.QtWidgets import QAbstractItemView, QListWidgetItem, QMainWindow
 
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.profile_wrapper import ProfileWrapper
@@ -22,53 +22,45 @@ class parent_profile_ui(QMainWindow, parent_profile_management_ui.Ui_Form):
         self.availableParentsComboBox.clear()
         self.listWidget.clear()
         self.addParentItem.clicked.connect(self.add_parent_profile)
-        self.parentUp.clicked.connect(self.change_parent_index_up)
-        self.parentDown.clicked.connect(self.change_parent_index_down)
         self.deleteParent.clicked.connect(self.remove_parent_profile)
         self.availableParentsComboBox.setMaxVisibleItems(15)
         self.currentActiveProfile: ProfileWrapper = None
         self.parentProfileChange.connect(self.save_profile_parent_maps)
         self.listWidget.clicked.connect(self.update_allowed_controls)
 
-        self.parentUp.setIcon(
-            qta.icon("fa5s.arrow-up", color="white", color_disabled="white")
-        )
-        self.parentUp.setText("UP       ")
-        self.parentDown.setIcon(
-            qta.icon("fa5s.arrow-down", color="white", color_disabled="white")
-        )
+        # Updated terminology
+        self.label.setText("Inherited Profiles")
+        self.label_2.setText("Drag to reorder. Higher in list = higher priority.")
+        self.addParentItem.setText("Add Inherited Profile")
+
+        # Hide up/down buttons — replaced by drag-and-drop reordering
+        self.parentUp.hide()
+        self.parentDown.hide()
+
+        # Enable drag-and-drop reordering on the list
+        self.listWidget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self.listWidget.setDefaultDropAction(Qt.DropAction.MoveAction)
+        self.listWidget.model().rowsMoved.connect(self._on_rows_moved)
+
         self.deleteParent.setIcon(
             qta.icon("fa5s.trash-alt", color="white", color_disabled="white")
         )
         self.deleteParent.setProperty("class", "danger")
 
         self.availableParentsComboBox.setStyleSheet("color:white")
+        self.availableParentsComboBox.setProperty("class", "view-binds-list")
 
         self.disable_parent_controls()
 
+    def _on_rows_moved(self):
+        """Handle drag-and-drop reordering."""
+        self.parentProfileChange.emit()
+
     def disable_parent_controls(self):
         self.deleteParent.setDisabled(True)
-        self.parentDown.setDisabled(True)
-        self.parentUp.setDisabled(True)
 
     def update_allowed_controls(self, item: QModelIndex):
-        total_rows = self.listWidget.count() - 1
-        item_index = item.row()
-
         self.deleteParent.setDisabled(False)
-
-        if item_index > 0 and item_index < total_rows:
-            self.deleteParent.setDisabled(False)
-            self.parentDown.setDisabled(False)
-            self.parentUp.setDisabled(False)
-
-        if item_index == 0:
-            self.parentUp.setDisabled(True)
-            self.parentDown.setDisabled(False)
-
-        if item_index == total_rows:
-            self.parentUp.setDisabled(False)
-            self.parentDown.setDisabled(True)
 
     def add_parent_profile(self):
         target_profile = self.availableParentsComboBox.currentData(
@@ -92,18 +84,6 @@ class parent_profile_ui(QMainWindow, parent_profile_management_ui.Ui_Form):
 
         if self.listWidget.count() == 0:
             self.disable_parent_controls()
-        self.parentProfileChange.emit()
-
-    def change_parent_index_up(self):
-        current_row = self.listWidget.currentRow()
-        current_item = self.listWidget.takeItem(current_row)
-        self.listWidget.insertItem(current_row - 1, current_item)
-        self.parentProfileChange.emit()
-
-    def change_parent_index_down(self):
-        current_row = self.listWidget.currentRow()
-        current_item = self.listWidget.takeItem(current_row)
-        self.listWidget.insertItem(current_row + 1, current_item)
         self.parentProfileChange.emit()
 
     def filter_available_parents(self):

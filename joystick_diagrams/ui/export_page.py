@@ -19,6 +19,7 @@ from joystick_diagrams.ui import main_window, ui_consts
 from joystick_diagrams.ui.device_setup import DeviceSetup
 from joystick_diagrams.ui.export_settings import ExportSettings
 from joystick_diagrams.ui.qt_designer import export_ui
+from joystick_diagrams.ui.widgets.section_header import SectionHeader
 from joystick_diagrams.utils import install_root
 
 _logger = logging.getLogger(__name__)
@@ -29,6 +30,16 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
         self.appState = AppState()
+
+        # Replace heading with SectionHeader
+        self.heading_label.hide()
+        self.section_header = SectionHeader(
+            "fa5s.file-export",
+            "Export",
+            "Select devices, assign templates, and export your diagrams",
+        )
+        self.verticalLayout.insertWidget(0, self.section_header)
+
         self.ExportButton.clicked.connect(self.run_exporter)
 
         # Connections
@@ -58,9 +69,12 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
             self.update_export_button_state
         )
 
+        # Double-click to set template on device tree
+        self.device_widget.treeWidget.doubleClicked.connect(self._on_tree_double_click)
+
         self.device_header_label.setText("Devices")
         self.device_help_label.setText(
-            "Choose your devices or profiles to export below"
+            "Choose your devices or profiles to export below. Double-click a device to assign a template."
         )
 
         ## Include Export Settings Panel
@@ -74,6 +88,12 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
 
         # Threading pool
         self.threadPool = QThreadPool()
+
+    def _on_tree_double_click(self, index):
+        """Handle double-click on device tree — trigger template selection for root items."""
+        item = self.device_widget.treeWidget.currentItem()
+        if item and item.parent() is None:
+            self.select_template()
 
     def update_export_button_state(self, data: int):
         if data == 0:
@@ -96,9 +116,13 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
             self.setTemplateButton.setText(f"Update template for {data.text(0)}")
 
     def select_template(self):
+        current_item = self.device_widget.treeWidget.currentItem()
+        if not current_item or current_item.parent() is not None:
+            return
+
         _file = QFileDialog.getOpenFileName(
             self,
-            caption=f"Select an SVG file to use as a template - {self.device_widget.treeWidget.currentItem().text(0)}",
+            caption=f"Select an SVG file to use as a template - {current_item.text(0)}",
             filter=("SVG Files (*.svg)"),
             dir=os.path.join(install_root(), "templates"),
         )
@@ -219,7 +243,24 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         # Check what is selected / Child / Parent
         items_to_export = self.get_items_to_export()
 
+        if not items_to_export:
+            return
+
+        # Export confirmation
         export_format = self.export_settings_widget.get_export_format()
+        device_count = len(set(item.device_id for item in items_to_export))
+        reply = QMessageBox.question(
+            self,
+            "Confirm Export",
+            f"Export {len(items_to_export)} profile{'s' if len(items_to_export) > 1 else ''} "
+            f"across {device_count} device{'s' if device_count > 1 else ''} "
+            f"as {export_format} to:\n\n{self.export_settings_widget.export_location}",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
         worker = ExportDispatch(
             items_to_export, self.export_settings_widget.export_location, export_format
         )

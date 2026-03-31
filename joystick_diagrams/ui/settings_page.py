@@ -30,6 +30,7 @@ from joystick_diagrams import utils
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db.db_settings import add_update_setting_value, get_setting
 from joystick_diagrams.output_plugin_wrapper import OutputPluginWrapper
+from joystick_diagrams.ui.widgets.section_header import SectionHeader
 
 _logger = logging.getLogger(__name__)
 
@@ -95,6 +96,9 @@ class SettingsPage(QMainWindow):
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
 
+        header = SectionHeader("fa5s.cog", "General Settings")
+        layout.addWidget(header)
+
         form = QFormLayout()
         form.setSpacing(12)
         form.setContentsMargins(0, 4, 0, 0)
@@ -143,6 +147,9 @@ class SettingsPage(QMainWindow):
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
 
+        header = SectionHeader("fa5s.eye-slash", "Hidden Devices")
+        layout.addWidget(header)
+
         help_text = QLabel(
             "Devices listed below are hidden from the Customise and Export views. "
             "Right-click a device in the Customise tab to hide it."
@@ -180,6 +187,28 @@ class SettingsPage(QMainWindow):
 
     def populate_hidden_table(self):
         hidden = self.appState.device_service.get_all_hidden()
+
+        if not hidden:
+            self.hidden_table.setRowCount(0)
+            self.hidden_table.hide()
+            if not hasattr(self, "_hidden_empty_label"):
+                self._hidden_empty_label = QLabel(
+                    "No hidden devices. Right-click a device in the Customise tab to hide it."
+                )
+                self._hidden_empty_label.setObjectName("device_help_label")
+                self._hidden_empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                self._hidden_empty_label.setWordWrap(True)
+                self._hidden_empty_label.setStyleSheet(
+                    "color: #9AA0A6; font-style: italic; padding: 40px;"
+                )
+                # Insert after the table in the parent layout
+                self.hidden_table.parent().layout().addWidget(self._hidden_empty_label)
+            self._hidden_empty_label.show()
+            return
+
+        if hasattr(self, "_hidden_empty_label"):
+            self._hidden_empty_label.hide()
+        self.hidden_table.show()
         self.hidden_table.setRowCount(len(hidden))
 
         for row, (guid, name) in enumerate(sorted(hidden.items(), key=lambda x: x[1])):
@@ -213,6 +242,9 @@ class SettingsPage(QMainWindow):
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
 
+        header = SectionHeader("fa5s.tags", "Custom Labels")
+        layout.addWidget(header)
+
         help_text = QLabel(
             "Manage your custom labels below. "
             "Double-click a Custom Label cell to edit it, "
@@ -243,6 +275,23 @@ class SettingsPage(QMainWindow):
         self.table.setProperty("class", "view-binds-tree")
         self.table.cellChanged.connect(self.on_cell_changed)
         layout.addWidget(self.table)
+
+        # Label count
+        self._label_count_text = QLabel()
+        self._label_count_text.setObjectName("device_help_label")
+        layout.addWidget(self._label_count_text)
+
+        # Empty state for labels
+        self._labels_empty_label = QLabel(
+            "No custom labels. Double-click an action in the Customise tab to rename it."
+        )
+        self._labels_empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._labels_empty_label.setWordWrap(True)
+        self._labels_empty_label.setStyleSheet(
+            "color: #9AA0A6; font-style: italic; padding: 20px;"
+        )
+        self._labels_empty_label.hide()
+        layout.addWidget(self._labels_empty_label)
 
         # Add manual entry row
         add_row_layout = QHBoxLayout()
@@ -306,6 +355,20 @@ class SettingsPage(QMainWindow):
         self.table.blockSignals(True)
         labels = self.appState.label_service.get_all_custom_labels()
         self.table.setRowCount(len(labels))
+
+        # Update count and empty state
+        count = len(labels)
+        if count > 0:
+            self._label_count_text.setText(
+                f"{count} custom label{'s' if count != 1 else ''}"
+            )
+            self._label_count_text.show()
+            self._labels_empty_label.hide()
+            self.table.show()
+        else:
+            self._label_count_text.hide()
+            self._labels_empty_label.show()
+            self.table.hide()
 
         for row, (original, custom) in enumerate(sorted(labels.items())):
             original_item = QTableWidgetItem(original)
@@ -378,6 +441,9 @@ class SettingsPage(QMainWindow):
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
+
+        header = SectionHeader("fa5s.plug", "Output Plugins")
+        layout.addWidget(header)
 
         help_text = QLabel(
             "Output plugins run automatically after export to deliver your diagrams "
