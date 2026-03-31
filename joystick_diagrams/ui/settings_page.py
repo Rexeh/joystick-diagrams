@@ -6,6 +6,7 @@ import qtawesome as qta
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QCheckBox,
     QComboBox,
     QFileDialog,
     QFormLayout,
@@ -34,6 +35,7 @@ from joystick_diagrams.ui.widgets.section_header import SectionHeader
 
 _logger = logging.getLogger(__name__)
 
+OPEN_AFTER_EXPORT_SETTING_KEY = "open_after_export"
 DATE_FORMAT_SETTING_KEY = "export_date_format"
 DEFAULT_DATE_FORMAT = "%d/%m/%Y"
 
@@ -88,6 +90,12 @@ class SettingsPage(QMainWindow):
         self.nav_list.currentRowChanged.connect(self.stack.setCurrentIndex)
         self.nav_list.setCurrentRow(0)
 
+    def refresh(self):
+        """Refresh data-dependent tabs when returning to this page."""
+        self.populate_hidden_table()
+        self.populate_table()
+        self._populate_output_plugin_cards()
+
     # ── General Tab ──
 
     def _create_general_tab(self) -> QWidget:
@@ -130,9 +138,24 @@ class SettingsPage(QMainWindow):
         date_label.setObjectName("device_help_label")
         form.addRow(date_label, date_row)
 
+        # Open export folder toggle
+        self.open_after_export_cb = QCheckBox("Open export folder after export")
+        saved_open = get_setting(OPEN_AFTER_EXPORT_SETTING_KEY)
+        self.open_after_export_cb.setChecked(saved_open != "false")  # default True
+        self.open_after_export_cb.stateChanged.connect(
+            self._on_open_after_export_changed
+        )
+        form.addRow("", self.open_after_export_cb)
+
         layout.addLayout(form)
         layout.addStretch(1)
         return tab
+
+    def _on_open_after_export_changed(self, state: int):
+        add_update_setting_value(
+            OPEN_AFTER_EXPORT_SETTING_KEY,
+            "true" if state == Qt.CheckState.Checked.value else "false",
+        )
 
     def _on_date_format_changed(self, index: int):
         fmt = self.date_format_combo.currentData()

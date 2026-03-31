@@ -6,12 +6,22 @@ from pathlib import Path
 import qtawesome as qta  # type: ignore
 from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QTreeWidgetItem
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db.db_device_management import (
     add_update_device_template_path,
 )
+from joystick_diagrams.db.db_settings import get_setting
 from joystick_diagrams.export import export
 from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.plugins.output_plugin_interface import ExportResult
@@ -79,15 +89,88 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
 
         ## Include Export Settings Panel
         self.export_settings_widget = ExportSettings()
-        self.export_settings_container.addWidget(self.export_settings_widget)
         self.export_bottom_section.setProperty("class", "export-bottom-container")
         self.export_settings_container.setProperty("class", "export-settings-container")
+
+        # Stack settings + output plugins row vertically within the container
+        settings_stack = QVBoxLayout()
+        settings_stack.setSpacing(4)
+        settings_stack.setContentsMargins(0, 0, 0, 0)
+        settings_stack.addWidget(self.export_settings_widget)
+
+        # Output plugins — compact inline row matching export settings rows
+        plugins_row = QHBoxLayout()
+        plugins_row.setContentsMargins(0, 2, 0, 0)
+        plugins_row.setSpacing(8)
+
+        plugins_label = QLabel("Output Plugins")
+        plugins_label.setStyleSheet("font-weight: bold;")
+        plugins_row.addWidget(plugins_label)
+
+        self._plugin_chips_layout = QHBoxLayout()
+        self._plugin_chips_layout.setSpacing(6)
+        self._plugin_chips_layout.setContentsMargins(0, 0, 0, 0)
+        plugins_row.addLayout(self._plugin_chips_layout)
+        plugins_row.addStretch()
+
+        self._refresh_output_plugins_panel()
+        settings_stack.addLayout(plugins_row)
+
+        self.export_settings_container.addLayout(settings_stack)
 
         # Defaults
         self.update_export_button_state(0)  # Set the export button state
 
         # Threading pool
         self.threadPool = QThreadPool()
+
+    def _make_plugin_chip(self, wrapper) -> QWidget:
+        """Create a compact inline chip: status dot + name."""
+        chip = QWidget()
+        row = QHBoxLayout(chip)
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(4)
+
+        # Status dot: green if ready, amber if not configured
+        dot_color = "#34D399" if wrapper.ready else "#F59E0B"
+        dot = QLabel()
+        dot.setFixedSize(6, 6)
+        dot.setStyleSheet(f"background: {dot_color}; border-radius: 3px;")
+        row.addWidget(dot)
+
+        name = QLabel(wrapper.name)
+        name.setStyleSheet("color: #BDC1C6; font-size: 11px;")
+        row.addWidget(name)
+
+        status = "Ready" if wrapper.ready else "Not configured"
+        chip.setToolTip(f"{wrapper.name} v{wrapper.version} — {status}")
+
+        return chip
+
+    def _refresh_output_plugins_panel(self):
+        """Rebuild the plugin chips to reflect current enabled state."""
+        while self._plugin_chips_layout.count():
+            item = self._plugin_chips_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        mgr = self.appState.output_plugin_manager
+        enabled = mgr.get_enabled_plugin_wrappers() if mgr else []
+
+        if not enabled:
+            hint = QLabel("None active — enable in Settings")
+            hint.setStyleSheet("color: #6B7280; font-size: 11px; font-style: italic;")
+            self._plugin_chips_layout.addWidget(hint)
+            return
+
+        for wrapper in enabled:
+            self._plugin_chips_layout.addWidget(self._make_plugin_chip(wrapper))
+
+        self._plugin_chips_layout.addStretch()
+
+    def refresh(self):
+        """Refresh dynamic state when navigating back to this page."""
+        self._refresh_output_plugins_panel()
 
     def _on_tree_double_click(self, index):
         """Handle double-click on device tree — trigger template selection for root items."""
@@ -167,7 +250,8 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
 
         msg_box.exec()
-        webbrowser.open(self.export_settings_widget.export_location)
+        if get_setting("open_after_export") != "false":
+            webbrowser.open(self.export_settings_widget.export_location)
 
     def update_export_progress(self, data):
         # TODO handle MW interaction better
@@ -249,12 +333,25 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         # Export confirmation
         export_format = self.export_settings_widget.get_export_format()
         device_count = len(set(item.device_id for item in items_to_export))
+
+        confirm_text = (
+            f"Export {len(items_to_export)} profile{'s' if len(items_to_export) > 1 else ''} "
+            f"across {device_count} device{'s' if device_count > 1 else ''} "
+            f"as {export_format} to:\n\n{self.export_settings_widget.export_location}"
+        )
+
+        # Mention active output plugins
+        mgr = self.appState.output_plugin_manager
+        if mgr:
+            enabled = mgr.get_enabled_plugin_wrappers()
+            if enabled:
+                names = ", ".join(w.name for w in enabled)
+                confirm_text += f"\n\nOutput plugins: {names}"
+
         reply = QMessageBox.question(
             self,
             "Confirm Export",
-            f"Export {len(items_to_export)} profile{'s' if len(items_to_export) > 1 else ''} "
-            f"across {device_count} device{'s' if device_count > 1 else ''} "
-            f"as {export_format} to:\n\n{self.export_settings_widget.export_location}",
+            confirm_text,
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.Yes,
         )

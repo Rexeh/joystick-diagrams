@@ -169,6 +169,10 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         )
         self.statistics_change.emit()
 
+    def refresh(self):
+        """Refresh plugin cards when returning to this page."""
+        self.populate_plugin_cards()
+
     def populate_plugin_cards(self):
         """Build plugin card widgets from the plugin manager."""
         # Clear existing cards

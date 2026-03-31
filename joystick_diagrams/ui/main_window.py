@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QSpacerItem,
+    QStackedWidget,
 )
 
 from joystick_diagrams import version
@@ -45,7 +46,14 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
         self.customiseSectionButton.clicked.connect(self.load_customise_page)
         self.exportSectionButton.clicked.connect(self.load_export_page)
-        self.window_content = None
+
+        # Page stack — pages are created lazily and cached
+        self._page_stack = QStackedWidget()
+        self.main_content_layout.addWidget(self._page_stack)
+        self._setup_page = None
+        self._customise_page = None
+        self._export_page = None
+        self._settings_page = None
 
         # Step numbers on workflow buttons
         self.setupSectionButton.setText("1. Setup")
@@ -252,6 +260,7 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         )
 
     def update_menus_from_profile_count(self, data: int):
+        self._invalidate_data_pages()
         self.enable_additional_menus() if data > 0 else self.disable_additional_menus()
 
     def _update_nav_icons(self, active: str):
@@ -278,34 +287,40 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.setupSectionButton.setChecked(True)
         self._update_nav_icons("setup")
 
-        if self.window_content:
-            self.window_content.hide()
-        self.window_content = plugins_page.PluginsPage()
-        self.window_content.total_parsed_profiles.connect(
-            self.update_menus_from_profile_count
-        )
-        self.main_content_layout.addWidget(self.window_content)
-        self.window_content.show()
+        if self._setup_page is None:
+            self._setup_page = plugins_page.PluginsPage()
+            self._setup_page.total_parsed_profiles.connect(
+                self.update_menus_from_profile_count
+            )
+            self._page_stack.addWidget(self._setup_page)
+        else:
+            self._setup_page.refresh()
+
+        self._page_stack.setCurrentWidget(self._setup_page)
 
     def load_customise_page(self):
         self.settingsSectionButton.setChecked(False)
         self.customiseSectionButton.setChecked(True)
         self._update_nav_icons("customise")
-        if self.window_content:
-            self.window_content.hide()
-        self.window_content = configure_page.configurePage()
-        self.main_content_layout.addWidget(self.window_content)
-        self.window_content.show()
+
+        if self._customise_page is None:
+            self._customise_page = configure_page.configurePage()
+            self._page_stack.addWidget(self._customise_page)
+
+        self._page_stack.setCurrentWidget(self._customise_page)
 
     def load_export_page(self):
         self.settingsSectionButton.setChecked(False)
         self.exportSectionButton.setChecked(True)
         self._update_nav_icons("export")
-        if self.window_content:
-            self.window_content.hide()
-        self.window_content = export_page.ExportPage()
-        self.main_content_layout.addWidget(self.window_content)
-        self.window_content.show()
+
+        if self._export_page is None:
+            self._export_page = export_page.ExportPage()
+            self._page_stack.addWidget(self._export_page)
+        else:
+            self._export_page.refresh()
+
+        self._page_stack.setCurrentWidget(self._export_page)
 
     def _uncheck_workflow_buttons(self):
         """Uncheck the Setup/Customise/Export button group."""
@@ -319,11 +334,22 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.settingsSectionButton.setChecked(True)
         self._update_nav_icons("settings")
 
-        if self.window_content:
-            self.window_content.hide()
-        self.window_content = settings_page.SettingsPage()
-        self.main_content_layout.addWidget(self.window_content)
-        self.window_content.show()
+        if self._settings_page is None:
+            self._settings_page = settings_page.SettingsPage()
+            self._page_stack.addWidget(self._settings_page)
+        else:
+            self._settings_page.refresh()
+
+        self._page_stack.setCurrentWidget(self._settings_page)
+
+    def _invalidate_data_pages(self):
+        """Destroy cached Customise/Export pages so they refresh on next visit."""
+        for attr in ("_customise_page", "_export_page"):
+            page = getattr(self, attr)
+            if page is not None:
+                self._page_stack.removeWidget(page)
+                page.deleteLater()
+                setattr(self, attr, None)
 
 
 if __name__ == "__main__":
