@@ -127,12 +127,7 @@ def generate_template_manifest() -> dict[str, str]:
     manifest: dict[str, str] = {}
 
     # Generate Template Manifest
-    for template in templates.iterdir():
-        # For now no traversal supported
-        if template.is_dir():
-            continue
-        if template.suffix != ".svg":
-            continue
+    for template in templates.rglob("*.svg"):
         with open(template, "rb", buffering=0) as file:
             manifest[template.name] = sha256(file.read()).hexdigest()
 

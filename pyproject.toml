@@ -73,7 +73,7 @@ include_files = [
     "version_manifest.json",
     "./theme"
 ]
-zip_include_packages = ["encodings", "PySide6","dynaconf"]
+zip_include_packages = ["encodings", "dynaconf"]
 bin_excludes =  ["Qt6Pdf.dll", "QtOpenGL.pyd"]
 excludes = [
     "tkinter",
