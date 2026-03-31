@@ -725,7 +725,7 @@ def extract_modifiers(bind_str: str) -> str | None:
     Assumes only one modifier can exist before a + symbol.
     """
     if "+" in bind_str:
-        return bind_str.split("+")[0]
+        return bind_str.split("+", maxsplit=1)[0]
 
     return None
 

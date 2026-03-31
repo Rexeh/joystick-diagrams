@@ -26,8 +26,6 @@ pytest-qt = "^4.2.0"
 pytest-cov = "^4.0.0"
 coveralls = "^3.3.0"
 cx-Freeze = "^8.3.0"
-mypy = "^1.7.1"
-isort = "^5.12.0"
 ruff = ">=0.15.0"
 
 [tool.poetry.scripts]
@@ -80,7 +78,6 @@ excludes = [
     "tkinter",
     "test",
     "distutils",
-    "joystick_diagrams..mypy_cache",
     "unittest"
 ]
 replace_paths = ["*="]
@@ -113,14 +110,6 @@ exclude_lines = [
     'if __name__ == "__main__":',
 ]
 
-[tool.mypy]
-warn_return_any = false
-warn_unused_configs = false
-disallow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = ["dynaconf.*", "qt_material.*","qtawesome.*"]
-ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 markers = ["uitest"]
@@ -148,7 +137,8 @@ ignore = [
     "COM819",
     "ISC001",
     "ISC002",
-    "PLR2004"
+    "PLR2004",
+    "PLC0415"
 ]
 
 unfixable = ["B"]
