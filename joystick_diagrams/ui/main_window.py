@@ -2,16 +2,18 @@ import logging
 import os
 
 import qtawesome as qta  # type:  ignore
-from PySide6.QtCore import QCoreApplication, QSize
+from PySide6.QtCore import QCoreApplication, QSize, Qt
 from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (
     QCheckBox,
+    QFrame,
     QLabel,
     QMainWindow,
     QProgressBar,
     QPushButton,
     QSizePolicy,
     QSpacerItem,
+    QStackedWidget,
 )
 
 from joystick_diagrams import version
@@ -45,13 +47,48 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.setupSectionButton.clicked.connect(self.load_setting_widget)
         self.customiseSectionButton.clicked.connect(self.load_customise_page)
         self.exportSectionButton.clicked.connect(self.load_export_page)
-        self.window_content = None
 
-        # Menu Bars
+        # Page stack — pages are created lazily and cached
+        self._page_stack = QStackedWidget()
+        self.main_content_layout.addWidget(self._page_stack)
+        self._setup_page = None
+        self._customise_page = None
+        self._export_page = None
+        self._settings_page = None
 
-        ## Menu Icons - Defined in instance as QTAwesome requires QApplication
-        discord_icon = qta.icon("fa5b.discord", color="white", color_active="green")
+        # Step numbers on workflow buttons
+        self.setupSectionButton.setText("1. Setup")
+        self.customiseSectionButton.setText("2. Customise")
+        self.exportSectionButton.setText("3. Export")
 
+        # Chevron connectors between workflow buttons
+        self.chevron_1 = QLabel()
+        self.chevron_1.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#515761").pixmap(QSize(14, 14))
+        )
+        self.chevron_1.setFixedSize(14, 14)
+        self.chevron_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.chevron_1.setProperty("class", "nav-chevron")
+
+        self.chevron_2 = QLabel()
+        self.chevron_2.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#515761").pixmap(QSize(14, 14))
+        )
+        self.chevron_2.setFixedSize(14, 14)
+        self.chevron_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.chevron_2.setProperty("class", "nav-chevron")
+
+        # Insert chevrons between the buttons in topnav_layout
+        # Layout order after setupUi: [Setup(0), Customise(1), Export(2)]
+        # Insert at index 1 (between Setup and Customise) and index 3 (between Customise and Export)
+        self.topnav_layout.insertWidget(
+            1, self.chevron_1, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+        self.topnav_layout.insertWidget(
+            3, self.chevron_2, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+
+        # Status Bar
         self.progressBar = QProgressBar()
         self.statusLabel = QLabel()
         self.statusLabel.setText("Waiting...")
@@ -65,20 +102,23 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.statusBar().addPermanentWidget(self.statusLabel, 1)
         self.statusBar().addPermanentWidget(self.progressBar, 1)
 
-        # Top Additional Nav Setup
-
+        # Nav bar setup
         self.topnav_layout.setSpacing(0)
         self.topnav_layout.setContentsMargins(0, 5, 0, 5)
 
         self.discord_pill = QPushButton()
-        self.discord_pill.setText("Discord")
-        self.discord_pill.setIcon(discord_icon)
-        self.discord_pill.setProperty("class", "pill-button discord")
+        self.discord_pill.setIcon(qta.icon("fa5b.discord", color="#6B7280"))
+        self.discord_pill.setIconSize(QSize(16, 16))
+        self.discord_pill.setFixedSize(QSize(32, 32))
+        self.discord_pill.setToolTip("Discord Community")
+        self.discord_pill.setProperty("class", "nav-icon-button")
 
         self.website_pill = QPushButton()
-        self.website_pill.setText("Website")
-        self.website_pill.setIcon(QIcon(ui_consts.JD_ICON))
-        self.website_pill.setProperty("class", "pill-button web")
+        self.website_pill.setIcon(qta.icon("fa5s.globe", color="#6B7280"))
+        self.website_pill.setIconSize(QSize(16, 16))
+        self.website_pill.setFixedSize(QSize(32, 32))
+        self.website_pill.setToolTip("Joystick Diagrams Website")
+        self.website_pill.setProperty("class", "nav-icon-button")
 
         self.update_pill = QPushButton()
         self.update_pill.setText("An update is available!")
@@ -90,21 +130,8 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.website_pill.clicked.connect(self.open_website_link)
         self.update_pill.clicked.connect(self.open_website_link)
 
-        self.topnav_additional_layout.addStretch(1)
-
-        # Top Nav Dev Refresh Button
-        # self.styleButton = QPushButton("Refresh Style")
-        # self.styleButton.clicked.connect(self.set_style)
-
-        # self.styleTimer = QTimer()
-        # self.styleTimer.setInterval(10000)
-        # self.styleTimer.timeout.connect(self.set_style)
-        # self.styleTimer.start()
-
-        # self.topnav_additional_layout.addWidget(self.styleButton)
-        self.topnav_additional_layout.addWidget(self.update_pill)
-        self.topnav_additional_layout.addWidget(self.discord_pill)
-        self.topnav_additional_layout.addWidget(self.website_pill)
+        # Collapse the unused additional layout from Qt Designer
+        self.topnav_additional_layout.setContentsMargins(0, 0, 0, 0)
 
         # Plugins Menu Controls
 
@@ -145,18 +172,36 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
             QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         )
 
-        # Settings - visually separated from the workflow flow
+        # Settings — icon-only, secondary prominence
         self.settings_icon_default = qta.icon("fa5s.sliders-h", color="#9AA0A6")
         self.settings_icon_active = qta.icon("fa5s.sliders-h", color="white")
         self.settingsSectionButton = QPushButton(self.centralwidget)
-        self.settingsSectionButton.setText("Settings")
         self.settingsSectionButton.setIcon(self.settings_icon_default)
-        self.settingsSectionButton.setIconSize(nav_icon_size)
-        self.settingsSectionButton.setToolTip("Application settings")
-        self.settingsSectionButton.setProperty("class", "nav-button standalone")
+        self.settingsSectionButton.setIconSize(QSize(24, 24))
+        self.settingsSectionButton.setFixedSize(QSize(50, 50))
+        self.settingsSectionButton.setToolTip("Settings")
+        self.settingsSectionButton.setProperty("class", "nav-icon-button")
         self.settingsSectionButton.setCheckable(True)
         self.settingsSectionButton.clicked.connect(self.load_settings_page)
-        self.topnav_layout.addWidget(self.settingsSectionButton)
+        self.topnav_layout.addWidget(
+            self.settingsSectionButton, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+
+        # Separator between Settings and external links
+        nav_separator = QFrame()
+        nav_separator.setFrameShape(QFrame.Shape.VLine)
+        nav_separator.setFixedHeight(20)
+        nav_separator.setStyleSheet("color: #3C4043;")
+        self.topnav_layout.addWidget(nav_separator, 0, Qt.AlignmentFlag.AlignVCenter)
+
+        # External link icons — tertiary prominence
+        self.topnav_layout.addWidget(
+            self.discord_pill, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+        self.topnav_layout.addWidget(
+            self.website_pill, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+        self.topnav_layout.addWidget(self.update_pill, 0, Qt.AlignmentFlag.AlignVCenter)
 
         # Disable Additional Menu Controls
 
@@ -200,12 +245,31 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         QDesktopServices.openUrl("https://joystick-diagrams.com")
 
     def disable_additional_menus(self):
-        [x.setDisabled(True) for x in self.additional_menus]
+        for x in self.additional_menus:
+            x.setDisabled(True)
+            x.setToolTip("Run plugins in Setup first to unlock")
+        # Reset chevrons to default gray
+        self.chevron_1.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#515761").pixmap(QSize(14, 14))
+        )
+        self.chevron_2.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#515761").pixmap(QSize(14, 14))
+        )
 
     def enable_additional_menus(self):
-        [x.setDisabled(False) for x in self.additional_menus]
+        for x in self.additional_menus:
+            x.setDisabled(False)
+            x.setToolTip("")
+        # Light up chevrons to show workflow progression
+        self.chevron_1.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#34D399").pixmap(QSize(14, 14))
+        )
+        self.chevron_2.setPixmap(
+            qta.icon("fa5s.chevron-right", color="#34D399").pixmap(QSize(14, 14))
+        )
 
     def update_menus_from_profile_count(self, data: int):
+        self._invalidate_data_pages()
         self.enable_additional_menus() if data > 0 else self.disable_additional_menus()
 
     def _update_nav_icons(self, active: str):
@@ -232,34 +296,40 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.setupSectionButton.setChecked(True)
         self._update_nav_icons("setup")
 
-        if self.window_content:
-            self.window_content.hide()
-        self.window_content = plugins_page.PluginsPage()
-        self.window_content.total_parsed_profiles.connect(
-            self.update_menus_from_profile_count
-        )
-        self.main_content_layout.addWidget(self.window_content)
-        self.window_content.show()
+        if self._setup_page is None:
+            self._setup_page = plugins_page.PluginsPage()
+            self._setup_page.total_parsed_profiles.connect(
+                self.update_menus_from_profile_count
+            )
+            self._page_stack.addWidget(self._setup_page)
+        else:
+            self._setup_page.refresh()
+
+        self._page_stack.setCurrentWidget(self._setup_page)
 
     def load_customise_page(self):
         self.settingsSectionButton.setChecked(False)
         self.customiseSectionButton.setChecked(True)
         self._update_nav_icons("customise")
-        if self.window_content:
-            self.window_content.hide()
-        self.window_content = configure_page.configurePage()
-        self.main_content_layout.addWidget(self.window_content)
-        self.window_content.show()
+
+        if self._customise_page is None:
+            self._customise_page = configure_page.configurePage()
+            self._page_stack.addWidget(self._customise_page)
+
+        self._page_stack.setCurrentWidget(self._customise_page)
 
     def load_export_page(self):
         self.settingsSectionButton.setChecked(False)
         self.exportSectionButton.setChecked(True)
         self._update_nav_icons("export")
-        if self.window_content:
-            self.window_content.hide()
-        self.window_content = export_page.ExportPage()
-        self.main_content_layout.addWidget(self.window_content)
-        self.window_content.show()
+
+        if self._export_page is None:
+            self._export_page = export_page.ExportPage()
+            self._page_stack.addWidget(self._export_page)
+        else:
+            self._export_page.refresh()
+
+        self._page_stack.setCurrentWidget(self._export_page)
 
     def _uncheck_workflow_buttons(self):
         """Uncheck the Setup/Customise/Export button group."""
@@ -273,11 +343,22 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
         self.settingsSectionButton.setChecked(True)
         self._update_nav_icons("settings")
 
-        if self.window_content:
-            self.window_content.hide()
-        self.window_content = settings_page.SettingsPage()
-        self.main_content_layout.addWidget(self.window_content)
-        self.window_content.show()
+        if self._settings_page is None:
+            self._settings_page = settings_page.SettingsPage()
+            self._page_stack.addWidget(self._settings_page)
+        else:
+            self._settings_page.refresh()
+
+        self._page_stack.setCurrentWidget(self._settings_page)
+
+    def _invalidate_data_pages(self):
+        """Destroy cached Customise/Export pages so they refresh on next visit."""
+        for attr in ("_customise_page", "_export_page"):
+            page = getattr(self, attr)
+            if page is not None:
+                self._page_stack.removeWidget(page)
+                page.deleteLater()
+                setattr(self, attr, None)
 
 
 if __name__ == "__main__":

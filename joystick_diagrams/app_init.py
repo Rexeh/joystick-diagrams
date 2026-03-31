@@ -8,6 +8,7 @@ from qt_material import apply_stylesheet
 from joystick_diagrams import utils  # type: ignore
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db import db_handler
+from joystick_diagrams.plugins.output_plugin_manager import OutputPluginManager
 from joystick_diagrams.plugins.plugin_manager import ParserPluginManager
 from joystick_diagrams.ui import resources_rc
 from joystick_diagrams.ui.main_window import MainWindow
@@ -25,8 +26,12 @@ def init():
     plugins.load_discovered_plugins()
     plugins.create_plugin_wrappers()
 
+    output_plugins = OutputPluginManager()
+    output_plugins.load_discovered_plugins()
+    output_plugins.create_plugin_wrappers()
+
     # Setup global state with plugins
-    _state = AppState(plugin_manager=plugins)
+    _state = AppState(plugin_manager=plugins, output_plugin_manager=output_plugins)
     # -------------------------------
 
     # Setup UI and begin thread

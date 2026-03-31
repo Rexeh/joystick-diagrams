@@ -1,12 +1,16 @@
 import logging
+import webbrowser
 from datetime import datetime
 
 import qtawesome as qta
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QCheckBox,
     QComboBox,
+    QFileDialog,
     QFormLayout,
+    QFrame,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -14,6 +18,7 @@ from PySide6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QMainWindow,
+    QMessageBox,
     QPushButton,
     QStackedWidget,
     QTableWidget,
@@ -22,11 +27,15 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from joystick_diagrams import utils
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.db.db_settings import add_update_setting_value, get_setting
+from joystick_diagrams.output_plugin_wrapper import OutputPluginWrapper
+from joystick_diagrams.ui.widgets.section_header import SectionHeader
 
 _logger = logging.getLogger(__name__)
 
+OPEN_AFTER_EXPORT_SETTING_KEY = "open_after_export"
 DATE_FORMAT_SETTING_KEY = "export_date_format"
 DEFAULT_DATE_FORMAT = "%d/%m/%Y"
 
@@ -61,6 +70,7 @@ class SettingsPage(QMainWindow):
             ("fa5s.cog", "General"),
             ("fa5s.eye-slash", "Hidden Devices"),
             ("fa5s.tags", "Custom Labels"),
+            ("fa5s.plug", "Output Plugins"),
         ]
         for icon_name, label in nav_items:
             item = QListWidgetItem(qta.icon(icon_name, color="#9AA0A6"), label)
@@ -74,10 +84,17 @@ class SettingsPage(QMainWindow):
         self.stack.addWidget(self._create_general_tab())
         self.stack.addWidget(self._create_hidden_devices_tab())
         self.stack.addWidget(self._create_custom_labels_tab())
+        self.stack.addWidget(self._create_output_plugins_tab())
         root_layout.addWidget(self.stack, 1)
 
         self.nav_list.currentRowChanged.connect(self.stack.setCurrentIndex)
         self.nav_list.setCurrentRow(0)
+
+    def refresh(self):
+        """Refresh data-dependent tabs when returning to this page."""
+        self.populate_hidden_table()
+        self.populate_table()
+        self._populate_output_plugin_cards()
 
     # ── General Tab ──
 
@@ -86,6 +103,9 @@ class SettingsPage(QMainWindow):
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
+
+        header = SectionHeader("fa5s.cog", "General Settings")
+        layout.addWidget(header)
 
         form = QFormLayout()
         form.setSpacing(12)
@@ -118,9 +138,24 @@ class SettingsPage(QMainWindow):
         date_label.setObjectName("device_help_label")
         form.addRow(date_label, date_row)
 
+        # Open export folder toggle
+        self.open_after_export_cb = QCheckBox("Open export folder after export")
+        saved_open = get_setting(OPEN_AFTER_EXPORT_SETTING_KEY)
+        self.open_after_export_cb.setChecked(saved_open != "false")  # default True
+        self.open_after_export_cb.stateChanged.connect(
+            self._on_open_after_export_changed
+        )
+        form.addRow("", self.open_after_export_cb)
+
         layout.addLayout(form)
         layout.addStretch(1)
         return tab
+
+    def _on_open_after_export_changed(self, state: int):
+        add_update_setting_value(
+            OPEN_AFTER_EXPORT_SETTING_KEY,
+            "true" if state == Qt.CheckState.Checked.value else "false",
+        )
 
     def _on_date_format_changed(self, index: int):
         fmt = self.date_format_combo.currentData()
@@ -134,6 +169,9 @@ class SettingsPage(QMainWindow):
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
+
+        header = SectionHeader("fa5s.eye-slash", "Hidden Devices")
+        layout.addWidget(header)
 
         help_text = QLabel(
             "Devices listed below are hidden from the Customise and Export views. "
@@ -172,6 +210,28 @@ class SettingsPage(QMainWindow):
 
     def populate_hidden_table(self):
         hidden = self.appState.device_service.get_all_hidden()
+
+        if not hidden:
+            self.hidden_table.setRowCount(0)
+            self.hidden_table.hide()
+            if not hasattr(self, "_hidden_empty_label"):
+                self._hidden_empty_label = QLabel(
+                    "No hidden devices. Right-click a device in the Customise tab to hide it."
+                )
+                self._hidden_empty_label.setObjectName("device_help_label")
+                self._hidden_empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                self._hidden_empty_label.setWordWrap(True)
+                self._hidden_empty_label.setStyleSheet(
+                    "color: #9AA0A6; font-style: italic; padding: 40px;"
+                )
+                # Insert after the table in the parent layout
+                self.hidden_table.parent().layout().addWidget(self._hidden_empty_label)
+            self._hidden_empty_label.show()
+            return
+
+        if hasattr(self, "_hidden_empty_label"):
+            self._hidden_empty_label.hide()
+        self.hidden_table.show()
         self.hidden_table.setRowCount(len(hidden))
 
         for row, (guid, name) in enumerate(sorted(hidden.items(), key=lambda x: x[1])):
@@ -205,6 +265,9 @@ class SettingsPage(QMainWindow):
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
 
+        header = SectionHeader("fa5s.tags", "Custom Labels")
+        layout.addWidget(header)
+
         help_text = QLabel(
             "Manage your custom labels below. "
             "Double-click a Custom Label cell to edit it, "
@@ -235,6 +298,23 @@ class SettingsPage(QMainWindow):
         self.table.setProperty("class", "view-binds-tree")
         self.table.cellChanged.connect(self.on_cell_changed)
         layout.addWidget(self.table)
+
+        # Label count
+        self._label_count_text = QLabel()
+        self._label_count_text.setObjectName("device_help_label")
+        layout.addWidget(self._label_count_text)
+
+        # Empty state for labels
+        self._labels_empty_label = QLabel(
+            "No custom labels. Double-click an action in the Customise tab to rename it."
+        )
+        self._labels_empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._labels_empty_label.setWordWrap(True)
+        self._labels_empty_label.setStyleSheet(
+            "color: #9AA0A6; font-style: italic; padding: 20px;"
+        )
+        self._labels_empty_label.hide()
+        layout.addWidget(self._labels_empty_label)
 
         # Add manual entry row
         add_row_layout = QHBoxLayout()
@@ -299,6 +379,20 @@ class SettingsPage(QMainWindow):
         labels = self.appState.label_service.get_all_custom_labels()
         self.table.setRowCount(len(labels))
 
+        # Update count and empty state
+        count = len(labels)
+        if count > 0:
+            self._label_count_text.setText(
+                f"{count} custom label{'s' if count != 1 else ''}"
+            )
+            self._label_count_text.show()
+            self._labels_empty_label.hide()
+            self.table.show()
+        else:
+            self._label_count_text.hide()
+            self._labels_empty_label.show()
+            self.table.hide()
+
         for row, (original, custom) in enumerate(sorted(labels.items())):
             original_item = QTableWidgetItem(original)
             original_item.setFlags(original_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
@@ -362,6 +456,289 @@ class SettingsPage(QMainWindow):
     def reset_all_labels(self):
         self.appState.label_service.remove_all_labels()
         self.populate_table()
+
+    # ── Output Plugins Tab ──
+
+    def _create_output_plugins_tab(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(16)
+
+        header = SectionHeader("fa5s.plug", "Output Plugins")
+        layout.addWidget(header)
+
+        help_text = QLabel(
+            "Output plugins run automatically after export to deliver your diagrams "
+            "to other applications (e.g. OpenKneeboard)."
+        )
+        help_text.setObjectName("device_help_label")
+        help_text.setWordWrap(True)
+        layout.addWidget(help_text)
+
+        # Action buttons
+        button_row = QHBoxLayout()
+        button_row.setSpacing(8)
+
+        install_btn = QPushButton("Install Plugin")
+        install_btn.setIcon(qta.icon("fa5s.file-import", color="white"))
+        install_btn.setProperty("class", "plugin-setup-button")
+        install_btn.clicked.connect(self._install_output_plugin)
+        button_row.addWidget(install_btn)
+
+        open_folder_btn = QPushButton("Open Plugins Folder")
+        open_folder_btn.setIcon(qta.icon("fa5s.folder-open", color="white"))
+        open_folder_btn.setProperty("class", "plugin-setup-button")
+        open_folder_btn.clicked.connect(self._open_plugins_folder)
+        button_row.addWidget(open_folder_btn)
+
+        button_row.addStretch(1)
+        layout.addLayout(button_row)
+
+        # Plugin cards
+        self._output_plugin_cards_layout = QVBoxLayout()
+        self._output_plugin_cards_layout.setSpacing(8)
+        self._populate_output_plugin_cards()
+        layout.addLayout(self._output_plugin_cards_layout)
+
+        layout.addStretch(1)
+        return tab
+
+    def _populate_output_plugin_cards(self):
+        while self._output_plugin_cards_layout.count():
+            item = self._output_plugin_cards_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        if self.appState.output_plugin_manager:
+            for wrapper in self.appState.output_plugin_manager.plugin_wrappers:
+                is_user = self.appState.output_plugin_manager.is_user_plugin(
+                    wrapper.name
+                )
+                card = OutputPluginCard(wrapper, is_user_plugin=is_user)
+                if is_user:
+                    card.uninstall_requested.connect(self._uninstall_output_plugin)
+                self._output_plugin_cards_layout.addWidget(card)
+
+    def _install_output_plugin(self):
+        from pathlib import Path
+
+        result = QFileDialog.getOpenFileName(
+            self,
+            "Select Output Plugin (ZIP)",
+            str(Path.home()),
+            "Plugin Archives (*.zip)",
+        )
+        if not result[0]:
+            return
+
+        self._do_install(Path(result[0]))
+
+    def _do_install(self, source):
+        import shutil
+
+        from joystick_diagrams.plugins.output_plugin_installer import (
+            install_output_plugin,
+            validate_output_plugin,
+        )
+
+        try:
+            installed_path = install_output_plugin(source)
+        except Exception as e:
+            QMessageBox.warning(self, "Install Failed", str(e))
+            return
+
+        valid, msg = validate_output_plugin(installed_path)
+        if not valid:
+            shutil.rmtree(installed_path, ignore_errors=True)
+            QMessageBox.warning(self, "Invalid Plugin", msg)
+            return
+
+        # Check name conflict with bundled plugins
+        if self.appState.output_plugin_manager:
+            bundled_names = {
+                w.name
+                for w in self.appState.output_plugin_manager.plugin_wrappers
+                if not self.appState.output_plugin_manager.is_user_plugin(w.name)
+            }
+            if msg in bundled_names:
+                shutil.rmtree(installed_path, ignore_errors=True)
+                QMessageBox.warning(
+                    self,
+                    "Name Conflict",
+                    f"A bundled plugin named '{msg}' already exists. "
+                    f"The user plugin cannot be installed.",
+                )
+                return
+
+        QMessageBox.information(
+            self, "Plugin Installed", f"Plugin '{msg}' installed successfully."
+        )
+        self._reload_output_plugins()
+
+    def _uninstall_output_plugin(self, name: str):
+        reply = QMessageBox.question(
+            self,
+            "Confirm Uninstall",
+            f"Remove the plugin '{name}'? Plugin settings will be preserved.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        from joystick_diagrams.plugins.output_plugin_installer import (
+            uninstall_output_plugin,
+        )
+
+        path = self.appState.output_plugin_manager.get_user_plugin_path(name)
+        if path:
+            try:
+                uninstall_output_plugin(name, path)
+                self._reload_output_plugins()
+            except Exception as e:
+                QMessageBox.warning(self, "Uninstall Failed", str(e))
+
+    def _reload_output_plugins(self):
+        from joystick_diagrams.plugins.output_plugin_manager import OutputPluginManager
+
+        mgr = OutputPluginManager()
+        mgr.load_discovered_plugins()
+        mgr.create_plugin_wrappers()
+        self.appState.output_plugin_manager = mgr
+        self._populate_output_plugin_cards()
+
+    def _open_plugins_folder(self):
+        webbrowser.open(str(utils.user_output_plugins_root()))
+
+
+class OutputPluginCard(QWidget):
+    """A card showing a single output plugin with enable toggle and setup button."""
+
+    uninstall_requested = Signal(str)
+
+    def __init__(
+        self, wrapper: OutputPluginWrapper, is_user_plugin: bool = False, parent=None
+    ):
+        super().__init__(parent)
+        self._wrapper = wrapper
+        self._is_user_plugin = is_user_plugin
+        self._config_panel = None
+        self._build_ui()
+
+    def _build_ui(self):
+        from PySide6.QtGui import QFont, QIcon
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(4)
+
+        # Card frame
+        frame = QFrame()
+        frame.setFrameShape(QFrame.Shape.StyledPanel)
+        frame_layout = QVBoxLayout(frame)
+        frame_layout.setContentsMargins(12, 10, 12, 10)
+        frame_layout.setSpacing(8)
+
+        # Header row: icon + name + enable toggle
+        header_row = QHBoxLayout()
+        header_row.setSpacing(10)
+
+        icon_label = QLabel()
+        icon_label.setPixmap(QIcon(self._wrapper.icon).pixmap(QSize(24, 24)))
+        icon_label.setFixedSize(24, 24)
+        header_row.addWidget(icon_label)
+
+        name_font = QFont()
+        name_font.setBold(True)
+        name_label = QLabel(f"{self._wrapper.name}  v{self._wrapper.version}")
+        name_label.setFont(name_font)
+        header_row.addWidget(name_label, stretch=1)
+
+        self._enable_btn = QPushButton(
+            "Enabled" if self._wrapper.enabled else "Disabled"
+        )
+        self._enable_btn.setCheckable(True)
+        self._enable_btn.setChecked(self._wrapper.enabled)
+        self._enable_btn.setProperty("class", "enabled-button")
+        self._enable_btn.clicked.connect(self._toggle_enabled)
+        header_row.addWidget(self._enable_btn)
+
+        if self._is_user_plugin:
+            uninstall_btn = QPushButton()
+            uninstall_btn.setIcon(qta.icon("fa5s.trash-alt", color="#EF4444"))
+            uninstall_btn.setIconSize(QSize(16, 16))
+            uninstall_btn.setToolTip(f"Uninstall {self._wrapper.name}")
+            uninstall_btn.setFixedSize(QSize(32, 32))
+            uninstall_btn.setStyleSheet(
+                "QPushButton { background: transparent; border: none; }"
+                "QPushButton:hover { background: rgba(239, 68, 68, 0.15); border-radius: 4px; }"
+            )
+            uninstall_btn.clicked.connect(
+                lambda: self.uninstall_requested.emit(self._wrapper.name)
+            )
+            header_row.addWidget(uninstall_btn)
+
+        frame_layout.addLayout(header_row)
+
+        # Ready indicator + setup button row
+        action_row = QHBoxLayout()
+        action_row.setSpacing(8)
+
+        self._ready_label = QLabel()
+        self._update_ready_label()
+        action_row.addWidget(self._ready_label)
+        action_row.addStretch(1)
+
+        if self._wrapper.has_settings():
+            setup_btn = QPushButton("Setup" if not self._wrapper.ready else "Update")
+            setup_btn.setProperty("class", "plugin-setup-button")
+            setup_btn.clicked.connect(self._toggle_config_panel)
+            action_row.addWidget(setup_btn)
+
+        frame_layout.addLayout(action_row)
+
+        # Config panel placeholder (shown below the card when opened)
+        self._panel_container = QVBoxLayout()
+        self._panel_container.setContentsMargins(0, 0, 0, 0)
+
+        outer.addWidget(frame)
+        outer.addLayout(self._panel_container)
+
+    def _update_ready_label(self):
+        if self._wrapper.ready:
+            self._ready_label.setText(
+                qta.icon("fa5s.check-circle", color="#34D399").pixmap(14, 14).isNull()
+                and "Ready"
+                or "Ready"
+            )
+            self._ready_label.setStyleSheet("color: #34D399;")
+        else:
+            self._ready_label.setText("Not configured")
+            self._ready_label.setStyleSheet("color: #EF4444;")
+
+    def _toggle_enabled(self, checked: bool):
+        self._wrapper.enabled = checked
+        self._enable_btn.setText("Enabled" if checked else "Disabled")
+
+    def _toggle_config_panel(self):
+        from joystick_diagrams.ui.plugins_page import PluginConfigPanel
+
+        # Clear any existing panel
+        while self._panel_container.count():
+            item = self._panel_container.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        if self._config_panel is not None:
+            self._config_panel = None
+            return
+
+        # Open a new panel (pass self as the "page" — PluginConfigPanel uses it for dialogs)
+        panel = PluginConfigPanel(self._wrapper, self)
+        panel.settings_changed.connect(self._update_ready_label)
+        panel.close_requested.connect(self._toggle_config_panel)
+        self._panel_container.addWidget(panel)
+        self._config_panel = panel
 
 
 if __name__ == "__main__":

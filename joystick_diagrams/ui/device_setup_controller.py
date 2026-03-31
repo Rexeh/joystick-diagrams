@@ -30,10 +30,13 @@ def convert_profile_wrappers_to_export_devices(
 
 def setup_export_devices(export_device_list: list[ExportDevice]):
     """Configures Export Devices and enriches object with additional information"""
+    template_cache: dict[str, Template | None] = {}
+
     for export_device in export_device_list:
-        # Get the template
         try:
-            export_device.template = get_template_for_device(export_device.device_id)
+            export_device.template = get_template_for_device(
+                export_device.device_id, template_cache
+            )
         except JoystickDiagramsError as e:
             _logger.error(e)
 
@@ -52,23 +55,35 @@ def get_export_devices() -> list[ExportDevice]:
     return devices
 
 
-def get_template_for_device(device_guid: str) -> Union[Template, None]:
+def get_template_for_device(
+    device_guid: str,
+    cache: dict[str, Template | None] | None = None,
+) -> Union[Template, None]:
     """Retrieves a device template from storage"""
-    template = get_device_template_path(device_guid)
+    template_path = get_device_template_path(device_guid)
 
-    if not template:
+    if not template_path:
         return None
 
-    exists = Path(template).exists()
+    # Return cached Template if available
+    if cache is not None and template_path in cache:
+        return cache[template_path]
+
+    exists = Path(template_path).exists()
 
     if not exists:
         _logger.warning(
-            f"Template was retrieved for {device_guid} resulting in {template} but item doesn't exist at the path so it will be removed from database"
+            f"Template was retrieved for {device_guid} resulting in {template_path} but item doesn't exist at the path so it will be removed from database"
         )
         remove_template_path_from_device(device_guid)
-        return None
+        result = None
+    else:
+        result = Template(template_path)
 
-    return Template(template)
+    if cache is not None:
+        cache[template_path] = result
+
+    return result
 
 
 def get_processed_profiles() -> list[ProfileWrapper]:

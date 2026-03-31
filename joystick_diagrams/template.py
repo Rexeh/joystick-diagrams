@@ -4,6 +4,7 @@ Interacts with the template file to allow interogration of template configuratio
 
 """
 
+import functools
 import logging
 import re
 from pathlib import Path
@@ -46,27 +47,41 @@ class Template:
                 "There was an issue reading the template file"
             ) from e
 
-    def get_template_modifiers(self) -> set[str]:
-        "Returns the available MODIFIER NUMBERS supported for a given CONTROL from the template"
+    @functools.cached_property
+    def _buttons(self) -> set[str]:
+        return {x.lower() for x in re.findall(self.BUTTON_KEY, self.raw_data)}
 
+    @functools.cached_property
+    def _hats(self) -> set[str]:
+        return {x.lower() for x in re.findall(self.HAT_KEY, self.raw_data)}
+
+    @functools.cached_property
+    def _axis(self) -> set[str]:
+        return {x.lower() for x in re.findall(self.AXIS_KEY, self.raw_data)}
+
+    @functools.cached_property
+    def _modifiers(self) -> set[str]:
         result = []
         for modifier_search_key in self.MODIFIER_KEYS:
             matches = re.findall(modifier_search_key, self.raw_data)
             result.extend(matches)
-
         return {x.lower() for x in result}
+
+    def get_template_modifiers(self) -> set[str]:
+        "Returns the available MODIFIER NUMBERS supported for a given CONTROL from the template"
+        return self._modifiers
 
     def get_template_hats(self) -> set[str]:
         "Returns the available HAT controls from the template"
-        return {x.lower() for x in re.findall(self.HAT_KEY, self.raw_data)}
+        return self._hats
 
     def get_template_axis(self) -> set[str]:
         "Returns the available AXIS controls from the template"
-        return {x.lower() for x in re.findall(self.AXIS_KEY, self.raw_data)}
+        return self._axis
 
     def get_template_buttons(self) -> set[str]:
         "Returns the available BUTTON controls from the template"
-        return {x.lower() for x in re.findall(self.BUTTON_KEY, self.raw_data)}
+        return self._buttons
 
     @property
     def template_name(self) -> bool:
