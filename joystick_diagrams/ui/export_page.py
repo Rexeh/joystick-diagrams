@@ -238,6 +238,8 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
     def export_finished(self, data):
         # TODO handle MW interaction better
         main_window_inst: main_window = self.appState.main_window
+        main_window_inst.progressBar.setRange(0, 100)
+        main_window_inst.progressBar.setValue(0)
         main_window_inst.statusLabel.setText("Waiting...")
 
         msg_box = QMessageBox()
@@ -258,6 +260,12 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         main_window_inst: main_window = self.appState.main_window
         main_window_inst.progressBar.setValue(data)
         main_window_inst.statusLabel.setText("Exporting templates")
+
+    def _set_indeterminate_status(self, text: str):
+        """Switch progress bar to indeterminate (barber pole) with a status message."""
+        main_window_inst: main_window = self.appState.main_window
+        main_window_inst.progressBar.setRange(0, 0)
+        main_window_inst.statusLabel.setText(text)
 
     def show_export_error(self, message: str):
         QMessageBox.warning(
@@ -302,6 +310,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
 
         export_results = getattr(self, "_pending_export_results", [])
         if export_results and self.appState.output_plugin_manager:
+            self._set_indeterminate_status("Running output plugins...")
             output_worker = OutputPluginDispatch(export_results)
             output_worker.signals.finished.connect(self._finish_export)
             self.threadPool.start(output_worker)
@@ -366,6 +375,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         worker.signals.finished.connect(self.export_finished)
         worker.signals.finished.connect(self.unlock_export_button)
         worker.signals.progress.connect(self.update_export_progress)
+        worker.signals.status_update.connect(self._set_indeterminate_status)
         worker.signals.error.connect(self.show_export_error)
         worker.signals.png_conversion_needed.connect(self.start_png_conversion)
         self._pending_export_count = 0
@@ -377,6 +387,7 @@ class ExportSignals(QObject):
     finished = Signal(int)
     progress = Signal(int)
     error = Signal(str)
+    status_update = Signal(str)
     png_conversion_needed = Signal(
         list
     )  # list of (svg_path, png_path, ExportResult) tuples
@@ -499,6 +510,8 @@ class ExportDispatch(QRunnable):
             self.signals.png_conversion_needed.emit(png_conversions)
         else:
             # SVG format: dispatch output plugins directly on this worker thread
+            if export_results:
+                self.signals.status_update.emit("Running output plugins...")
             self._dispatch_output_plugins(export_results)
             self.signals.finished.emit(exported_count)
 
@@ -508,26 +521,34 @@ class ExportDispatch(QRunnable):
             appState = AppState()
 
             # Get enabled plugins that have export functionality
-            for plugin_wrapper in appState.plugin_manager.get_enabled_plugin_wrappers():
-                if hasattr(plugin_wrapper.plugin, "export_mappings"):
-                    try:
+            plugins_with_export = [
+                pw
+                for pw in appState.plugin_manager.get_enabled_plugin_wrappers()
+                if hasattr(pw.plugin, "export_mappings")
+            ]
+
+            if not plugins_with_export:
+                return
+
+            self.signals.status_update.emit("Running plugin exports...")
+
+            for plugin_wrapper in plugins_with_export:
+                try:
+                    _logger.info(f"Calling export for plugin: {plugin_wrapper.name}")
+                    export_path = Path(self.export_directory)
+                    success = plugin_wrapper.plugin.export_mappings(export_path)
+                    if success:
                         _logger.info(
-                            f"Calling export for plugin: {plugin_wrapper.name}"
+                            f"Successfully exported data for plugin: {plugin_wrapper.name}"
                         )
-                        export_path = Path(self.export_directory)
-                        success = plugin_wrapper.plugin.export_mappings(export_path)
-                        if success:
-                            _logger.info(
-                                f"Successfully exported data for plugin: {plugin_wrapper.name}"
-                            )
-                        else:
-                            _logger.warning(
-                                f"Export failed for plugin: {plugin_wrapper.name}"
-                            )
-                    except Exception as e:
-                        _logger.error(
-                            f"Error during export for plugin {plugin_wrapper.name}: {e}"
+                    else:
+                        _logger.warning(
+                            f"Export failed for plugin: {plugin_wrapper.name}"
                         )
+                except Exception as e:
+                    _logger.error(
+                        f"Error during export for plugin {plugin_wrapper.name}: {e}"
+                    )
 
         except Exception as e:
             _logger.error(f"Error accessing plugin manager for exports: {e}")
