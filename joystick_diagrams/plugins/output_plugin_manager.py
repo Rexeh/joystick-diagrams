@@ -33,6 +33,7 @@ class OutputPluginManager:
         self.plugin_wrappers: list[OutputPluginWrapper] = []
         self._user_plugin_names: set[str] = set()
         self._user_plugin_paths: dict[str, Path] = {}
+        self.conflicts: list[tuple[str, Path]] = []
 
     def load_discovered_plugins(self) -> None:
         # Load bundled plugins
@@ -63,6 +64,7 @@ class OutputPluginManager:
                         f"User plugin '{loaded.name}' conflicts with bundled plugin "
                         f"of same name. Skipping user plugin at {plugin_path}."
                     )
+                    self.conflicts.append((loaded.name, plugin_path))
                     continue
 
                 self.loaded_plugins.append(loaded)

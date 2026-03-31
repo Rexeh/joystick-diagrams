@@ -35,6 +35,14 @@ def plugin_data_root() -> Path:
     return root
 
 
+def user_parser_plugins_root() -> Path:
+    """Returns the directory for user-installed parser plugin code."""
+    root = Path.joinpath(data_root(), "parser_plugins")
+    if not root.is_dir():
+        create_directory(root)
+    return root
+
+
 def user_output_plugins_root() -> Path:
     """Returns the directory for user-installed output plugin code."""
     root = Path.joinpath(data_root(), "output_plugins")

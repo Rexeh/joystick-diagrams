@@ -132,7 +132,7 @@ def test_install_from_folder(tmp_path):
     user_dir = tmp_path / "user_plugins"
     user_dir.mkdir()
 
-    with patch("joystick_diagrams.plugins.output_plugin_installer.utils") as mock_utils:
+    with patch("joystick_diagrams.plugins.plugin_installer.utils") as mock_utils:
         mock_utils.user_output_plugins_root.return_value = user_dir
         installed = install_output_plugin(source)
 
@@ -146,7 +146,7 @@ def test_install_from_zip(tmp_path):
     user_dir = tmp_path / "user_plugins"
     user_dir.mkdir()
 
-    with patch("joystick_diagrams.plugins.output_plugin_installer.utils") as mock_utils:
+    with patch("joystick_diagrams.plugins.plugin_installer.utils") as mock_utils:
         mock_utils.user_output_plugins_root.return_value = user_dir
         installed = install_output_plugin(zip_path)
 
@@ -163,7 +163,7 @@ def test_install_replaces_existing(tmp_path):
 
     source = _make_plugin_dir(tmp_path / "source", "my_plugin")
 
-    with patch("joystick_diagrams.plugins.output_plugin_installer.utils") as mock_utils:
+    with patch("joystick_diagrams.plugins.plugin_installer.utils") as mock_utils:
         mock_utils.user_output_plugins_root.return_value = user_dir
         installed = install_output_plugin(source)
 
@@ -189,7 +189,7 @@ def test_install_bad_zip_raises(tmp_path):
 
 
 def test_install_nonexistent_raises(tmp_path):
-    with pytest.raises(JoystickDiagramsError, match="must be a folder or .zip"):
+    with pytest.raises(JoystickDiagramsError, match="must be a folder"):
         install_output_plugin(tmp_path / "nope.txt")
 
 
@@ -200,7 +200,7 @@ def test_uninstall_removes_directory(tmp_path):
     user_dir = tmp_path / "user_plugins"
     plugin_dir = _make_plugin_dir(user_dir, "my_plugin")
 
-    with patch("joystick_diagrams.plugins.output_plugin_installer.utils") as mock_utils:
+    with patch("joystick_diagrams.plugins.plugin_installer.utils") as mock_utils:
         mock_utils.user_output_plugins_root.return_value = user_dir
         uninstall_output_plugin("MyPlugin", plugin_dir)
 
@@ -213,9 +213,9 @@ def test_uninstall_rejects_path_outside_user_dir(tmp_path):
     outside = tmp_path / "bundled" / "some_plugin"
     outside.mkdir(parents=True)
 
-    with patch("joystick_diagrams.plugins.output_plugin_installer.utils") as mock_utils:
+    with patch("joystick_diagrams.plugins.plugin_installer.utils") as mock_utils:
         mock_utils.user_output_plugins_root.return_value = user_dir
-        with pytest.raises(JoystickDiagramsError, match="not in the user plugins"):
+        with pytest.raises(JoystickDiagramsError, match="not in the user"):
             uninstall_output_plugin("SomePlugin", outside)
 
 
@@ -224,7 +224,7 @@ def test_uninstall_nonexistent_raises(tmp_path):
     user_dir.mkdir()
     missing = user_dir / "gone"
 
-    with patch("joystick_diagrams.plugins.output_plugin_installer.utils") as mock_utils:
+    with patch("joystick_diagrams.plugins.plugin_installer.utils") as mock_utils:
         mock_utils.user_output_plugins_root.return_value = user_dir
         with pytest.raises(JoystickDiagramsError, match="does not exist"):
             uninstall_output_plugin("Gone", missing)

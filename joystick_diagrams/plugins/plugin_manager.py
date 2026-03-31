@@ -6,15 +6,16 @@ Plugin manager serves as the main interface between the GUI and the rest of the 
 
 """
 
+import importlib.util
 import logging
 import os
-import shutil
-import zipfile
+import sys
 from importlib import import_module
 from json import JSONDecodeError
 from pathlib import Path
 from types import ModuleType
 
+from joystick_diagrams import utils
 from joystick_diagrams.exceptions import JoystickDiagramsError, PluginNotValidError
 from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
@@ -30,8 +31,12 @@ EXCLUDED_PLUGIN_DIRS: list[str] = ["__pycache__"]
 class ParserPluginManager:
     def __init__(self) -> None:
         self.plugins: list[Path] = find_plugins(PLUGINS_DIRECTORY)
+        self.user_plugins: list[Path] = find_user_parser_plugins()
         self.loaded_plugins: list[PluginInterface] = []
         self.plugin_wrappers: list[PluginWrapper] = []
+        self._user_plugin_names: set[str] = set()
+        self._user_plugin_paths: dict[str, Path] = {}
+        self.conflicts: list[tuple[str, Path]] = []
 
     def create_plugin_wrappers(self):
         for plugin in self.get_available_plugins():
@@ -53,24 +58,17 @@ class ParserPluginManager:
         - Loads a plugin using importlib
         - Validates the plugin with further checks
         """
-        if not self.plugins:
-            _logger.error(
-                "No valid plugins exist to load"
-            )  # raise JDException.NoPluginsExist()
+        if not self.plugins and not self.user_plugins:
+            _logger.error("No valid plugins exist to load")
             return
 
+        # Load bundled plugins
         for plugin in self.plugins:
             try:
                 _logger.debug(f"Loading plugin {plugin}")
-
-                # Try load the PLugin Package
                 loaded_module = load_plugin(plugin_package_name=plugin.name)
-
-                # Try to instanciate the Plugin TODO add further checks
                 loaded = loaded_module.ParserPlugin()
-
                 self.loaded_plugins.append(loaded)
-
             except (
                 JoystickDiagramsError,
                 JSONDecodeError,
@@ -79,123 +77,95 @@ class ParserPluginManager:
             ) as e:
                 _logger.error(f"Error with Plugin: {plugin} - {e}")
 
+        # Load user-installed plugins
+        bundled_names = {p.name for p in self.loaded_plugins}
+        for plugin_path in self.user_plugins:
+            try:
+                _logger.debug(f"Loading user parser plugin {plugin_path}")
+                loaded_module = load_user_parser_plugin(plugin_path)
+                loaded = loaded_module.ParserPlugin()
+
+                if loaded.name in bundled_names:
+                    _logger.warning(
+                        f"User plugin '{loaded.name}' conflicts with bundled plugin "
+                        f"of same name. Skipping user plugin at {plugin_path}."
+                    )
+                    self.conflicts.append((loaded.name, plugin_path))
+                    continue
+
+                self.loaded_plugins.append(loaded)
+                self._user_plugin_names.add(loaded.name)
+                self._user_plugin_paths[loaded.name] = plugin_path
+            except Exception as e:
+                _logger.error(f"Error loading user parser plugin: {plugin_path} - {e}")
+
     def get_available_plugins(self) -> list[PluginInterface]:
         return [x for x in self.loaded_plugins]
 
+    def is_user_plugin(self, name: str) -> bool:
+        return name in self._user_plugin_names
 
-def install_plugin(plugin_package: Path):
-    """Validates and installs a provided Folder/ZIP as a plugin"""
-    if not isinstance(plugin_package, Path):
-        raise TypeError("Plugin path must be a valid path object")
-
-    # Support for ZIP files
-    if plugin_package.is_file() and plugin_package.suffix == ".zip":
-        install_zip_plugin(plugin_package)
-
-    # Support for folder
-    if plugin_package.is_dir():
-        install_folder_plugin(plugin_package)
-
-    # TODO POST STEPS / Initialisation / Hotload / Signing
+    def get_user_plugin_path(self, name: str) -> Path | None:
+        return self._user_plugin_paths.get(name)
 
 
-def install_folder_plugin(plugin_path: Path):
-    check = check_folder_validity(plugin_path)
+def find_user_parser_plugins() -> list[Path]:
+    """Discover user-installed parser plugins from the user data directory."""
+    user_dir = utils.user_parser_plugins_root()
+    if not user_dir.is_dir():
+        return []
 
-    if not check:
-        _logger.error("Plugin folder failed validation, so will not be installed")
-        return
-
-    try:
-        _move = shutil.copy(
-            plugin_path,
-            Path(os.path.join(Path(__file__).resolve().parent, PLUGINS_DIRECTORY)),
-        )
-        _logger.info(f"Plugin installed to: {_move}")
-    except shutil.Error as e:
-        raise JoystickDiagramsError(
-            f"Error when installing plugin in target directory: {e}"
-        ) from e  # Move to new Exception Type
+    folders = [
+        folder
+        for folder in user_dir.iterdir()
+        if check_folder_validity(folder) and folder.name not in EXCLUDED_PLUGIN_DIRS
+    ]
+    _logger.debug(f"Valid user parser plugins detected: {folders}")
+    return folders
 
 
-def install_zip_plugin(plugin_path: Path):
-    _logger.info(f"Trying to unpack ZIP plugin: {plugin_path}")
+def load_user_parser_plugin(plugin_path: Path) -> ModuleType:
+    """Load a parser plugin from an arbitrary filesystem path.
 
-    try:
-        unpacked_zip = handle_zip_plugin(plugin_path)
-    except JoystickDiagramsError as e:
-        _logger.error(e)
-        return
-
-    check = check_folder_validity(unpacked_zip)
-
-    if not check:
-        _logger.error("Unpacked ZIP failed validation, so will not be installed")
-        clean_plugin_unpack_directory(unpacked_zip)
-        return
-
-    try:
-        _move = shutil.move(
-            unpacked_zip,
-            Path(os.path.join(Path(__file__).resolve().parent, PLUGINS_DIRECTORY)),
-        )
-        _logger.info(f"Unzipped plugin installed to: {_move}")
-    except shutil.Error as e:
-        raise JoystickDiagramsError(
-            f"Error when installing plugin in target directory: {e}"
-        ) from e  # Move to new Exception Type
-    finally:
-        clean_plugin_unpack_directory(unpacked_zip)
-
-
-def handle_zip_plugin(zip_file: Path) -> Path:
-    """Validates a ZIP file and unpacks it to a directory
-
-    Returns Path to unpackaged ZIP is valid
+    Uses spec_from_file_location so plugins outside the joystick_diagrams
+    package can be loaded. Works in frozen (cx_freeze) environments.
     """
-    # unpack zip
-    zip_obj = zipfile.ZipFile(zip_file, mode="r")
-    extract_path = Path.joinpath(Path.cwd(), Path("temp"))
-
-    # Check zip integrity
-    try:
-        zip_obj.testzip()
-    except zipfile.BadZipFile as e:
-        _logger.warning(f"Zip file was loaded from {zip_file} but invalid")
-        raise JoystickDiagramsError(
-            "Plugin zip file not valid"
-        ) from e  # Move to new Exception Type
-
-    # Extract the ZIP
-    zip_obj.extractall(extract_path)
-
-    # Get the folder unpacked from the ZIP
-    items = os.listdir(extract_path)
-
-    if not len(items) == 1:
-        raise JoystickDiagramsError(
-            "Plugin zip file not valid, more than one item unpacked from zip."
+    main_file = Path.joinpath(plugin_path, "main.py")
+    if not main_file.is_file():
+        raise PluginNotValidError(
+            value=str(plugin_path),
+            error="Plugin directory does not contain main.py",
         )
 
-    unpacked_item = Path.joinpath(extract_path, items[0])
-
-    if not unpacked_item.is_dir():
-        raise JoystickDiagramsError(
-            "Plugin zip file not valid, item unpacked is not a directory"
+    module_name = f"jd_user_parser_plugin_{plugin_path.name}"
+    spec = importlib.util.spec_from_file_location(
+        f"{module_name}.main",
+        str(main_file),
+        submodule_search_locations=[str(plugin_path)],
+    )
+    if spec is None or spec.loader is None:
+        raise PluginNotValidError(
+            value=str(plugin_path),
+            error="Could not create module spec for plugin",
         )
 
-    return Path.joinpath(extract_path, items[0])
+    # Register the parent package so relative imports within the plugin work
+    if module_name not in sys.modules:
+        parent_spec = importlib.util.spec_from_file_location(
+            module_name,
+            str(Path.joinpath(plugin_path, "__init__.py")),
+            submodule_search_locations=[str(plugin_path)],
+        )
+        if parent_spec is not None:
+            parent_module = importlib.util.module_from_spec(parent_spec)
+            sys.modules[module_name] = parent_module
+            if parent_spec.loader is not None:
+                parent_spec.loader.exec_module(parent_module)
 
-
-def clean_plugin_unpack_directory(directory: Path):
-    _logger.info("Attempting to remove unpack directory for plugin at {directory}")
-    if directory.is_dir():
-        shutil.rmtree(directory)
-
-
-def verify_plugin_signature() -> bool:
-    "Used to verify a package for official Author."
-    return True
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def load_plugin(
@@ -257,11 +227,3 @@ def check_folder_validity(folder: Path):
         return True
 
     return False
-
-
-if __name__ == "__main__":
-    app = ParserPluginManager()
-
-    install_plugin(
-        Path("D:\\Git Repos\\joystick-diagrams\\_DISABLED\\dcs_world_plugin_other.zip")
-    )

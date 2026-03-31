@@ -181,20 +181,45 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             card.deleteLater()
         self._plugin_cards.clear()
 
-        # Remove stretch
+        # Remove stretch and install link
         while self._cards_layout.count():
-            self._cards_layout.takeAt(0)
+            item = self._cards_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
         for plugin_data in self.appState.plugin_manager.plugin_wrappers:
-            card = PluginCard(plugin_data, self)
+            is_user = self.appState.plugin_manager.is_user_plugin(plugin_data.name)
+            card = PluginCard(plugin_data, self, is_user_plugin=is_user)
             card.enabled_toggled.connect(self._on_plugin_enabled_toggled)
             card.setup_clicked.connect(self.show_plugin_config_panel)
             self._plugin_cards.append(card)
             self._cards_layout.addWidget(card)
 
+        # "Install more plugins" link
+        install_link = QPushButton("Install more plugins...")
+        install_link.setIcon(qta.icon("fa5s.puzzle-piece", color="#4C8BF5"))
+        install_link.setIconSize(QSize(14, 14))
+        install_link.setStyleSheet(
+            "QPushButton { color: #4C8BF5; background: transparent; "
+            "border: none; text-align: left; padding: 8px 4px; }"
+            "QPushButton:hover { text-decoration: underline; color: #6BA1F7; }"
+        )
+        install_link.setCursor(Qt.CursorShape.PointingHandCursor)
+        install_link.clicked.connect(self._navigate_to_plugin_settings)
+        self._cards_layout.addWidget(install_link)
+
         self._cards_layout.addStretch()
         self.pluginListChanged.emit()
         self.update_run_button_state()
+
+    def _navigate_to_plugin_settings(self):
+        """Navigate to Settings > Parser Plugins tab."""
+        main_window = self.appState.main_window
+        if main_window:
+            main_window.load_settings_page()
+            # Select the Parser Plugins tab (index 3 in the nav list)
+            if main_window._settings_page:
+                main_window._settings_page.nav_list.setCurrentRow(3)
 
     def _on_plugin_enabled_toggled(self, plugin_wrapper: PluginWrapper, enabled: bool):
         plugin_wrapper.enabled = enabled
@@ -299,9 +324,12 @@ class PluginCard(QFrame):
     enabled_toggled = Signal(object, bool)  # (PluginWrapper, enabled)
     setup_clicked = Signal(object)  # PluginWrapper
 
-    def __init__(self, plugin_wrapper: PluginWrapper, parent=None):
+    def __init__(
+        self, plugin_wrapper: PluginWrapper, parent=None, is_user_plugin: bool = False
+    ):
         super().__init__(parent)
         self.plugin_wrapper = plugin_wrapper
+        self._is_user_plugin = is_user_plugin
         self._profile_count = 0
         self._build_ui()
         self.refresh_status()
@@ -341,6 +369,17 @@ class PluginCard(QFrame):
         version_label = QLabel(f"v{self.plugin_wrapper.version}")
         version_label.setProperty("class", "plugin-card-version")
         name_row.addWidget(version_label)
+
+        # User-installed badge
+        if self._is_user_plugin:
+            badge = QLabel("User")
+            badge.setStyleSheet(
+                "color: #F59E0B; background: rgba(245, 158, 11, 0.15); "
+                "border-radius: 3px; padding: 1px 6px; font-size: 10px;"
+            )
+            badge.setFixedHeight(16)
+            name_row.addWidget(badge)
+
         name_row.addStretch()
 
         center.addLayout(name_row)
@@ -461,7 +500,7 @@ class PluginConfigPanel(QWidget):
     settings_changed = Signal()
     close_requested = Signal()
 
-    def __init__(self, plugin_wrapper: PluginWrapper, page: PluginsPage, parent=None):
+    def __init__(self, plugin_wrapper: PluginWrapper, page: QWidget, parent=None):
         super().__init__(parent)
         self._wrapper = plugin_wrapper
         self._page = page
@@ -553,10 +592,9 @@ class PluginConfigPanel(QWidget):
                     browse_btn = QPushButton("Browse...")
                     browse_btn.setFixedWidth(100)
                     browse_btn.clicked.connect(
-                        lambda checked,
-                        fn=field_name,
-                        fi=field_info,
-                        pf=path_field: self._on_path_browse(fn, fi, pf)
+                        lambda checked, fn=field_name, fi=field_info, pf=path_field: (
+                            self._on_path_browse(fn, fi, pf)
+                        )
                     )
                     row.addWidget(browse_btn)
                     outer.addLayout(row)

@@ -17,6 +17,7 @@ pydantic = "^2.0"
 pyside6 = "^6.9.0"
 semver = "^3.0.2"
 qtawesome = "^1.3.0"
+cryptography = ">=41.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.6.0"
@@ -27,7 +28,7 @@ coveralls = "^3.3.0"
 cx-Freeze = "^8.3.0"
 mypy = "^1.7.1"
 isort = "^5.12.0"
-ruff = "^0.2.0"
+ruff = ">=0.15.0"
 
 [tool.poetry.scripts]
 version_package = 'joystick_diagrams.version:generate_version'
@@ -155,7 +156,7 @@ unfixable = ["B"]
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402"]
 "**/{tests,docs,tools,qt_ui}/*" = ["E402", "PLR2004"]
-"**/{ui}/*" = ["N", "PLR"]
+"**/{ui}/*" = ["N", "PLR", "PLC0415"]
 
 [tool.ruff.format]
 quote-style = "double"
