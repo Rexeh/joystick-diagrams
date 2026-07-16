@@ -2,6 +2,7 @@
 
 import logging
 import os
+import re
 import uuid
 from pathlib import Path
 from typing import Union
@@ -29,15 +30,11 @@ class EliteDangerous:
                 try:
                     self.__validate_file(data)
                 except Exception as e:
-                    raise Exception(
-                        "File is not a valid Elite Dangerous XML"
-                    ) from e
+                    raise Exception("File is not a valid Elite Dangerous XML") from e
                 else:
                     return data
             else:
-                raise Exception(
-                    "File must be a .binds file"
-                )
+                raise Exception("File must be a .binds file")
         else:
             raise FileNotFoundError("File not found")
 
@@ -45,9 +42,7 @@ class EliteDangerous:
         try:
             parsed_xml = minidom.parseString(data)
         except ValueError as e:
-            raise Exception(
-                "File is not a valid Elite Dangerous XML"
-            ) from e
+            raise Exception("File is not a valid Elite Dangerous XML") from e
         else:
             root = parsed_xml.documentElement
             if root.tagName == "Root" and root.hasAttribute("PresetName"):
@@ -61,7 +56,9 @@ class EliteDangerous:
         """Get or create a GUID for a device name."""
         if device_name not in self.device_guid_map:
             # Generate a consistent GUID based on device name
-            self.device_guid_map[device_name] = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"ed-device-{device_name}"))
+            self.device_guid_map[device_name] = str(
+                uuid.uuid5(uuid.NAMESPACE_DNS, f"ed-device-{device_name}")
+            )
         return self.device_guid_map[device_name]
 
     def parse_binding_element(self, element) -> tuple[str, str] | None:
@@ -74,7 +71,9 @@ class EliteDangerous:
 
         return (device, key)
 
-    def resolve_input(self, device_name: str, key: str) -> tuple[str, Union[Axis, Button, Hat, None]] | None:
+    def resolve_input(
+        self, device_name: str, key: str
+    ) -> tuple[str, Union[Axis, Button, Hat, None]] | None:
         """Resolve a device/key combination to a device GUID and input control."""
         if not device_name or not key:
             return None
@@ -88,7 +87,7 @@ class EliteDangerous:
 
         return (device_guid, input_control)
 
-    def parse_key(self, key: str) -> Union[Axis, Button, Hat, None]:
+    def parse_key(self, key: str) -> Union[Axis, Button, Hat, None]:  # noqa: C901, PLR0911, PLR0912
         """Parse an Elite Dangerous key string into an input control."""
         key = key.strip()
 
@@ -106,7 +105,7 @@ class EliteDangerous:
                     "ZAxis": "Z",
                     "RZAxis": "RZ",
                     "RXAxis": "RX",
-                    "RYAxis": "RY"
+                    "RYAxis": "RY",
                 }
                 return Axis(AxisDirection[axis_map[axis_name]])
 
@@ -122,7 +121,7 @@ class EliteDangerous:
                     "ZAxis": "Z",
                     "RZAxis": "RZ",
                     "RXAxis": "RX",
-                    "RYAxis": "RY"
+                    "RYAxis": "RY",
                 }
                 return Axis(AxisDirection[axis_map[axis_part]])
 
@@ -161,7 +160,9 @@ class EliteDangerous:
                 "LeftControl": 7,
                 "LeftAlt": 8,
             }
-            button_id = key_map.get(key_name, hash(key_name) % 1000 + 100)  # Fallback mapping
+            button_id = key_map.get(
+                key_name, hash(key_name) % 1000 + 100
+            )  # Fallback mapping
             return Button(button_id)
 
         # Handle mouse buttons
@@ -184,18 +185,18 @@ class EliteDangerous:
     def get_human_readable_name(self, binding_name: str) -> str:
         """Convert binding names to human readable format."""
         # Custom friendly name mapping - add your XML node names here
-        FRIENDLY_NAMES = {
+        FRIENDLY_NAMES = {  # noqa: N806
             # Example mappings - replace with your preferred names
             "YawAxisRaw": "Yaw Axis",
             "RollAxisRaw": "Roll Axis",
             "PitchAxisRaw": "Pitch Axis",
             "LateralThrustRaw": "Lateral Thrust",
             "VerticalThrustRaw": "Vertical Thrust",
-            "SetSpeed0" : "Throttle 0%",
-            "SetSpeed25" : "Throttle 25%",
-            "SetSpeed50" : "Throttle 50%",
-            "SetSpeed75" : "Throttle 75%",
-            "SetSpeed100" : "Throttle 100%",
+            "SetSpeed0": "Throttle 0%",
+            "SetSpeed25": "Throttle 25%",
+            "SetSpeed50": "Throttle 50%",
+            "SetSpeed75": "Throttle 75%",
+            "SetSpeed100": "Throttle 100%",
             "ThrottleAxis": "Throttle",
             "ToggleReverseThrottleInput": "Reverse Throttle",
             "PrimaryFire": "Primary Fire",
@@ -207,7 +208,7 @@ class EliteDangerous:
             "ToggleFlightAssist": "Flight Assist",
             "LandingGearToggle": "Landing Gear",
             "CargoScoop": "Cargo Scoop",
-            "DeployHardpointToggle" : "Deploy Hardpoints",
+            "DeployHardpointToggle": "Deploy Hardpoints",
             "DeployHeatSink": "Heat Sink",
             "UseShieldCell": "Shield Cell",
             "FireChaffLauncher": "Chaff",
@@ -237,7 +238,6 @@ class EliteDangerous:
             "OpenCodexGoToDiscovery": "Codex",
             "PlayerHUDModeToggle": "HUD Mode",
             "ExplorationFSSEnter": "FSS Scanner",
-            "ExplorationFSSZoomIn"
             "ExplorationFSSCameraPitchDecrease": "FSS Camera Pitch Down",
             "ExplorationFSSCameraYaw": "FSS Camera Yaw",
             "ExplorationFSSCameraYawIncrease": "FSS Camera Yaw Up",
@@ -250,12 +250,9 @@ class EliteDangerous:
             "ExplorationFSSRadioTuningY_Raw": "FSS Radio Tuning Y",
             "ExplorationFSSRadioTuningZ_Raw": "FSS Radio Tuning Z",
             "ExplorationFSSRadioTuningW_Raw": "FSS Radio Tuning W",
-            "ExplorationFSSRadioTuningX_Raw": "FSS Radio Tuning X",
-            "ExplorationFSSRadioTuningY_Raw": "FSS Radio Tuning Y",
-            "ExplorationFSSRadioTuningZ_Raw": "FSS Radio Tuning Z",
             "ToggleButtonUpInput": "Toggle Button Up",
             "ToggleButtonDownInput": "Toggle Button Down",
-            "ExplorationFSSShowHelp" : "FSS Help",
+            "ExplorationFSSShowHelp": "FSS Help",
             "UI_Up": "UI Up",
             "UI_Down": "UI Down",
             "UI_Left": "UI Left",
@@ -400,11 +397,11 @@ class EliteDangerous:
             "HumanoidEmoteSlot6": "Emote 6",
             "HumanoidEmoteSlot7": "Emote 7",
             "HumanoidEmoteSlot8": "Emote 8",
-            "TargetWingman0" : "Target Wingman 1",
-            "TargetWingman1" : "Target Wingman 2",
-            "TargetWingman2" : "Target Wingman 3",
-            "SelectTargetsTarget" : "Target's Target",
-            "ShipSpotLightToggle" : "Ship Lights",
+            "TargetWingman0": "Target Wingman 1",
+            "TargetWingman1": "Target Wingman 2",
+            "TargetWingman2": "Target Wingman 3",
+            "SelectTargetsTarget": "Target's Target",
+            "ShipSpotLightToggle": "Ship Lights",
         }
 
         # Check if we have a custom friendly name for this binding
@@ -412,16 +409,15 @@ class EliteDangerous:
             return FRIENDLY_NAMES[binding_name]
 
         # Otherwise, apply automatic formatting
-        import re
         # Convert camelCase/PascalCase to space separated
-        name = re.sub(r'([a-z])([A-Z])', r'\1 \2', binding_name)
+        name = re.sub(r"([a-z])([A-Z])", r"\1 \2", binding_name)
         # Handle cases like "PrimaryFire" -> "Primary Fire"
-        name = re.sub(r'([a-zA-Z])([A-Z][a-z])', r'\1 \2', name)
+        name = re.sub(r"([a-zA-Z])([A-Z][a-z])", r"\1 \2", name)
         # Remove "Button" suffix as it's redundant in context
-        name = re.sub(r'\s+Button$', '', name)
+        name = re.sub(r"\s+Button$", "", name)
         return name.strip().title()
 
-    def parse(self) -> ProfileCollection:
+    def parse(self) -> ProfileCollection:  # noqa: C901, PLR0912, PLR0915
         """Parse the Elite Dangerous bindings file and return a ProfileCollection."""
         parsed_xml = self.parse_file_data(self.data)
         root = parsed_xml.documentElement
@@ -434,12 +430,14 @@ class EliteDangerous:
             "Landing": [],  # Landing controls (_Landing suffix)
             "SRV": [],  # SRV/Buggy controls (_Buggy suffix)
             "On Foot": [],  # On foot controls (_Humanoid suffix)
-            "General": []  # General controls that apply to multiple schemes
+            "General": [],  # General controls that apply to multiple schemes
         }
 
         # Find all binding elements and categorize them by control scheme
         for child in root.childNodes:
-            if child.nodeType == child.ELEMENT_NODE and child.tagName not in ["KeyboardLayout"]:
+            if child.nodeType == child.ELEMENT_NODE and child.tagName not in [
+                "KeyboardLayout"
+            ]:
                 binding_name = child.tagName
 
                 # Determine which control scheme this binding belongs to
@@ -461,41 +459,71 @@ class EliteDangerous:
                 elif "Buggy" in binding_name:
                     scheme = "SRV"
                     clean_name = binding_name
-                else:
-                    # Categorize controls that don't have specific suffixes
-                    # General controls are UI, camera, and system-wide controls available across all game modes
-                    if any(binding_name.startswith(prefix) for prefix in [
+                elif any(
+                    binding_name.startswith(prefix)
+                    for prefix in [
                         # UI Controls
-                        "UI", "Focus", "GalaxyMap", "SystemMap", "Codex", "FriendsMenu",
-                        "CycleNextPanel", "CyclePreviousPanel", "CycleNextPage", "CyclePreviousPage",
-                        "QuickCommsPanel", "PlayerHUDModeToggle", "ShowPGScoreSummaryInput",
-
+                        "UI",
+                        "Focus",
+                        "GalaxyMap",
+                        "SystemMap",
+                        "Codex",
+                        "FriendsMenu",
+                        "CycleNextPanel",
+                        "CyclePreviousPanel",
+                        "CycleNextPage",
+                        "CyclePreviousPage",
+                        "QuickCommsPanel",
+                        "PlayerHUDModeToggle",
+                        "ShowPGScoreSummaryInput",
                         # Camera Controls
-                        "CamPitch", "CamYaw", "CamTranslate", "CamZoom", "CamTranslateZHold",
-                        "HeadLook", "MouseHeadlook", "MotionHeadlook",
-                        "PitchCamera", "YawCamera", "RollCamera",
-
+                        "CamPitch",
+                        "CamYaw",
+                        "CamTranslate",
+                        "CamZoom",
+                        "CamTranslateZHold",
+                        "HeadLook",
+                        "MouseHeadlook",
+                        "MotionHeadlook",
+                        "PitchCamera",
+                        "YawCamera",
+                        "RollCamera",
                         # System-wide Controls
-                        "Pause", "HMDReset", "MicrophoneMute", "PhotoCamera", "VanityCamera",
-                        "FreeCam", "MoveFreeCam", "ToggleRotationLock", "FixCameraRelativeToggle",
-                        "FixCameraWorldToggle", "QuitCamera", "ToggleAdvanceMode", "FreeCamZoom",
-                        "FStop", "CommanderCreator", "GalnetAudio", "GalaxyMapHome",
-
+                        "Pause",
+                        "HMDReset",
+                        "MicrophoneMute",
+                        "PhotoCamera",
+                        "VanityCamera",
+                        "FreeCam",
+                        "MoveFreeCam",
+                        "ToggleRotationLock",
+                        "FixCameraRelativeToggle",
+                        "FixCameraWorldToggle",
+                        "QuitCamera",
+                        "ToggleAdvanceMode",
+                        "FreeCamZoom",
+                        "FStop",
+                        "CommanderCreator",
+                        "GalnetAudio",
+                        "GalaxyMapHome",
                         # Multi-crew and Orders
-                        "MultiCrew", "Order",
-
+                        "MultiCrew",
+                        "Order",
                         # Audio and Communication
                         "OpenCodexGoToDiscovery",
-
                         # System-wide flight functions (available across modes)
-                        "UseBoostJuice", "Supercruise", "Hyperspace", "ToggleDriveAssist"
-                    ]):
-                        scheme = "General"
-                        clean_name = binding_name
-                    else:
-                        # Everything else goes to Flight (main flight controls)
-                        scheme = "Flight"
-                        clean_name = binding_name
+                        "UseBoostJuice",
+                        "Supercruise",
+                        "Hyperspace",
+                        "ToggleDriveAssist",
+                    ]
+                ):
+                    scheme = "General"
+                    clean_name = binding_name
+                else:
+                    # Everything else goes to Flight (main flight controls)
+                    scheme = "Flight"
+                    clean_name = binding_name
 
                 # Get the human readable name
                 human_name = self.get_human_readable_name(clean_name)
@@ -523,7 +551,7 @@ class EliteDangerous:
                 if binding_elem:
                     bindings_to_process.append(("Binding", binding_elem))
 
-                for binding_type, elem in bindings_to_process:
+                for _binding_type, elem in bindings_to_process:
                     binding_info = self.parse_binding_element(elem)
                     if binding_info:
                         device_name, key = binding_info
@@ -533,12 +561,14 @@ class EliteDangerous:
                             device_guid, input_control = resolved_input
 
                             # Store binding info for this scheme
-                            control_schemes[scheme].append({
-                                'device_guid': device_guid,
-                                'device_name': device_name,
-                                'input_control': input_control,
-                                'human_name': human_name
-                            })
+                            control_schemes[scheme].append(
+                                {
+                                    "device_guid": device_guid,
+                                    "device_name": device_name,
+                                    "input_control": input_control,
+                                    "human_name": human_name,
+                                }
+                            )
 
         # Create profiles for each control scheme that has bindings
         for scheme_name, bindings in control_schemes.items():
@@ -547,10 +577,14 @@ class EliteDangerous:
 
                 for binding in bindings:
                     # Add device to profile (add_device handles duplicates internally)
-                    device_obj = profile_obj.add_device(binding['device_guid'], binding['device_name'])
+                    device_obj = profile_obj.add_device(
+                        binding["device_guid"], binding["device_name"]
+                    )
 
-                    if device_obj and binding['input_control']:
-                        device_obj.create_input(binding['input_control'], binding['human_name'])
+                    if device_obj and binding["input_control"]:
+                        device_obj.create_input(
+                            binding["input_control"], binding["human_name"]
+                        )
 
         return profile_collection
 

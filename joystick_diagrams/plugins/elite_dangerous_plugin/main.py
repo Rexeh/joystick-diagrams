@@ -1,72 +1,57 @@
-import json
-import logging
 from pathlib import Path
 
-from joystick_diagrams.plugins.elite_dangerous_plugin.config import (
-    settings,  # TODO Move out plugins to separate package
-)
-from joystick_diagrams.plugins.elite_dangerous_plugin.elite_dangerous import (
-    EliteDangerous,  # TODO Move out plugins to separate package
-)
-from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from pydantic import Field
 
-CONFIG_FILE = "data.json"
-_logger = logging.getLogger("__name__")
+from joystick_diagrams.input.profile_collection import ProfileCollection
+from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.plugins.plugin_settings import PluginMeta, PluginSettings
+
+from .elite_dangerous import EliteDangerous
+
+
+class EliteDangerousSettings(PluginSettings):
+    binds_file: Path | None = Field(
+        default=None,
+        title="Elite Dangerous .binds File",
+        json_schema_extra={
+            "is_folder": False,
+            "default_path": "~/AppData/Local/Frontier Developments/Elite Dangerous/Options/Bindings",
+            "extensions": [".binds"],
+        },
+    )
 
 
 class ParserPlugin(PluginInterface):
+    plugin_meta = PluginMeta(
+        name="Elite Dangerous",
+        version="0.0.1",
+        icon_path="img/ed.ico",
+    )
+    plugin_settings_model = EliteDangerousSettings
+
     def __init__(self):
-        self.path = None
-        self.settings = settings
-        self.settings.validators.register()
-        self.instance: EliteDangerous = None
+        super().__init__()
+        self.instance: EliteDangerous | None = None
 
-    def process(self):
-        return self.instance.parse()
+    def process(self) -> ProfileCollection:
+        if self.instance:
+            return self.instance.parse()
+        return ProfileCollection()
 
-    def set_path(self, path: Path) -> bool:
-        inst = EliteDangerous(path)
+    def _rebuild_instance(self) -> None:
+        binds_file = self.get_setting("binds_file")
+        if binds_file and Path(binds_file).exists():
+            self.instance = EliteDangerous(binds_file)
+        else:
+            self.instance = None
 
-        if inst:
-            self.instance = inst
-            self.path = path
-            self.save_plugin_state()
-            return True
+    def update_setting(self, key, value) -> None:
+        super().update_setting(key, value)
+        self._rebuild_instance()
 
-        return False
-
-    def save_plugin_state(self):
-        with open(
-            Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
-            "w",
-            encoding="UTF8",
-        ) as f:
-            f.write(json.dumps({"path": str(self.path)}))
-
-    def load_settings(self) -> None:
-        try:
-            with open(
-                Path.joinpath(self.get_plugin_data_path(), CONFIG_FILE),
-                "r",
-                encoding="UTF8",
-            ) as f:
-                data = json.loads(f.read())
-                self.path = Path(data["path"]) if data["path"] else None
-        except FileNotFoundError:
-            pass
-
-    @property
-    def path_type(self):
-        return self.FilePath(
-            "Select your Elite Dangerous .binds file",
-            Path.home() / "AppData" / "Local" / "Frontier Developments" / "Elite Dangerous" / "Options" / "Bindings",  # Common ED install location
-            [".binds"],
-        )
-
-    @property
-    def icon(self):
-        return f"{Path.joinpath(Path(__file__).parent,self.settings.PLUGIN_ICON)}"
+    def on_settings_loaded(self) -> None:
+        self._rebuild_instance()
 
 
 if __name__ == "__main__":
-    plugin = ParserPlugin()
+    pass
