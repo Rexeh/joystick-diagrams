@@ -33,6 +33,30 @@ class TestDCSParseTest(unittest.TestCase):
         button = self.dcs_instance.convert_button_format("JOY_BTN_POV2_UR")
         self.assertIsInstance(button, Hat)
 
+    def test_parse_unescapes_backslash_quote_in_strings(self):
+        """DCS Lua stores command names with \\\" for literal double-quotes.
+        The lexer must unescape them so downstream Python strings contain a
+        plain " — otherwise SVG export writes \\&quot; and the backslashes
+        show up in the rendered diagram."""
+        lua = (
+            '{["keyDiffs"] = {["1"] = '
+            '{["name"] = "\\"Prepare Weapons\\" command to gunner"}}} '
+        )
+        result = self.dcs_instance.parse_config(lua)
+        self.assertIsNotNone(result)
+        self.assertEqual(
+            result["keyDiffs"]["1"]["name"],
+            '"Prepare Weapons" command to gunner',
+        )
+
+    def test_parse_unescapes_backslash_backslash_in_strings(self):
+        """Literal backslashes in Lua are \\\\ (two chars); after unescape
+        they should collapse to a single \\ in the Python string."""
+        lua = '{["keyDiffs"] = {["1"] = {["name"] = "a\\\\b"}}} '
+        result = self.dcs_instance.parse_config(lua)
+        self.assertIsNotNone(result)
+        self.assertEqual(result["keyDiffs"]["1"]["name"], "a\\b")
+
 
 if __name__ == "__main__":
     unittest.main()

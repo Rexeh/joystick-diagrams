@@ -51,6 +51,22 @@ def get_bind_text_for_string(search_string: str) -> str | None:
     return result[0]
 
 
+def get_all_bind_text() -> list[tuple[str, str]]:
+    con = connection()
+    cur = con.cursor()
+
+    cur.execute("SELECT original_str, replaced_str FROM bind_text")
+    return cur.fetchall()
+
+
+def delete_bind_text(original_str: str):
+    con = connection()
+    cur = con.cursor()
+
+    cur.execute("DELETE FROM bind_text WHERE original_str = ?", [original_str])
+    con.commit()
+
+
 if __name__ == "__main__":
     create_new_db_if_not_exist()
     add_update_bind_text("123", "2322323")

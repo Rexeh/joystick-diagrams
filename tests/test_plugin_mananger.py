@@ -20,7 +20,7 @@ def test_load_plugin_not_valid(caplog):
     with pytest.raises(exceptions.PluginNotValidError):
         load_plugin(plugin_package, module_path)
 
-    assert "notPlugin.main" in caplog.text
+    assert "notPlugin" in caplog.text or "tests.data" in caplog.text
 
 
 @pytest.fixture

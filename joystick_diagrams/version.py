@@ -12,12 +12,12 @@ from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 
-import requests  # type: ignore
+import requests
 import semver
 
 _LOGGER = logging.getLogger(__name__)
 
-VERSION = "2.1.0"  # Format Major.Minor
+VERSION = "2.2.0"  # Format Major.Minor
 VERSION_SERVER = "https://www.joystick-diagrams.com/"
 TEMPLATE_DIR = "./templates"
 MANIFEST_DIR = "./"
@@ -127,12 +127,7 @@ def generate_template_manifest() -> dict[str, str]:
     manifest: dict[str, str] = {}
 
     # Generate Template Manifest
-    for template in templates.iterdir():
-        # For now no traversal supported
-        if template.is_dir():
-            continue
-        if template.suffix != ".svg":
-            continue
+    for template in templates.rglob("*.svg"):
         with open(template, "rb", buffering=0) as file:
             manifest[template.name] = sha256(file.read()).hexdigest()
 

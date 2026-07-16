@@ -33,8 +33,8 @@ def test_comprehensive_french_descriptions():
             len(profile.devices) > 0
         ), f"Profile '{profile_name}' should have at least one device"
 
-        for device_guid, device in profile.devices.items():
-            for input_type, inputs in device.inputs.items():
+        for _device_guid, device in profile.devices.items():
+            for _input_type, inputs in device.inputs.items():
                 for input_obj in inputs.values():
                     total_inputs += 1
                     command = input_obj.command
@@ -80,9 +80,9 @@ def test_comprehensive_french_descriptions():
     ), "Should have at least some French descriptions in the test data"
 
     # Verify encoding is correct (no double-encoded UTF-8 artifacts)
-    for profile_name, profile in profile_collection.profiles.items():
-        for device_guid, device in profile.devices.items():
-            for input_type, inputs in device.inputs.items():
+    for _profile_name, profile in profile_collection.profiles.items():
+        for _device_guid, device in profile.devices.items():
+            for _input_type, inputs in device.inputs.items():
                 for input_obj in inputs.values():
                     command = input_obj.command
                     assert (

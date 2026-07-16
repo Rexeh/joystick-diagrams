@@ -3,30 +3,37 @@ from pathlib import Path
 
 import qtawesome as qta
 from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import (
-    QAbstractItemView,
+    QCheckBox,
+    QComboBox,
     QFileDialog,
+    QFrame,
     QHBoxLayout,
-    QHeaderView,
+    QLabel,
+    QLineEdit,
     QMainWindow,
+    QMessageBox,
     QPushButton,
-    QTreeWidgetItem,
+    QScrollArea,
+    QVBoxLayout,
     QWidget,
 )
 
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.exceptions import JoystickDiagramsError
+from joystick_diagrams.db.db_settings import add_update_setting_value, get_setting
 from joystick_diagrams.plugin_wrapper import PluginWrapper
-from joystick_diagrams.plugins.plugin_interface import PluginInterface
 from joystick_diagrams.ui.qt_designer import setting_page_ui
+from joystick_diagrams.ui.widgets.section_header import SectionHeader
 
 _logger = logging.getLogger(__name__)
+
+SETUP_BANNER_DISMISSED_KEY = "setup_banner_dismissed"
 
 
 class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
     profileCollectionChange = Signal()
-    pluginTreeChanged = Signal()
+    pluginListChanged = Signal()
     togglePluginEnabledState = Signal(object)
     statistics_change = Signal()
     total_parsed_profiles = Signal(int)
@@ -39,371 +46,222 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         # Attributes
         self.plugin_count = 0
         self.plugins_ready = 0
+        self._plugin_cards: list[PluginCard] = []
 
-        # Connections
-        self.pluginTreeChanged.connect(self.update_plugin_count_statistics)
-        self.pluginTreeChanged.connect(self.initialise_ui)
+        # Replace the generated heading_label with SectionHeader
+        self.heading_label.hide()
+        self.section_header = SectionHeader(
+            "fa5s.cog",
+            "Plugin Setup",
+            "Enable and configure your plugins, then run them to import bindings",
+        )
+        self.verticalLayout_2.insertWidget(0, self.section_header)
 
-        self.runPluginsButton.clicked.connect(self.call_plugin_runner)
-        self.togglePluginEnabledState.connect(self.toggle_enabled_plugin)
+        # Hide the install plugin button and help label (replaced by SectionHeader subtitle)
+        self.installPlugin.hide()
+        self.pluginTreeHelpLabel.hide()
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
 
-        self.statistics_change.connect(self.update_run_button_state)
+        # Hide the old QTreeWidget — we replace it with plugin cards
+        self.pluginTreeWidget.hide()
 
-        # self.parserPluginList.itemClicked.connect(self.plugin_selected)
-        # self.parserPluginList.itemChanged.connect(self.plugin_selected)
-        self.profileCollectionChange.connect(self.update_profile_collections)
-
-        # Setup
-
-        # Header Column Setup
-        self.plugin_header = QTreeWidgetItem()
-        self.plugin_header.setText(0, "Plugin Name")
-        self.plugin_header.setTextAlignment(0, Qt.AlignmentFlag.AlignLeft)
-
-        self.plugin_header.setText(1, "Enabled")
-
-        self.plugin_header.setTextAlignment(1, Qt.AlignmentFlag.AlignHCenter)
-
-        self.plugin_header.setText(2, "Setup")
-        self.plugin_header.setTextAlignment(2, Qt.AlignmentFlag.AlignLeft)
-
-        self.plugin_header.setText(3, "Ready")
-        self.plugin_header.setTextAlignment(3, Qt.AlignmentFlag.AlignHCenter)
-
-        self.plugin_header.setText(4, "Profiles")
-        self.plugin_header.setTextAlignment(4, Qt.AlignmentFlag.AlignHCenter)
-
-        self.pluginTreeWidget.setColumnCount(5)
-
-        self.pluginTreeWidget.setHeaderItem(self.plugin_header)
-        self.pluginTreeWidget.setIconSize(QSize(30, 30))
-        self.pluginTreeWidget.setWordWrap(False)
-        self.pluginTreeWidget.setHorizontalScrollBarPolicy(
+        # Create scrollable plugin cards area
+        self._cards_scroll = QScrollArea()
+        self._cards_scroll.setWidgetResizable(True)
+        self._cards_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self._cards_scroll.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
 
-        self.pluginTreeWidget.header().setMinimumSectionSize(200)
+        self._cards_container = QWidget()
+        self._cards_layout = QVBoxLayout(self._cards_container)
+        self._cards_layout.setContentsMargins(0, 0, 0, 0)
+        self._cards_layout.setSpacing(6)
+        self._cards_layout.addStretch()
+        self._cards_scroll.setWidget(self._cards_container)
 
-        # Header Configuration
-        self.pluginTreeWidget.header().setStretchLastSection(True)
-        self.pluginTreeWidget.header().setSectionResizeMode(
-            QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.pluginTreeWidget.setSelectionBehavior(
-            QAbstractItemView.SelectionBehavior.SelectRows
-        )
-        self.pluginTreeWidget.setSelectionMode(
-            QAbstractItemView.SelectionMode.NoSelection
-        )
+        # Insert the scroll area where the tree widget was
+        self.pluginContainer.insertWidget(0, self._cards_scroll)
 
-        self.pluginTreeWidget.setProperty("class", "plugin-tree")
+        # First-time guidance banner
+        self._guidance_banner = None
+        if not get_setting(SETUP_BANNER_DISMISSED_KEY):
+            self._create_guidance_banner()
 
-        # Styling Overrides
-        self.installPlugin.setIcon(qta.icon("fa5s.file-import"))
-        self.installPlugin.setToolTip("Available in future version")
-        self.pluginTreeHelpLabel.setText(
-            "Enable and setup the plugins you want to create diagrams for. Run the plugins when ready to begin."
-        )
+        # Connections
+        self.pluginListChanged.connect(self.update_plugin_count_statistics)
+        self.statistics_change.connect(self.update_run_button_state)
+        self.profileCollectionChange.connect(self.update_profile_collections)
 
+        # Run button styling and connection
         self.runPluginsButton.setProperty("class", "run-button")
+        self.runPluginsButton.clicked.connect(self.call_plugin_runner)
 
         self.threadPool = QThreadPool()
+        self._current_worker: PluginExecutor | None = None
 
-        self.populate_available_plugin_list()
-        self.initialise_ui()
+        self.populate_plugin_cards()
 
-    class EnabledPushButton(QPushButton):
-        """Custom PushButton class to handle QTreeWidget item pass through to click event for embedded widget"""
+    def _create_guidance_banner(self):
+        """Create the first-time user guidance banner."""
+        self._guidance_banner = QFrame()
+        self._guidance_banner.setProperty("class", "guidance-banner")
 
-        toggled = Signal(bool, object)
+        banner_layout = QHBoxLayout(self._guidance_banner)
+        banner_layout.setContentsMargins(10, 8, 10, 8)
+        banner_layout.setSpacing(10)
 
-        def __init__(self, *args, row_data=None, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.row_data = row_data  # Custom data to be passed
+        icon_label = QLabel()
+        icon_label.setPixmap(
+            qta.icon("fa5s.info-circle", color="#4C8BF5").pixmap(QSize(18, 18))
+        )
+        icon_label.setFixedSize(18, 18)
+        banner_layout.addWidget(icon_label)
 
-        def mousePressEvent(self, event):
-            self.toggle()
-            self.toggled.emit(self.isChecked(), self.row_data)
+        text_label = QLabel(
+            "Welcome! Enable a plugin below, configure its path, "
+            "then click Run to import your bindings."
+        )
+        text_label.setWordWrap(True)
+        banner_layout.addWidget(text_label, stretch=1)
 
-    def initialise_ui(self):
-        """Used to restore state between window changes"""
-        plugins = self.get_plugin_data_for_tree()
+        close_btn = QPushButton()
+        close_btn.setIcon(qta.icon("fa5s.times", color="#9AA0A6"))
+        close_btn.setIconSize(QSize(12, 12))
+        close_btn.setFixedSize(20, 20)
+        close_btn.setFlat(True)
+        close_btn.setProperty("class", "guidance-banner-close")
+        close_btn.clicked.connect(self._dismiss_guidance_banner)
+        banner_layout.addWidget(close_btn)
 
-        for plugin in plugins:
-            self.update_plugin_execute_state(plugin)
+        # Insert after section header
+        self.verticalLayout_2.insertWidget(1, self._guidance_banner)
+
+    def _dismiss_guidance_banner(self):
+        if self._guidance_banner:
+            self._guidance_banner.hide()
+            add_update_setting_value(SETUP_BANNER_DISMISSED_KEY, "true")
 
     def update_run_button_state(self):
         self.runPluginsButton.setEnabled(False)
+        self.runPluginsButton.setIcon(QIcon())
 
         if self.plugins_ready > 0:
             plugin_button_text = "plugins" if self.plugins_ready > 1 else "plugin"
             self.runPluginsButton.setText(
-                f"Run {self.plugins_ready} {plugin_button_text}"
+                f"  Run {self.plugins_ready} {plugin_button_text}"
             )
+            self.runPluginsButton.setIcon(
+                qta.icon("fa5s.play", color="white", color_disabled="#6B7280")
+            )
+            self.runPluginsButton.setIconSize(QSize(16, 16))
             self.runPluginsButton.setEnabled(True)
         else:
-            self.runPluginsButton.setText("No plugins ready")
+            self.runPluginsButton.setText("No plugins ready to run")
 
-    def get_plugin_data_for_tree(self) -> list[PluginWrapper]:
-        plugin_wrappers = []
-        for plugin_row in range(self.pluginTreeWidget.topLevelItemCount()):
-            plugin_data: PluginWrapper = self.pluginTreeWidget.topLevelItem(
-                plugin_row
-            ).data(0, Qt.ItemDataRole.UserRole)
-            plugin_wrappers.append(plugin_data)
-
-        return plugin_wrappers
+    def get_plugin_wrappers(self) -> list[PluginWrapper]:
+        return [card.plugin_wrapper for card in self._plugin_cards]
 
     def update_plugin_count_statistics(self):
-        plugin_item_count = self.pluginTreeWidget.topLevelItemCount()
-
-        # Set Plugin Count
-        self.plugin_count = plugin_item_count
-
-        # Calculate Ready Plugins
-        self.plugins_ready = 0
-        for plugin in self.get_plugin_data_for_tree():
-            if plugin.ready and plugin.enabled:
-                self.plugins_ready = self.plugins_ready + 1
+        self.plugin_count = len(self._plugin_cards)
+        self.plugins_ready = sum(
+            1 for p in self.get_plugin_wrappers() if p.ready and p.enabled
+        )
         self.statistics_change.emit()
 
-    def toggle_enabled_plugin(self, click_state: bool, data: QTreeWidgetItem):
-        """Toggles an embedded enabled button from the QTreeWidgetItem
+    def refresh(self):
+        """Refresh plugin cards when returning to this page."""
+        self.populate_plugin_cards()
 
-        This is overly complex but the only way I could come up with at the time
-        """
-        plugin_data: PluginWrapper = data.data(0, Qt.ItemDataRole.UserRole)
-        plugin_data.enabled = click_state
+    def populate_plugin_cards(self):
+        """Build plugin card widgets from the plugin manager."""
+        # Clear existing cards
+        for card in self._plugin_cards:
+            card.setParent(None)
+            card.deleteLater()
+        self._plugin_cards.clear()
 
-        enabled_widget = self.pluginTreeWidget.itemWidget(data, 1)
-
-        enabled_button_control = enabled_widget.findChild(self.EnabledPushButton)
-
-        enabled_button_control.setText("Enabled" if click_state else "Disabled")
-        self.populate_available_plugin_list()
-
-    def generate_enabled_widget(
-        self, state: bool, widget_item: QTreeWidgetItem
-    ) -> tuple[QWidget, QPushButton]:
-        widget = self.EnabledPushButton(row_data=widget_item)
-        widget.setCheckable(True)
-        widget.setText("Enabled" if state else "Disabled")
-        widget.setChecked(state)
-        widget.setProperty("class", "enabled-button")
-
-        checkBoxWrapper = QWidget()
-        checkBoxWrapper.setProperty("class", "enabled-wrapper")
-
-        layout = QHBoxLayout()
-        layout.addStretch()
-        layout.addWidget(widget)
-        layout.addStretch()
-        layout.setContentsMargins(0, 0, 0, 0)
-        checkBoxWrapper.setLayout(layout)
-
-        return (checkBoxWrapper, widget)
-
-    def get_ready_state_icon(self, state: bool):
-        button = QPushButton()
-        button.setIconSize(QSize(25, 25))
-        button.setFlat(True)
-        button.setProperty("class", "ready-button")
-
-        if state:
-            button.setIcon(
-                qta.icon("fa5s.check-circle", color="green", background="white")
-            )
-            return button
-
-        button.setIcon(qta.icon("fa5s.times-circle", color="red"))
-        return button
-
-    def populate_available_plugin_list(self):
-        self.pluginTreeWidget.clear()
+        # Remove stretch and install link
+        while self._cards_layout.count():
+            item = self._cards_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
         for plugin_data in self.appState.plugin_manager.plugin_wrappers:
-            # Create base plugin row
-            plugin = QTreeWidgetItem()
+            is_user = self.appState.plugin_manager.is_user_plugin(plugin_data.name)
+            card = PluginCard(plugin_data, self, is_user_plugin=is_user)
+            card.enabled_toggled.connect(self._on_plugin_enabled_toggled)
+            card.setup_clicked.connect(self.show_plugin_config_panel)
+            self._plugin_cards.append(card)
+            self._cards_layout.addWidget(card)
 
-            # Set object to row
-            plugin.setData(0, Qt.ItemDataRole.UserRole, plugin_data)
-
-            # Set columns
-            plugin.setText(0, f"{plugin_data.name} - V{plugin_data.version}")
-            plugin.setIcon(0, QIcon(plugin_data.icon))
-
-            plugin.setText(4, "0")
-            plugin.setTextAlignment(4, Qt.AlignmentFlag.AlignCenter)
-
-            # Add item to tree so it can be initlalised
-
-            self.pluginTreeWidget.addTopLevelItem(plugin)
-
-            # Setup further widgets on row
-
-            ## Enabled State
-
-            enabled_widget_wrapper, button = self.generate_enabled_widget(
-                plugin_data.enabled, plugin
-            )
-
-            button.toggled.connect(self.toggle_enabled_plugin)
-
-            self.pluginTreeWidget.setItemWidget(plugin, 1, enabled_widget_wrapper)
-
-            ## Plugin Ready State
-            self.pluginTreeWidget.setItemWidget(
-                plugin, 3, self.get_ready_state_icon(plugin_data.ready)
-            )
-            plugin.setToolTip(
-                3,
-                "Plugin ready to use" if plugin_data.ready else plugin_data.error,
-            )
-
-            path_setup_button = QPushButton()
-            path_setup_button.setCheckable(True)
-            path_setup_button.setProperty("class", "plugin-setup-button")
-            path_setup_button.setText(
-                "Setup Plugin" if not plugin_data.path else "Update Plugin"
-            )
-
-            path_setup_button.setChecked(True if plugin_data.path else False)
-
-            path_setup_button.clicked.connect(self.handle_path_set_for_plugin)
-            self.pluginTreeWidget.setItemWidget(plugin, 2, path_setup_button)
-
-        self.pluginTreeChanged.emit()
-
-    def get_plugin_path_type(
-        self, plugin_wrapper: PluginWrapper
-    ) -> PluginInterface.FilePath | PluginInterface.FolderPath:
-        return plugin_wrapper.path_type
-
-    def get_plugin_row_by_plugin_wrapper(
-        self, plugin_wrapper: PluginWrapper
-    ) -> QTreeWidgetItem | None:
-        search = self.pluginTreeWidget.findItems(
-            plugin_wrapper.name, Qt.MatchFlag.MatchContains, 0
+        # "Install more plugins" link
+        install_link = QPushButton("Install more plugins...")
+        install_link.setIcon(qta.icon("fa5s.puzzle-piece", color="#4C8BF5"))
+        install_link.setIconSize(QSize(14, 14))
+        install_link.setStyleSheet(
+            "QPushButton { color: #4C8BF5; background: transparent; "
+            "border: none; text-align: left; padding: 8px 4px; }"
+            "QPushButton:hover { text-decoration: underline; color: #6BA1F7; }"
         )
-        return search[0] if search else None
+        install_link.setCursor(Qt.CursorShape.PointingHandCursor)
+        install_link.clicked.connect(self._navigate_to_plugin_settings)
+        self._cards_layout.addWidget(install_link)
+
+        self._cards_layout.addStretch()
+        self.pluginListChanged.emit()
+        self.update_run_button_state()
+
+    def _navigate_to_plugin_settings(self):
+        """Navigate to Settings > Parser Plugins tab."""
+        main_window = self.appState.main_window
+        if main_window:
+            main_window.load_settings_page()
+            # Select the Parser Plugins tab (index 3 in the nav list)
+            if main_window._settings_page:
+                main_window._settings_page.nav_list.setCurrentRow(3)
+
+    def _on_plugin_enabled_toggled(self, plugin_wrapper: PluginWrapper, enabled: bool):
+        plugin_wrapper.enabled = enabled
+        self.update_plugin_count_statistics()
+
+    def show_plugin_config_panel(self, plugin_wrapper: PluginWrapper) -> None:
+        """Show the configuration panel for a plugin in the side panel area."""
+        self._clear_side_panel()
+        panel = PluginConfigPanel(plugin_wrapper, self)
+        panel.settings_changed.connect(self._on_settings_changed)
+        panel.close_requested.connect(self._clear_side_panel)
+        self.treeWidgetSidePanel.addWidget(panel)
+
+    def _on_settings_changed(self):
+        """Refresh all cards when any plugin's settings change."""
+        for card in self._plugin_cards:
+            card.refresh_status()
+        self.update_plugin_count_statistics()
+
+    def _clear_side_panel(self) -> None:
+        while self.treeWidgetSidePanel.count():
+            item = self.treeWidgetSidePanel.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
     def update_plugin_error_state(self, plugin: PluginWrapper):
-        plugin_row: QTreeWidgetItem | None = self.get_plugin_row_by_plugin_wrapper(
-            plugin
-        )
-
-        if plugin_row is None:
-            _logger.error(
-                f"Plugin row was not found in plugins  page for {plugin=}. This indicates a problem with UI state."
-            )
-            return
-
-        plugin_row.setText(4, "An error occured")
-        plugin_row.setToolTip(4, f"An error occured with the plugin: {plugin.error}")
+        for card in self._plugin_cards:
+            if card.plugin_wrapper is plugin:
+                card.set_error_state(plugin.error)
+                break
 
     def update_plugin_execute_state(self, plugin: PluginWrapper):
-        """Locates a plugin in QTreeWidget based on the plugin object Name"""
-
-        plugin_row: QTreeWidgetItem | None = self.get_plugin_row_by_plugin_wrapper(
-            plugin
-        )
-
-        if plugin_row is None:
-            _logger.error(
-                f"Plugin row was not found in plugins  page for {plugin=}. This indicates a problem with UI state."
-            )
-            return
-
-        plugin_collection_length = str(
-            len(plugin.plugin_profile_collection)
-            if plugin.plugin_profile_collection
-            else 0
-        )
-
-        plugin_row.setText(4, plugin_collection_length)
-        plugin_row.setToolTip(4, "")
-
-    def set_plugin_path(self, path: Path, plugin_wrapper: PluginWrapper) -> bool:
-        if not isinstance(path, Path):
-            _logger.error(
-                f"Plugin path for {plugin_wrapper.plugin.name} was not a Path object"
-            )
-            return False
-
-        try:
-            _logger.debug(
-                f"Atempting path set {path=} for plugin {plugin_wrapper.plugin.name}"
-            )
-            load = plugin_wrapper.set_path(path)
-
-            if not load:
-                _logger.error(
-                    f"An error occured seting the {path=} for {plugin_wrapper.plugin.name}"
+        """Update a plugin card's profile count after execution."""
+        for card in self._plugin_cards:
+            if card.plugin_wrapper is plugin:
+                count = (
+                    len(plugin.plugin_profile_collection)
+                    if plugin.plugin_profile_collection
+                    else 0
                 )
-                raise JoystickDiagramsError("Error loading plugin")
-            if load:
-                _logger.info(f"Path successfully set for {plugin_wrapper.plugin.name}")
-                return True
-
-        except JoystickDiagramsError:
-            return False
-
-    def handle_path_set_for_plugin(self) -> None:
-        current_treewidget_row = self.pluginTreeWidget.currentItem()
-        plugin_wrapper_object: PluginWrapper = current_treewidget_row.data(
-            0, Qt.ItemDataRole.UserRole
-        )
-
-        new_path = self.open_file_dialog(plugin_wrapper_object)
-
-        if not new_path:
-            # Handle Checked State NULL for exited
-            widget: QPushButton = current_treewidget_row.treeWidget().itemWidget(
-                current_treewidget_row, 2
-            )
-
-            widget.setChecked(not widget.isChecked())
-
-            # widget.setChecked(widget.checkStateSet())
-            return
-
-        path_set_state = self.set_plugin_path(new_path, plugin_wrapper_object)
-
-        if path_set_state:
-            self.pluginTreeWidget.setItemWidget(
-                current_treewidget_row,
-                3,
-                self.get_ready_state_icon(plugin_wrapper_object.ready),
-            )
-        self.populate_available_plugin_list()
-        self.pluginTreeChanged.emit()
-
-    def open_file_dialog(self, plugin_object: PluginWrapper) -> Path | None:
-        plugin_path = self.get_plugin_path_type(plugin_object)
-
-        match type(plugin_path):
-            case PluginInterface.FilePath:
-                exts = " ".join(f"*{ext}" for ext in plugin_path.supported_extensions)
-
-                _file = QFileDialog.getOpenFileName(
-                    self,
-                    caption=plugin_path.dialog_title,
-                    dir=str(plugin_path.default_path),
-                    filter=(f"All Files ({exts})"),
-                )
-
-                if _file[0]:
-                    return Path(_file[0])
-            case PluginInterface.FolderPath:
-                _folder = QFileDialog.getExistingDirectory(
-                    self, plugin_path.dialog_title, str(plugin_path.default_path)
-                )
-                if _folder:
-                    return Path(_folder)
-            case _:
-                _logger.error("Unexpected plugin path type given.")
-
-        return None
+                card.set_profile_count(count)
+                break
 
     def update_run_button_on_start(self):
         animation = qta.Spin(self.runPluginsButton)
@@ -412,27 +270,34 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         )
         self.runPluginsButton.setIconSize(QSize(35, 35))
         self.runPluginsButton.setIcon(spin_icon)
+        self.runPluginsButton.setText("  Running...")
         self.runPluginsButton.setDisabled(True)
 
     def update_run_button_on_finish(self):
         self.runPluginsButton.setIcon(QIcon())
         self.runPluginsButton.setDisabled(False)
+        self.update_run_button_state()
 
     def call_plugin_runner(self):
-        # Emit parsed 0 to update buttons
+        # Disable immediately to prevent a second run starting before the
+        # thread's started signal arrives and disables the button.
+        self.runPluginsButton.setDisabled(True)
         self.total_parsed_profiles.emit(0)
 
-        worker = PluginExecutor(self.get_plugin_data_for_tree())
-
-        # TODO handle started event/button disable
-
-        worker.signals.started.connect(self.update_run_button_on_start)
-        worker.signals.finished.connect(self.calculate_total_profile_count)
-        worker.signals.finished.connect(self.update_run_button_on_finish)
-        worker.signals.finished.connect(self.profileCollectionChange.emit)
-        worker.signals.processed.connect(self.update_plugin_execute_state)
-        worker.signals.process_error.connect(self.update_plugin_error_state)
-        self.threadPool.start(worker)
+        # Keep a strong Python reference so GC doesn't collect the worker
+        # (and its Signals QObject) while the thread is still running.
+        self._current_worker = PluginExecutor(self.get_plugin_wrappers())
+        self._current_worker.signals.started.connect(self.update_run_button_on_start)
+        self._current_worker.signals.finished.connect(
+            self.calculate_total_profile_count
+        )
+        self._current_worker.signals.finished.connect(self.update_run_button_on_finish)
+        self._current_worker.signals.finished.connect(self.profileCollectionChange.emit)
+        self._current_worker.signals.processed.connect(self.update_plugin_execute_state)
+        self._current_worker.signals.process_error.connect(
+            self.update_plugin_error_state
+        )
+        self.threadPool.start(self._current_worker)
 
     @Slot()
     def update_profile_collections(self):
@@ -444,13 +309,433 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         count = sum(
             [
                 len(x.plugin_profile_collection)
-                for x in self.get_plugin_data_for_tree()
+                for x in self.get_plugin_wrappers()
                 if x.plugin_profile_collection
             ],
             0,
         )
         _logger.debug(f"Total of {count} profiles now detected")
         self.total_parsed_profiles.emit(count)
+
+
+class PluginCard(QFrame):
+    """A visual card representing a single plugin with status, enable toggle, and setup button."""
+
+    enabled_toggled = Signal(object, bool)  # (PluginWrapper, enabled)
+    setup_clicked = Signal(object)  # PluginWrapper
+
+    def __init__(
+        self, plugin_wrapper: PluginWrapper, parent=None, is_user_plugin: bool = False
+    ):
+        super().__init__(parent)
+        self.plugin_wrapper = plugin_wrapper
+        self._is_user_plugin = is_user_plugin
+        self._profile_count = 0
+        self._build_ui()
+        self.refresh_status()
+        # Restore profile count from any previous plugin execution
+        if plugin_wrapper.plugin_profile_collection:
+            self.set_profile_count(len(plugin_wrapper.plugin_profile_collection))
+
+    def _build_ui(self):
+        self.setProperty("class", "plugin-card")
+        self.setMinimumHeight(70)
+        self.setMaximumHeight(90)
+
+        root = QHBoxLayout(self)
+        root.setContentsMargins(12, 10, 12, 10)
+        root.setSpacing(14)
+
+        # Left: Plugin icon
+        icon_label = QLabel()
+        icon_pixmap = QIcon(self.plugin_wrapper.icon).pixmap(QSize(42, 42))
+        icon_label.setPixmap(icon_pixmap)
+        icon_label.setFixedSize(42, 42)
+        icon_label.setStyleSheet("background: transparent;")
+        root.addWidget(icon_label)
+
+        # Center: Name + version on top, status on bottom
+        center = QVBoxLayout()
+        center.setContentsMargins(0, 0, 0, 0)
+        center.setSpacing(4)
+
+        name_row = QHBoxLayout()
+        name_row.setSpacing(8)
+
+        name_label = QLabel(self.plugin_wrapper.name)
+        name_label.setProperty("class", "plugin-card-name")
+        name_row.addWidget(name_label)
+
+        version_label = QLabel(f"v{self.plugin_wrapper.version}")
+        version_label.setProperty("class", "plugin-card-version")
+        name_row.addWidget(version_label)
+
+        # User-installed badge
+        if self._is_user_plugin:
+            badge = QLabel("User")
+            badge.setStyleSheet(
+                "color: #F59E0B; background: rgba(245, 158, 11, 0.15); "
+                "border-radius: 3px; padding: 1px 6px; font-size: 10px;"
+            )
+            badge.setFixedHeight(16)
+            name_row.addWidget(badge)
+
+        name_row.addStretch()
+
+        center.addLayout(name_row)
+
+        # Status line
+        self._status_layout = QHBoxLayout()
+        self._status_layout.setContentsMargins(0, 0, 0, 0)
+        self._status_layout.setSpacing(6)
+
+        self._status_icon = QLabel()
+        self._status_icon.setFixedSize(14, 14)
+        self._status_icon.setStyleSheet("background: transparent;")
+        self._status_layout.addWidget(self._status_icon)
+
+        self._status_label = QLabel()
+        self._status_label.setProperty("class", "plugin-card-status")
+        self._status_layout.addWidget(self._status_label)
+        self._status_layout.addStretch()
+
+        center.addLayout(self._status_layout)
+        root.addLayout(center, stretch=1)
+
+        # Right: Profile count badge + Enabled toggle + Setup button
+        right = QHBoxLayout()
+        right.setContentsMargins(0, 0, 0, 0)
+        right.setSpacing(10)
+
+        # Profile count badge
+        self._profile_badge = QLabel("0")
+        self._profile_badge.setProperty("class", "profile-count-badge")
+        self._profile_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._profile_badge.setFixedHeight(22)
+        self._profile_badge.setMinimumWidth(28)
+        self._profile_badge.setToolTip("Profiles parsed")
+        self._profile_badge.hide()  # Hidden until profiles are parsed
+        right.addWidget(self._profile_badge)
+
+        # Enabled toggle
+        self._enabled_btn = QPushButton(
+            "Enabled" if self.plugin_wrapper.enabled else "Disabled"
+        )
+        self._enabled_btn.setCheckable(True)
+        self._enabled_btn.setChecked(self.plugin_wrapper.enabled)
+        self._enabled_btn.setProperty("class", "enabled-button")
+        self._enabled_btn.clicked.connect(self._on_enabled_clicked)
+        right.addWidget(self._enabled_btn)
+
+        # Setup button
+        self._setup_btn = QPushButton()
+        self._setup_btn.setProperty("class", "plugin-setup-button")
+        self._setup_btn.clicked.connect(
+            lambda: self.setup_clicked.emit(self.plugin_wrapper)
+        )
+        right.addWidget(self._setup_btn)
+
+        root.addLayout(right)
+
+    def refresh_status(self):
+        """Update the status indicator and card accent based on current plugin state."""
+        pw = self.plugin_wrapper
+
+        if pw.error:
+            self._set_status("error", pw.error, "fa5s.times-circle", "#EF4444")
+            self._update_card_class("error")
+        elif pw.ready:
+            self._set_status("ready", "Ready", "fa5s.check-circle", "#34D399")
+            self._update_card_class("ready")
+        else:
+            msg = pw.error or "Not configured"
+            self._set_status("not-ready", msg, "fa5s.exclamation-circle", "#F59E0B")
+            self._update_card_class("not-ready")
+
+        self._setup_btn.setText("Update" if pw.ready else "Setup")
+
+    def _set_status(self, css_class: str, text: str, icon_name: str, color: str):
+        self._status_icon.setPixmap(
+            qta.icon(icon_name, color=color).pixmap(QSize(14, 14))
+        )
+        self._status_label.setText(text)
+        self._status_label.setProperty("class", f"plugin-card-status {css_class}")
+        # Force style refresh
+        self._status_label.style().unpolish(self._status_label)
+        self._status_label.style().polish(self._status_label)
+
+    def _update_card_class(self, state: str):
+        self.setProperty("class", f"plugin-card {state}")
+        self.style().unpolish(self)
+        self.style().polish(self)
+
+    def _on_enabled_clicked(self, checked: bool):
+        self._enabled_btn.setText("Enabled" if checked else "Disabled")
+        self.enabled_toggled.emit(self.plugin_wrapper, checked)
+
+    def set_profile_count(self, count: int):
+        self._profile_count = count
+        self._profile_badge.setText(str(count))
+        self._profile_badge.setVisible(count > 0)
+        self._profile_badge.setToolTip(
+            f"{count} profile{'s' if count != 1 else ''} parsed"
+        )
+
+    def set_error_state(self, error_message: str | None):
+        self._set_status(
+            "error",
+            error_message or "An error occurred",
+            "fa5s.times-circle",
+            "#EF4444",
+        )
+        self._update_card_class("error")
+
+
+class PluginConfigPanel(QWidget):
+    """Side panel that shows all settings (including paths) for a single plugin.
+
+    Opened when the user clicks Setup / Update Plugin in a card.
+    """
+
+    settings_changed = Signal()
+    close_requested = Signal()
+
+    def __init__(self, plugin_wrapper: PluginWrapper, page: QWidget, parent=None):
+        super().__init__(parent)
+        self._wrapper = plugin_wrapper
+        self._page = page
+        self.setMinimumWidth(280)
+        self.setFixedWidth(350)
+        self.setProperty("class", "plugin-config-panel")
+        self._build_ui()
+
+    def _build_ui(self):
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(16, 14, 14, 14)
+        outer.setSpacing(10)
+
+        # --- Header row: icon + name + close button ---
+        header_font = QFont()
+        header_font.setPointSize(11)
+        header_font.setBold(True)
+
+        header_row = QHBoxLayout()
+        header_row.setSpacing(8)
+
+        icon_label = QLabel()
+        icon_label.setPixmap(QIcon(self._wrapper.icon).pixmap(QSize(24, 24)))
+        icon_label.setFixedSize(24, 24)
+        header_row.addWidget(icon_label)
+
+        name_label = QLabel(self._wrapper.name)
+        name_label.setFont(header_font)
+        header_row.addWidget(name_label, stretch=1)
+
+        close_btn = QPushButton()
+        close_btn.setIcon(qta.icon("fa5s.times", color="#9AA0A6"))
+        close_btn.setIconSize(QSize(12, 12))
+        close_btn.setFixedSize(24, 24)
+        close_btn.setFlat(True)
+        close_btn.setToolTip("Close")
+        close_btn.setStyleSheet(
+            "QPushButton { background: transparent; border: none; }"
+            "QPushButton:hover { background: #3C4043; border-radius: 4px; }"
+        )
+        close_btn.clicked.connect(self.close_requested.emit)
+        header_row.addWidget(close_btn)
+        outer.addLayout(header_row)
+
+        version_label = QLabel(f"Version {self._wrapper.version}")
+        outer.addWidget(version_label)
+
+        outer.addWidget(self._make_separator())
+
+        # --- All settings fields (paths and non-path) ---
+        if self._wrapper.has_settings():
+            path_fields = []
+            other_fields = []
+
+            for field_name, field_info in type(
+                self._wrapper.plugin_settings
+            ).model_fields.items():
+                annotation = field_info.annotation
+                is_path = annotation is Path or (
+                    hasattr(annotation, "__args__") and Path in annotation.__args__
+                )
+                if is_path:
+                    path_fields.append((field_name, field_info))
+                else:
+                    other_fields.append((field_name, field_info))
+
+            if path_fields:
+                path_heading = QLabel("Path" if len(path_fields) == 1 else "Paths")
+                path_heading.setFont(self._section_font())
+                outer.addWidget(path_heading)
+
+                for field_name, field_info in path_fields:
+                    current_value = getattr(self._wrapper.plugin_settings, field_name)
+                    label_text = (
+                        field_info.title or field_name.replace("_", " ").title()
+                    )
+                    tooltip = field_info.description or ""
+
+                    lbl = QLabel(label_text)
+                    lbl.setToolTip(tooltip)
+                    outer.addWidget(lbl)
+
+                    row = QHBoxLayout()
+                    path_field = QLineEdit(str(current_value) if current_value else "")
+                    path_field.setReadOnly(True)
+                    path_field.setPlaceholderText("Not configured")
+                    row.addWidget(path_field)
+
+                    browse_btn = QPushButton("Browse...")
+                    browse_btn.setFixedWidth(100)
+                    browse_btn.clicked.connect(
+                        lambda checked, fn=field_name, fi=field_info, pf=path_field: (
+                            self._on_path_browse(fn, fi, pf)
+                        )
+                    )
+                    row.addWidget(browse_btn)
+                    outer.addLayout(row)
+
+            if other_fields:
+                outer.addWidget(self._make_separator())
+                settings_heading = QLabel("Settings")
+                settings_heading.setFont(self._section_font())
+                outer.addWidget(settings_heading)
+
+                for field_name, field_info in other_fields:
+                    current_value = getattr(self._wrapper.plugin_settings, field_name)
+                    label_text = (
+                        field_info.title or field_name.replace("_", " ").title()
+                    )
+                    tooltip = field_info.description or ""
+
+                    row = QHBoxLayout()
+                    lbl = QLabel(label_text)
+                    lbl.setToolTip(tooltip)
+                    row.addWidget(lbl, stretch=1)
+
+                    widget = self._make_setting_widget(
+                        field_name, field_info, current_value
+                    )
+                    if widget:
+                        row.addWidget(widget)
+
+                    outer.addLayout(row)
+
+        outer.addStretch()
+
+    # ------------------------------------------------------------------
+    # Browse handler for Path fields
+    # ------------------------------------------------------------------
+
+    def _on_path_browse(
+        self, field_name: str, field_info, path_field: QLineEdit
+    ) -> None:
+        extra = field_info.json_schema_extra or {}
+        is_folder = extra.get("is_folder", True)
+        default_path = str(Path(extra.get("default_path", "~")).expanduser())
+        extensions = extra.get("extensions", [])
+
+        if is_folder:
+            result = QFileDialog.getExistingDirectory(
+                self._page, field_info.title or "Select Folder", default_path
+            )
+            selected = Path(result) if result else None
+        else:
+            ext_filter = " ".join(f"*{e}" for e in extensions) if extensions else "*"
+            result, _ = QFileDialog.getOpenFileName(
+                self._page,
+                field_info.title or "Select File",
+                default_path,
+                f"Files ({ext_filter})",
+            )
+            selected = Path(result) if result else None
+
+        if selected is None:
+            return
+
+        try:
+            self._wrapper.update_setting(field_name, selected)
+            path_field.setText(str(selected))
+            self._wrapper.push_error("")
+            self.settings_changed.emit()
+        except Exception as e:
+            self._wrapper.update_setting(field_name, None)
+            path_field.clear()
+            self._wrapper.push_error(str(e))
+            self.settings_changed.emit()
+            QMessageBox.warning(
+                self._page,
+                "Error",
+                str(e),
+                buttons=QMessageBox.StandardButton.Ok,
+            )
+
+    # ------------------------------------------------------------------
+    # Widget factory for non-path settings
+    # ------------------------------------------------------------------
+
+    def _make_setting_widget(
+        self, field_name: str, field_info, current_value
+    ) -> QWidget | None:
+        annotation = field_info.annotation
+
+        if annotation is bool:
+            widget = QCheckBox()
+            widget.setChecked(bool(current_value))
+            widget.stateChanged.connect(
+                lambda state, k=field_name: self._on_setting_changed(k, bool(state))
+            )
+            return widget
+
+        if annotation is str:
+            extra = field_info.json_schema_extra or {}
+            options = extra.get("options")
+            if options:
+                widget = QComboBox()
+                widget.setProperty("class", "view-binds-list")
+                for option in options:
+                    widget.addItem(option)
+                current_index = widget.findText(str(current_value or ""))
+                if current_index >= 0:
+                    widget.setCurrentIndex(current_index)
+                widget.currentTextChanged.connect(
+                    lambda text, k=field_name: self._on_setting_changed(k, text)
+                )
+                return widget
+
+            widget = QLineEdit(str(current_value or ""))
+            widget.editingFinished.connect(
+                lambda k=field_name, w=widget: self._on_setting_changed(k, w.text())
+            )
+            return widget
+
+        _logger.warning(f"No widget mapping for setting field type: {annotation}")
+        return None
+
+    def _on_setting_changed(self, key: str, value) -> None:
+        self._wrapper.update_setting(key, value)
+        self.settings_changed.emit()
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _make_separator() -> QFrame:
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.HLine)
+        line.setFrameShadow(QFrame.Shadow.Sunken)
+        return line
+
+    @staticmethod
+    def _section_font() -> QFont:
+        font = QFont()
+        font.setBold(True)
+        return font
 
 
 class Signals(QObject):
@@ -461,28 +746,19 @@ class Signals(QObject):
 
 
 class PluginExecutor(QRunnable):
-    """
-    PluginExecutor
-    Executes parser plugins to run their process methods and produce ProfileCollections
-
-    """
+    """Executes parser plugins to run their process methods and produce ProfileCollections."""
 
     def __init__(self, plugin_wrappers: list[PluginWrapper]):
         super(PluginExecutor, self).__init__()
-        # Store constructor arguments (re-used for processing)
-
         self.plugin_wrappers = plugin_wrappers
         self.signals = Signals()
 
-    @Slot()  # QtCore.Slot
+    @Slot()
     def run(self):
-        """
-        Initialise the runner function with passed args, kwargs.
-        """
         self.signals.started.emit()
 
         for plugin in self.plugin_wrappers:
-            if not plugin.enabled:  # Added to prevent processing disabled plugins
+            if not plugin.enabled:
                 _logger.info(f"Plugin: {plugin.name} was disabled - skipping")
                 continue
 

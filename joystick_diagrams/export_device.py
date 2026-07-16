@@ -53,19 +53,26 @@ class ExportDevice:
 
         # Button Checks
         device_buttons = {
-            x.lower() for x in set(device_inputs.get(device.INPUT_BUTTON_KEY))
+            x.lower() for x in set(device_inputs.get(device.INPUT_BUTTON_KEY, {}))
         }
 
         device_buttons.difference_update(self.template.get_template_buttons())
 
         # Hat Checks
-        device_hats = {x.lower() for x in set(device_inputs.get(device.INPUT_HAT_KEY))}
+        device_hats = {
+            x.lower() for x in set(device_inputs.get(device.INPUT_HAT_KEY, {}))
+        }
         device_hats.difference_update(self.template.get_template_hats())
 
         # AXIS
-        device_axis = {x.lower() for x in set(device_inputs.get(device.INPUT_AXIS_KEY))}
+        device_axis = {
+            x.lower() for x in set(device_inputs.get(device.INPUT_AXIS_KEY, {}))
+        }
         device_axis = device_axis.union(
-            {x.lower() for x in set(device_inputs.get(device.INPUT_AXIS_SLIDER_KEY))}
+            {
+                x.lower()
+                for x in set(device_inputs.get(device.INPUT_AXIS_SLIDER_KEY, {}))
+            }
         )
         device_axis.difference_update(self.template.get_template_axis())
 

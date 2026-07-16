@@ -12,6 +12,7 @@ from joystick_diagrams.utils import install_root
 _logger = logging.getLogger(__name__)
 
 EXPORT_PATH_SETTING_KEY = "export_path"
+EXPORT_FORMAT_SETTING_KEY = "export_format"
 
 
 class ExportSettings(QMainWindow, export_settings.Ui_Form):
@@ -28,6 +29,19 @@ class ExportSettings(QMainWindow, export_settings.Ui_Form):
         self.setExportLocationButton.clicked.connect(self.set_export_location)
         self.setExportLocationButton.setProperty("class", "export-location-button")
         self.export_path_changed.connect(self.setup_widget)
+
+        # Export format setup
+        self.export_format.clear()
+        self.export_format.addItem("SVG", "SVG")
+        self.export_format.addItem("PNG", "PNG")
+        self.export_format.setProperty("class", "view-binds-list")
+
+        saved_format = get_setting(EXPORT_FORMAT_SETTING_KEY) or "SVG"
+        index = self.export_format.findData(saved_format)
+        if index >= 0:
+            self.export_format.setCurrentIndex(index)
+
+        self.export_format.currentIndexChanged.connect(self._on_format_changed)
 
         # Setup
         self.setup_widget()
@@ -52,6 +66,14 @@ class ExportSettings(QMainWindow, export_settings.Ui_Form):
 
     def store_export_location(self, location: str):
         add_update_setting_value(EXPORT_PATH_SETTING_KEY, location)
+
+    def get_export_format(self) -> str:
+        return self.export_format.currentData() or "SVG"
+
+    def _on_format_changed(self, index: int):
+        fmt = self.export_format.currentData()
+        if fmt:
+            add_update_setting_value(EXPORT_FORMAT_SETTING_KEY, fmt)
 
     def set_export_location(self):
         _folder = QFileDialog.getExistingDirectory(

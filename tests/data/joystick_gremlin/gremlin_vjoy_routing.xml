@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<profile version="9">
+    <devices>
+        <device device-guid="{03F2F260-B49D-11EA-8001-444553540000}" label="" name="Physical Stick" type="joystick">
+            <mode name="Default">
+                <button description="" id="1">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="7" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="2">
+                    <container activate-on="release" delay="0.5" type="tempo">
+                        <action-set>
+                            <remap button="108" vjoy="1"/>
+                        </action-set>
+                        <action-set>
+                            <remap button="109" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="3">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="50" vjoy="1"/>
+                        </action-set>
+                        <activation-condition rule="all">
+                            <condition comparison="pressed" condition-type="vjoy" id="126" input="button" vjoy-id="1"/>
+                        </activation-condition>
+                    </container>
+                </button>
+                <axis description="" id="1">
+                    <container type="basic">
+                        <action-set>
+                            <remap axis="4" axis-scaling="1.0" axis-type="absolute" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </axis>
+            </mode>
+        </device>
+    </devices>
+    <vjoy-devices>
+        <vjoy-device device-guid="{492EAD50-D1E0-11EF-8002-444553540000}" label="" name="vJoy Device" type="vjoy">
+            <mode name="Default"/>
+        </vjoy-device>
+    </vjoy-devices>
+    <settings>
+        <default-delay>0.05</default-delay>
+    </settings>
+    <plugins/>
+</profile>

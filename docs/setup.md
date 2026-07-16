@@ -2,14 +2,13 @@
 The tool is currently undergoing a V2 release, so major changes will be taking place, for any development questions or to help out with development get in touch.
 
 ## Prerequisites
-- Poetry
+- uv (https://docs.astral.sh/uv/)
 - Python 3.11 x64
 
 ## Repository Setup
 
-1. Install Poetry for your system (https://python-poetry.org/docs/)
-2. Setup a venv for Joystick Diagrams **python -m venv venv**
-3. Run **poetry install**
+1. Install uv for your system (https://docs.astral.sh/uv/getting-started/installation/)
+2. Run **uv sync**
 
 You should now have the relevant things installed to develop Joystick Diagrams, if you run into any issues join our Discord server for support.
 

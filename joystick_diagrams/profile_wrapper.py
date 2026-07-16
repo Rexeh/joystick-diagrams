@@ -3,6 +3,7 @@
 import logging
 from copy import deepcopy
 
+from joystick_diagrams.conflict_strategy import get_inheritance_strategy
 from joystick_diagrams.db import db_profile_parents, db_profiles
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.plugin_wrapper import PluginWrapper
@@ -74,11 +75,12 @@ class ProfileWrapper:
         _logger.debug(f"Parents are {_parents}")
 
         merged_profiles = deepcopy(self.original_profile)
+        strategy = get_inheritance_strategy()
 
         for parent in _parents:
             _logger.debug(f"Processing {parent=}")
             obj = deepcopy(parent.original_profile)
-            merged_profiles = merged_profiles.merge_profiles(obj)
+            merged_profiles = merged_profiles.merge_profiles(obj, strategy=strategy)
 
         self.profile = merged_profiles
 

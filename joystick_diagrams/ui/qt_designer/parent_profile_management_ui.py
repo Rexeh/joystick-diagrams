@@ -8,7 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import QCoreApplication, QMetaObject, QRect
+from PySide6.QtCore import QCoreApplication, QMetaObject
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QComboBox,
@@ -26,13 +26,12 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName("Form")
         Form.resize(400, 265)
-        self.verticalLayoutWidget = QWidget(Form)
-        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(0, 0, 401, 261))
-        self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
+        self._centralWidget = QWidget(Form)
+        self._centralWidget.setObjectName("_centralWidget")
+        self.verticalLayout = QVBoxLayout(self._centralWidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.label = QLabel(self.verticalLayoutWidget)
+        self.label = QLabel(self._centralWidget)
         self.label.setObjectName("label")
         font = QFont()
         font.setBold(True)
@@ -40,31 +39,31 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.label)
 
-        self.label_2 = QLabel(self.verticalLayoutWidget)
+        self.label_2 = QLabel(self._centralWidget)
         self.label_2.setObjectName("label_2")
 
         self.verticalLayout.addWidget(self.label_2)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.listWidget = QListWidget(self.verticalLayoutWidget)
+        self.listWidget = QListWidget(self._centralWidget)
         self.listWidget.setObjectName("listWidget")
 
         self.horizontalLayout.addWidget(self.listWidget)
 
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.parentUp = QPushButton(self.verticalLayoutWidget)
+        self.parentUp = QPushButton(self._centralWidget)
         self.parentUp.setObjectName("parentUp")
 
         self.verticalLayout_2.addWidget(self.parentUp)
 
-        self.parentDown = QPushButton(self.verticalLayoutWidget)
+        self.parentDown = QPushButton(self._centralWidget)
         self.parentDown.setObjectName("parentDown")
 
         self.verticalLayout_2.addWidget(self.parentDown)
 
-        self.deleteParent = QPushButton(self.verticalLayoutWidget)
+        self.deleteParent = QPushButton(self._centralWidget)
         self.deleteParent.setObjectName("deleteParent")
 
         self.verticalLayout_2.addWidget(self.deleteParent)
@@ -73,7 +72,7 @@ class Ui_Form(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.availableParentsComboBox = QComboBox(self.verticalLayoutWidget)
+        self.availableParentsComboBox = QComboBox(self._centralWidget)
         self.availableParentsComboBox.addItem("")
         self.availableParentsComboBox.addItem("")
         self.availableParentsComboBox.addItem("")
@@ -82,10 +81,12 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.availableParentsComboBox)
 
-        self.addParentItem = QPushButton(self.verticalLayoutWidget)
+        self.addParentItem = QPushButton(self._centralWidget)
         self.addParentItem.setObjectName("addParentItem")
 
         self.verticalLayout.addWidget(self.addParentItem)
+
+        Form.setCentralWidget(self._centralWidget)
 
         self.retranslateUi(Form)
 

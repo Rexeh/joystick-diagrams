@@ -1,56 +1,42 @@
-import logging
 from pathlib import Path
+
+from pydantic import Field
 
 from joystick_diagrams.input.profile_collection import ProfileCollection
 from joystick_diagrams.plugins.plugin_interface import PluginInterface
+from joystick_diagrams.plugins.plugin_settings import PluginMeta, PluginSettings
 
-from .config import settings
 
-_logger = logging.getLogger("__name__")
+class ExampleSettings(PluginSettings):
+    # Define your path fields here. Required paths block ready state until set.
+    source_dir: Path | None = Field(
+        default=None,
+        title="Source Folder",
+        json_schema_extra={
+            "is_folder": True,
+            "default_path": "~/Saved Games",
+        },
+    )
+    # Add any non-path settings below:
+    # some_toggle: bool = Field(default=True, title="Enable Feature")
 
 
 class ParserPlugin(PluginInterface):
+    plugin_meta = PluginMeta(
+        name="EXAMPLE PLUGIN", version="0.0.1", icon_path="img/logo.ico"
+    )
+    plugin_settings_model = ExampleSettings
+
     def __init__(self):
         super().__init__()
-        self.settings = settings
-        self.settings.validators.register()
-        self.path = None
 
     def process(self) -> ProfileCollection:
         # Process your plugin, to build and return a profile collection instance
         return ProfileCollection()
 
-    def set_path(self, path: Path) -> bool:
-        try:
-            # Handle the Path provided
-            # Validate the path / file/ folder provided is suitable for your plugin
-            # Pre-initialise any instances if required
-            pass
-
-        except Exception:
-            return False
-
-        return True
-
-    def save_plugin_state(self):
-        # Persist any data changes when they are modified
-        # self.get_plugin_data_path() - Gets your plugins app data path automatically
+    def on_settings_loaded(self) -> None:
+        # Rebuild any internal state from self.get_setting(...) here
         pass
-
-    def load_settings(self) -> None:
-        # Load any data / initialise your plugin - Automatically called on start up if plugin is enabled
-        pass
-
-    @property
-    def path_type(self):
-        return self.FolderPath(
-            "This title shows up on the UI select dialog",
-            Path.joinpath(Path.home(), "Saved Games"),
-        )
-
-    @property
-    def icon(self):
-        return f"{Path.joinpath(Path(__file__).parent,self.settings.PLUGIN_ICON)}"
 
 
 if __name__ == "__main__":

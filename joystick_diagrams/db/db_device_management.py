@@ -1,4 +1,8 @@
+import logging
+
 from joystick_diagrams.db.db_connection import connection
+
+_logger = logging.getLogger(__name__)
 
 TABLE_NAME = "devices"
 
@@ -8,8 +12,23 @@ def create_new_db_if_not_exist():
     cur = con.cursor()
 
     cur.execute(
-        f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(guid TEXT PRIMARY KEY, template_path TEXT)"
+        f"CREATE TABLE IF NOT EXISTS {TABLE_NAME}(guid TEXT PRIMARY KEY, template_path TEXT, name TEXT, hidden BOOLEAN DEFAULT 0)"
     )
+
+    # Migrate existing tables that lack the hidden/name/custom_name columns
+    _migrate_add_column(cur, "hidden", "BOOLEAN DEFAULT 0")
+    _migrate_add_column(cur, "name", "TEXT")
+    _migrate_add_column(cur, "custom_name", "TEXT")
+    con.commit()
+
+
+def _migrate_add_column(cursor, column_name: str, column_def: str):
+    try:
+        cursor.execute(
+            f"ALTER TABLE {TABLE_NAME} ADD COLUMN {column_name} {column_def}"
+        )
+    except Exception:
+        pass  # Column already exists
 
 
 def get_device_templates() -> list:
@@ -24,7 +43,7 @@ def remove_template_path_from_device(guid: str):
     con = connection()
     cur = con.cursor()
     cur.execute("UPDATE devices SET template_path = NULL WHERE guid =  ?", (guid,))
-    connection().commit()
+    con.commit()
 
 
 def add_update_device_template_path(guid: str, template_path: str) -> bool:
@@ -59,6 +78,81 @@ def get_device_template_path(guid: str):
     result = cur.fetchone()
 
     return result[0] if result else None
+
+
+def set_device_hidden(guid: str, name: str, hidden: bool):
+    con = connection()
+    cur = con.cursor()
+
+    cur.execute("SELECT guid FROM devices WHERE guid = ?", (guid,))
+    result = cur.fetchone()
+
+    if result:
+        cur.execute(
+            "UPDATE devices SET hidden = ?, name = ? WHERE guid = ?",
+            (int(hidden), name, guid),
+        )
+    else:
+        cur.execute(
+            "INSERT INTO devices (guid, name, hidden) VALUES (?, ?, ?)",
+            (guid, name, int(hidden)),
+        )
+
+    con.commit()
+
+
+def get_hidden_devices() -> list[tuple[str, str]]:
+    """Returns list of (guid, name) for all hidden devices."""
+    con = connection()
+    cur = con.cursor()
+    cur.execute("SELECT guid, name FROM devices WHERE hidden = 1")
+    return cur.fetchall()
+
+
+def set_device_custom_name(guid: str, custom_name: str | None):
+    """Set or clear a custom display name for a device."""
+    con = connection()
+    cur = con.cursor()
+
+    cur.execute("SELECT guid FROM devices WHERE guid = ?", (guid,))
+    result = cur.fetchone()
+
+    if result:
+        cur.execute(
+            "UPDATE devices SET custom_name = ? WHERE guid = ?",
+            (custom_name, guid),
+        )
+    else:
+        cur.execute(
+            "INSERT INTO devices (guid, custom_name) VALUES (?, ?)",
+            (guid, custom_name),
+        )
+
+    con.commit()
+
+
+def get_device_custom_name(guid: str) -> str | None:
+    con = connection()
+    cur = con.cursor()
+    cur.execute("SELECT custom_name FROM devices WHERE guid = ?", (guid,))
+    result = cur.fetchone()
+    return result[0] if result and result[0] else None
+
+
+def get_all_device_custom_names() -> dict[str, str]:
+    """Returns dict of guid -> custom_name for all devices with custom names."""
+    con = connection()
+    cur = con.cursor()
+    cur.execute("SELECT guid, custom_name FROM devices WHERE custom_name IS NOT NULL")
+    return {row[0]: row[1] for row in cur.fetchall()}
+
+
+def is_device_hidden(guid: str) -> bool:
+    con = connection()
+    cur = con.cursor()
+    cur.execute("SELECT hidden FROM devices WHERE guid = ?", (guid,))
+    result = cur.fetchone()
+    return bool(result and result[0])
 
 
 if __name__ == "__main__":

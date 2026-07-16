@@ -60,3 +60,8 @@ def test_get_devices(profile_obj):
     device_list = profile.get_devices()
 
     assert isinstance(device_list, dict)
+
+
+def test_profile_has_empty_input_routes_on_init(profile_obj):
+    profile = profile_obj("profile1")
+    assert profile.input_routes == {}

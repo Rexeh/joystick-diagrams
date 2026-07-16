@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<profile version="9">
+    <devices>
+        <device device-guid="{03F2F260-B49D-11EA-8001-444553540000}" label="" name="Physical Stick" type="joystick">
+            <mode name="Base">
+                <button description="" id="1">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="50" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+                <button description="" id="2">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="60" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+            </mode>
+            <mode inherit="Base" name="Combat">
+                <button description="" id="2">
+                    <container type="basic">
+                        <action-set>
+                            <remap button="99" vjoy="1"/>
+                        </action-set>
+                    </container>
+                </button>
+            </mode>
+        </device>
+    </devices>
+    <vjoy-devices>
+        <vjoy-device device-guid="{492EAD50-D1E0-11EF-8002-444553540000}" label="" name="vJoy Device" type="vjoy">
+            <mode name="Base"/>
+            <mode name="Combat"/>
+        </vjoy-device>
+    </vjoy-devices>
+    <settings>
+        <default-delay>0.05</default-delay>
+    </settings>
+    <plugins/>
+</profile>

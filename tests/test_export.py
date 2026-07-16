@@ -134,9 +134,9 @@ def test_replace_specific_modifier_identifier():
         test_case = [
             (
                 f"{control}_modifier_{mod_id}",
-                f"{modifier.modifiers} - {modifier.command}",
+                str(modifier),
             ),
-            (f"{control}_modifier_{mod_id}_key", f"{modifier.modifiers}"),
+            (f"{control}_modifier_{mod_id}_key", "+".join(modifier.modifiers)),
             (f"{control}_modifier_{mod_id}_action", f"{modifier.command}"),
         ]
 
@@ -145,6 +145,32 @@ def test_replace_specific_modifier_identifier():
             expected_string = f'<testData>STRING="ABC">{expected}<testData>'
             rep = replace_input_modifier_id_key(control, mod_id, modifier, test_string)
             assert rep == expected_string
+
+
+def test_replace_specific_modifier_identifier_joystick_button():
+    """Test that joystick button modifiers (e.g. JOY_BTN3) are formatted correctly, not as Python set repr"""
+    controls = [
+        ("BUTTON_1", 1, Modifier({"JOY_BTN3"}, "Fire Weapon")),
+        ("BUTTON_5", 1, Modifier({"JOY_BTN3", "LAlt"}, "Alt Fire")),
+    ]
+
+    for control, mod_id, modifier in controls:
+        test_case = [
+            (
+                f"{control}_modifier_{mod_id}",
+                str(modifier),
+            ),
+            (f"{control}_modifier_{mod_id}_key", "+".join(modifier.modifiers)),
+            (f"{control}_modifier_{mod_id}_action", f"{modifier.command}"),
+        ]
+
+        for case, expected in test_case:
+            test_string = f'<testData>STRING="ABC">{case}<testData>'
+            expected_string = f'<testData>STRING="ABC">{expected}<testData>'
+            rep = replace_input_modifier_id_key(control, mod_id, modifier, test_string)
+            assert rep == expected_string
+            # Verify no Python set notation in output
+            assert "{'" not in rep, f"Python set notation found in output: {rep}"
 
 
 def test_replace_input_all_modifiers():
@@ -185,11 +211,40 @@ def test_replace_input_all_modifiers():
 
 
 def test_svg_sanitization():
-    tests = [("test", "test")]
-    # TODO create test scenarios from DCS data
+    # Draw.io SVGs embed mxgraph editor XML inside the root <svg>'s
+    # content="..." attribute, so replacement tokens land inside a
+    # "-delimited attribute value. Raw " / ' in the replacement corrupts the
+    # SVG with an XML "attributes construct error", so they must be escaped.
+    # Browsers decode &quot; back to " when rendering the visible <text> /
+    # <foreignObject><div> content, so users still see the quote character.
+    tests = [
+        ("test", "test"),
+        # XML specials always escaped
+        ("a & b", "a &amp; b"),
+        ("a < b > c", "a &lt; b &gt; c"),
+        # Raw quotes must be escaped — otherwise they terminate the draw.io
+        # content="..." attribute and the SVG fails to parse.
+        (
+            '"Prepare Weapons" command to gunner',
+            "&quot;Prepare Weapons&quot; command to gunner",
+        ),
+        ("it's a test", "it&apos;s a test"),
+        # Pre-escaped input is normalised, not double-escaped (commit 956bf30
+        # — DCS descriptions that arrive pre-escaped round-trip cleanly).
+        ("a &amp; b", "a &amp; b"),
+        ("a &lt; b", "a &lt; b"),
+        # Idempotency for quote entities: sanitize(sanitize(x)) == sanitize(x).
+        # Without this, a double call would turn &quot; into &amp;quot; and the
+        # visible SVG text would read &quot;Prepare Weapons&quot; in the browser.
+        ("&quot;Prepare Weapons&quot;", "&quot;Prepare Weapons&quot;"),
+        ("it&apos;s a test", "it&apos;s a test"),
+    ]
 
     for test_value, expected_return in tests:
-        assert sanitize_string_for_svg(test_value) == expected_return
+        assert sanitize_string_for_svg(test_value) == expected_return, (
+            f"sanitize_string_for_svg({test_value!r}) returned "
+            f"{sanitize_string_for_svg(test_value)!r}, expected {expected_return!r}"
+        )
 
 
 @pytest.fixture()

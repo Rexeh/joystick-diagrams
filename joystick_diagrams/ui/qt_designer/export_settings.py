@@ -8,7 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize
+from PySide6.QtCore import QCoreApplication, QMetaObject, QSize
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QComboBox,
@@ -27,22 +27,19 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName("Form")
         Form.resize(550, 150)
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(1)
+        sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QSize(550, 150))
-        Form.setMaximumSize(QSize(550, 150))
-        Form.setBaseSize(QSize(500, 150))
-        self.verticalLayoutWidget = QWidget(Form)
-        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(9, 9, 531, 131))
-        self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
+        Form.setMinimumSize(QSize(300, 120))
+        self._centralWidget = QWidget(Form)
+        self._centralWidget.setObjectName("_centralWidget")
+        self.verticalLayout = QVBoxLayout(self._centralWidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayout.setSizeConstraint(QLayout.SetMaximumSize)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.label = QLabel(self.verticalLayoutWidget)
+        self.label = QLabel(self._centralWidget)
         self.label.setObjectName("label")
         self.label.setMaximumSize(QSize(1100, 23))
 
@@ -55,7 +52,7 @@ class Ui_Form(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout_2.setSizeConstraint(QLayout.SetMaximumSize)
         self.verticalLayout_2.setContentsMargins(-1, -1, 10, -1)
-        self.export_location_label_2 = QLabel(self.verticalLayoutWidget)
+        self.export_location_label_2 = QLabel(self._centralWidget)
         self.export_location_label_2.setObjectName("export_location_label_2")
         sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         sizePolicy1.setHorizontalStretch(0)
@@ -70,7 +67,7 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addWidget(self.export_location_label_2)
 
-        self.export_location_directory = QLabel(self.verticalLayoutWidget)
+        self.export_location_directory = QLabel(self._centralWidget)
         self.export_location_directory.setObjectName("export_location_directory")
         sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         sizePolicy2.setHorizontalStretch(0)
@@ -86,7 +83,7 @@ class Ui_Form(object):
 
         self.export_location_container.addLayout(self.verticalLayout_2)
 
-        self.setExportLocationButton = QPushButton(self.verticalLayoutWidget)
+        self.setExportLocationButton = QPushButton(self._centralWidget)
         self.setExportLocationButton.setObjectName("setExportLocationButton")
         sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
         sizePolicy3.setHorizontalStretch(0)
@@ -104,13 +101,13 @@ class Ui_Form(object):
         self.export_format_container = QHBoxLayout()
         self.export_format_container.setObjectName("export_format_container")
         self.export_format_container.setSizeConstraint(QLayout.SetMaximumSize)
-        self.export_format_label = QLabel(self.verticalLayoutWidget)
+        self.export_format_label = QLabel(self._centralWidget)
         self.export_format_label.setObjectName("export_format_label")
         self.export_format_label.setFont(font)
 
         self.export_format_container.addWidget(self.export_format_label)
 
-        self.export_format = QComboBox(self.verticalLayoutWidget)
+        self.export_format = QComboBox(self._centralWidget)
         self.export_format.addItem("")
         self.export_format.setObjectName("export_format")
         self.export_format.setMaximumSize(QSize(200, 16777215))
@@ -122,6 +119,8 @@ class Ui_Form(object):
         self.verticalLayout.setStretch(0, 1)
         self.verticalLayout.setStretch(1, 1)
         self.verticalLayout.setStretch(2, 1)
+
+        Form.setCentralWidget(self._centralWidget)
 
         self.retranslateUi(Form)
 

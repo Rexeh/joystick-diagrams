@@ -1,17 +1,24 @@
 import logging
+from pathlib import Path
 
-import qtawesome as qta  # type:  ignore
+import qtawesome as qta
 from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QBrush, QColor, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QHeaderView,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QPushButton,
     QTreeWidgetItem,
 )
 
+from joystick_diagrams.app_state import AppState
+from joystick_diagrams.db.db_device_management import (
+    add_update_device_template_path,
+    get_device_template_path,
+)
 from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.ui import ui_consts
 from joystick_diagrams.ui.device_setup_controller import (
@@ -27,6 +34,7 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
     device_item_selected = Signal(object)
     device_checkstate_changed = Signal()
     number_of_selected_profiles = Signal(int)
+    template_set_requested = Signal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,14 +53,19 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         self.device_header.setText(1, "Profile")
         self.device_header.setSizeHint(1, QSize(100, 25))
         self.device_header.setTextAlignment(1, Qt.AlignmentFlag.AlignCenter)
-        self.device_header.setText(2, "Status")
+
+        self.device_header.setText(2, "Template")
+        self.device_header.setSizeHint(2, QSize(120, 25))
+
+        self.device_header.setText(3, "Status")
+        self.device_header.setSizeHint(3, QSize(80, 25))
 
         self.treeWidget.setHeaderItem(self.device_header)
         self.treeWidget.setIconSize(QSize(20, 20))
 
         self.treeWidget.setProperty("class", "device-tree")
 
-        self.treeWidget.setColumnCount(3)
+        self.treeWidget.setColumnCount(4)
         self.treeWidget.itemClicked.connect(self.device_item_clicked)
         self.treeWidget.header().setStretchLastSection(True)
         self.treeWidget.header().setSectionResizeMode(
@@ -64,6 +77,10 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         self.treeWidget.setSelectionMode(
             QAbstractItemView.SelectionMode.SingleSelection
         )
+
+        # Context menu for template management
+        self.treeWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.treeWidget.customContextMenuRequested.connect(self._show_context_menu)
 
         # Icon Setup
         self.good_icon = qta.icon(
@@ -86,6 +103,30 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
 
         # Init
         self.initialise_ui()
+
+    def _show_context_menu(self, position):
+        """Context menu for device tree — Set/Clear template on root items."""
+        item = self.treeWidget.itemAt(position)
+        if not item or item.parent() is not None:
+            return  # Only show context menu on root (device) items
+
+        menu = QMenu(self)
+        set_action = menu.addAction("Set Template...")
+        clear_action = menu.addAction("Clear Template")
+
+        guid = item.data(0, Qt.ItemDataRole.UserRole)
+        has_template = bool(get_device_template_path(guid)) if guid else False
+        clear_action.setEnabled(has_template)
+
+        action = menu.exec(self.treeWidget.viewport().mapToGlobal(position))
+
+        if action == set_action:
+            self.treeWidget.setCurrentItem(item)
+            self.device_item_selected.emit(item)
+            self.template_set_requested.emit()
+        elif action == clear_action and guid:
+            add_update_device_template_path(guid, "")
+            self.devices_updated.emit()
 
     def initialise_ui(self):
         devices = get_export_devices()
@@ -203,25 +244,30 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
 
     def add_devices_to_widget(self, export_devices: list[ExportDevice]):
         tree_roots = []
-        child_nodes = []
         self.treeWidget.clear()
 
-        identifiers = set([(x.device_id, x.device_name) for x in export_devices])
+        device_service = AppState().device_service
+        identifiers = set(
+            [
+                (x.device_id, device_service.resolve_name(x.device_id, x.device_name))
+                for x in export_devices
+            ]
+        )
 
         def return_top_level_icon_state(
             children_have_template_issues: bool, children_have_errors: bool
         ) -> tuple[QIcon, str]:
             if children_have_template_issues:
-                return (self.bad_icon, "A template has not configured for this device")
+                return (self.bad_icon, "No template assigned")
 
             if children_have_errors:
-                return (self.warning_icon, "One or more profiles have warnings")
+                return (self.warning_icon, "Some profiles have warnings")
 
             return (self.good_icon, "")
 
         for device_identifier, device_name in identifiers:
+            child_nodes = []
             root_item = QTreeWidgetItem()
-            # root_item.setStatusTip(0, identifier)
             root_item.setToolTip(0, f"Device GUID: {device_identifier}")
             root_item.setData(0, Qt.ItemDataRole.UserRole, device_identifier)
             root_item.setText(0, device_name)
@@ -239,12 +285,23 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
 
             root_item.setText(1, root_profile_text)
             root_item.setTextAlignment(1, Qt.AlignmentFlag.AlignCenter)
-            # Detect if any of the potential children have a missing template, if so all items will be missing template
+
+            # Template column — show template filename
+            template_path = get_device_template_path(device_identifier)
+            if template_path:
+                template_name = Path(template_path).name
+                root_item.setText(2, template_name)
+                root_item.setToolTip(2, template_path)
+            else:
+                root_item.setText(2, "Not set")
+                root_item.setForeground(2, QBrush(QColor("#F59E0B")))
+
+            # Detect if any of the potential children have a missing template
             children_have_template_issues = bool(
                 [x.has_template for x in child_items if not x.has_template]
             )
 
-            # Detect if any of the children have errors, one or more may have errors - Which should trigger a warning
+            # Detect if any of the children have errors
             children_have_errors = bool([x.errors for x in child_items if x.errors])
 
             root_icon_state, root_message = return_top_level_icon_state(
@@ -267,23 +324,23 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
                     # Add export option for child
                     child_item.setCheckState(0, Qt.CheckState.Unchecked)
 
-                    # Get the child icon state where template not exists / or errors bucket contains entries
+                    # Get the child icon state
                     child_icon_state, child_message = return_top_level_icon_state(
                         not child.has_template, bool(child.errors)
                     )
 
-                    child_item.setIcon(2, child_icon_state)
-                    child_item.setTextAlignment(2, Qt.AlignmentFlag.AlignCenter)
+                    child_item.setIcon(3, child_icon_state)
+                    child_item.setTextAlignment(3, Qt.AlignmentFlag.AlignCenter)
 
                     child_nodes.append(child_item)
 
             root_item.addChildren(child_nodes)
             root_item.setIcon(
-                2,
+                3,
                 root_icon_state,
             )
             if root_message:
-                root_item.setText(2, root_message)
+                root_item.setText(3, root_message)
 
             tree_roots.append(root_item)
 
@@ -300,12 +357,15 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
                 child_data = child_item.data(0, Qt.ItemDataRole.UserRole)
 
                 if child_data.errors:
-                    button = QPushButton("View Warnings")
+                    error_count = len(child_data.errors)
+                    button = QPushButton(
+                        f"{error_count} warning{'s' if error_count > 1 else ''}"
+                    )
                     button.setProperty("class", "view-errors-button")
-                    button.setFixedWidth(150)
-                    button.setFixedHeight(25)
+                    button.setMinimumWidth(120)
+                    button.setMinimumHeight(25)
                     button.clicked.connect(self.view_device_errors)
-                    self.treeWidget.setItemWidget(child_item, 2, button)
+                    self.treeWidget.setItemWidget(child_item, 3, button)
 
 
 if __name__ == "__main__":

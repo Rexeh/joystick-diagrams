@@ -1,7 +1,7 @@
 #define ExeName "Joystick_Diagrams.exe"
 #define BuildDir "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\"
 #define ApplicationName "Joystick Diagrams"
-#define Version "2.1.0"
+#define Version "2.2.0"
 
 [Setup]
 AppName={#ApplicationName}
@@ -73,6 +73,16 @@ begin
 
   if CurStep = ssInstall then
   begin
+    // Unconditionally wipe lib\ so stale bytecode from any previous version
+    // cannot mix with the new build.  The dependencies.log fallback is kept
+    // below for belt-and-suspenders on the first run after this change.
+    AppPath := ExpandConstant('{app}');
+    if DirExists(AppPath + '\lib') then
+    begin
+      Log('Removing existing lib directory before upgrade');
+      DelTree(AppPath + '\lib', True, True, True);
+    end;
+
     if LoadStringsFromFile(DependenciesLogPath, Dependencies) then
     begin
       Count := GetArrayLength(Dependencies);

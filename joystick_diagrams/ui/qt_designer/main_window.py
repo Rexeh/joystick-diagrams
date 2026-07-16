@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.1
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -31,10 +31,9 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1100, 900)
-        MainWindow.setMinimumSize(QSize(1100, 900))
-        MainWindow.setMaximumSize(QSize(1100, 900))
+        MainWindow.setMinimumSize(QSize(800, 600))
         font = QFont()
-        font.setFamilies(["Century Gothic"])
+        font.setFamilies(["Roboto"])
         font.setBold(True)
         MainWindow.setFont(font)
         self.actionSubmenu_2 = QAction(MainWindow)
@@ -172,14 +171,14 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName("verticalLayout")
         self.topnav_additional_layout = QHBoxLayout()
         self.topnav_additional_layout.setObjectName("topnav_additional_layout")
-        self.topnav_additional_layout.setContentsMargins(-1, -1, -1, 20)
+        self.topnav_additional_layout.setContentsMargins(-1, -1, -1, 8)
 
         self.verticalLayout.addLayout(self.topnav_additional_layout)
 
         self.topnav_layout = QHBoxLayout()
         self.topnav_layout.setObjectName("topnav_layout")
         self.topnav_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.topnav_layout.setContentsMargins(-1, 25, -1, 50)
+        self.topnav_layout.setContentsMargins(-1, 8, -1, 12)
         self.setupSectionButton = QPushButton(self.centralwidget)
         self.buttonGroup_2 = QButtonGroup(MainWindow)
         self.buttonGroup_2.setObjectName("buttonGroup_2")
@@ -199,7 +198,7 @@ class Ui_MainWindow(object):
         self.exportSectionButton = QPushButton(self.centralwidget)
         self.buttonGroup_2.addButton(self.exportSectionButton)
         self.exportSectionButton.setObjectName("exportSectionButton")
-        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
@@ -215,7 +214,7 @@ class Ui_MainWindow(object):
         self.main_content_layout = QHBoxLayout()
         self.main_content_layout.setObjectName("main_content_layout")
 
-        self.verticalLayout.addLayout(self.main_content_layout)
+        self.verticalLayout.addLayout(self.main_content_layout, 1)
 
         self.line = QFrame(self.centralwidget)
         self.line.setObjectName("line")

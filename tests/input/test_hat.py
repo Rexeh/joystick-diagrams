@@ -1,4 +1,3 @@
-#
 import pytest
 
 from joystick_diagrams.input.hat import Hat, HatDirection

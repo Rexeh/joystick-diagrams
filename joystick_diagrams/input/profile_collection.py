@@ -21,7 +21,7 @@ class ProfileCollection:
         if self.get_profile(profile_name) is None:
             self.profiles[profile_name] = Profile_(profile_name)
 
-        return self.profiles.get(profile_name)  # type: ignore
+        return self.profiles[profile_name]
 
     def get_profile(self, profile_name) -> Profile_ | None:
         return self.profiles.get(profile_name.lower())
