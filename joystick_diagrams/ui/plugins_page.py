@@ -217,9 +217,9 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         main_window = self.appState.main_window
         if main_window:
             main_window.load_settings_page()
-            # Select the Parser Plugins tab (index 3 in the nav list)
+            # Select the Parser Plugins tab (index 1 in the nav list)
             if main_window._settings_page:
-                main_window._settings_page.nav_list.setCurrentRow(3)
+                main_window._settings_page.nav_list.setCurrentRow(1)
 
     def _on_plugin_enabled_toggled(self, plugin_wrapper: PluginWrapper, enabled: bool):
         plugin_wrapper.enabled = enabled
