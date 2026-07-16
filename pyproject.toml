@@ -1,6 +1,6 @@
 [project]
 name = "joystick-diagrams"
-version = "2.2.0"
+version = "2.2.1"
 description = "Automatically create diagrams for your throttles, joysticks and custom HID devices"
 readme = "readme.md"
 requires-python = ">=3.11, <3.13"

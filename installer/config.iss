@@ -1,7 +1,7 @@
 #define ExeName "Joystick_Diagrams.exe"
 #define BuildDir "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\"
 #define ApplicationName "Joystick Diagrams"
-#define Version "2.2.0"
+#define Version "2.2.1"
 
 [Setup]
 AppName={#ApplicationName}
