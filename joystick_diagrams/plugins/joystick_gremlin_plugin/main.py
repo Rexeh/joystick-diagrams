@@ -23,7 +23,10 @@ class JoystickGremlinSettings(PluginSettings):
 
 class ParserPlugin(PluginInterface):
     plugin_meta = PluginMeta(
-        name="Joystick Gremlin (2.7X)", version="2.0.0", icon_path="img/jg.ico"
+        id="a98c9291-4673-42db-98d2-3c55fb271269",
+        name="Joystick Gremlin (2.7X)",
+        version="2.0.0",
+        icon_path="img/jg.ico",
     )
     plugin_settings_model = JoystickGremlinSettings
 

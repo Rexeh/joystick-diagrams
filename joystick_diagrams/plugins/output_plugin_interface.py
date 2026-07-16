@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar
+from uuid import UUID
 
 from joystick_diagrams import utils
 from joystick_diagrams.input.device import Device_
@@ -51,6 +52,11 @@ class OutputPluginInterface(ABC):
     def process_export(self, results: list[ExportResult]) -> bool:
         """Called after export completes (SVG or PNG). Return True on success."""
         ...
+
+    @property
+    def id(self) -> UUID | None:
+        """The plugin's stable catalog identity (GUID), or None for id-less plugins."""
+        return self.plugin_meta.id
 
     @property
     def name(self) -> str:

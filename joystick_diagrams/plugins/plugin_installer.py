@@ -4,6 +4,7 @@ Handles installation from local paths (ZIP/folder) and URLs,
 uninstallation, and post-install validation for both plugin types.
 """
 
+import hashlib
 import logging
 import shutil
 import tempfile
@@ -23,8 +24,16 @@ PluginType = Literal["parser", "output"]
 EXPECTED_PLUGIN_FILES: list[str] = ["__init__", "main"]
 
 
-def install_plugin(source: Path | str, plugin_type: PluginType) -> Path:
+def install_plugin(
+    source: Path | str,
+    plugin_type: PluginType,
+    expected_sha256: str | None = None,
+) -> Path:
     """Install a plugin from a folder, ZIP file, or URL.
+
+    When ``expected_sha256`` is provided (e.g. from a catalog manifest entry), the
+    downloaded/target ZIP is verified against it before extraction; a mismatch raises
+    JoystickDiagramsError. Ignored for folder sources.
 
     Returns the installed plugin directory path.
     Raises JoystickDiagramsError on failure.
@@ -32,11 +41,13 @@ def install_plugin(source: Path | str, plugin_type: PluginType) -> Path:
     if isinstance(source, str) and (
         source.startswith("http://") or source.startswith("https://")
     ):
-        return _install_from_url(source, plugin_type)
+        return _install_from_url(source, plugin_type, expected_sha256)
 
     source = Path(source)
 
     if source.is_file() and source.suffix == ".zip":
+        if expected_sha256 is not None:
+            _verify_sha256(source.read_bytes(), expected_sha256)
         return _install_from_zip(source, plugin_type)
     elif source.is_dir():
         return _install_from_folder(source, plugin_type)
@@ -143,7 +154,9 @@ def _install_from_zip(zip_path: Path, plugin_type: PluginType) -> Path:
         return _install_from_folder(extracted, plugin_type)
 
 
-def _install_from_url(url: str, plugin_type: PluginType) -> Path:
+def _install_from_url(
+    url: str, plugin_type: PluginType, expected_sha256: str | None = None
+) -> Path:
     """Download a plugin ZIP from a URL and install it."""
     _logger.info(f"Downloading plugin from {url}")
 
@@ -166,7 +179,20 @@ def _install_from_url(url: str, plugin_type: PluginType) -> Path:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
+        if expected_sha256 is not None:
+            _verify_sha256(zip_path.read_bytes(), expected_sha256)
+
         return _install_from_zip(zip_path, plugin_type)
+
+
+def _verify_sha256(data: bytes, expected_sha256: str) -> None:
+    """Raise JoystickDiagramsError if data's SHA-256 does not match the expected digest."""
+    actual = hashlib.sha256(data).hexdigest()
+    if actual.lower() != expected_sha256.strip().lower():
+        raise JoystickDiagramsError(
+            "Downloaded plugin failed integrity check. "
+            f"Expected SHA-256 {expected_sha256.strip().lower()}, got {actual}."
+        )
 
 
 def _validate_parser_plugin(plugin_path: Path) -> tuple[bool, str]:

@@ -25,7 +25,12 @@ class DCSSettings(PluginSettings):
 
 
 class ParserPlugin(PluginInterface):
-    plugin_meta = PluginMeta(name="DCS World", version="2.0.0", icon_path="img/dcs.ico")
+    plugin_meta = PluginMeta(
+        id="ea2a7f6a-cbf3-4f81-91ed-fdc81dd13af8",
+        name="DCS World",
+        version="2.0.0",
+        icon_path="img/dcs.ico",
+    )
     plugin_settings_model = DCSSettings
 
     def __init__(self):

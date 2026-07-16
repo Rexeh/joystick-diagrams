@@ -26,7 +26,10 @@ class IL2Settings(PluginSettings):
 
 class ParserPlugin(PluginInterface):
     plugin_meta = PluginMeta(
-        name="IL-2 Sturmovik", version="1.0.0", icon_path="img/icon.png"
+        id="455dea21-ec69-4056-bc01-b9e00c6daf68",
+        name="IL-2 Sturmovik",
+        version="1.0.0",
+        icon_path="img/icon.png",
     )
     plugin_settings_model = IL2Settings
 

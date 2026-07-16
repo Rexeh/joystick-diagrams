@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -6,11 +8,24 @@ class PluginMeta(BaseModel):
 
     Example:
         class ParserPlugin(PluginInterface):
-            plugin_meta = PluginMeta(name="My Plugin", version="1.0.0", icon_path="img/icon.ico")
+            plugin_meta = PluginMeta(
+                id="6f9619ff-8b86-d011-b42d-00c04fc964ff",
+                name="My Plugin",
+                version="1.0.0",
+                icon_path="img/icon.ico",
+            )
+
+    ``id`` is a GUID that is the plugin's stable, immutable identity — it is what the
+    hosted plugin catalog matches against to detect updates. Generate it once (the
+    ``create-plugin`` scaffolder does this for you) and never change it. When present it
+    must be a valid UUID; malformed values raise a ``ValidationError`` at load time.
+    It is optional only so older plugins predating the catalog still load — those simply
+    never match a catalog entry.
     """
 
     model_config = ConfigDict(frozen=True)
 
+    id: UUID | None = None
     name: str
     version: str
     icon_path: str  # relative path from the plugin's own directory (e.g. "img/dcs.ico")

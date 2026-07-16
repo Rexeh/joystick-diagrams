@@ -337,6 +337,45 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
     def check_for_new_version(self):
         _logger.info("Checking version...")
         self._check_for_updates()
+        self._check_for_plugin_updates()
+
+    def _check_for_plugin_updates(self):
+        """Kick off a background plugin-catalog check and record when it ran."""
+        from datetime import datetime, timezone
+
+        from joystick_diagrams.db.db_settings import add_update_setting_value
+        from joystick_diagrams.ui.plugins_page import PLUGIN_CATALOG_LAST_CHECKED_KEY
+
+        if self._setup_page is not None:
+            self._setup_page.check_plugin_updates()
+            add_update_setting_value(
+                PLUGIN_CATALOG_LAST_CHECKED_KEY, datetime.now(timezone.utc).isoformat()
+            )
+
+    def set_plugin_update_badge(self, count: int):
+        """Show/hide a small count badge on the Setup nav button."""
+        btn = self.setupSectionButton
+        badge = getattr(self, "_setup_update_badge", None)
+        if badge is None:
+            badge = QLabel(btn)
+            badge.setStyleSheet(
+                "background:#EF4444; color:white; border-radius:8px; "
+                "font-size:10px; font-weight:bold;"
+            )
+            badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            badge.setFixedSize(16, 16)
+            badge.move(btn.width() - 18, 2)
+            self._setup_update_badge = badge
+
+        if count > 0:
+            badge.setText(str(count) if count < 10 else "9+")
+            badge.show()
+            badge.raise_()
+            plural = "s" if count != 1 else ""
+            btn.setToolTip(f"Setup — {count} plugin update{plural} available")
+        else:
+            badge.hide()
+            btn.setToolTip("Setup")
 
     def set_style(self):
         stylesheet = self.app.styleSheet()

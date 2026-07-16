@@ -272,33 +272,17 @@ class SettingsPage(QMainWindow):
 
         Returns True if the user accepted the plugin, False if they cancelled.
         """
-        from joystick_diagrams.plugins.plugin_signing import verify_plugin_signature
-        from joystick_diagrams.ui.plugin_security_dialog import (
-            PluginSecurityWarningDialog,
-            PluginSignedDialog,
-        )
+        from joystick_diagrams.ui.plugin_install_flow import run_security_check
 
-        if verify_plugin_signature(installed_path):
-            dialog = PluginSignedDialog(plugin_name, self)
-            dialog.exec()
-            return True
-        else:
-            dialog = PluginSecurityWarningDialog(plugin_name, self)
-            return dialog.exec() == PluginSecurityWarningDialog.Accepted
+        return run_security_check(installed_path, plugin_name, self)
 
     def _record_trust(
         self, plugin_name: str, plugin_type: str, installed_path: Path
     ) -> None:
         """Record trust for a plugin after successful security check."""
-        from joystick_diagrams.db.db_plugin_trust import set_plugin_trusted
-        from joystick_diagrams.plugins.plugin_signing import verify_plugin_signature
+        from joystick_diagrams.ui.plugin_install_flow import record_trust
 
-        reason = (
-            "signature_valid"
-            if verify_plugin_signature(installed_path)
-            else "user_accepted"
-        )
-        set_plugin_trusted(plugin_name, plugin_type, True, reason)
+        record_trust(plugin_name, plugin_type, installed_path)
 
     def _show_conflict_banner(self, layout: QVBoxLayout, conflicts: list) -> None:
         """Add a yellow conflict warning banner if there are name conflicts."""

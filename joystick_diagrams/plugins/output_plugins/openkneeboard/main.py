@@ -80,6 +80,7 @@ class OpenKneeboardSettings(PluginSettings):
 
 class OutputPlugin(OutputPluginInterface):
     plugin_meta = PluginMeta(
+        id="1f1ce378-f17c-42fa-ab3e-7b1fc4cf2989",
         name="OpenKneeboard",
         version="1.0.0",
         icon_path="img/openkneeboard.ico",

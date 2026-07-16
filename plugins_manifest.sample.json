@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "plugins": [
+    {
+      "id": "ea2a7f6a-cbf3-4f81-91ed-fdc81dd13af8",
+      "name": "DCS World",
+      "type": "parser",
+      "version": "2.0.0",
+      "description": "Parse DCS World keybind exports into device profiles.",
+      "author": "Joystick Diagrams",
+      "signed": true,
+      "download_url": "https://github.com/Rexeh/joystick-diagrams-plugins/releases/download/dcs_world-2.0.0/dcs_world_plugin.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "min_app_version": "2.2.0",
+      "icon_url": null
+    },
+    {
+      "id": "1f1ce378-f17c-42fa-ab3e-7b1fc4cf2989",
+      "name": "OpenKneeboard",
+      "type": "output",
+      "version": "1.1.0",
+      "description": "Export diagrams directly into OpenKneeboard tabs.",
+      "author": "Joystick Diagrams",
+      "signed": true,
+      "download_url": "https://github.com/Rexeh/joystick-diagrams-plugins/releases/download/openkneeboard-1.1.0/openkneeboard.zip",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "min_app_version": "2.2.0",
+      "icon_url": null
+    },
+    {
+      "id": "035a5cf9-411c-4a5e-931f-27f343ed4886",
+      "name": "Elite Dangerous (Community)",
+      "type": "parser",
+      "version": "0.3.0",
+      "description": "Community-maintained parser for Elite Dangerous bindings. Unsigned — installs with a trust prompt.",
+      "author": "community-contributor",
+      "signed": false,
+      "download_url": "https://example.com/elite-dangerous-plugin/elite_dangerous-0.3.0.zip",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "min_app_version": null,
+      "icon_url": null
+    }
+  ]
+}

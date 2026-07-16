@@ -22,6 +22,7 @@ Repository = "https://github.com/Rexeh/joystick-diagrams"
 
 [project.scripts]
 version_package = "joystick_diagrams.version:generate_version"
+create-plugin = "joystick_diagrams.plugins.scaffold:main"
 
 [dependency-groups]
 dev = [

@@ -21,7 +21,10 @@ class FS2020Settings(PluginSettings):
 
 class ParserPlugin(PluginInterface):
     plugin_meta = PluginMeta(
-        name="Flight Simulator 2020", version="0.0.1", icon_path="img/icon.png"
+        id="a45f6e83-0460-4d05-86c6-ac4a5704361e",
+        name="Flight Simulator 2020",
+        version="0.0.1",
+        icon_path="img/icon.png",
     )
     plugin_settings_model = FS2020Settings
 

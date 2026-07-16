@@ -4,6 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import ClassVar
+from uuid import UUID
 
 from joystick_diagrams import utils
 from joystick_diagrams.exceptions import (
@@ -43,6 +44,11 @@ class PluginInterface(ABC):
     # ------------------------------------------------------------------
     # Concrete metadata properties
     # ------------------------------------------------------------------
+
+    @property
+    def id(self) -> UUID | None:
+        """The plugin's stable catalog identity (GUID), or None for id-less plugins."""
+        return self.plugin_meta.id
 
     @property
     def name(self) -> str:

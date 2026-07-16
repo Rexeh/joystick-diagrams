@@ -21,7 +21,10 @@ class StarCitizenSettings(PluginSettings):
 
 class ParserPlugin(PluginInterface):
     plugin_meta = PluginMeta(
-        name="Star Citizen", version="2.0.0", icon_path="img/sc.png"
+        id="74f924a9-c82d-4d32-b214-2183fd5baad2",
+        name="Star Citizen",
+        version="2.0.0",
+        icon_path="img/sc.png",
     )
     plugin_settings_model = StarCitizenSettings
 
