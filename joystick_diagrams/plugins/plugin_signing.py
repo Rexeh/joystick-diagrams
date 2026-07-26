@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 _logger = logging.getLogger(__name__)
 
-_DEVELOPER_PUBLIC_KEY_B64 = "vsk7IsZ9nnfBLUHE4dOP+2sow3C1444UAKtwOGA6NPA="
+_DEVELOPER_PUBLIC_KEY_B64 = "ViWmGr+j2CYAqKvnvBWgPBx2nIgne522AYZf8/2MkQ4="
 
 SIGNATURE_FILENAME = "plugin.sig"
 EXCLUDED_PATHS = {"plugin.sig", "__pycache__"}
@@ -40,13 +40,22 @@ def compute_plugin_digest(plugin_path: Path) -> bytes:
     Iterates all files in the plugin directory (excluding plugin.sig
     and __pycache__), sorted by relative path, and builds a hash from
     each file's relative path and its SHA-256 content hash.
+
+    Relative paths are normalised with forward slashes (``as_posix``) and
+    sorted by that form so the digest is identical regardless of the OS
+    that computes it. Without this a plugin signed on Linux (CI) — where
+    paths render as ``img/x`` — would never verify on Windows, where the
+    same path renders as ``img\\x`` and hashes differently.
     """
     hasher = hashlib.sha256()
 
     all_files = sorted(
-        f.relative_to(plugin_path)
-        for f in plugin_path.rglob("*")
-        if f.is_file() and not any(part in EXCLUDED_PATHS for part in f.parts)
+        (
+            f.relative_to(plugin_path)
+            for f in plugin_path.rglob("*")
+            if f.is_file() and not any(part in EXCLUDED_PATHS for part in f.parts)
+        ),
+        key=lambda rel: rel.as_posix(),
     )
 
     for rel_path in all_files:
@@ -56,7 +65,7 @@ def compute_plugin_digest(plugin_path: Path) -> bytes:
 
         abs_path = plugin_path / rel_path
         file_hash = hashlib.sha256(abs_path.read_bytes()).hexdigest()
-        hasher.update(str(rel_path).encode("utf-8"))
+        hasher.update(rel_path.as_posix().encode("utf-8"))
         hasher.update(file_hash.encode("utf-8"))
 
     return hasher.digest()
