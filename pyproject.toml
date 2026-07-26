@@ -42,22 +42,14 @@ build-backend = "hatchling.build"
 [tool.distutils.build_exe]
 silent = 3
 optimize = 2
-includes = [
-    "joystick_diagrams.plugins.dcs_world_plugin",
-    "joystick_diagrams.plugins.star_citizen_plugin",
-    "joystick_diagrams.plugins.joystick_gremlin_plugin",
-    "joystick_diagrams.plugins.fs2020_plugin",
-    "joystick_diagrams.plugins.il2_sturmovik_plugin",
-    "joystick_diagrams.plugins.output_plugins.openkneeboard",
-]
+includes = []
 packages = [
     "asyncio",
-    "joystick_diagrams.plugins.dcs_world_plugin",
-    "joystick_diagrams.plugins.star_citizen_plugin",
-    "joystick_diagrams.plugins.joystick_gremlin_plugin",
-    "joystick_diagrams.plugins.fs2020_plugin",
-    "joystick_diagrams.plugins.il2_sturmovik_plugin",
-    "joystick_diagrams.plugins.output_plugins.openkneeboard",
+    # `ply` is force-bundled for the (now external) DCS World plugin: installed plugins run
+    # inside this frozen environment and cannot ship their own PyPI deps, so without this the
+    # runtime-installed DCS plugin's `import ply` fails. No other unbundled plugin needs a
+    # third-party runtime dep beyond what the app already bundles (e.g. pydantic).
+    "ply",
 ]
 include_files = [
     "./img",
@@ -151,18 +143,8 @@ unresolved-attribute = "ignore"
 
 [[tool.ty.overrides]]
 include = ["joystick_diagrams/input/", "joystick_diagrams/export*.py", "joystick_diagrams/template.py", "joystick_diagrams/version.py", "joystick_diagrams/utils.py", "joystick_diagrams/plugins/"]
-exclude = ["joystick_diagrams/plugins/joystick_gremlin_plugin/"]
 [tool.ty.overrides.rules]
 unresolved-attribute = "error"
-
-# minidom stubs are incomplete - suppress false positives
-[[tool.ty.overrides]]
-include = ["joystick_diagrams/plugins/joystick_gremlin_plugin/"]
-[tool.ty.overrides.rules]
-unresolved-attribute = "ignore"
-invalid-argument-type = "ignore"
-invalid-assignment = "ignore"
-not-subscriptable = "ignore"
 
 [[tool.ty.overrides]]
 include = ["joystick_diagrams/ui/"]
