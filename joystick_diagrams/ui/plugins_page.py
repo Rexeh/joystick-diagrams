@@ -29,6 +29,8 @@ from joystick_diagrams.ui.widgets.section_header import SectionHeader
 _logger = logging.getLogger(__name__)
 
 SETUP_BANNER_DISMISSED_KEY = "setup_banner_dismissed"
+PLUGIN_UPDATES_DISMISSED_KEY = "plugin_updates_dismissed"
+PLUGIN_CATALOG_LAST_CHECKED_KEY = "plugin_catalog_last_checked"
 
 
 class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
@@ -88,6 +90,10 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         if not get_setting(SETUP_BANNER_DISMISSED_KEY):
             self._create_guidance_banner()
 
+        # Plugin-update notification banner (populated by check_plugin_updates())
+        self._update_banner = None
+        self._update_worker = None
+
         # Connections
         self.pluginListChanged.connect(self.update_plugin_count_statistics)
         self.statistics_change.connect(self.update_run_button_state)
@@ -142,6 +148,104 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             self._guidance_banner.hide()
             add_update_setting_value(SETUP_BANNER_DISMISSED_KEY, "true")
 
+    # ── Plugin store + update notifications ──
+
+    def open_plugin_store(self):
+        """Open the plugin store dialog and refresh cards after any install/update."""
+        from joystick_diagrams.ui.plugin_store_dialog import PluginStoreDialog
+
+        dialog = PluginStoreDialog(self)
+        dialog.catalog_changed.connect(self.populate_plugin_cards)
+        dialog.catalog_changed.connect(self.check_plugin_updates)
+        dialog.exec()
+
+    def check_plugin_updates(self):
+        """Fetch the catalog in the background and show an update banner if needed."""
+        from joystick_diagrams.ui.plugin_store_dialog import _FetchWorker
+
+        self._update_worker = _FetchWorker()
+        self._update_worker.signals.finished.connect(self._on_update_catalog_fetched)
+        self.threadPool.start(self._update_worker)
+
+    def _on_update_catalog_fetched(self, catalog):
+        from joystick_diagrams.plugins import plugin_catalog as pc
+
+        if catalog is None:
+            return
+
+        installed = pc.installed_index(
+            self.appState.plugin_manager, self.appState.output_plugin_manager
+        )
+        updates = pc.available_updates(pc.compute_status(catalog, installed))
+        if not updates:
+            self._remove_update_banner()
+            return
+
+        signature = ",".join(sorted(f"{u.entry.id}:{u.entry.version}" for u in updates))
+        if get_setting(PLUGIN_UPDATES_DISMISSED_KEY) == signature:
+            return  # user already dismissed this exact set of updates
+
+        self._show_update_banner(len(updates), signature)
+
+    def _show_update_banner(self, count: int, signature: str):
+        self._remove_update_banner()
+
+        banner = QFrame()
+        banner.setProperty("class", "guidance-banner")
+        layout = QHBoxLayout(banner)
+        layout.setContentsMargins(10, 8, 10, 8)
+        layout.setSpacing(10)
+
+        icon_label = QLabel()
+        icon_label.setPixmap(
+            qta.icon("fa5s.arrow-circle-up", color="#34D399").pixmap(QSize(18, 18))
+        )
+        icon_label.setFixedSize(18, 18)
+        layout.addWidget(icon_label)
+
+        plural = "s" if count != 1 else ""
+        text_label = QLabel(f"{count} plugin update{plural} available.")
+        text_label.setWordWrap(True)
+        layout.addWidget(text_label, stretch=1)
+
+        open_btn = QPushButton("Open store")
+        open_btn.setProperty("class", "plugin-setup-button")
+        open_btn.clicked.connect(self.open_plugin_store)
+        layout.addWidget(open_btn)
+
+        close_btn = QPushButton()
+        close_btn.setIcon(qta.icon("fa5s.times", color="#9AA0A6"))
+        close_btn.setIconSize(QSize(12, 12))
+        close_btn.setFixedSize(20, 20)
+        close_btn.setFlat(True)
+        close_btn.setProperty("class", "guidance-banner-close")
+        close_btn.clicked.connect(lambda: self._dismiss_update_banner(signature))
+        layout.addWidget(close_btn)
+
+        self._update_banner = banner
+        # Insert just below the section header (and guidance banner if present)
+        insert_at = 2 if self._guidance_banner else 1
+        self.verticalLayout_2.insertWidget(insert_at, banner)
+        self._set_nav_update_badge(count)
+
+    def _dismiss_update_banner(self, signature: str):
+        add_update_setting_value(PLUGIN_UPDATES_DISMISSED_KEY, signature)
+        self._remove_update_banner()
+
+    def _remove_update_banner(self):
+        if self._update_banner is not None:
+            self._update_banner.hide()
+            self._update_banner.deleteLater()
+            self._update_banner = None
+        self._set_nav_update_badge(0)
+
+    def _set_nav_update_badge(self, count: int):
+        """Ask the main window to show a plugin-update count badge on the nav (best-effort)."""
+        main_window = self.appState.main_window
+        setter = getattr(main_window, "set_plugin_update_badge", None)
+        if callable(setter):
+            setter(count)
+
     def update_run_button_state(self):
         self.runPluginsButton.setEnabled(False)
         self.runPluginsButton.setIcon(QIcon())
@@ -195,8 +299,8 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             self._plugin_cards.append(card)
             self._cards_layout.addWidget(card)
 
-        # "Install more plugins" link
-        install_link = QPushButton("Install more plugins...")
+        # "Browse plugin store" link
+        install_link = QPushButton("Browse plugin store...")
         install_link.setIcon(qta.icon("fa5s.puzzle-piece", color="#4C8BF5"))
         install_link.setIconSize(QSize(14, 14))
         install_link.setStyleSheet(
@@ -205,21 +309,12 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             "QPushButton:hover { text-decoration: underline; color: #6BA1F7; }"
         )
         install_link.setCursor(Qt.CursorShape.PointingHandCursor)
-        install_link.clicked.connect(self._navigate_to_plugin_settings)
+        install_link.clicked.connect(self.open_plugin_store)
         self._cards_layout.addWidget(install_link)
 
         self._cards_layout.addStretch()
         self.pluginListChanged.emit()
         self.update_run_button_state()
-
-    def _navigate_to_plugin_settings(self):
-        """Navigate to Settings > Parser Plugins tab."""
-        main_window = self.appState.main_window
-        if main_window:
-            main_window.load_settings_page()
-            # Select the Parser Plugins tab (index 3 in the nav list)
-            if main_window._settings_page:
-                main_window._settings_page.nav_list.setCurrentRow(3)
 
     def _on_plugin_enabled_toggled(self, plugin_wrapper: PluginWrapper, enabled: bool):
         plugin_wrapper.enabled = enabled
