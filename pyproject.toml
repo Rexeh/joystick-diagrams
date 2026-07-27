@@ -45,11 +45,8 @@ optimize = 2
 includes = []
 packages = [
     "asyncio",
-    # `ply` is force-bundled for the (now external) DCS World plugin: installed plugins run
-    # inside this frozen environment and cannot ship their own PyPI deps, so without this the
-    # runtime-installed DCS plugin's `import ply` fails. No other unbundled plugin needs a
-    # third-party runtime dep beyond what the app already bundles (e.g. pydantic).
     "ply",
+    "xml",
 ]
 include_files = [
     "./img",
