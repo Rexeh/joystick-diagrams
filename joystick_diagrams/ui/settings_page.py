@@ -508,7 +508,7 @@ class SettingsPage(QMainWindow):
         QMessageBox.information(
             self, "Plugin Installed", f"Parser plugin '{name}' installed successfully."
         )
-        self._reload_parser_plugins()
+        self._populate_parser_plugin_cards()
 
     def _uninstall_parser_plugin(self, name: str):
         reply = QMessageBox.question(
