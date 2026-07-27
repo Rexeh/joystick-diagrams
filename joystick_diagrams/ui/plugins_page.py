@@ -411,8 +411,55 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             self.populate_plugin_cards()
 
     def _update_config_nudge(self) -> None:
-        """Replaced with the real implementation in Task 5."""
-        return
+        """Point the user at the first plugin that still needs configuring.
+
+        Not dismissible by design: it clears itself as soon as every plugin is
+        ready, so it cannot become stale nagging.
+        """
+        self._remove_config_nudge()
+
+        unconfigured = next(
+            (w for w in self.get_plugin_wrappers() if not w.ready), None
+        )
+        if unconfigured is None:
+            return
+
+        banner = QFrame()
+        banner.setProperty("class", "guidance-banner")
+        layout = QHBoxLayout(banner)
+        layout.setContentsMargins(10, 8, 10, 8)
+        layout.setSpacing(10)
+
+        icon_label = QLabel()
+        icon_label.setPixmap(
+            qta.icon("fa5s.exclamation-circle", color="#F59E0B").pixmap(QSize(18, 18))
+        )
+        icon_label.setFixedSize(18, 18)
+        layout.addWidget(icon_label)
+
+        text_label = QLabel(f"{unconfigured.name} needs a path before it can run.")
+        text_label.setWordWrap(True)
+        layout.addWidget(text_label, stretch=1)
+
+        setup_btn = QPushButton("Set it up")
+        setup_btn.setProperty("class", "plugin-setup-button")
+        setup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        setup_btn.clicked.connect(lambda: self.show_plugin_config_panel(unconfigured))
+        layout.addWidget(setup_btn)
+
+        self._config_nudge = banner
+        insert_at = 1
+        if self._guidance_banner is not None:
+            insert_at += 1
+        if self._update_banner is not None:
+            insert_at += 1
+        self.verticalLayout_2.insertWidget(insert_at, banner)
+
+    def _remove_config_nudge(self) -> None:
+        if self._config_nudge is not None:
+            self._config_nudge.setParent(None)
+            self._config_nudge.deleteLater()
+            self._config_nudge = None
 
     def _on_plugin_enabled_toggled(self, plugin_wrapper: PluginWrapper, enabled: bool):
         plugin_wrapper.enabled = enabled
@@ -431,6 +478,7 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         for card in self._plugin_cards:
             card.refresh_status()
         self.update_plugin_count_statistics()
+        self._update_config_nudge()
 
     def _clear_side_panel(self) -> None:
         while self.treeWidgetSidePanel.count():

@@ -121,3 +121,48 @@ def test_empty_state_cleared_when_plugins_appear(qapp):
 
     assert page._empty_state is None
     assert len(page._plugin_cards) == 1
+
+
+@pytest.mark.uitest
+def test_nudge_appears_for_first_unconfigured_plugin(qapp):
+    page = _page(qapp, [_wrapper("DCS World", ready=False)])
+
+    page.populate_plugin_cards()
+
+    assert page._config_nudge is not None
+    from PySide6.QtWidgets import QLabel
+
+    texts = {label.text() for label in page._config_nudge.findChildren(QLabel)}
+    assert "DCS World needs a path before it can run." in texts
+
+
+@pytest.mark.uitest
+def test_nudge_absent_when_every_plugin_is_ready(qapp):
+    page = _page(qapp, [_wrapper("DCS World", ready=True)])
+
+    page.populate_plugin_cards()
+
+    assert page._config_nudge is None
+
+
+@pytest.mark.uitest
+def test_nudge_clears_once_plugin_becomes_ready(qapp):
+    wrapper = _wrapper("DCS World", ready=False)
+    page = _page(qapp, [wrapper])
+    page.populate_plugin_cards()
+    assert page._config_nudge is not None
+
+    wrapper.ready = True
+    page._on_settings_changed()
+
+    assert page._config_nudge is None
+
+
+@pytest.mark.uitest
+def test_no_nudge_when_no_plugins_installed(qapp):
+    page = _page(qapp, [])
+
+    with patch.object(PluginsPage, "_fetch_empty_state_catalog", autospec=True):
+        page.populate_plugin_cards()
+
+    assert page._config_nudge is None
