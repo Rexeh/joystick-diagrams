@@ -129,3 +129,67 @@ def install_from_catalog(entry, app_state, parent: QWidget) -> str | None:
     record_trust(msg, entry.type, installed_path)
     reload_plugin_manager(app_state, entry.type)
     return msg
+
+
+def install_from_local_source(
+    source: Path | str,
+    app_state,
+    parent: QWidget,
+    plugin_type: str = "parser",
+) -> str | None:
+    """Install a plugin from a local ZIP/folder path or a URL, applying the full trust flow.
+
+    Mirrors ``install_from_catalog`` but without a catalog entry, so there is no expected
+    SHA-256 to verify against — the source is user-supplied. Validates the plugin, checks
+    for bundled-name conflicts, runs the signing/trust dialog, records trust, and reloads
+    the relevant manager. Returns the installed plugin name on success, or None on
+    failure/cancellation (surfacing a message box for user-facing errors).
+    """
+    import shutil
+
+    from PySide6.QtWidgets import QMessageBox
+
+    from joystick_diagrams.plugins.plugin_installer import (
+        install_plugin,
+        validate_plugin,
+    )
+
+    try:
+        installed_path = install_plugin(source, plugin_type)
+    except Exception as e:
+        QMessageBox.warning(parent, "Install Failed", str(e))
+        return None
+
+    valid, msg = validate_plugin(installed_path, plugin_type)
+    if not valid:
+        shutil.rmtree(installed_path, ignore_errors=True)
+        QMessageBox.warning(parent, "Invalid Plugin", msg)
+        return None
+
+    manager = (
+        app_state.plugin_manager
+        if plugin_type == "parser"
+        else app_state.output_plugin_manager
+    )
+    if manager is not None:
+        bundled_names = {
+            w.name
+            for w in manager.plugin_wrappers
+            if not manager.is_user_plugin(w.name)
+        }
+        if msg in bundled_names:
+            shutil.rmtree(installed_path, ignore_errors=True)
+            QMessageBox.warning(
+                parent,
+                "Name Conflict",
+                f"A bundled plugin named '{msg}' already exists.",
+            )
+            return None
+
+    if not run_security_check(installed_path, msg, parent):
+        shutil.rmtree(installed_path, ignore_errors=True)
+        return None
+
+    record_trust(msg, plugin_type, installed_path)
+    reload_plugin_manager(app_state, plugin_type)
+    return msg
