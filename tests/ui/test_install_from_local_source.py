@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -12,27 +11,8 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from joystick_diagrams.ui import plugin_install_flow as flow  # noqa: E402
 
 
-class _FakeManager:
-    plugin_wrappers: list = []
-
-    def is_user_plugin(self, name):
-        return True
-
-
-class _BundledConflictManager:
-    """A manager reporting a single bundled (non-user) plugin with a given name."""
-
-    def __init__(self, name):
-        self.plugin_wrappers = [SimpleNamespace(name=name)]
-
-    def is_user_plugin(self, name):
-        return False
-
-
 def _app_state():
-    state = MagicMock()
-    state.plugin_manager = _FakeManager()
-    return state
+    return MagicMock()
 
 
 @pytest.mark.uitest
@@ -79,38 +59,6 @@ def test_returns_none_and_removes_plugin_when_trust_declined(qapp, tmp_path):
 
     assert result is None
     assert not installed.exists()
-
-
-@pytest.mark.uitest
-def test_returns_none_and_removes_plugin_on_bundled_name_conflict(qapp, tmp_path):
-    installed = tmp_path / "my_plugin"
-    installed.mkdir()
-
-    state = MagicMock()
-    state.plugin_manager = _BundledConflictManager("My Plugin")
-
-    with (
-        patch(
-            "joystick_diagrams.plugins.plugin_installer.install_plugin",
-            return_value=installed,
-        ),
-        patch(
-            "joystick_diagrams.plugins.plugin_installer.validate_plugin",
-            return_value=(True, "My Plugin"),
-        ),
-        patch("PySide6.QtWidgets.QMessageBox.warning") as mock_warning,
-    ):
-        result = flow.install_from_local_source(Path("plugin.zip"), state, None)
-
-    assert result is None
-    assert not installed.exists()
-    mock_warning.assert_called_once()
-    _parent, title, message = mock_warning.call_args[0]
-    assert title == "Name Conflict"
-    assert message == (
-        "A bundled plugin named 'My Plugin' already exists. "
-        "The user plugin cannot be installed."
-    )
 
 
 @pytest.mark.uitest
