@@ -147,15 +147,24 @@ def test_nudge_absent_when_every_plugin_is_ready(qapp):
 
 @pytest.mark.uitest
 def test_nudge_clears_once_plugin_becomes_ready(qapp):
+    from PySide6.QtWidgets import QLabel
+
     wrapper = _wrapper("DCS World", ready=False)
     page = _page(qapp, [wrapper])
     page.populate_plugin_cards()
     assert page._config_nudge is not None
 
+    nudge_text = "DCS World needs a path before it can run."
+    assert nudge_text in {label.text() for label in page.findChildren(QLabel)}
+
     wrapper.ready = True
     page._on_settings_changed()
 
     assert page._config_nudge is None
+    # Guards against a regression where the banner is nulled out but never
+    # actually reparented/torn down (findChildren scoped to the page, not the
+    # banner, so a dangling-but-unparented widget would still be found here).
+    assert nudge_text not in {label.text() for label in page.findChildren(QLabel)}
 
 
 @pytest.mark.uitest
