@@ -182,7 +182,8 @@ def install_from_local_source(
             QMessageBox.warning(
                 parent,
                 "Name Conflict",
-                f"A bundled plugin named '{msg}' already exists.",
+                f"A bundled plugin named '{msg}' already exists. "
+                f"The user plugin cannot be installed.",
             )
             return None
 
