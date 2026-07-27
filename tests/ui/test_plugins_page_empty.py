@@ -107,3 +107,17 @@ def test_unreachable_catalog_shows_unavailable_state(qapp):
     texts = {b.text() for b in page._empty_state.findChildren(QPushButton)}
     assert "Retry" in texts
     assert "Install from ZIP..." in texts
+
+
+@pytest.mark.uitest
+def test_empty_state_cleared_when_plugins_appear(qapp):
+    page = _page(qapp, [])
+    with patch.object(PluginsPage, "_fetch_empty_state_catalog", autospec=True):
+        page.populate_plugin_cards()
+    assert page._empty_state is not None
+
+    page.appState.plugin_manager.plugin_wrappers = [_wrapper()]
+    page.populate_plugin_cards()
+
+    assert page._empty_state is None
+    assert len(page._plugin_cards) == 1
