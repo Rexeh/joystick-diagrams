@@ -376,10 +376,16 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         installed = pc.installed_index(
             self.appState.plugin_manager, self.appState.output_plugin_manager
         )
+        # Parsers only: the picker asks "which games do you play?", and an output
+        # plugin installed here would leave the page still showing the empty state.
+        # Incompatible entries are excluded too — the store already refuses them,
+        # so offering a checkbox for one would dead-end the guided flow.
         available = [
             status.entry
             for status in pc.compute_status(catalog, installed)
             if status.status is pc.CatalogStatus.AVAILABLE
+            and status.compatible
+            and status.entry.type == "parser"
         ]
         self._empty_state.set_catalog(available)
 
@@ -411,15 +417,17 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             self.populate_plugin_cards()
 
     def _update_config_nudge(self) -> None:
-        """Point the user at the first plugin that still needs configuring.
+        """Point the user at the first *enabled* plugin that still needs configuring.
 
-        Not dismissible by design: it clears itself as soon as every plugin is
-        ready, so it cannot become stale nagging.
+        Not dismissible by design: it clears itself as soon as every enabled plugin
+        is ready, so it cannot become stale nagging. Disabled plugins are ignored —
+        disabling is the natural "I don't want this one" action, and nagging about a
+        plugin the user deliberately switched off would be unclearable.
         """
         self._remove_config_nudge()
 
         unconfigured = next(
-            (w for w in self.get_plugin_wrappers() if not w.ready), None
+            (w for w in self.get_plugin_wrappers() if w.enabled and not w.ready), None
         )
         if unconfigured is None:
             return
@@ -464,6 +472,8 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
     def _on_plugin_enabled_toggled(self, plugin_wrapper: PluginWrapper, enabled: bool):
         plugin_wrapper.enabled = enabled
         self.update_plugin_count_statistics()
+        # The nudge only tracks enabled plugins, so toggling changes what it says.
+        self._update_config_nudge()
 
     def show_plugin_config_panel(self, plugin_wrapper: PluginWrapper) -> None:
         """Show the configuration panel for a plugin in the side panel area."""

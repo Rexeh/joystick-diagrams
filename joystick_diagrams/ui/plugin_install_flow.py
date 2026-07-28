@@ -65,10 +65,46 @@ def reload_plugin_manager(app_state, plugin_type: str) -> None:
         mgr.create_plugin_wrappers()
         app_state.output_plugin_manager = mgr
 
+    _refresh_setup_page(app_state)
+
+
+def _refresh_setup_page(app_state) -> None:
+    """Rebuild the Setup page's plugin cards, if that page has been created."""
     main_window = getattr(app_state, "main_window", None)
     setup_page = getattr(main_window, "_setup_page", None)
     if setup_page is not None:
         setup_page.populate_plugin_cards()
+
+
+def enable_installed_plugin(app_state, plugin_type: str, plugin_name: str) -> None:
+    """Enable a freshly installed plugin so it is immediately runnable.
+
+    Choosing a plugin — from the catalog picker, the store, or a local ZIP — is an
+    unambiguous statement of intent, so the user should not have to hunt for a second
+    toggle before the Run button comes alive.
+
+    Must be called *after* ``reload_plugin_manager``: the wrapper this enables is
+    created by that rebuild. Setting ``enabled`` persists via the wrapper's property
+    setter, so the Setup page is refreshed again afterwards to pick up the new state.
+    A wrapper that cannot be found is logged, not raised — the install itself
+    succeeded and must not be reported as a failure.
+    """
+    manager = (
+        app_state.plugin_manager
+        if plugin_type == "parser"
+        else app_state.output_plugin_manager
+    )
+    wrappers = getattr(manager, "plugin_wrappers", None) or []
+    wrapper = next((w for w in wrappers if w.name == plugin_name), None)
+    if wrapper is None:
+        _logger.warning(
+            f"Installed plugin '{plugin_name}' was not found after reloading the "
+            f"{plugin_type} plugin manager - leaving it disabled."
+        )
+        return
+
+    wrapper.enabled = True
+    _refresh_setup_page(app_state)
 
 
 def install_from_catalog(entry, app_state, parent: QWidget) -> str | None:
@@ -128,6 +164,7 @@ def install_from_catalog(entry, app_state, parent: QWidget) -> str | None:
 
     record_trust(msg, entry.type, installed_path)
     reload_plugin_manager(app_state, entry.type)
+    enable_installed_plugin(app_state, entry.type, msg)
     return msg
 
 
@@ -176,4 +213,5 @@ def install_from_local_source(
 
     record_trust(msg, plugin_type, installed_path)
     reload_plugin_manager(app_state, plugin_type)
+    enable_installed_plugin(app_state, plugin_type, msg)
     return msg

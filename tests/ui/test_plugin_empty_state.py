@@ -94,7 +94,9 @@ def test_install_requested_carries_only_checked_entries(qapp):
 
     boxes = {box.text(): box for box in _checkboxes(widget)}
     boxes["Star Citizen"].setChecked(True)
-    widget._emit_install()
+    # Driven through the button, not _emit_install, so the clicked->_emit_install
+    # connection is part of what this test protects.
+    widget._install_button.click()
 
     assert received == [[star]]
 
