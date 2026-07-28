@@ -76,12 +76,37 @@ def _refresh_setup_page(app_state) -> None:
         setup_page.populate_plugin_cards()
 
 
+def has_stored_plugin_choice(plugin_name: str) -> bool:
+    """True when a plugin configuration row already exists for this plugin name.
+
+    A row means this installation already holds an enabled/disabled choice for the
+    plugin — either one the user made explicitly, or the default written the first
+    time the plugin was wrapped. Either way the plugin is not new here, so
+    auto-enabling it would overwrite a decision rather than make one.
+
+    **Must be sampled before ``reload_plugin_manager``.** That call rebuilds the
+    manager via ``create_plugin_wrappers()``, and ``PluginWrapper.setup_plugin``
+    inserts a configuration row for any plugin that lacks one — so after the reload a
+    brand-new plugin is indistinguishable from one configured months ago, and this
+    check would refuse to enable anything.
+    """
+    from joystick_diagrams.db.db_plugin_data import get_plugin_configuration
+
+    return get_plugin_configuration(plugin_name) is not None
+
+
 def enable_installed_plugin(app_state, plugin_type: str, plugin_name: str) -> None:
     """Enable a freshly installed plugin so it is immediately runnable.
 
     Choosing a plugin — from the catalog picker, the store, or a local ZIP — is an
     unambiguous statement of intent, so the user should not have to hunt for a second
     toggle before the Run button comes alive.
+
+    **First installs only.** Callers must gate this on ``has_stored_plugin_choice``:
+    ``install_from_catalog`` is also the *update* path (the store wires
+    ``UPDATE_AVAILABLE`` straight to it), and a local reinstall can land on top of an
+    existing plugin, so calling this unconditionally would silently re-enable a plugin
+    the user had deliberately switched off.
 
     Must be called *after* ``reload_plugin_manager``: the wrapper this enables is
     created by that rebuild. Setting ``enabled`` persists via the wrapper's property
@@ -162,9 +187,15 @@ def install_from_catalog(entry, app_state, parent: QWidget) -> str | None:
         shutil.rmtree(installed_path, ignore_errors=True)
         return None
 
+    # Sampled before the reload — see has_stored_plugin_choice. This is also the
+    # update path (the store wires "Update -> vX" straight here), so a plugin the
+    # user already has a choice for must keep it.
+    is_first_install = not has_stored_plugin_choice(msg)
+
     record_trust(msg, entry.type, installed_path)
     reload_plugin_manager(app_state, entry.type)
-    enable_installed_plugin(app_state, entry.type, msg)
+    if is_first_install:
+        enable_installed_plugin(app_state, entry.type, msg)
     return msg
 
 
@@ -211,7 +242,13 @@ def install_from_local_source(
         shutil.rmtree(installed_path, ignore_errors=True)
         return None
 
+    # Sampled before the reload — see has_stored_plugin_choice. Reinstalling over an
+    # existing plugin must not resurrect it: uninstall deliberately leaves the
+    # configuration row behind ("Plugin settings will be preserved").
+    is_first_install = not has_stored_plugin_choice(msg)
+
     record_trust(msg, plugin_type, installed_path)
     reload_plugin_manager(app_state, plugin_type)
-    enable_installed_plugin(app_state, plugin_type, msg)
+    if is_first_install:
+        enable_installed_plugin(app_state, plugin_type, msg)
     return msg

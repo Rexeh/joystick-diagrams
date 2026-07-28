@@ -14,11 +14,23 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
+from joystick_diagrams.db import db_plugin_data  # noqa: E402
 from joystick_diagrams.ui import plugin_install_flow as flow  # noqa: E402
 
 
 def _app_state():
     return MagicMock()
+
+
+def _reload_writes_config_row(_app_state_arg, _plugin_type):
+    """Stand-in for the real reload's side effect on the configuration table.
+
+    ``reload_plugin_manager`` -> ``create_plugin_wrappers()`` -> ``PluginWrapper``
+    ``.setup_plugin()`` inserts a row for any plugin that lacks one. Reproducing that
+    here is what lets these tests catch the "is this plugin new?" check being sampled
+    *after* the reload, where every plugin looks pre-existing.
+    """
+    db_plugin_data.add__update_plugin_configuration("My Plugin", False)
 
 
 @pytest.mark.uitest
@@ -115,9 +127,51 @@ def test_returns_none_when_installer_raises(qapp):
 
 @pytest.mark.uitest
 def test_enables_the_newly_installed_plugin(qapp, tmp_path):
-    """Picking a plugin is a statement of intent — it must not land disabled."""
+    """Picking a plugin is a statement of intent — it must not land disabled.
+
+    The reload mock writes a configuration row exactly as the real one does, so this
+    also pins the "is it new?" check to *before* the reload.
+    """
     installed = tmp_path / "my_plugin"
     installed.mkdir()
+    wrapper = SimpleNamespace(name="My Plugin", enabled=False)
+    state = _app_state()
+    state.plugin_manager.plugin_wrappers = [wrapper]
+    assert db_plugin_data.get_plugin_configuration("My Plugin") is None
+
+    with (
+        patch(
+            "joystick_diagrams.plugins.plugin_installer.install_plugin",
+            return_value=installed,
+        ),
+        patch(
+            "joystick_diagrams.plugins.plugin_installer.validate_plugin",
+            return_value=(True, "My Plugin"),
+        ),
+        patch.object(flow, "run_security_check", autospec=True, return_value=True),
+        patch.object(flow, "record_trust", autospec=True),
+        patch.object(
+            flow,
+            "reload_plugin_manager",
+            autospec=True,
+            side_effect=_reload_writes_config_row,
+        ),
+    ):
+        flow.install_from_local_source(Path("plugin.zip"), state, None)
+
+    assert wrapper.enabled is True
+
+
+@pytest.mark.uitest
+def test_reinstall_does_not_re_enable_a_deliberately_disabled_plugin(qapp, tmp_path):
+    """Uninstall promises "Plugin settings will be preserved".
+
+    Reinstalling over a plugin the user had switched off must honour that rather than
+    resurrecting it — the configuration row survives uninstall by design.
+    """
+    installed = tmp_path / "my_plugin"
+    installed.mkdir()
+    db_plugin_data.add__update_plugin_configuration("My Plugin", False)
     wrapper = SimpleNamespace(name="My Plugin", enabled=False)
     state = _app_state()
     state.plugin_manager.plugin_wrappers = [wrapper]
@@ -135,9 +189,11 @@ def test_enables_the_newly_installed_plugin(qapp, tmp_path):
         patch.object(flow, "record_trust", autospec=True),
         patch.object(flow, "reload_plugin_manager", autospec=True),
     ):
-        flow.install_from_local_source(Path("plugin.zip"), state, None)
+        result = flow.install_from_local_source(Path("plugin.zip"), state, None)
 
-    assert wrapper.enabled is True
+    assert result == "My Plugin"
+    assert wrapper.enabled is False
+    assert db_plugin_data.get_plugin_configuration("My Plugin") == ("My Plugin", 0)
 
 
 @pytest.mark.uitest

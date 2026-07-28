@@ -11,7 +11,6 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QCheckBox  # noqa: E402
 
-from joystick_diagrams.db import db_handler  # noqa: E402
 from joystick_diagrams.plugins import plugin_catalog as pc  # noqa: E402
 from joystick_diagrams.ui.plugins_page import PluginsPage  # noqa: E402
 from joystick_diagrams.ui.widgets.plugin_empty_state import (  # noqa: E402
@@ -48,30 +47,9 @@ def _catalog_entry(name, plugin_type="parser", min_app_version=None):
     )
 
 
-@pytest.fixture(autouse=True)
-def _temp_database(tmp_path):
-    """Give every test a throwaway data root with a fully migrated schema.
-
-    Constructing a real AppState builds a LabelService, which reads the
-    ``bind_text`` table on init — so the schema has to exist before the page is
-    built or the whole file fails on a machine (or CI runner) that has never run
-    the app.
-
-    ``db_connection`` binds ``data_root`` at import time (``from ... import
-    data_root``), so patching ``joystick_diagrams.utils.data_root`` alone does not
-    reach it. The binding inside ``db_connection`` is the one that decides where
-    the sqlite file lives; ``db_handler.init`` uses ``utils.data_root`` via the
-    module, so both are redirected to keep the developer's real database out of
-    the test run.
-    """
-    root = tmp_path / "data_root"
-    root.mkdir()
-    with (
-        patch("joystick_diagrams.db.db_connection.data_root", return_value=root),
-        patch("joystick_diagrams.utils.data_root", return_value=root),
-    ):
-        db_handler.init()
-        yield
+# The migrated throwaway database this file depends on comes from the autouse
+# ``temp_database`` fixture in tests/ui/conftest.py — constructing a real AppState
+# builds a LabelService that reads ``bind_text`` on init.
 
 
 @pytest.fixture(autouse=True)
