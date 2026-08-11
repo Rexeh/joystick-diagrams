@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Joystick Diagrams
+Comment=Automatically create diagrams for your throttles, joysticks and custom HID devices
+Exec=@APP_DIR@/run.sh
+Icon=@APP_DIR@/img/logo.png
+Terminal=false
+Categories=Utility;
+StartupWMClass=joystick_diagrams

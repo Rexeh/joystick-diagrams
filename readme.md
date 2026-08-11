@@ -88,6 +88,15 @@ A starter template is included for creating custom device layouts using [draw.io
 2. Unzip to your preferred location
 3. Run installer, and launch application
 
+### Linux
+
+1. Download the `joystick-diagrams-<version>-linux-x86_64.tar.gz` from the latest [release](https://github.com/Rexeh/joystick-diagrams/releases)
+2. Extract it to your preferred location
+3. Run `./run.sh` from the extracted folder
+
+There is no installer on Linux. Optionally run `./install-desktop.sh` to add an
+application menu entry for your user (re-run it if you move the folder).
+
 For setup guidance, see the [documentation](https://joystick-diagrams.com/setup/).
 
 ### Building from Source
