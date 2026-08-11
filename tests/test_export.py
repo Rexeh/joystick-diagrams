@@ -1,11 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime
+from unittest.mock import patch
 
 import pytest
 
 from joystick_diagrams.export import (
+    MERGE_MODIFIERS_SETTING_KEY,
     TEMPLATE_DATING_KEY,
     TEMPLATE_NAMING_KEY,
+    merge_modifiers_enabled,
     populate_template,
     replace_input_modifier_id_key,
     replace_input_modifiers_string,
@@ -296,3 +299,123 @@ def test_template_populate(mock_export_device):
         modified_template
         == "Button Action 1 | Button Action 2 |  | AXIS Control 1 | Hat Control Action 1 |  | Modifier 1 - ctrl"
     )
+
+
+# Merging modifiers into the main input key
+
+
+@dataclass
+class MockTemplate:
+    raw_data: str
+
+
+@dataclass
+class MockWrapper:
+    profile_name: str
+
+
+@dataclass
+class MockExportDevice:
+    template: MockTemplate
+    profile_wrapper: MockWrapper
+    device: Device_
+
+
+def build_export_device(raw_data: str, device: Device_) -> MockExportDevice:
+    return MockExportDevice(MockTemplate(raw_data), MockWrapper("profile_1"), device)
+
+
+def merge_modifiers_on():
+    """Patches the settings lookup so the merge option reads as enabled."""
+    return patch("joystick_diagrams.db.db_settings.get_setting", return_value="true")
+
+
+def test_merge_modifiers_enabled_default_off():
+    # The autouse conftest fixture returns None for all settings
+    assert merge_modifiers_enabled() is False
+
+    for stored_value in ("false", "", "yes", "TRUE"):
+        with patch(
+            "joystick_diagrams.db.db_settings.get_setting", return_value=stored_value
+        ):
+            assert merge_modifiers_enabled() is False
+
+    with patch(
+        "joystick_diagrams.db.db_settings.get_setting", return_value="true"
+    ) as mock_get:
+        assert merge_modifiers_enabled() is True
+        mock_get.assert_called_once_with(MERGE_MODIFIERS_SETTING_KEY)
+
+
+def test_template_populate_merged_modifiers(mock_export_device):
+    """Modifiers fold into BUTTON_1, and BUTTON_1_Modifiers is still filled"""
+    with merge_modifiers_on():
+        modified_template = populate_template(mock_export_device)
+
+    assert modified_template == (
+        "Button Action 1 | Modifier 1 - ctrl | Button Action 2 |  | AXIS Control 1"
+        " | Hat Control Action 1 |  | Modifier 1 - ctrl"
+    )
+
+
+def test_merged_modifiers_applies_to_all_control_types():
+    dev = Device_("666ec0a0-556b-11ee-8002-444553540000", "Test Device")
+    dev.create_input(Axis(AxisDirection.X), "Pitch")
+    dev.add_modifier_to_input(Axis(AxisDirection.X), {"ctrl"}, "Trim")
+    dev.create_input(Hat(1, HatDirection.U), "Look Up")
+    dev.add_modifier_to_input(Hat(1, HatDirection.U), {"alt"}, "Snap Up")
+
+    export_device = build_export_device("AXIS_X | POV_1_U", dev)
+
+    with merge_modifiers_on():
+        assert (
+            populate_template(export_device)
+            == "Pitch | Trim - ctrl | Look Up | Snap Up - alt"
+        )
+
+
+def test_merged_modifiers_skip_empty_command():
+    """A modifier only input has no command, so must not render a leading separator"""
+    dev = Device_("666ec0a0-556b-11ee-8002-444553540000", "Test Device")
+    dev.add_modifier_to_input(Button(9), {"ctrl"}, "Shell Mod")
+
+    export_device = build_export_device("BUTTON_9", dev)
+
+    with merge_modifiers_on():
+        assert populate_template(export_device) == "Shell Mod - ctrl"
+
+
+def test_merged_modifiers_multiple_in_list_order():
+    dev = Device_("666ec0a0-556b-11ee-8002-444553540000", "Test Device")
+    dev.create_input(Button(6), "Fire")
+    dev.add_modifier_to_input(Button(6), {"ctrl"}, "Alt Fire")
+    dev.add_modifier_to_input(Button(6), {"alt"}, "Lock")
+
+    export_device = build_export_device("BUTTON_6", dev)
+
+    with merge_modifiers_on():
+        assert populate_template(export_device) == "Fire | Alt Fire - ctrl | Lock - alt"
+
+
+def test_merged_modifiers_off_leaves_main_key_untouched():
+    dev = Device_("666ec0a0-556b-11ee-8002-444553540000", "Test Device")
+    dev.create_input(Button(6), "Fire")
+    dev.add_modifier_to_input(Button(6), {"ctrl"}, "Alt Fire")
+
+    export_device = build_export_device("BUTTON_6", dev)
+
+    assert populate_template(export_device) == "Fire"
+
+
+def test_merged_modifiers_are_sanitized():
+    dev = Device_("666ec0a0-556b-11ee-8002-444553540000", "Test Device")
+    dev.create_input(Button(6), 'Fire "Primary"')
+    dev.add_modifier_to_input(Button(6), {"ctrl"}, "Fire & Forget")
+
+    export_device = build_export_device("BUTTON_6", dev)
+
+    with merge_modifiers_on():
+        assert (
+            populate_template(export_device)
+            == "Fire &quot;Primary&quot; | Fire &amp; Forget - ctrl"
+        )

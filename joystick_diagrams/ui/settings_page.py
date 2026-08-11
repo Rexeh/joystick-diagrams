@@ -37,6 +37,7 @@ from joystick_diagrams.conflict_strategy import (
     get_inheritance_strategy,
 )
 from joystick_diagrams.db.db_settings import add_update_setting_value, get_setting
+from joystick_diagrams.export import MERGE_MODIFIERS_SETTING_KEY
 from joystick_diagrams.ui.widgets.section_header import SectionHeader
 
 _logger = logging.getLogger(__name__)
@@ -170,6 +171,22 @@ class SettingsPage(QMainWindow):
         )
         form.addRow("", self.open_after_export_cb)
 
+        # Merge modifiers into the main input text
+        self.merge_modifiers_cb = QCheckBox(
+            "Merge modifiers into the main binding text"
+        )
+        self.merge_modifiers_cb.setToolTip(
+            "Templates normally need MODIFIER_X keys to show modifier bindings. "
+            "With this on, an input's modifiers are appended to its main key "
+            '(e.g. BUTTON_6 becomes "Fire | Alt Fire - ctrl"), so simple templates '
+            "still show them. Any MODIFIER_X keys in the template are still filled."
+        )
+        self.merge_modifiers_cb.setChecked(
+            get_setting(MERGE_MODIFIERS_SETTING_KEY) == "true"  # default False
+        )
+        self.merge_modifiers_cb.stateChanged.connect(self._on_merge_modifiers_changed)
+        form.addRow("", self.merge_modifiers_cb)
+
         # Alias merge strategy
         self.alias_strategy_combo = QComboBox()
         self.alias_strategy_combo.setProperty("class", "view-binds-list")
@@ -219,6 +236,12 @@ class SettingsPage(QMainWindow):
     def _on_open_after_export_changed(self, state: int):
         add_update_setting_value(
             OPEN_AFTER_EXPORT_SETTING_KEY,
+            "true" if state == Qt.CheckState.Checked.value else "false",
+        )
+
+    def _on_merge_modifiers_changed(self, state: int):
+        add_update_setting_value(
+            MERGE_MODIFIERS_SETTING_KEY,
             "true" if state == Qt.CheckState.Checked.value else "false",
         )
 
