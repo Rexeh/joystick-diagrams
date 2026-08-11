@@ -22,8 +22,9 @@ The easiest way to do this is via Make (https://gnuwin32.sourceforge.net/package
 | `make build-tarball` | Linux | The above, plus a `.tar.gz` in **/dist** |
 | `make build-exe` | Windows | Alias for `build-installer` (the historic target name) |
 
-The Windows installer needs Inno Setup 6. `make build-installer` looks for it at
-`C:\Program Files (x86)\Inno Setup 6\ISCC.exe`; override with `make build-installer ISCC=<path>`.
+The Windows installer needs Inno Setup 6. `make build-installer` shells out to
+`packaging\windows\build_installer.bat`, which looks for `ISCC.exe` at the default
+install location and then on PATH; override with `make build-installer ISCC=<path>`.
 The installer version is taken from `version_manifest.json`, so run `make make-version`
 (or any of the build targets, which depend on it) after bumping the version.
 

@@ -20,13 +20,6 @@ jobs:
       uses: astral-sh/setup-uv@v5
     - name: Install build tooling
       run: choco install innosetup make -y --no-progress
-    - name: Locate Inno Setup
-      shell: pwsh
-      run: |
-        $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-        if (-not (Test-Path $iscc)) { $iscc = (Get-Command ISCC.exe -ErrorAction Stop).Source }
-        Write-Host "Using $iscc"
-        "ISCC=$iscc" >> $env:GITHUB_ENV
     - name: Install dependencies
       run: uv sync
     - name: Build installer

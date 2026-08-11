@@ -8,8 +8,10 @@ BUILD_DIR := build/app
 # only evaluated by the targets that actually reference it.
 VERSION = $(shell uv run python -c "import json;print(json.load(open('version_manifest.json'))['version'])")
 
-# Overridable so CI can point at the Chocolatey shim (make build-installer ISCC=ISCC.exe)
-ISCC ?= C:\Program Files (x86)\Inno Setup 6\ISCC.exe
+# ISCC is resolved by packaging/windows/build_installer.bat, which honours an
+# ISCC environment variable if you need to point at a non default install.
+# Exported so 'make build-installer ISCC=<path>' reaches the batch file too.
+export ISCC
 
 test: fmt lint unit-test
 
@@ -31,9 +33,10 @@ build-app: make-version
 	@uv run python setup.py build_exe --build-exe $(BUILD_DIR)
 
 # Windows: freeze, then wrap in the Inno Setup installer (installer/Output/*.exe)
+# The batch wrapper locates ISCC and keeps cmd quoting out of the makefile.
 build-installer: build-app
 	@echo "Creating Installer"
-	@cmd /C "$(ISCC)" /Qp /DVersion=$(VERSION) ./installer/config.iss
+	@packaging\windows\build_installer.bat $(VERSION)
 
 # Linux: freeze, then stage the launcher alongside it and tar it up
 build-tarball: build-app
