@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import qtawesome as qta
 from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
@@ -26,6 +27,9 @@ from joystick_diagrams.plugin_wrapper import PluginWrapper
 from joystick_diagrams.ui.qt_designer import setting_page_ui
 from joystick_diagrams.ui.widgets.section_header import SectionHeader
 
+if TYPE_CHECKING:
+    from joystick_diagrams.ui.widgets.plugin_empty_state import PluginEmptyState
+
 _logger = logging.getLogger(__name__)
 
 SETUP_BANNER_DISMISSED_KEY = "setup_banner_dismissed"
@@ -49,6 +53,9 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         self.plugin_count = 0
         self.plugins_ready = 0
         self._plugin_cards: list[PluginCard] = []
+        self._empty_state: "PluginEmptyState | None" = None
+        self._empty_worker = None
+        self._config_nudge = None
 
         # Replace the generated heading_label with SectionHeader
         self.heading_label.hide()
@@ -85,9 +92,11 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         # Insert the scroll area where the tree widget was
         self.pluginContainer.insertWidget(0, self._cards_scroll)
 
-        # First-time guidance banner
+        # First-time guidance banner — only meaningful once plugins exist.
         self._guidance_banner = None
-        if not get_setting(SETUP_BANNER_DISMISSED_KEY):
+        if self.appState.plugin_manager.plugin_wrappers and not get_setting(
+            SETUP_BANNER_DISMISSED_KEY
+        ):
             self._create_guidance_banner()
 
         # Plugin-update notification banner (populated by check_plugin_updates())
@@ -247,6 +256,7 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             setter(count)
 
     def update_run_button_state(self):
+        self.runPluginsButton.setVisible(self.plugin_count > 0)
         self.runPluginsButton.setEnabled(False)
         self.runPluginsButton.setIcon(QIcon())
 
@@ -291,34 +301,179 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
             if item.widget():
                 item.widget().deleteLater()
 
-        for plugin_data in self.appState.plugin_manager.plugin_wrappers:
-            is_user = self.appState.plugin_manager.is_user_plugin(plugin_data.name)
-            card = PluginCard(plugin_data, self, is_user_plugin=is_user)
-            card.enabled_toggled.connect(self._on_plugin_enabled_toggled)
-            card.setup_clicked.connect(self.show_plugin_config_panel)
-            self._plugin_cards.append(card)
-            self._cards_layout.addWidget(card)
+        wrappers = self.appState.plugin_manager.plugin_wrappers
+        self._empty_state = None
 
-        # "Browse plugin store" link
-        install_link = QPushButton("Browse plugin store...")
-        install_link.setIcon(qta.icon("fa5s.puzzle-piece", color="#4C8BF5"))
-        install_link.setIconSize(QSize(14, 14))
-        install_link.setStyleSheet(
-            "QPushButton { color: #4C8BF5; background: transparent; "
-            "border: none; text-align: left; padding: 8px 4px; }"
-            "QPushButton:hover { text-decoration: underline; color: #6BA1F7; }"
+        if not wrappers:
+            self._show_empty_state()
+        else:
+            for plugin_data in wrappers:
+                is_user = self.appState.plugin_manager.is_user_plugin(plugin_data.name)
+                card = PluginCard(plugin_data, self, is_user_plugin=is_user)
+                card.enabled_toggled.connect(self._on_plugin_enabled_toggled)
+                card.setup_clicked.connect(self.show_plugin_config_panel)
+                self._plugin_cards.append(card)
+                self._cards_layout.addWidget(card)
+
+            # "Browse plugin store" link
+            install_link = QPushButton("Browse plugin store...")
+            install_link.setIcon(qta.icon("fa5s.puzzle-piece", color="#4C8BF5"))
+            install_link.setIconSize(QSize(14, 14))
+            install_link.setStyleSheet(
+                "QPushButton { color: #4C8BF5; background: transparent; "
+                "border: none; text-align: left; padding: 8px 4px; }"
+                "QPushButton:hover { text-decoration: underline; color: #6BA1F7; }"
+            )
+            install_link.setCursor(Qt.CursorShape.PointingHandCursor)
+            install_link.clicked.connect(self.open_plugin_store)
+            self._cards_layout.addWidget(install_link)
+            self._cards_layout.addStretch()
+
+        self.section_header.set_subtitle(
+            "Enable and configure your plugins, then run them to import bindings"
+            if wrappers
+            else "Install a plugin to import your bindings"
         )
-        install_link.setCursor(Qt.CursorShape.PointingHandCursor)
-        install_link.clicked.connect(self.open_plugin_store)
-        self._cards_layout.addWidget(install_link)
 
-        self._cards_layout.addStretch()
         self.pluginListChanged.emit()
         self.update_run_button_state()
+        self._update_config_nudge()
+
+    # ── Empty state (zero plugins installed) ──
+
+    def _show_empty_state(self) -> None:
+        from joystick_diagrams.ui.widgets.plugin_empty_state import PluginEmptyState
+
+        self._empty_state = PluginEmptyState()
+        self._empty_state.browse_store_requested.connect(self.open_plugin_store)
+        self._empty_state.install_zip_requested.connect(self._install_zip_via_dialog)
+        self._empty_state.zip_dropped.connect(self._install_local_source)
+        self._empty_state.retry_requested.connect(self._fetch_empty_state_catalog)
+        self._empty_state.install_requested.connect(self._install_catalog_entries)
+        self._cards_layout.addWidget(self._empty_state)
+        self._fetch_empty_state_catalog()
+
+    def _fetch_empty_state_catalog(self) -> None:
+        from joystick_diagrams.ui.plugin_store_dialog import _FetchWorker
+
+        if self._empty_state is None:
+            return
+        self._empty_state.set_loading()
+        self._empty_worker = _FetchWorker()
+        self._empty_worker.signals.finished.connect(self._on_empty_state_catalog)
+        self.threadPool.start(self._empty_worker)
+
+    def _on_empty_state_catalog(self, catalog) -> None:
+        from joystick_diagrams.plugins import plugin_catalog as pc
+
+        if self._empty_state is None:
+            return
+
+        if catalog is None:
+            self._empty_state.set_unavailable()
+            return
+
+        installed = pc.installed_index(
+            self.appState.plugin_manager, self.appState.output_plugin_manager
+        )
+        # Parsers only: the picker asks "which games do you play?", and an output
+        # plugin installed here would leave the page still showing the empty state.
+        # Incompatible entries are excluded too — the store already refuses them,
+        # so offering a checkbox for one would dead-end the guided flow.
+        available = [
+            status.entry
+            for status in pc.compute_status(catalog, installed)
+            if status.status is pc.CatalogStatus.AVAILABLE
+            and status.compatible
+            and status.entry.type == "parser"
+        ]
+        self._empty_state.set_catalog(available)
+
+    def _install_catalog_entries(self, entries: list) -> None:
+        from joystick_diagrams.ui.plugin_install_flow import install_from_catalog
+
+        installed_any = False
+        for entry in entries:
+            if install_from_catalog(entry, self.appState, self):
+                installed_any = True
+
+        # A successful install repopulates via reload_plugin_manager. If every
+        # install failed or was declined, rebuild so the empty state is not
+        # left mid-flight.
+        if not installed_any:
+            self.populate_plugin_cards()
+
+    def _install_zip_via_dialog(self) -> None:
+        result, _ = QFileDialog.getOpenFileName(
+            self, "Select plugin ZIP", str(Path.home()), "Plugin archives (*.zip)"
+        )
+        if result:
+            self._install_local_source(Path(result))
+
+    def _install_local_source(self, source: Path) -> None:
+        from joystick_diagrams.ui.plugin_install_flow import install_from_local_source
+
+        if install_from_local_source(source, self.appState, self, "parser") is None:
+            self.populate_plugin_cards()
+
+    def _update_config_nudge(self) -> None:
+        """Point the user at the first *enabled* plugin that still needs configuring.
+
+        Not dismissible by design: it clears itself as soon as every enabled plugin
+        is ready, so it cannot become stale nagging. Disabled plugins are ignored —
+        disabling is the natural "I don't want this one" action, and nagging about a
+        plugin the user deliberately switched off would be unclearable.
+        """
+        self._remove_config_nudge()
+
+        unconfigured = next(
+            (w for w in self.get_plugin_wrappers() if w.enabled and not w.ready), None
+        )
+        if unconfigured is None:
+            return
+
+        banner = QFrame()
+        banner.setProperty("class", "guidance-banner")
+        layout = QHBoxLayout(banner)
+        layout.setContentsMargins(10, 8, 10, 8)
+        layout.setSpacing(10)
+
+        icon_label = QLabel()
+        icon_label.setPixmap(
+            qta.icon("fa5s.exclamation-circle", color="#F59E0B").pixmap(QSize(18, 18))
+        )
+        icon_label.setFixedSize(18, 18)
+        layout.addWidget(icon_label)
+
+        text_label = QLabel(f"{unconfigured.name} needs a path before it can run.")
+        text_label.setWordWrap(True)
+        layout.addWidget(text_label, stretch=1)
+
+        setup_btn = QPushButton("Set it up")
+        setup_btn.setProperty("class", "plugin-setup-button")
+        setup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        setup_btn.clicked.connect(lambda: self.show_plugin_config_panel(unconfigured))
+        layout.addWidget(setup_btn)
+
+        self._config_nudge = banner
+        insert_at = 1
+        if self._guidance_banner is not None:
+            insert_at += 1
+        if self._update_banner is not None:
+            insert_at += 1
+        self.verticalLayout_2.insertWidget(insert_at, banner)
+
+    def _remove_config_nudge(self) -> None:
+        if self._config_nudge is not None:
+            self._config_nudge.setParent(None)
+            self._config_nudge.deleteLater()
+            self._config_nudge = None
 
     def _on_plugin_enabled_toggled(self, plugin_wrapper: PluginWrapper, enabled: bool):
         plugin_wrapper.enabled = enabled
         self.update_plugin_count_statistics()
+        # The nudge only tracks enabled plugins, so toggling changes what it says.
+        self._update_config_nudge()
 
     def show_plugin_config_panel(self, plugin_wrapper: PluginWrapper) -> None:
         """Show the configuration panel for a plugin in the side panel area."""
@@ -333,6 +488,7 @@ class PluginsPage(QMainWindow, setting_page_ui.Ui_Form):
         for card in self._plugin_cards:
             card.refresh_status()
         self.update_plugin_count_statistics()
+        self._update_config_nudge()
 
     def _clear_side_panel(self) -> None:
         while self.treeWidgetSidePanel.count():

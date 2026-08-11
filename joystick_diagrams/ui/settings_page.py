@@ -499,51 +499,16 @@ class SettingsPage(QMainWindow):
         self._do_parser_install(url.strip())
 
     def _do_parser_install(self, source: Path | str):
-        from joystick_diagrams.plugins.plugin_installer import (
-            install_plugin,
-            validate_plugin,
-        )
+        from joystick_diagrams.ui.plugin_install_flow import install_from_local_source
 
-        try:
-            installed_path = install_plugin(source, "parser")
-        except Exception as e:
-            QMessageBox.warning(self, "Install Failed", str(e))
+        name = install_from_local_source(source, self.appState, self, "parser")
+        if name is None:
             return
-
-        valid, msg = validate_plugin(installed_path, "parser")
-        if not valid:
-            shutil.rmtree(installed_path, ignore_errors=True)
-            QMessageBox.warning(self, "Invalid Plugin", msg)
-            return
-
-        # Check name conflict with bundled plugins
-        if self.appState.plugin_manager:
-            bundled_names = {
-                w.name
-                for w in self.appState.plugin_manager.plugin_wrappers
-                if not self.appState.plugin_manager.is_user_plugin(w.name)
-            }
-            if msg in bundled_names:
-                shutil.rmtree(installed_path, ignore_errors=True)
-                QMessageBox.warning(
-                    self,
-                    "Name Conflict",
-                    f"A bundled plugin named '{msg}' already exists. "
-                    f"The user plugin cannot be installed.",
-                )
-                return
-
-        # Security check
-        if not self._run_security_check(installed_path, msg):
-            shutil.rmtree(installed_path, ignore_errors=True)
-            return
-
-        self._record_trust(msg, "parser", installed_path)
 
         QMessageBox.information(
-            self, "Plugin Installed", f"Parser plugin '{msg}' installed successfully."
+            self, "Plugin Installed", f"Parser plugin '{name}' installed successfully."
         )
-        self._reload_parser_plugins()
+        self._populate_parser_plugin_cards()
 
     def _uninstall_parser_plugin(self, name: str):
         reply = QMessageBox.question(

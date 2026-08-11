@@ -41,15 +41,17 @@ class SectionHeader(QWidget):
         text_col = QVBoxLayout()
         text_col.setContentsMargins(0, 0, 0, 0)
         text_col.setSpacing(2)
+        self._text_col = text_col
 
         title_label = QLabel(title)
         title_label.setProperty("class", "section-header-title")
         text_col.addWidget(title_label)
 
+        self._sub_label: QLabel | None = None
         if subtitle:
-            sub_label = QLabel(subtitle)
-            sub_label.setProperty("class", "section-header-subtitle")
-            text_col.addWidget(sub_label)
+            self._sub_label = QLabel(subtitle)
+            self._sub_label.setProperty("class", "section-header-subtitle")
+            text_col.addWidget(self._sub_label)
 
         root.addLayout(text_col, stretch=1)
 
@@ -62,3 +64,11 @@ class SectionHeader(QWidget):
     def add_action(self, widget: QWidget) -> None:
         """Add a widget (button, label, etc.) to the right-side action area."""
         self._action_layout.addWidget(widget)
+
+    def set_subtitle(self, text: str) -> None:
+        """Replace the subtitle text, creating the label if the header had none."""
+        if self._sub_label is None:
+            self._sub_label = QLabel()
+            self._sub_label.setProperty("class", "section-header-subtitle")
+            self._text_col.addWidget(self._sub_label)
+        self._sub_label.setText(text)
