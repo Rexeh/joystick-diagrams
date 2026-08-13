@@ -3,14 +3,49 @@ name: Python package
 on: workflow_dispatch
 
 jobs:
-  build:
+  windows:
+    name: Windows installer
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: [3.11]
+        python-version: [3.12]
 
     steps:
-    - uses: actions/checkout@v4  # Updated to v4 for consistency
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+    - name: Install build tooling
+      run: choco install innosetup make -y --no-progress
+    - name: Install dependencies
+      run: uv sync
+    - name: Build installer
+      run: make build-installer
+    - name: Upload installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-installer
+        path: ${{ github.workspace }}/installer/Output/*.exe
+        if-no-files-found: error
+    - name: Upload portable build
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-portable
+        path: ${{ github.workspace }}/build/app
+        if-no-files-found: error
+
+  linux:
+    name: Linux tarball
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.12]
+
+    steps:
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -19,12 +54,11 @@ jobs:
       uses: astral-sh/setup-uv@v5
     - name: Install dependencies
       run: uv sync
-    - name: Build Package
-      run: |
-        make build-exe
-    - name: Upload
+    - name: Build tarball
+      run: make build-tarball
+    - name: Upload tarball
       uses: actions/upload-artifact@v4
       with:
-        name: py_package
-        path: ${{ github.workspace }}/build/exe.win-amd64-3.11
+        name: linux-tarball
+        path: ${{ github.workspace }}/dist/*.tar.gz
         if-no-files-found: error

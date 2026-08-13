@@ -15,12 +15,29 @@ You should now have the relevant things installed to develop Joystick Diagrams, 
 ## Building executables
 The easiest way to do this is via Make (https://gnuwin32.sourceforge.net/packages/make.htm), and using the included MakeFile.
 
-**make build-exe**
+| Target | Platform | Output |
+| --- | --- | --- |
+| `make build-app` | Any | Frozen standalone binary package in **/build/app** |
+| `make build-installer` | Windows | The above, plus the Inno Setup installer in **/installer/Output** |
+| `make build-tarball` | Linux | The above, plus a `.tar.gz` in **/dist** |
+| `make build-exe` | Windows | Alias for `build-installer` (the historic target name) |
 
-This will build the standalone binary package, as well as the installer package for output in **/build**
+The Windows installer needs Inno Setup 6. `make build-installer` shells out to
+`packaging\windows\build_installer.bat`, which looks for `ISCC.exe` at the default
+install location and then on PATH; override with `make build-installer ISCC=<path>`.
+The installer version is taken from `version_manifest.json`, so run `make make-version`
+(or any of the build targets, which depend on it) after bumping the version.
 
 >  [!NOTE]
->  Note that the build will need to take place on the target OS for deployment which for Joystick Diagrams is Windows. While the tool does support cross-platform, no need has yet come up to compile for Linux/Mac
+>  Builds must take place on the target OS - there is no cross compilation. Linux ships
+>  as a tarball rather than an installer; users extract it and run `./run.sh`. The Linux
+>  packaging files live in **/packaging/linux**.
+
+### Building in CI
+The **Python package** workflow (`.github/workflows/python-package.yml`) is manually
+triggered (`workflow_dispatch`) and builds both platforms, producing three artifacts:
+`windows-installer`, `windows-portable` and `linux-tarball`. Releases are still published
+by hand from those artifacts.
 
 # Developer Documentation
 This is still work in progress, if you have any questions get in touch on Discord.

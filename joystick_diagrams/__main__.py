@@ -7,9 +7,10 @@ if getattr(sys, "frozen", False):
     _lib = _Path(sys.executable).parent / "lib"
     _pyside6 = _lib / "PySide6"
 
-    for _dll_dir in (_lib, _pyside6):
-        if _dll_dir.is_dir():
-            os.add_dll_directory(str(_dll_dir))
+    if hasattr(os, "add_dll_directory"):  # Windows only
+        for _dll_dir in (_lib, _pyside6):
+            if _dll_dir.is_dir():
+                os.add_dll_directory(str(_dll_dir))
 
     _plugins = _pyside6 / "plugins"
     if _plugins.is_dir():

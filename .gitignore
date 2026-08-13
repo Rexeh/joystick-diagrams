@@ -6,6 +6,7 @@ diagrams/*.pdf
 .DS_Store
 *.ui
 *.bat
+!packaging/windows/*.bat
 debug.txt
 coverage.xml
 *.log

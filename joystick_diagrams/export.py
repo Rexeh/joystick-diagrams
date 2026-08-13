@@ -22,6 +22,25 @@ _logger = logging.getLogger(__name__)
 TEMPLATE_NAMING_KEY = "TEMPLATE_NAME"
 TEMPLATE_DATING_KEY = "CURRENT_DATE"
 
+MERGE_MODIFIERS_SETTING_KEY = "merge_modifiers_into_input"
+MODIFIER_JOIN_SEPARATOR = " | "
+
+
+def merge_modifiers_enabled() -> bool:
+    """Whether modifier text is concatenated into the main input key. Default off."""
+    from joystick_diagrams.db.db_settings import get_setting
+
+    return get_setting(MERGE_MODIFIERS_SETTING_KEY) == "true"
+
+
+def _join_input_parts(parts: list[str]) -> str:
+    """Joins the parts of an input's text, skipping any empty parts.
+
+    Inputs that only exist because a modifier was bound to them have an empty
+    command, so they must not render with a leading separator.
+    """
+    return MODIFIER_JOIN_SEPARATOR.join(part for part in parts if part)
+
 
 def export(
     export_device: ExportDevice, output_directory: str, export_format: str = "SVG"
@@ -97,20 +116,31 @@ def _resolve_command(command: str) -> str:
 def populate_template(export_device: ExportDevice) -> str:
     """Manipulates template_data to replace known keys with data from Device_"""
     modified_template_data = export_device.template.raw_data
+    merge_modifiers = merge_modifiers_enabled()
 
     for input_key, input_object in export_device.device.get_combined_inputs().items():
         resolved_command = _resolve_command(input_object.command)
+        resolved_modifiers = [
+            Modifier(m.modifiers, _resolve_command(m.command))
+            for m in input_object.modifiers
+        ]
+
+        # Optionally fold the modifiers into the main input key, so templates
+        # without MODIFIER_X keys still show modifier bindings
+        input_text = resolved_command
+        if merge_modifiers and resolved_modifiers:
+            input_text = _join_input_parts(
+                [sanitize_string_for_svg(resolved_command)]
+                + [sanitize_string_for_svg(str(mod)) for mod in resolved_modifiers]
+            )
+
         modified_template_data = replace_input_string(
             input_key,
-            resolved_command,
+            input_text,
             modified_template_data,
         )
 
-        if input_object.modifiers:
-            resolved_modifiers = [
-                Modifier(m.modifiers, _resolve_command(m.command))
-                for m in input_object.modifiers
-            ]
+        if resolved_modifiers:
             modified_template_data = replace_input_modifiers_string(
                 input_key, resolved_modifiers, modified_template_data
             )
@@ -156,14 +186,10 @@ def replace_input_modifiers_string(
     search = re.compile(rf"\b{input_key}_Modifiers\b", re.IGNORECASE)
 
     # Create Modifier Strings
-    mod_string = ""
-    total_modifiers = len(modifiers)
-    for modifier_index, modifier in enumerate(modifiers, 1):
-        mod_string = mod_string + sanitize_string_for_svg(str(modifier))
-
-        # Due to way SVG handles new lines, this is a compromise for modifiers to be joined and look reasonable
-        if modifier_index != total_modifiers:
-            mod_string = mod_string + " | "
+    # Due to way SVG handles new lines, this is a compromise for modifiers to be joined and look reasonable
+    mod_string = _join_input_parts(
+        [sanitize_string_for_svg(str(modifier)) for modifier in modifiers]
+    )
 
     return re.sub(search, mod_string, data)
 

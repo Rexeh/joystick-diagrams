@@ -37,6 +37,7 @@ from joystick_diagrams.conflict_strategy import (
     get_inheritance_strategy,
 )
 from joystick_diagrams.db.db_settings import add_update_setting_value, get_setting
+from joystick_diagrams.export import MERGE_MODIFIERS_SETTING_KEY
 from joystick_diagrams.ui.widgets.section_header import SectionHeader
 
 _logger = logging.getLogger(__name__)
@@ -170,6 +171,22 @@ class SettingsPage(QMainWindow):
         )
         form.addRow("", self.open_after_export_cb)
 
+        # Merge modifiers into the main input text
+        self.merge_modifiers_cb = QCheckBox(
+            "Merge modifiers into the main binding text"
+        )
+        self.merge_modifiers_cb.setToolTip(
+            "Templates normally need MODIFIER_X keys to show modifier bindings. "
+            "With this on, an input's modifiers are appended to its main key "
+            '(e.g. BUTTON_6 becomes "Fire | Alt Fire - ctrl"), so simple templates '
+            "still show them. Any MODIFIER_X keys in the template are still filled."
+        )
+        self.merge_modifiers_cb.setChecked(
+            get_setting(MERGE_MODIFIERS_SETTING_KEY) == "true"  # default False
+        )
+        self.merge_modifiers_cb.stateChanged.connect(self._on_merge_modifiers_changed)
+        form.addRow("", self.merge_modifiers_cb)
+
         # Alias merge strategy
         self.alias_strategy_combo = QComboBox()
         self.alias_strategy_combo.setProperty("class", "view-binds-list")
@@ -219,6 +236,12 @@ class SettingsPage(QMainWindow):
     def _on_open_after_export_changed(self, state: int):
         add_update_setting_value(
             OPEN_AFTER_EXPORT_SETTING_KEY,
+            "true" if state == Qt.CheckState.Checked.value else "false",
+        )
+
+    def _on_merge_modifiers_changed(self, state: int):
+        add_update_setting_value(
+            MERGE_MODIFIERS_SETTING_KEY,
             "true" if state == Qt.CheckState.Checked.value else "false",
         )
 
@@ -499,51 +522,16 @@ class SettingsPage(QMainWindow):
         self._do_parser_install(url.strip())
 
     def _do_parser_install(self, source: Path | str):
-        from joystick_diagrams.plugins.plugin_installer import (
-            install_plugin,
-            validate_plugin,
-        )
+        from joystick_diagrams.ui.plugin_install_flow import install_from_local_source
 
-        try:
-            installed_path = install_plugin(source, "parser")
-        except Exception as e:
-            QMessageBox.warning(self, "Install Failed", str(e))
+        name = install_from_local_source(source, self.appState, self, "parser")
+        if name is None:
             return
-
-        valid, msg = validate_plugin(installed_path, "parser")
-        if not valid:
-            shutil.rmtree(installed_path, ignore_errors=True)
-            QMessageBox.warning(self, "Invalid Plugin", msg)
-            return
-
-        # Check name conflict with bundled plugins
-        if self.appState.plugin_manager:
-            bundled_names = {
-                w.name
-                for w in self.appState.plugin_manager.plugin_wrappers
-                if not self.appState.plugin_manager.is_user_plugin(w.name)
-            }
-            if msg in bundled_names:
-                shutil.rmtree(installed_path, ignore_errors=True)
-                QMessageBox.warning(
-                    self,
-                    "Name Conflict",
-                    f"A bundled plugin named '{msg}' already exists. "
-                    f"The user plugin cannot be installed.",
-                )
-                return
-
-        # Security check
-        if not self._run_security_check(installed_path, msg):
-            shutil.rmtree(installed_path, ignore_errors=True)
-            return
-
-        self._record_trust(msg, "parser", installed_path)
 
         QMessageBox.information(
-            self, "Plugin Installed", f"Parser plugin '{msg}' installed successfully."
+            self, "Plugin Installed", f"Parser plugin '{name}' installed successfully."
         )
-        self._reload_parser_plugins()
+        self._populate_parser_plugin_cards()
 
     def _uninstall_parser_plugin(self, name: str):
         reply = QMessageBox.question(

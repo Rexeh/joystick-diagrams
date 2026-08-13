@@ -1,7 +1,13 @@
 #define ExeName "Joystick_Diagrams.exe"
-#define BuildDir "D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\"
+; SourcePath is the directory of this .iss file, with a trailing separator.
+; Keeping everything relative to it means the script works from any checkout.
+#define BuildDir SourcePath + "..\build\app\"
 #define ApplicationName "Joystick Diagrams"
-#define Version "2.3.0"
+; Overridable with ISCC /DVersion=x.y.z - the makefile passes the value from
+; version_manifest.json so this default is only used on a bare ISCC run.
+#ifndef Version
+  #define Version "2.3.0"
+#endif
 
 [Setup]
 AppName={#ApplicationName}
@@ -20,6 +26,7 @@ WizardSmallImageFile="{#BuildDir}img\logo-thumb.bmp"
 WizardImageStretch=no
 WizardStyle=classic
 OutputBaseFilename=Joystick Diagrams Installer - {#SetupSetting("AppVersion")}
+OutputDir={#SourcePath}Output
 [Dirs]
 Name: "{userappdata}\Joystick Diagrams"
 
@@ -37,7 +44,7 @@ Source: "{#BuildDir}lib\*"; DestDir: "{app}\lib"; Flags: recursesubdirs
 #define ProcessFolder(Source) \
     Local[0] = FindFirst(Source + "\\*.*", faAnyFile), \
     ProcessFile(Source, Local[0], Local[0])
-#define DepedenciesToInstall ProcessFolder("D:\Git Repos\joystick-diagrams\build\exe.win-amd64-3.11\lib")
+#define DepedenciesToInstall ProcessFolder(BuildDir + "lib")
 #define DependenciesLog "{app}\dependencies.log"
 
 Source: "{#BuildDir}templates\*"; DestDir: "{app}\templates"; Flags: recursesubdirs
@@ -56,7 +63,7 @@ Name: "{userdesktop}\{#SetupSetting("AppName")}"; Filename: "{app}\{#ExeName}"; 
     IconFilename: "{app}\{#ExeName}"; Tasks: desktopicon
 
 [Languages]
-Name: "en"; MessagesFile: "D:\Git Repos\joystick-diagrams\installer\Default.isl"; InfoAfterFile: "D:\Git Repos\joystick-diagrams\installer\success.rtf"
+Name: "en"; MessagesFile: "{#SourcePath}Default.isl"; InfoAfterFile: "{#SourcePath}success.rtf"
 
 [Run]
 Filename: "{app}\{#ExeName}"; Description: Open Joystick Diagrams; Flags: nowait postinstall skipifsilent runascurrentuser
