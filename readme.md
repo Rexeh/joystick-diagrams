@@ -1,4 +1,4 @@
-# Joystick Diagrams
+# Joystick Diagrams (ENGINE)
 
 <div align="center">
 
@@ -35,21 +35,27 @@ No manual data entry. No design skills needed. Always in sync with your actual b
 
 ...this is what I built it to fix.
 
-## Supported Games
+## Supported Games/Tools
+We have a fully documented API to build your own support for games and tools as well as special export capabilities.
 
-| Game | Import Type |
-|------|-------------|
-| **DCS World** | Per-aircraft profiles |
-| **Microsoft Flight Simulator 2020** | Controller bindings |
-| **Star Citizen** | Action maps |
-| **IL-2 Sturmovik: Great Battles** | Controller bindings |
-| **Joystick Gremlin** | Macro profiles (covers any game) |
+- **DCS World**
+- **Microsoft Flight Simulator 2020**
+- **Star Citizen**
+- **IL-2 Sturmovik: Great Battles**
+- **Joystick Gremlin**
+- **Elite Dangerous**
+- **Falcon BMS**
+- **OpenKneeboard**
 
-More games can be added through the open plugin system.
+More games can be added through the open plugin system, which is documented at https://www.joystick-diagrams.com/developers
 
 ## Hardware Templates
 
-46+ SVG templates matching the exact physical layout of real HOTAS hardware. Bindings show up on the diagram right where the button sits on the actual device.
+A number of manufacturers and devices are supported out of the box. If yours is missing then you can make your own in no time at all.
+
+Full coverage of templates available at https://www.joystick-diagrams.com/templates/
+
+Example of what we have!
 
 | Manufacturer | Devices |
 |-------------|---------|
@@ -62,17 +68,6 @@ More games can be added through the open plugin system.
 | **Total Controls** | Apache MPD, Multi-Function Button Box |
 
 A starter template is included for creating custom device layouts using [draw.io](https://www.drawio.com/).
-
-## Features
-
-- **Automatic Binding Import.** Point the app at your game's config folder and every binding is extracted. Change a binding in-game, re-run the export, done.
-- **Hardware-Accurate Diagrams.** 46+ templates matching real HOTAS hardware layouts. Glance at the diagram and know exactly which physical button does what.
-- **Custom Labels.** Override verbose game action names with your own text. "Weapon Fire Primary Mode Toggle" becomes "Guns".
-- **SVG & PNG Export.** SVG for print-quality output at any size. PNG at 2x resolution for sharing on Discord, forums, or as stream overlays.
-- **Batch Export.** Select multiple profiles and devices, export them all at once. Regenerate all your aircraft diagrams in seconds.
-- **Profile Inheritance.** Set parent profiles so common bindings carry through. Only document the differences per aircraft.
-- **Device Management.** Hide devices you don't need for a particular aircraft. Manage visibility from Settings.
-- **Plugin Architecture.** Open plugin system for adding new game support. Community can contribute parsers for new titles.
 
 ## How It Works
 
