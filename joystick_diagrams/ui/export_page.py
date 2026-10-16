@@ -4,7 +4,16 @@ import webbrowser
 from pathlib import Path
 
 import qtawesome as qta
-from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
+from PySide6.QtCore import (
+    QObject,
+    QRunnable,
+    QSize,
+    Qt,
+    QThreadPool,
+    QTimer,
+    Signal,
+    Slot,
+)
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QFileDialog,
@@ -13,6 +22,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QSizePolicy,
+    QSplitter,
     QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
@@ -23,11 +33,12 @@ from joystick_diagrams.db.db_device_management import (
     add_update_device_template_path,
 )
 from joystick_diagrams.db.db_settings import get_setting
-from joystick_diagrams.export import export
+from joystick_diagrams.export import export, populate_template
 from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.plugins.output_plugin_interface import ExportResult
 from joystick_diagrams.ui import main_window, ui_consts
 from joystick_diagrams.ui.device_setup import DeviceSetup
+from joystick_diagrams.ui.export_preview import ExportPreviewPanel
 from joystick_diagrams.ui.export_settings import ExportSettings
 from joystick_diagrams.ui.qt_designer import export_ui
 from joystick_diagrams.ui.widgets.section_header import SectionHeader
@@ -37,6 +48,8 @@ _logger = logging.getLogger(__name__)
 
 
 class ExportPage(QMainWindow, export_ui.Ui_Form):
+    PREVIEW_DEBOUNCE_MS = 180
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setupUi(self)
@@ -47,7 +60,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         self.section_header = SectionHeader(
             "fa5s.file-export",
             "Export",
-            "Select devices, assign templates, and export your diagrams",
+            "Select devices, assign templates, preview, and export your diagrams",
         )
         self.verticalLayout.insertWidget(0, self.section_header)
 
@@ -76,17 +89,38 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         self.device_widget = DeviceSetup()
         self.device_widget.device_item_selected.connect(self.change_template_button)
         self.device_widget.template_set_requested.connect(self.select_template)
-        self.devices_container.addWidget(self.device_widget)
         self.device_widget.number_of_selected_profiles.connect(
             self.update_export_button_state
         )
+
+        # Live preview uses the exact same populate_template() pipeline as export.
+        self._preview_export_device: ExportDevice | None = None
+        self._preview_identity: tuple[str, str] | None = None
+        self._preview_timer = QTimer(self)
+        self._preview_timer.setSingleShot(True)
+        self._preview_timer.setInterval(self.PREVIEW_DEBOUNCE_MS)
+        self._preview_timer.timeout.connect(self._refresh_preview)
+
+        self.preview_panel = ExportPreviewPanel(self)
+        self.preview_panel.settings_changed.connect(self._schedule_preview_refresh)
+        self.device_widget.device_item_selected.connect(self._on_preview_item_selected)
+        self.device_widget.devices_updated.connect(self._on_devices_updated)
+
+        self.preview_splitter = QSplitter(Qt.Orientation.Horizontal, self)
+        self.preview_splitter.setChildrenCollapsible(False)
+        self.preview_splitter.addWidget(self.device_widget)
+        self.preview_splitter.addWidget(self.preview_panel)
+        self.preview_splitter.setStretchFactor(0, 3)
+        self.preview_splitter.setStretchFactor(1, 5)
+        self.preview_splitter.setSizes([420, 700])
+        self.devices_container.addWidget(self.preview_splitter)
 
         # Double-click to set template on device tree
         self.device_widget.treeWidget.doubleClicked.connect(self._on_tree_double_click)
 
         self.device_header_label.setText("Devices")
         self.device_help_label.setText(
-            "Choose your devices or profiles to export below. Double-click a device to assign a template."
+            "Choose profiles to export. Select a profile to preview it live, or double-click a device to assign a template."
         )
 
         ## Include Export Settings Panel
@@ -150,6 +184,8 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         # Threading pool
         self.threadPool = QThreadPool()
 
+        QTimer.singleShot(0, self._select_initial_preview)
+
     def _make_plugin_chip(self, wrapper) -> QWidget:
         """Create a compact inline chip: status dot + name."""
         chip = QWidget()
@@ -197,12 +233,138 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
     def refresh(self):
         """Refresh dynamic state when navigating back to this page."""
         self._refresh_output_plugins_panel()
+        self.preview_panel.reload_settings()
+        QTimer.singleShot(0, self._restore_preview_selection)
 
     def _on_tree_double_click(self, index):
         """Handle double-click on device tree — trigger template selection for root items."""
         item = self.device_widget.treeWidget.currentItem()
         if item and item.parent() is None:
             self.select_template()
+
+    def _export_device_from_item(
+        self, item: QTreeWidgetItem | None
+    ) -> ExportDevice | None:
+        if item is None:
+            return None
+
+        if item.parent() is not None:
+            data = item.data(0, Qt.ItemDataRole.UserRole)
+            return data if isinstance(data, ExportDevice) else None
+
+        # Device root selected: preview the first checked profile, otherwise the first.
+        fallback = None
+        for index in range(item.childCount()):
+            child = item.child(index)
+            data = child.data(0, Qt.ItemDataRole.UserRole)
+            if not isinstance(data, ExportDevice):
+                continue
+            if fallback is None:
+                fallback = data
+            if child.checkState(0) == Qt.CheckState.Checked:
+                return data
+        return fallback
+
+    def _on_preview_item_selected(self, item: QTreeWidgetItem) -> None:
+        export_device = self._export_device_from_item(item)
+        if export_device is None:
+            self._preview_export_device = None
+            self._preview_identity = None
+            self.preview_panel.show_empty(
+                "Select a profile with a template to preview it here."
+            )
+            return
+
+        self._preview_export_device = export_device
+        self._preview_identity = (
+            export_device.device_id,
+            export_device.profile_wrapper.profile_name,
+        )
+        self._schedule_preview_refresh()
+
+    def _schedule_preview_refresh(self) -> None:
+        self._preview_timer.start()
+
+    def _refresh_preview(self) -> None:
+        export_device = self._preview_export_device
+        if export_device is None:
+            self.preview_panel.show_empty(
+                "Select a profile with a template to preview it here."
+            )
+            return
+
+        self.preview_panel.set_context(
+            export_device.device_name,
+            export_device.profile_wrapper.profile_name,
+            export_device.template_file_name,
+            len(export_device.errors),
+        )
+
+        if not export_device.has_template:
+            self.preview_panel.show_empty(
+                "Assign an SVG template to this device to enable live preview."
+            )
+            return
+
+        try:
+            svg_data = populate_template(export_device)
+        except Exception as exc:
+            _logger.exception("Unable to generate live export preview")
+            self.preview_panel.show_empty(f"Preview generation failed: {exc}")
+            return
+
+        self.preview_panel.show_svg(svg_data)
+
+    def _select_initial_preview(self) -> None:
+        current = self.device_widget.treeWidget.currentItem()
+        if current is not None and self._export_device_from_item(current) is not None:
+            self._on_preview_item_selected(current)
+            return
+
+        tree = self.device_widget.treeWidget
+        for root_index in range(tree.topLevelItemCount()):
+            root = tree.topLevelItem(root_index)
+            if root.childCount() == 0:
+                continue
+            child = root.child(0)
+            tree.setCurrentItem(child)
+            self._on_preview_item_selected(child)
+            return
+
+        self.preview_panel.show_empty(
+            "No exportable profile with an assigned template is available."
+        )
+
+    def _on_devices_updated(self) -> None:
+        # DeviceSetup rebuilds the QTreeWidget synchronously before this slot runs.
+        # Defer selection one event-loop turn so Qt has finished updating widgets.
+        QTimer.singleShot(0, self._restore_preview_selection)
+
+    def _restore_preview_selection(self) -> None:
+        identity = self._preview_identity
+        if identity is None:
+            self._select_initial_preview()
+            return
+
+        device_id, profile_name = identity
+        tree = self.device_widget.treeWidget
+        for root_index in range(tree.topLevelItemCount()):
+            root = tree.topLevelItem(root_index)
+            for child_index in range(root.childCount()):
+                child = root.child(child_index)
+                data = child.data(0, Qt.ItemDataRole.UserRole)
+                if not isinstance(data, ExportDevice):
+                    continue
+                if (
+                    data.device_id == device_id
+                    and data.profile_wrapper.profile_name == profile_name
+                ):
+                    tree.setCurrentItem(child)
+                    self._on_preview_item_selected(child)
+                    return
+
+        self._preview_identity = None
+        self._select_initial_preview()
 
     def update_export_button_state(self, data: int):
         if data == 0:

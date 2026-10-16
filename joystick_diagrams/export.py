@@ -14,6 +14,11 @@ from xml.sax.saxutils import escape, unescape
 from joystick_diagrams import utils
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.export_text_layout import (
+    TextLayoutOptions,
+    apply_text_layout_to_token,
+    get_text_layout_options,
+)
 from joystick_diagrams.input.modifier import Modifier
 from joystick_diagrams.template import Template
 
@@ -117,6 +122,7 @@ def populate_template(export_device: ExportDevice) -> str:
     """Manipulates template_data to replace known keys with data from Device_"""
     modified_template_data = export_device.template.raw_data
     merge_modifiers = merge_modifiers_enabled()
+    text_layout_options = get_text_layout_options()
 
     for input_key, input_object in export_device.device.get_combined_inputs().items():
         resolved_command = _resolve_command(input_object.command)
@@ -126,28 +132,35 @@ def populate_template(export_device: ExportDevice) -> str:
         ]
 
         # Optionally fold the modifiers into the main input key, so templates
-        # without MODIFIER_X keys still show modifier bindings
+        # without MODIFIER_X keys still show modifier bindings.
         input_text = resolved_command
         if merge_modifiers and resolved_modifiers:
             input_text = _join_input_parts(
-                [sanitize_string_for_svg(resolved_command)]
-                + [sanitize_string_for_svg(str(mod)) for mod in resolved_modifiers]
+                [resolved_command] + [str(modifier) for modifier in resolved_modifiers]
             )
 
         modified_template_data = replace_input_string(
             input_key,
             input_text,
             modified_template_data,
+            text_layout_options,
         )
 
         if resolved_modifiers:
             modified_template_data = replace_input_modifiers_string(
-                input_key, resolved_modifiers, modified_template_data
+                input_key,
+                resolved_modifiers,
+                modified_template_data,
+                text_layout_options,
             )
 
             for modifier_number, modifier in enumerate(resolved_modifiers, 1):
                 modified_template_data = replace_input_modifier_id_key(
-                    input_key, modifier_number, modifier, modified_template_data
+                    input_key,
+                    modifier_number,
+                    modifier,
+                    modified_template_data,
+                    text_layout_options,
                 )
 
     modified_template_data = replace_template_name_string(
@@ -179,55 +192,61 @@ def sanitize_string_for_svg(value_to_sanitize: str) -> str:
     )
 
 
-def replace_input_modifiers_string(
-    input_key: str, modifiers: list[Modifier], data: str
+def _replace_dynamic_text_token(
+    token: str,
+    replacement: str,
+    data: str,
+    layout_options: TextLayoutOptions | None = None,
 ) -> str:
-    """Replaces the INPUT_KEY_MODIFIERS key with combined modifiers from input"""
-    search = re.compile(rf"\b{input_key}_Modifiers\b", re.IGNORECASE)
+    """Apply optional visible-label layout, then perform legacy token replacement."""
+    data = apply_text_layout_to_token(data, token, replacement, layout_options)
+    search = re.compile(rf"\b{re.escape(token)}\b", re.IGNORECASE)
+    return re.sub(search, sanitize_string_for_svg(replacement), data)
 
-    # Create Modifier Strings
-    # Due to way SVG handles new lines, this is a compromise for modifiers to be joined and look reasonable
-    mod_string = _join_input_parts(
-        [sanitize_string_for_svg(str(modifier)) for modifier in modifiers]
-    )
 
-    return re.sub(search, mod_string, data)
+def replace_input_modifiers_string(
+    input_key: str,
+    modifiers: list[Modifier],
+    data: str,
+    layout_options: TextLayoutOptions | None = None,
+) -> str:
+    """Replaces the INPUT_KEY_MODIFIERS key with combined modifiers from input."""
+    token = f"{input_key}_Modifiers"
+    mod_string = _join_input_parts([str(modifier) for modifier in modifiers])
+    return _replace_dynamic_text_token(token, mod_string, data, layout_options)
 
 
 def replace_input_modifier_id_key(
-    input_key: str, modifier_number: int, modifier: Modifier, data: str
+    input_key: str,
+    modifier_number: int,
+    modifier: Modifier,
+    data: str,
+    layout_options: TextLayoutOptions | None = None,
 ) -> str:
-    """Replaces instances where a particular Modifier key has been used, either with an overall ID, or with specific ID/Value combinations"""
-    # Handle INPUT_KEY_MODIFIER_X
-    search = re.compile(rf"\b{input_key}_Modifier_{modifier_number}\b", re.IGNORECASE)
-    replacement = str(modifier)
+    """Replace a numbered modifier token and its optional key/action sub-tokens."""
+    token = f"{input_key}_Modifier_{modifier_number}"
+    data = _replace_dynamic_text_token(token, str(modifier), data, layout_options)
 
-    data = re.sub(search, sanitize_string_for_svg(replacement), data)
+    key_token = f"{token}_Key"
+    key_text = "+".join(modifier.modifiers)
+    data = _replace_dynamic_text_token(key_token, key_text, data, layout_options)
 
-    # INPUT_KEY_Modifier_1_KEY
-    search = re.compile(
-        rf"\b{input_key}_Modifier_{modifier_number}_Key\b", re.IGNORECASE
+    action_token = f"{token}_Action"
+    return _replace_dynamic_text_token(
+        action_token, modifier.command, data, layout_options
     )
-    replacement = "+".join(modifier.modifiers)
-    data = re.sub(search, sanitize_string_for_svg(replacement), data)
 
-    # INPUT_KEY_Modifier_1_ACTION
-    search = re.compile(
-        rf"\b{input_key}_Modifier_{modifier_number}_Action\b", re.IGNORECASE
+
+def replace_input_string(
+    search_key: str,
+    replacement: str,
+    data: str,
+    layout_options: TextLayoutOptions | None = None,
+) -> str:
+    """Replace a BUTTON, AXIS or POV token with its expected action."""
+    return _replace_dynamic_text_token(
+        search_key, replacement, data, layout_options
     )
-    replacement = f"{modifier.command}"
-    data = re.sub(search, sanitize_string_for_svg(replacement), data)
-
-    return data
-
-
-def replace_input_string(search_key: str, replacement: str, data: str) -> str:
-    """Replaces basic keys with their expected action
-
-    BUTTON_X, AXIS_X, POV_X_X
-    """
-    search = re.compile(rf"\b{search_key}\b", re.IGNORECASE)
-    return re.sub(search, sanitize_string_for_svg(replacement), data)
 
 
 def replace_unused_keys(data: str) -> str:
