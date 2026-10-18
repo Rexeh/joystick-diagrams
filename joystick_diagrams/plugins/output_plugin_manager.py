@@ -136,6 +136,15 @@ def load_output_plugin(
         raise PluginNotValidError(value=plugin_package_name, error=e) from e
 
 
+def _forget_plugin_modules(module_name: str) -> None:
+    """Removes a plugin package and all its submodules from the import cache."""
+    for name in [
+        n for n in sys.modules if n == module_name or n.startswith(f"{module_name}.")
+    ]:
+        del sys.modules[name]
+    importlib.invalidate_caches()
+
+
 def load_user_output_plugin(plugin_path: Path) -> ModuleType:
     """Load an output plugin from an arbitrary filesystem path.
 
@@ -161,18 +170,21 @@ def load_user_output_plugin(plugin_path: Path) -> ModuleType:
             error="Could not create module spec for plugin",
         )
 
+    # A plugin reinstalled or updated during the session keeps its package name: drop the
+    # modules cached by the previous load, or main.py would import the old submodules
+    _forget_plugin_modules(module_name)
+
     # Register the parent package so relative imports within the plugin work
-    if module_name not in sys.modules:
-        parent_spec = importlib.util.spec_from_file_location(
-            module_name,
-            str(Path.joinpath(plugin_path, "__init__.py")),
-            submodule_search_locations=[str(plugin_path)],
-        )
-        if parent_spec is not None:
-            parent_module = importlib.util.module_from_spec(parent_spec)
-            sys.modules[module_name] = parent_module
-            if parent_spec.loader is not None:
-                parent_spec.loader.exec_module(parent_module)
+    parent_spec = importlib.util.spec_from_file_location(
+        module_name,
+        str(Path.joinpath(plugin_path, "__init__.py")),
+        submodule_search_locations=[str(plugin_path)],
+    )
+    if parent_spec is not None:
+        parent_module = importlib.util.module_from_spec(parent_spec)
+        sys.modules[module_name] = parent_module
+        if parent_spec.loader is not None:
+            parent_spec.loader.exec_module(parent_module)
 
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
