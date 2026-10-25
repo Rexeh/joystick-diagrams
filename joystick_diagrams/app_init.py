@@ -44,6 +44,11 @@ def init():
 
     QtWidgets.QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
 
+    # jdeditor:// (layout editor canvas, previews) must exist before the app object
+    from joystick_diagrams.ui.layout_editor.scheme import register_scheme
+
+    register_scheme()
+
     app = QtWidgets.QApplication(sys.argv)
 
     window = MainWindow()

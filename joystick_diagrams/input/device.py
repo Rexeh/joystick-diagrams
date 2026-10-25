@@ -11,6 +11,7 @@ from joystick_diagrams.input.axis import Axis, AxisSlider
 from joystick_diagrams.input.button import Button
 from joystick_diagrams.input.hat import Hat
 from joystick_diagrams.input.input import Input_
+from joystick_diagrams.input.modifier import ModifierKind
 
 _logger = logging.getLogger("__name__")
 
@@ -119,11 +120,17 @@ class Device_:  # noqa: N801
         return flattened_dict_
 
     def add_modifier_to_input(
-        self, control: Axis | Button | Hat | AxisSlider, modifier: set, command: str
+        self,
+        control: Axis | Button | Hat | AxisSlider,
+        modifier: set,
+        command: str,
+        *,
+        kind: ModifierKind = ModifierKind.KEY,
     ) -> None:
         """Adds a modifier to a respective control type supplied.
 
-        Creates an input if it does not exist, otherwise attaches a modifier
+        Creates an input if it does not exist, otherwise attaches a modifier.
+        ``kind`` is optional and defaults to a real key (``ModifierKind.KEY``).
 
         Returns:  None
         """
@@ -151,10 +158,10 @@ class Device_:  # noqa: N801
             )
 
             if shell_input:
-                shell_input.add_modifier(modifier, str(command))
+                shell_input.add_modifier(modifier, str(command), kind=kind)
 
         else:
-            input_obj.add_modifier(modifier, str(command))
+            input_obj.add_modifier(modifier, str(command), kind=kind)
 
 
 if __name__ == "__main__":

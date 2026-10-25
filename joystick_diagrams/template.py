@@ -6,12 +6,47 @@ Interacts with the template file to allow interogration of template configuratio
 
 import functools
 import logging
+import os
 import re
+from hashlib import sha256
 from pathlib import Path
 
 from joystick_diagrams.exceptions import JoystickDiagramsError
 
 _logger = logging.getLogger(__name__)
+
+
+def bundled_templates_root() -> Path:
+    """The bundled ``templates`` folder, resolved (``install_root()`` is "" in dev)."""
+    from joystick_diagrams.utils import install_root
+
+    return (Path(install_root() or ".").resolve() / "templates").resolve()
+
+
+def _normcase(path: Path) -> str:
+    return os.path.normcase(str(path))
+
+
+def template_key_for(path: Path) -> str:
+    """Stable identity for a template file (plan §4.3).
+
+    ``bundled:<posix path relative to the bundled root>`` for shipped templates,
+    so upgrades and reinstalls to another drive keep layouts; otherwise
+    ``user:<resolved absolute posix path>``. Case-insensitive on Windows.
+    """
+    resolved = path.resolve()
+    root = bundled_templates_root()
+    try:
+        relative = Path(_normcase(resolved)).relative_to(_normcase(root))
+    except ValueError:
+        return f"user:{resolved.as_posix()}"
+    return f"bundled:{relative.as_posix()}"
+
+
+def hash_file_bytes(path: Path) -> str:
+    """sha256 of the file bytes, as ``version.generate_template_manifest`` computes it."""
+    with open(path, "rb", buffering=0) as file:
+        return sha256(file.read()).hexdigest()
 
 
 class Template:
@@ -35,6 +70,26 @@ class Template:
     def __init__(self, template_path: str):
         self.raw_data: str = self.get_template_data(Path(template_path))
         self.template_file_name = Path(template_path).name
+        self.template_path: Path = Path(template_path).resolve()
+        self._content_hash: tuple[tuple[int, int], str] | None = None
+
+    @property
+    def template_key(self) -> str:
+        "Stable identity used to key layouts and render caches (cheap, no file read)"
+        return template_key_for(self.template_path)
+
+    @property
+    def content_hash(self) -> str:
+        """sha256 of the template FILE bytes, memoised by (mtime_ns, size).
+
+        Hashes bytes rather than ``raw_data`` so it equals the version manifest
+        hash for bundled templates and is stable when ``raw_data`` is reassigned.
+        """
+        stat = self.template_path.stat()
+        stamp = (stat.st_mtime_ns, stat.st_size)
+        if self._content_hash is None or self._content_hash[0] != stamp:
+            self._content_hash = (stamp, hash_file_bytes(self.template_path))
+        return self._content_hash[1]
 
     def get_template_data(self, template_path: Path):
         try:

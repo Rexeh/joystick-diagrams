@@ -52,3 +52,6 @@ play*.py
 
 # Ignore dynaconf secret files
 .secrets.*
+
+# Local design/planning notes (not part of the project)
+docs/superpowers/

@@ -17,9 +17,16 @@ from enum import Enum
 
 from joystick_diagrams.db import db_settings
 from joystick_diagrams.input.input import Input_
-from joystick_diagrams.input.modifier import Modifier
+from joystick_diagrams.input.modifier import Modifier, ModifierKind
 
 _logger = logging.getLogger(__name__)
+
+# Values for `apply_input_conflict(qualifier_source=...)`, recorded on promoted
+# qualifier modifiers so the UI can say where a label came from.
+QUALIFIER_SOURCE_PROFILE = "profile"
+QUALIFIER_SOURCE_DEVICE = "device"
+QUALIFIER_SOURCE_ROUTE = "route"
+QUALIFIER_SOURCE_INPUT = "input"
 
 ALIAS_CONFLICT_STRATEGY_KEY = "alias_conflict_strategy"
 INHERITANCE_CONFLICT_STRATEGY_KEY = "inheritance_conflict_strategy"
@@ -73,6 +80,7 @@ def apply_input_conflict(
     loser: Input_,
     loser_qualifier: str,
     strategy: AliasConflictStrategy | InheritanceConflictStrategy,
+    qualifier_source: str | None = None,
 ) -> None:
     """Merge the losing input into the winning input in-place per `strategy`.
 
@@ -82,6 +90,9 @@ def apply_input_conflict(
     For MODIFIER strategy, the promoted modifier uses `{loser_qualifier}` as its
     modifiers set. If that key-set already exists on the winner, the promotion
     is skipped (loser's primary is still expressed as the existing modifier).
+    The promoted modifier is flagged ``ModifierKind.QUALIFIER`` (it is a label,
+    not a key the user holds) with ``source=qualifier_source`` — one of the
+    ``QUALIFIER_SOURCE_*`` constants — so it is never aliased or coloured.
     """
     strategy_value = strategy.value if isinstance(strategy, Enum) else str(strategy)
 
@@ -93,7 +104,14 @@ def apply_input_conflict(
     elif strategy_value == "MODIFIER":
         promoted_keys = {loser_qualifier}
         if winner._check_existing_modifier(promoted_keys) is None:
-            winner.modifiers.append(Modifier(promoted_keys, loser.command))
+            winner.modifiers.append(
+                Modifier(
+                    promoted_keys,
+                    loser.command,
+                    kind=ModifierKind.QUALIFIER,
+                    source=qualifier_source,
+                )
+            )
 
     for modifier in loser.modifiers:
         if winner._check_existing_modifier(modifier.modifiers) is None:

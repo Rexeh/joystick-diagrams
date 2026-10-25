@@ -12,9 +12,12 @@ from PySide6.QtWidgets import (
 )
 
 from joystick_diagrams.app_state import AppState
+from joystick_diagrams.ui import strings_appearance, strings_layout
+from joystick_diagrams.ui.customise_appearance import CustomiseAppearance
 from joystick_diagrams.ui.customise_devices import CustomiseDevices
 from joystick_diagrams.ui.customise_inheritance import CustomiseInheritance
 from joystick_diagrams.ui.customise_labels import CustomiseLabels
+from joystick_diagrams.ui.customise_layout import CustomiseLayout
 from joystick_diagrams.ui.customise_profiles import CustomiseProfiles
 from joystick_diagrams.ui.qt_designer import configure_page_ui
 from joystick_diagrams.ui.widgets.section_header import SectionHeader
@@ -33,7 +36,7 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.section_header = SectionHeader(
             "fa5s.tools",
             "Customise & Review",
-            "View binds, edit labels, manage devices, and configure profile inheritance",
+            strings_appearance.CUSTOMISE_SUBTITLE,
         )
         self.verticalLayout.insertWidget(0, self.section_header)
 
@@ -55,6 +58,8 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
             ("fa5s.code-branch", "Inheritance"),
             ("fa5s.hdd", "Devices"),
             ("fa5s.tags", "Labels"),
+            ("fa5s.palette", strings_appearance.NAV_APPEARANCE),
+            ("fa5s.th-large", strings_layout.NAV_LAYOUT),
         ]
         for icon_name, label in nav_items:
             item = QListWidgetItem(qta.icon(icon_name, color="#9AA0A6"), label)
@@ -70,11 +75,15 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.inheritance_screen = CustomiseInheritance()
         self.devices_screen = CustomiseDevices()
         self.labels_screen = CustomiseLabels()
+        self.appearance_screen = CustomiseAppearance()
+        self.layout_screen = CustomiseLayout()
 
         self.stack.addWidget(self.profiles_screen)
         self.stack.addWidget(self.inheritance_screen)
         self.stack.addWidget(self.devices_screen)
         self.stack.addWidget(self.labels_screen)
+        self.stack.addWidget(self.appearance_screen)
+        self.stack.addWidget(self.layout_screen)
 
         root_layout.addWidget(self.stack, 1)
 
@@ -88,6 +97,9 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         self.profiles_screen.device_visibility_changed.connect(
             self.devices_screen.refresh
         )
+        self.devices_screen.edit_layout_requested.connect(self.show_layout)
+        self.layout_screen.devices_changed.connect(self._on_devices_changed)
+        self.layout_screen.devices_changed.connect(self.devices_screen.refresh)
 
         # Initial load
         self.profiles_screen.refresh()
@@ -109,6 +121,23 @@ class configurePage(QMainWindow, configure_page_ui.Ui_Form):
         current = self.stack.currentWidget()
         if hasattr(current, "refresh"):
             current.refresh()
+
+    def show_appearance(self, tab: int = CustomiseAppearance.TAB_STYLE):
+        """Navigate to Customise → Appearance and open the given tab."""
+        self.appearance_screen.show_tab(tab)
+        self.nav_list.setCurrentRow(self.stack.indexOf(self.appearance_screen))
+
+    def show_layout(self, device_id: str | None = None):
+        """Navigate to Customise → Layout with ``device_id``'s diagram selected."""
+        self.nav_list.setCurrentRow(self.stack.indexOf(self.layout_screen))
+        self.layout_screen.show_device(device_id)
+
+    def shutdown(self):
+        """Tear down WebEngine pages before the page is destroyed (plan §5.6)."""
+        self.layout_screen.shutdown()
+        preview = getattr(self.appearance_screen.style_tab, "preview", None)
+        if preview is not None:
+            preview.shutdown()
 
 
 if __name__ == "__main__":

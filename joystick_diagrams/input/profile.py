@@ -2,6 +2,7 @@ import logging
 from copy import deepcopy
 
 from joystick_diagrams.conflict_strategy import (
+    QUALIFIER_SOURCE_PROFILE,
     InheritanceConflictStrategy,
     apply_input_conflict,
 )
@@ -72,6 +73,7 @@ class Profile_:  # noqa: N801
                             loser=input_,
                             loser_qualifier=profile.name,
                             strategy=strategy,
+                            qualifier_source=QUALIFIER_SOURCE_PROFILE,
                         )
 
         return src_profile
