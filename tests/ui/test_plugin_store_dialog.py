@@ -42,14 +42,14 @@ def dialog(qapp):
 @pytest.mark.uitest
 def test_action_button_available_is_install(dialog):
     btn = dialog._action_button(_item(pc.CatalogStatus.AVAILABLE))
-    assert btn.text() == "Install"
+    assert btn.text() == "Add"
     assert btn.isEnabled()
 
 
 @pytest.mark.uitest
 def test_action_button_installed_is_disabled(dialog):
     btn = dialog._action_button(_item(pc.CatalogStatus.INSTALLED))
-    assert btn.text() == "Installed"
+    assert btn.text() == "Added"
     assert not btn.isEnabled()
 
 

@@ -7,6 +7,8 @@ Author: Robert Cox
 
 import logging
 import re
+from dataclasses import dataclass
+from dataclasses import replace as dataclass_replace
 from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape, unescape
@@ -14,7 +16,33 @@ from xml.sax.saxutils import escape, unescape
 from joystick_diagrams import utils
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.modifier import Modifier
+from joystick_diagrams.modifier_identity import (
+    LEGACY_MERGE_MODIFIERS_SETTING_KEY,
+    ModifierDisplay,
+    get_modifier_display,
+    modifiers_in_main_text,
+)
+from joystick_diagrams.render import (
+    BindingOptions,
+    Engine,
+    RenderContext,
+    RenderFallbackError,
+    RenderNotice,
+    RenderOutcome,
+    RenderReport,
+    build_render_context,
+    choose_engine,
+    render_device,
+)
+from joystick_diagrams.render.compose import (
+    ComposeResult,
+    compose_page,
+    member_devices_for_profile,
+    profiles_for_page,
+)
+from joystick_diagrams.render.page import Page
 from joystick_diagrams.template import Template
 
 _logger = logging.getLogger(__name__)
@@ -22,15 +50,31 @@ _logger = logging.getLogger(__name__)
 TEMPLATE_NAMING_KEY = "TEMPLATE_NAME"
 TEMPLATE_DATING_KEY = "CURRENT_DATE"
 
-MERGE_MODIFIERS_SETTING_KEY = "merge_modifiers_into_input"
+# Kept for downgrade safety and the legacy tests; the user-facing choice is
+# ``modifier_identity.get_modifier_display()`` ("Showing modifiers").
+MERGE_MODIFIERS_SETTING_KEY = LEGACY_MERGE_MODIFIERS_SETTING_KEY
 MODIFIER_JOIN_SEPARATOR = " | "
+
+EXPORT_DATE_FORMAT_SETTING_KEY = "export_date_format"
+DEFAULT_EXPORT_DATE_FORMAT = "%d/%m/%Y"
 
 
 def merge_modifiers_enabled() -> bool:
-    """Whether modifier text is concatenated into the main input key. Default off."""
+    """Whether modifier text is folded into the main input key. Default off.
+
+    Reads through ``get_modifier_display()``: ``MERGED_SAME_LINE`` (and the
+    migrated legacy ``merge_modifiers_into_input == "true"``) keep today's
+    ``" | "`` join byte for byte; ``UNDER_MAIN_TEXT`` also counts, so a DOM
+    render that falls back to this engine still shows every modifier.
+    """
+    return modifiers_in_main_text(get_modifier_display())
+
+
+def export_date_format() -> str:
+    """The strftime format for CURRENT_DATE, read at call time."""
     from joystick_diagrams.db.db_settings import get_setting
 
-    return get_setting(MERGE_MODIFIERS_SETTING_KEY) == "true"
+    return get_setting(EXPORT_DATE_FORMAT_SETTING_KEY) or DEFAULT_EXPORT_DATE_FORMAT
 
 
 def _join_input_parts(parts: list[str]) -> str:
@@ -42,17 +86,63 @@ def _join_input_parts(parts: list[str]) -> str:
     return MODIFIER_JOIN_SEPARATOR.join(part for part in parts if part)
 
 
+@dataclass(frozen=True)
+class ExportOutput:
+    """What one export produced: the SVG path, the PNG path to convert to (or
+    ``None``) and the render report (``None`` when the template was missing).
+
+    ``pdf_path`` is set instead of ``png_path`` for the PDF format (pages);
+    ``compose`` carries the ``ComposeResult`` when the output is a combined page.
+    """
+
+    svg_path: str
+    png_path: str | None
+    report: RenderReport | None
+    pdf_path: str | None = None
+    compose: ComposeResult | None = None
+
+    @property
+    def paths(self) -> tuple[str, str | None]:
+        return (self.svg_path, self.png_path)
+
+    @property
+    def conversion_target(self) -> str | None:
+        """The PNG or PDF path the converter should write, or ``None`` for SVG."""
+        return self.png_path or self.pdf_path
+
+
 def export(
-    export_device: ExportDevice, output_directory: str, export_format: str = "SVG"
+    export_device: ExportDevice,
+    output_directory: str,
+    export_format: str = "SVG",
+    ctx: RenderContext | None = None,
 ) -> tuple[str, str | None] | None:
     """Export a device. Returns (svg_path, png_path_or_None) on success, None on failure.
 
     For SVG format: returns (svg_path, None).
     For PNG format: returns (svg_path, png_path) so the caller can queue conversion.
+
+    ``ctx`` is the per-batch RenderContext snapshot; callers should build it once
+    on the UI thread. When omitted one is built here so the hidden
+    ``render_engine`` setting still works end-to-end.
     """
+    output = export_with_report(export_device, output_directory, export_format, ctx)
+    return output.paths if output is not None else None
+
+
+def export_with_report(
+    export_device: ExportDevice,
+    output_directory: str,
+    export_format: str = "SVG",
+    ctx: RenderContext | None = None,
+) -> ExportOutput | None:
+    """``export`` plus the ``RenderReport`` (for the export summary dialog)."""
     try:
-        return export_device_to_templates(
-            export_device, Path(output_directory), export_format
+        return _export_device(
+            export_device,
+            Path(output_directory),
+            export_format,
+            ctx if ctx is not None else build_render_context(),
         )
     except PermissionError as e:
         _logger.error(
@@ -66,10 +156,22 @@ def export(
 
 
 def export_device_to_templates(
-    export_device: ExportDevice, export_location: Path, export_format: str = "SVG"
+    export_device: ExportDevice,
+    export_location: Path,
+    export_format: str = "SVG",
+    ctx: RenderContext | None = None,
 ) -> tuple[str, str | None] | None:
     """Handles the manipulation of the template."""
+    output = _export_device(export_device, export_location, export_format, ctx)
+    return output.paths if output is not None else None
 
+
+def _export_device(
+    export_device: ExportDevice,
+    export_location: Path,
+    export_format: str = "SVG",
+    ctx: RenderContext | None = None,
+) -> ExportOutput | None:
     if export_device.template is None:
         _logger.error(
             f"There was an issue getting data for the current template: {export_device}"
@@ -77,7 +179,8 @@ def export_device_to_templates(
         return None
 
     # Replace strings in the template data with device data
-    result = populate_template(export_device)
+    outcome = render_template(export_device, ctx)
+    result = outcome.svg_text
 
     # TODO handle duplicate file names due to device name clashes
     base_name = f"{export_device.device_id[:5]}-{export_device.device.name}-{export_device.profile_wrapper.profile_name}"
@@ -89,9 +192,101 @@ def export_device_to_templates(
 
     if export_format == "PNG":
         png_path = str(export_location / f"{base_name}.png")
-        return (svg_path, png_path)
+        return ExportOutput(svg_path, png_path, outcome.report)
 
-    return (svg_path, None)
+    return ExportOutput(svg_path, None, outcome.report)
+
+
+# ── Pages ──
+
+_INVALID_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+
+
+def safe_file_name(name: str, fallback: str = "Page") -> str:
+    """A file-name-safe version of a page or profile name."""
+    cleaned = " ".join(_INVALID_FILENAME_CHARS.sub("", name).split()).strip(" .")
+    return cleaned or fallback
+
+
+def page_profiles(page: Page, export_devices: list[ExportDevice]) -> list:
+    """The profile wrappers a page is exported for, by its ``profile_rule``
+    (default: profiles in which every controller on the page has bindings)."""
+    return profiles_for_page(page, export_devices)
+
+
+def page_member_devices(
+    page: Page, profile_wrapper, export_devices: list[ExportDevice]
+) -> tuple[Device_, ...]:
+    """Every controller on ``page`` as a ``Device_``, in placement order, with
+    this profile's bindings (``ExportResult.devices`` for other apps). A
+    controller with no bindings in the profile comes back empty, as it is drawn."""
+    members = member_devices_for_profile(page, profile_wrapper, export_devices)
+    wanted = getattr(profile_wrapper, "profile_key", None)
+    devices = []
+    for guid in page.member_guids:
+        export_device = members.get(guid)
+        if export_device is None:
+            continue
+        device = export_device.device
+        same_profile = (
+            export_device.profile_wrapper is profile_wrapper
+            or getattr(export_device.profile_wrapper, "profile_key", None) == wanted
+        )
+        devices.append(device if same_profile else Device_(device.guid, device.name))
+    return tuple(devices)
+
+
+@dataclass(frozen=True)
+class ExportDestination:
+    """Where an export run writes: the folder and the format ("SVG" | "PNG" | "PDF")."""
+
+    location: Path
+    export_format: str = "SVG"
+
+    @property
+    def format(self) -> str:
+        return self.export_format.upper()
+
+
+def export_page(
+    page: Page,
+    profile_wrapper,
+    export_devices: list[ExportDevice],
+    ctx: RenderContext | None,
+    destination: ExportDestination,
+) -> ExportOutput:
+    """Export one combined page for one profile.
+
+    Writes ``<page name> - <profile>.svg`` into ``destination.location`` and, like
+    ``export()``, returns the conversion target for the caller to queue:
+    ``png_path`` for ``"PNG"``, ``pdf_path`` for ``"PDF"`` (``PngConverter`` writes
+    either from the SVG). ``export_devices`` is the full export list (every
+    profile); the member for this profile is used when present, otherwise the
+    member is drawn empty and dimmed. Raises ``ComposeError`` when a member has
+    no template.
+    """
+    location = Path(destination.location)
+    members = member_devices_for_profile(page, profile_wrapper, export_devices)
+    result = compose_page(page, profile_wrapper, members, ctx)
+
+    base_name = (
+        f"{safe_file_name(page.name)} - "
+        f"{safe_file_name(profile_wrapper.profile_name, 'Profile')}"
+    )
+    svg_file = f"{base_name}.svg"
+    save_template(result.svg_text, svg_file, location)
+    svg_path = str(location / svg_file)
+
+    fmt = destination.format
+    if fmt == "PNG":
+        return ExportOutput(
+            svg_path, str(location / f"{base_name}.png"), None, None, result
+        )
+    if fmt == "PDF":
+        return ExportOutput(
+            svg_path, None, None, str(location / f"{base_name}.pdf"), result
+        )
+    return ExportOutput(svg_path, None, None, None, result)
 
 
 def save_template(template_data, file_name, export_path):
@@ -113,7 +308,84 @@ def _resolve_command(command: str) -> str:
     return AppState().label_service.resolve(command)
 
 
-def populate_template(export_device: ExportDevice) -> str:
+# ── Engine selection ──
+
+
+def _template_label(export_device: ExportDevice) -> str:
+    template = getattr(export_device, "template", None)
+    return str(
+        getattr(template, "template_key", None)
+        or getattr(template, "template_file_name", None)
+        or template
+    )
+
+
+def _legacy_outcome(
+    export_device: ExportDevice,
+    ctx: RenderContext | None,
+    notices: tuple[RenderNotice, ...] = (),
+    details: tuple[str, ...] = (),
+) -> RenderOutcome:
+    now = ctx.now if ctx is not None else None
+    report = RenderReport(engine=Engine.LEGACY, notices=notices, details=details)
+    return RenderOutcome(populate_template(export_device, now=now), report)
+
+
+def dom_binding_options(ctx: RenderContext) -> BindingOptions:
+    """The ``BindingOptions`` the DOM engine (and the layout editor) derive from a context."""
+    display = ModifierDisplay(ctx.modifier_display)
+    return BindingOptions(
+        merge_modifiers=modifiers_in_main_text(display),
+        join_separator=MODIFIER_JOIN_SEPARATOR,
+        date_format=export_date_format(),
+        labels=ctx.labels,
+        now=ctx.now,
+        modifier_display=display,
+        registry=ctx.registry,
+        # The hint only appears once the user opted into styling, so the hidden
+        # ``render_engine=dom`` flag under Original stays text-identical to legacy.
+        overflow_hint=ctx.theme is not None or ctx.colour_modifiers,
+    )
+
+
+_dom_binding_options = dom_binding_options  # name used by earlier tests
+
+
+def render_template(
+    export_device: ExportDevice, ctx: RenderContext | None
+) -> RenderOutcome:
+    """Render with the chosen engine. ``ctx is None`` is exactly ``populate_template``.
+
+    The DOM engine falls back to the legacy engine on any ``RenderFallbackError``
+    (parse error, not draw.io, coverage mismatch) or unexpected exception; the
+    template and reason are logged at WARNING and recorded in the report.
+    """
+    if ctx is None or choose_engine(ctx, export_device) is Engine.LEGACY:
+        return _legacy_outcome(export_device, ctx)
+
+    try:
+        return render_device(export_device, ctx, dom_binding_options(ctx))
+    except RenderFallbackError as e:
+        _logger.warning(
+            f"DOM render of {_template_label(export_device)} fell back to legacy: "
+            f"{e.notice.value} ({e.detail})"
+        )
+        notices = (e.notice, RenderNotice.FELL_BACK_TO_LEGACY)
+        return _legacy_outcome(export_device, ctx, notices, (e.detail,))
+    except Exception as e:
+        _logger.warning(
+            f"DOM render of {_template_label(export_device)} failed unexpectedly, "
+            f"falling back to legacy: {e}",
+            exc_info=True,
+        )
+        notices = (RenderNotice.UNEXPECTED_ERROR, RenderNotice.FELL_BACK_TO_LEGACY)
+        return _legacy_outcome(export_device, ctx, notices, (str(e),))
+
+
+# ── Legacy regex engine ──
+
+
+def populate_template(export_device: ExportDevice, now: datetime | None = None) -> str:
     """Manipulates template_data to replace known keys with data from Device_"""
     modified_template_data = export_device.template.raw_data
     merge_modifiers = merge_modifiers_enabled()
@@ -121,7 +393,7 @@ def populate_template(export_device: ExportDevice) -> str:
     for input_key, input_object in export_device.device.get_combined_inputs().items():
         resolved_command = _resolve_command(input_object.command)
         resolved_modifiers = [
-            Modifier(m.modifiers, _resolve_command(m.command))
+            dataclass_replace(m, command=_resolve_command(m.command))
             for m in input_object.modifiers
         ]
 
@@ -154,7 +426,7 @@ def populate_template(export_device: ExportDevice) -> str:
         export_device.profile_wrapper.profile_name, modified_template_data
     )
 
-    modified_template_data = replace_template_date_string(modified_template_data)
+    modified_template_data = replace_template_date_string(modified_template_data, now)
 
     modified_template_data = replace_unused_keys(modified_template_data)
 
@@ -208,7 +480,7 @@ def replace_input_modifier_id_key(
     search = re.compile(
         rf"\b{input_key}_Modifier_{modifier_number}_Key\b", re.IGNORECASE
     )
-    replacement = "+".join(modifier.modifiers)
+    replacement = "+".join(modifier.sorted_keys)
     data = re.sub(search, sanitize_string_for_svg(replacement), data)
 
     # INPUT_KEY_Modifier_1_ACTION
@@ -252,14 +524,12 @@ def replace_unused_keys(data: str) -> str:
     return data
 
 
-def replace_template_date_string(data: str) -> str:
-    """Basic replacement of the key with a date at time of run"""
-    from joystick_diagrams.db.db_settings import get_setting
-
+def replace_template_date_string(data: str, now: datetime | None = None) -> str:
+    """Basic replacement of the key with a date at time of run (or ``now`` when given)"""
     search = re.compile(rf"\b{TEMPLATE_DATING_KEY}\b", re.IGNORECASE)
-    date_format = get_setting("export_date_format") or "%d/%m/%Y"
+    date_format = export_date_format()
 
-    return re.sub(search, datetime.now().strftime(date_format), data)
+    return re.sub(search, (now or datetime.now()).strftime(date_format), data)
 
 
 def replace_template_name_string(replacement: str, data: str) -> str:

@@ -1,19 +1,35 @@
 /*
   Joystick Diagrams - Modern Dark Theme
-  Color Palette:
+
+  NOTE: qt-material reads this file with str.format(), so every literal brace
+  in a rule is doubled.
+
+  Colour tokens (docs/superpowers/plans/2026-10-25-four-stage-implementation.md):
     Background:      #1a1d23
     Surface:         #252830
     Surface Raised:  #2c2f38
-    Primary:         #4C8BF5
-    Primary Hover:   #6BA1F7
+    Primary (fill):  #2F6FDB   filled buttons, active stage tab, checked boxes
+                                (white text: 4.75:1, passes AA)
+    Primary hover:   #4C8BF5   hover on filled controls (white text 3.3:1:
+                                transient state only, never the resting colour)
+    Accent:          #4C8BF5   borders, focus rings, selection, underlines,
+                                progress, the "busy" spinner
+    Link:            #8AB4F8   link-style buttons and links (8.0:1 on #1a1d23)
     Success:         #34D399
-    Danger:          #EF4444
+    Warning (amber): #F59E0B   needs the player: statuses, notices (7.9:1)
+    Error text:      #F87171   (6.1:1 on #1a1d23, 5.3:1 on #252830)
     Text Primary:    #E8EAED
     Text Secondary:  #9AA0A6
     Border:          #3C4043
     Disabled BG:     #3C4043
     Disabled Text:   #6B7280
 */
+
+/* Sentence case everywhere (docs/superpowers/specs/2026-10-25-ux-language.md §2.5):
+   qt-material uppercases button text; the strings are already sentence case. */
+QPushButton, QToolButton {{
+    text-transform: none;
+}}
 
 QMainWindow {{
     background: #1a1d23;
@@ -55,23 +71,6 @@ QProgressBar::chunk {{
 /* ===== Main Navigation ===== */
 
 /* Icon-only utility buttons (Settings, Discord, Website) */
-
-.nav-icon-button {{
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    padding: 4px;
-    margin: 0px 2px;
-}}
-
-.nav-icon-button:hover {{
-    background: #2c2f38;
-}}
-
-.nav-icon-button:checked {{
-    background: rgba(76, 139, 245, 0.15);
-    border: 1px solid rgba(76, 139, 245, 0.3);
-}}
 
 /* Update notification pill — stays prominent (rare, important) */
 
@@ -215,8 +214,8 @@ QMenu::indicator {{
 
 QMenu::indicator:checked {{
     image: none;
-    background: #4C8BF5;
-    border: 1px solid #4C8BF5;
+    background: #2F6FDB;
+    border: 1px solid #2F6FDB;
     border-radius: 3px;
 }}
 
@@ -228,72 +227,6 @@ QMenu::indicator:unchecked {{
 }}
 
 /* Section Navigation Tabs */
-
-.nav-button {{
-    color: #9AA0A6;
-    background-color: #252830;
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: 18px 24px;
-    font-size: 13px;
-    font-weight: bold;
-    max-height: 18px;
-}}
-
-.nav-button.left {{
-    border-top-left-radius: 10px;
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-    border-bottom-left-radius: 0px;
-}}
-
-.nav-button.middle {{
-    border-radius: 0px;
-    border-left: 1px solid #3C4043;
-    border-right: 1px solid #3C4043;
-}}
-
-.nav-button.right {{
-    border-top-right-radius: 10px;
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
-}}
-
-.nav-button.standalone {{
-    border-radius: 10px;
-}}
-
-.nav-button:hover {{
-    color: #E8EAED;
-    background-color: #2c2f38;
-}}
-
-.nav-button:checked {{
-    color: white;
-    background-color: #4C8BF5;
-    border-bottom: 3px solid #6BA1F7;
-}}
-
-.nav-button:hover:checked {{
-    background-color: #5A95F7;
-}}
-
-.nav-button:pressed {{
-    color: white;
-    background-color: #4C8BF5;
-    border-bottom: 3px solid #6BA1F7;
-}}
-
-.nav-button:disabled {{
-    color: #515761;
-    background-color: #252830;
-}}
-
-.nav-button::menu-indicator {{
-    color: white;
-    background-color: #4C8BF5;
-}}
 
 /* ===== Plugin Setup Page ===== */
 
@@ -383,7 +316,7 @@ QListWidget.settings-nav::item:hover {{
 
 QListWidget.settings-nav::item:selected {{
     background-color: rgba(76, 139, 245, 0.15);
-    color: #4C8BF5;
+    color: #8AB4F8;
     border-left: 3px solid #4C8BF5;
 }}
 
@@ -437,48 +370,6 @@ QTreeWidget.plugin-tree QHeaderView::section {{
     background: transparent;
 }}
 
-.enabled-button {{
-    padding: 6px 16px;
-    border: 2px solid #3C4043;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: bold;
-    background: #2c2f38;
-    color: #9AA0A6;
-}}
-
-.enabled-button:hover {{
-    background: #3C4043;
-    border-color: #6B7280;
-    color: #E8EAED;
-}}
-
-.enabled-button:checked {{
-    background: rgba(76, 139, 245, 0.15);
-    border-color: #4C8BF5;
-    color: #4C8BF5;
-}}
-
-.enabled-button:checked:hover {{
-    background: rgba(76, 139, 245, 0.28);
-    border-color: #6BA1F7;
-    color: #6BA1F7;
-}}
-
-.enabled-button:focus {{
-    outline: none;
-    background: #2c2f38;
-    border-color: #3C4043;
-    color: #9AA0A6;
-}}
-
-.enabled-button:checked:focus {{
-    outline: none;
-    background: rgba(76, 139, 245, 0.15);
-    border-color: #4C8BF5;
-    color: #4C8BF5;
-}}
-
 /* Setup/Update Plugin Button */
 
 .plugin-setup-button {{
@@ -499,14 +390,14 @@ QTreeWidget.plugin-tree QHeaderView::section {{
 
 .plugin-setup-button:checked {{
     background: rgba(76, 139, 245, 0.15);
-    border-color: #4C8BF5;
-    color: #4C8BF5;
+    border-color: #8AB4F8;
+    color: #8AB4F8;
 }}
 
 .plugin-setup-button:checked:hover {{
     background: rgba(76, 139, 245, 0.28);
-    border-color: #6BA1F7;
-    color: #6BA1F7;
+    border-color: #8AB4F8;
+    color: #8AB4F8;
 }}
 
 .plugin-setup-button:focus {{
@@ -519,8 +410,8 @@ QTreeWidget.plugin-tree QHeaderView::section {{
 .plugin-setup-button:checked:focus {{
     outline: none;
     background: rgba(76, 139, 245, 0.15);
-    border-color: #4C8BF5;
-    color: #4C8BF5;
+    border-color: #8AB4F8;
+    color: #8AB4F8;
 }}
 
 /* Ready Status Button */
@@ -552,12 +443,12 @@ QTreeWidget.plugin-tree QHeaderView::section {{
 }}
 
 .run-button:enabled {{
-    background: #4C8BF5;
+    background: #2F6FDB;
     color: white;
 }}
 
 .run-button:enabled:hover {{
-    background: #6BA1F7;
+    background: #4C8BF5;
 }}
 
 .run-button:disabled {{
@@ -626,7 +517,7 @@ QComboBox::item.view-binds-list {{
 }}
 
 QComboBox::item.view-binds-list:selected {{
-    background: #4C8BF5;
+    background: #2F6FDB;
     color: white;
 }}
 
@@ -769,14 +660,14 @@ QTreeWidget.device-tree::indicator:unchecked {{
 }}
 
 QTreeWidget.device-tree::indicator:checked {{
-    background-color: #4C8BF5;
-    border: 2px solid #4C8BF5;
+    background-color: #2F6FDB;
+    border: 2px solid #2F6FDB;
     image: url(:/icons/check);
 }}
 
 QTreeWidget.device-tree::indicator:indeterminate {{
-    background-color: #4C8BF5;
-    border: 2px solid #4C8BF5;
+    background-color: #2F6FDB;
+    border: 2px solid #2F6FDB;
 }}
 
 QPushButton.view-errors-button {{
@@ -797,62 +688,6 @@ QPushButton.view-errors-button:hover {{
 
 #export_format {{
     color: #E8EAED;
-}}
-
-QPushButton.export-location-button {{
-    background: #4C8BF5;
-    border: none;
-    color: white;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-weight: bold;
-}}
-
-QPushButton.export-location-button:hover {{
-    background: #6BA1F7;
-}}
-
-.template-set-button {{
-    background: #2c2f38;
-    border: 1px solid #3C4043;
-    border-radius: 6px;
-    color: #E8EAED;
-    padding: 8px 16px;
-    font-weight: bold;
-}}
-
-.template-set-button:hover {{
-    border-color: #4C8BF5;
-    color: #4C8BF5;
-}}
-
-.template-set-button:disabled {{
-    background: #1f2128;
-    border: 1px solid #3C4043;
-    border-radius: 6px;
-    color: #6B7280;
-}}
-
-.export-button {{
-    border: none;
-    border-radius: 6px;
-    padding: 12px 24px;
-    font-weight: bold;
-    font-size: 13px;
-}}
-
-.export-button:disabled {{
-    background: #3C4043;
-    color: #6B7280;
-}}
-
-.export-button:enabled {{
-    background: #4C8BF5;
-    color: white;
-}}
-
-.export-button:enabled:hover {{
-    background: #6BA1F7;
 }}
 
 /* ===== Reusable Widgets ===== */
@@ -935,7 +770,7 @@ QPushButton.export-location-button:hover {{
 }}
 
 .plugin-card.error {{
-    border-left: 3px solid #EF4444;
+    border-left: 3px solid #F87171;
 }}
 
 .plugin-card-name {{
@@ -965,25 +800,10 @@ QPushButton.export-location-button:hover {{
 }}
 
 .plugin-card-status.error {{
-    color: #EF4444;
-}}
-
-.profile-count-badge {{
-    background: #4C8BF5;
-    color: white;
-    border-radius: 10px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: bold;
-    min-width: 20px;
+    color: #F87171;
 }}
 
 /* ===== Plugin Config Panel ===== */
-
-.plugin-config-panel {{
-    background: #2c2f38;
-    border-left: 2px solid #4C8BF5;
-}}
 
 /* ===== Guidance Banner ===== */
 

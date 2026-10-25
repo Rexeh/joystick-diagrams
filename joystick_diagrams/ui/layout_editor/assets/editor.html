@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<title>Layout canvas</title>
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+<div id="viewport" tabindex="0" role="application" aria-label="Diagram canvas">
+  <div id="stage">
+    <div id="canvas"></div>
+    <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+<div id="status" role="status" aria-live="polite" hidden></div>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script src="editor.js"></script>
+</body>
+</html>

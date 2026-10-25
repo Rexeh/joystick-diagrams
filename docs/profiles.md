@@ -69,7 +69,9 @@ device.create_input(AxisSlider(1), "Action")
 
 ## Modifier
 # Library will handle Button(1) existing or not and create a shell if needed so you don't have to worry about the object existing
-device.add_modifier_to_input(Button(1), {ctrl}, "Modifier command")
+# The modifier is a set of strings: one key per element, using the game's own names.
+device.add_modifier_to_input(Button(1), {"LCtrl"}, "Modifier command")
+device.add_modifier_to_input(Button(1), {"LCtrl", "LShift"}, "Another command")
 
 
 return collection

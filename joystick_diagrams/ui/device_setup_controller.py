@@ -1,16 +1,15 @@
 import logging
-from pathlib import Path
 from typing import Union
 
 from joystick_diagrams.app_state import AppState
-from joystick_diagrams.db.db_device_management import (
-    get_device_template_path,
-    remove_template_path_from_device,
-)
 from joystick_diagrams.exceptions import JoystickDiagramsError
 from joystick_diagrams.export_device import ExportDevice
 from joystick_diagrams.profile_wrapper import ProfileWrapper
 from joystick_diagrams.template import Template
+from joystick_diagrams.template_identity import (
+    TemplateResolution,
+    relink_device_template,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -33,9 +32,11 @@ def setup_export_devices(export_device_list: list[ExportDevice]):
     template_cache: dict[str, Template | None] = {}
 
     for export_device in export_device_list:
+        resolution = resolve_device_template(export_device.device_id)
+        export_device.template_missing = resolution.status == "missing"
         try:
-            export_device.template = get_template_for_device(
-                export_device.device_id, template_cache
+            export_device.template = template_from_resolution(
+                resolution, template_cache
             )
         except JoystickDiagramsError as e:
             _logger.error(e)
@@ -55,35 +56,42 @@ def get_export_devices() -> list[ExportDevice]:
     return devices
 
 
+def resolve_device_template(device_guid: str) -> TemplateResolution:
+    """Where the controller's chosen template is now.
+
+    ``status`` is ``"none"`` (no template chosen), ``"ok"``, ``"relinked"`` (the
+    file moved and was found again by name or sha256; the row and its layout
+    edits now point at the new path) or ``"missing"``. A missing template is
+    reported, never removed: the Export list and stage 2 show it with
+    "Choose template…" instead.
+    """
+    state = AppState()
+    return relink_device_template(
+        device_guid, state.device_service, state.layout_service
+    )
+
+
+def template_from_resolution(
+    resolution: TemplateResolution,
+    cache: dict[str, Template | None] | None = None,
+) -> Template | None:
+    if not resolution.usable or resolution.path is None:
+        return None
+    template_path = str(resolution.path)
+    if cache is not None and template_path in cache:
+        return cache[template_path]
+    result = Template(template_path)
+    if cache is not None:
+        cache[template_path] = result
+    return result
+
+
 def get_template_for_device(
     device_guid: str,
     cache: dict[str, Template | None] | None = None,
 ) -> Union[Template, None]:
-    """Retrieves a device template from storage"""
-    template_path = get_device_template_path(device_guid)
-
-    if not template_path:
-        return None
-
-    # Return cached Template if available
-    if cache is not None and template_path in cache:
-        return cache[template_path]
-
-    exists = Path(template_path).exists()
-
-    if not exists:
-        _logger.warning(
-            f"Template was retrieved for {device_guid} resulting in {template_path} but item doesn't exist at the path so it will be removed from database"
-        )
-        remove_template_path_from_device(device_guid)
-        result = None
-    else:
-        result = Template(template_path)
-
-    if cache is not None:
-        cache[template_path] = result
-
-    return result
+    """Retrieves a device template from storage (``None`` when unchosen or missing)."""
+    return template_from_resolution(resolve_device_template(device_guid), cache)
 
 
 def get_processed_profiles() -> list[ProfileWrapper]:

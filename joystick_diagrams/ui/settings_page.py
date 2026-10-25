@@ -1,5 +1,17 @@
+"""Settings (the cog at the end of the stage strip): General and Other apps.
+
+General holds the app-wide choices that don't belong to one stage: the date on
+diagrams, reading the games when the app opens, and what to do when a
+controller listed twice has two bindings on one control. Pointers lead to the
+stage that owns the rest (games live in 1. Setup, modifier display in
+4. Diagrams › Appearance).
+
+Other apps lists the output plugins (in code) that get the diagrams after each
+export. Adding one goes through ``plugin_install_flow`` (the same security check
+as a game); success is one inline line, never a dialog.
+"""
+
 import logging
-import shutil
 import webbrowser
 from datetime import datetime
 from pathlib import Path
@@ -17,8 +29,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QListWidget,
     QListWidgetItem,
-    QMainWindow,
-    QMessageBox,
     QPushButton,
     QScrollArea,
     QStackedWidget,
@@ -26,23 +36,19 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from joystick_diagrams import utils
+from joystick_diagrams import utils, workflow_settings
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.conflict_strategy import (
     ALIAS_CONFLICT_STRATEGY_KEY,
-    INHERITANCE_CONFLICT_STRATEGY_KEY,
     AliasConflictStrategy,
-    InheritanceConflictStrategy,
     get_alias_strategy,
-    get_inheritance_strategy,
 )
 from joystick_diagrams.db.db_settings import add_update_setting_value, get_setting
-from joystick_diagrams.export import MERGE_MODIFIERS_SETTING_KEY
-from joystick_diagrams.ui.widgets.section_header import SectionHeader
+from joystick_diagrams.ui import strings_settings as S
+from joystick_diagrams.ui.widgets.confirm import confirm, show_problem
 
 _logger = logging.getLogger(__name__)
 
-OPEN_AFTER_EXPORT_SETTING_KEY = "open_after_export"
 DATE_FORMAT_SETTING_KEY = "export_date_format"
 DEFAULT_DATE_FORMAT = "%d/%m/%Y"
 
@@ -57,59 +63,63 @@ DATE_FORMAT_OPTIONS = [
 ]
 
 ALIAS_STRATEGY_OPTIONS = [
-    (AliasConflictStrategy.CONCATENATE, "Concatenate (combine into primary)"),
-    (AliasConflictStrategy.MODIFIER, "Modifier (losing binding becomes a modifier)"),
+    (AliasConflictStrategy.CONCATENATE, S.LISTED_TWICE_CONCATENATE),
+    (AliasConflictStrategy.MODIFIER, S.LISTED_TWICE_MODIFIER),
 ]
 
-INHERITANCE_STRATEGY_OPTIONS = [
-    (
-        InheritanceConflictStrategy.KEEP_EXISTING,
-        "Keep existing (main profile wins)",
-    ),
-    (
-        InheritanceConflictStrategy.CONCATENATE,
-        "Concatenate (combine into primary)",
-    ),
-    (
-        InheritanceConflictStrategy.MODIFIER,
-        "Modifier (inherited binding becomes a modifier)",
-    ),
-]
+PAGE_QSS = """
+QLabel#settingsHelp { color: #9AA0A6; font-size: 12px; }
+QLabel#settingsSuccess { color: #34D399; font-size: 12px; }
+QLabel#settingsWarning { color: #F59E0B; font-size: 12px; }
+QPushButton#settingsLink {
+    background: transparent; border: none; color: #8AB4F8; padding: 2px 0px;
+    text-align: left; font-size: 12px; font-weight: 700; text-transform: none;
+}
+QPushButton#settingsLink:hover { text-decoration: underline; }
+"""
 
 
-class SettingsPage(QMainWindow):
+def _help(text: str, name: str = "settingsHelp") -> QLabel:
+    label = QLabel(text)
+    label.setObjectName(name)
+    label.setWordWrap(True)
+    return label
+
+
+def _link(text: str, handler) -> QPushButton:
+    button = QPushButton(text)
+    button.setObjectName("settingsLink")
+    button.setCursor(Qt.CursorShape.PointingHandCursor)
+    button.setFlat(True)
+    button.clicked.connect(lambda _checked=False: handler())
+    return button
+
+
+class SettingsPage(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.appState = AppState()
+        self.setStyleSheet(PAGE_QSS)
 
-        container = QWidget()
-        root_layout = QHBoxLayout(container)
+        root_layout = QHBoxLayout(self)
         root_layout.setContentsMargins(0, 0, 0, 0)
         root_layout.setSpacing(0)
-        self.setCentralWidget(container)
 
-        # Left sidebar navigation
         self.nav_list = QListWidget()
         self.nav_list.setFixedWidth(200)
         self.nav_list.setProperty("class", "settings-nav")
-
-        nav_items = [
-            ("fa5s.cog", "General"),
-            ("fa5s.puzzle-piece", "Parser Plugins"),
-            ("fa5s.plug", "Output Plugins"),
-        ]
-        for icon_name, label in nav_items:
+        for icon_name, label in (
+            ("fa5s.cog", S.NAV_GENERAL),
+            ("fa5s.plug", S.NAV_OTHER_APPS),
+        ):
             item = QListWidgetItem(qta.icon(icon_name, color="#9AA0A6"), label)
             item.setSizeHint(QSize(0, 44))
             self.nav_list.addItem(item)
-
         root_layout.addWidget(self.nav_list)
 
-        # Right content area
         self.stack = QStackedWidget()
         self.stack.addWidget(self._create_general_tab())
-        self.stack.addWidget(self._create_parser_plugins_tab())
-        self.stack.addWidget(self._create_output_plugins_tab())
+        self.stack.addWidget(self._create_other_apps_tab())
         root_layout.addWidget(self.stack, 1)
 
         self.nav_list.currentRowChanged.connect(self.stack.setCurrentIndex)
@@ -117,10 +127,12 @@ class SettingsPage(QMainWindow):
 
     def refresh(self):
         """Refresh data-dependent tabs when returning to this page."""
-        self._populate_parser_plugin_cards()
-        self._populate_output_plugin_cards()
+        self.auto_read_cb.blockSignals(True)
+        self.auto_read_cb.setChecked(workflow_settings.get_auto_read_on_launch())
+        self.auto_read_cb.blockSignals(False)
+        self._populate_app_cards()
 
-    # ── General Tab ──
+    # ── General ──
 
     def _create_general_tab(self) -> QWidget:
         tab = QWidget()
@@ -128,74 +140,36 @@ class SettingsPage(QMainWindow):
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
 
-        header = SectionHeader("fa5s.cog", "General Settings")
-        layout.addWidget(header)
-
         form = QFormLayout()
         form.setSpacing(12)
         form.setContentsMargins(0, 4, 0, 0)
 
-        date_row = QHBoxLayout()
-        date_row.setSpacing(12)
-
         self.date_format_combo = QComboBox()
         self.date_format_combo.setProperty("class", "view-binds-list")
         self.date_format_combo.setMinimumWidth(220)
-
         now = datetime.now()
         current_format = get_setting(DATE_FORMAT_SETTING_KEY) or DEFAULT_DATE_FORMAT
         selected_index = 0
-
         for i, (fmt, label) in enumerate(DATE_FORMAT_OPTIONS):
-            preview = now.strftime(fmt)
-            self.date_format_combo.addItem(f"{label}  ({preview})", fmt)
+            self.date_format_combo.addItem(f"{label}  ({now.strftime(fmt)})", fmt)
             if fmt == current_format:
                 selected_index = i
-
         self.date_format_combo.setCurrentIndex(selected_index)
         self.date_format_combo.currentIndexChanged.connect(self._on_date_format_changed)
-
+        date_row = QHBoxLayout()
         date_row.addWidget(self.date_format_combo)
         date_row.addStretch(1)
+        form.addRow(_help(S.DATE_ON_DIAGRAMS), date_row)
 
-        date_label = QLabel("Export date format")
-        date_label.setObjectName("device_help_label")
-        form.addRow(date_label, date_row)
+        self.auto_read_cb = QCheckBox(S.AUTO_READ)
+        self.auto_read_cb.setToolTip(S.AUTO_READ_TIP)
+        self.auto_read_cb.setChecked(workflow_settings.get_auto_read_on_launch())
+        self.auto_read_cb.toggled.connect(workflow_settings.set_auto_read_on_launch)
+        form.addRow("", self.auto_read_cb)
 
-        # Open export folder toggle
-        self.open_after_export_cb = QCheckBox("Open export folder after export")
-        saved_open = get_setting(OPEN_AFTER_EXPORT_SETTING_KEY)
-        self.open_after_export_cb.setChecked(saved_open != "false")  # default True
-        self.open_after_export_cb.stateChanged.connect(
-            self._on_open_after_export_changed
-        )
-        form.addRow("", self.open_after_export_cb)
-
-        # Merge modifiers into the main input text
-        self.merge_modifiers_cb = QCheckBox(
-            "Merge modifiers into the main binding text"
-        )
-        self.merge_modifiers_cb.setToolTip(
-            "Templates normally need MODIFIER_X keys to show modifier bindings. "
-            "With this on, an input's modifiers are appended to its main key "
-            '(e.g. BUTTON_6 becomes "Fire | Alt Fire - ctrl"), so simple templates '
-            "still show them. Any MODIFIER_X keys in the template are still filled."
-        )
-        self.merge_modifiers_cb.setChecked(
-            get_setting(MERGE_MODIFIERS_SETTING_KEY) == "true"  # default False
-        )
-        self.merge_modifiers_cb.stateChanged.connect(self._on_merge_modifiers_changed)
-        form.addRow("", self.merge_modifiers_cb)
-
-        # Alias merge strategy
         self.alias_strategy_combo = QComboBox()
         self.alias_strategy_combo.setProperty("class", "view-binds-list")
         self.alias_strategy_combo.setMinimumWidth(320)
-        self.alias_strategy_combo.setToolTip(
-            "When two aliased devices both have a binding on the same control, "
-            "choose whether to concatenate them into one string or demote the "
-            "target's binding to a modifier."
-        )
         current_alias = get_alias_strategy()
         for i, (value, label) in enumerate(ALIAS_STRATEGY_OPTIONS):
             self.alias_strategy_combo.addItem(label, value.value)
@@ -204,46 +178,49 @@ class SettingsPage(QMainWindow):
         self.alias_strategy_combo.currentIndexChanged.connect(
             self._on_alias_strategy_changed
         )
-        alias_label = QLabel("Alias merge strategy")
-        alias_label.setObjectName("device_help_label")
-        form.addRow(alias_label, self.alias_strategy_combo)
-
-        # Profile inheritance strategy
-        self.inheritance_strategy_combo = QComboBox()
-        self.inheritance_strategy_combo.setProperty("class", "view-binds-list")
-        self.inheritance_strategy_combo.setMinimumWidth(320)
-        self.inheritance_strategy_combo.setToolTip(
-            "When a child profile and an inherited parent profile both bind the "
-            "same control, choose whether to keep only the child's binding, "
-            "concatenate them, or demote the parent's binding to a modifier."
-        )
-        current_inheritance = get_inheritance_strategy()
-        for i, (value, label) in enumerate(INHERITANCE_STRATEGY_OPTIONS):
-            self.inheritance_strategy_combo.addItem(label, value.value)
-            if value == current_inheritance:
-                self.inheritance_strategy_combo.setCurrentIndex(i)
-        self.inheritance_strategy_combo.currentIndexChanged.connect(
-            self._on_inheritance_strategy_changed
-        )
-        inh_label = QLabel("Profile inheritance strategy")
-        inh_label.setObjectName("device_help_label")
-        form.addRow(inh_label, self.inheritance_strategy_combo)
-
+        listed_twice = _help(S.LISTED_TWICE)
+        listed_twice.setMaximumWidth(260)
+        alias_row = QHBoxLayout()
+        alias_row.addWidget(self.alias_strategy_combo)
+        alias_row.addStretch(1)
+        form.addRow(listed_twice, alias_row)
         layout.addLayout(form)
+
+        for text, button_text, handler in (
+            (S.MODIFIERS_POINTER, S.GO_TO_APPEARANCE, self._open_appearance),
+            (S.GAMES_POINTER, S.GO_TO_SETUP, self._open_setup),
+        ):
+            row = QHBoxLayout()
+            row.setSpacing(8)
+            row.addWidget(_help(text), 1)
+            button = _link(button_text, handler)
+            row.addWidget(button)
+            layout.addLayout(row)
+            if handler == self._open_appearance:
+                self.open_appearance_button = button
+
         layout.addStretch(1)
         return tab
 
-    def _on_open_after_export_changed(self, state: int):
-        add_update_setting_value(
-            OPEN_AFTER_EXPORT_SETTING_KEY,
-            "true" if state == Qt.CheckState.Checked.value else "false",
+    def _open_appearance(self):
+        from joystick_diagrams.ui.stage_contract import (
+            PAYLOAD_SECTION,
+            SECTION_APPEARANCE,
+            STAGE_DIAGRAMS,
         )
 
-    def _on_merge_modifiers_changed(self, state: int):
-        add_update_setting_value(
-            MERGE_MODIFIERS_SETTING_KEY,
-            "true" if state == Qt.CheckState.Checked.value else "false",
-        )
+        main_window = self.appState.main_window
+        if main_window is not None:
+            main_window.go_to_stage(
+                STAGE_DIAGRAMS, {PAYLOAD_SECTION: SECTION_APPEARANCE}
+            )
+
+    def _open_setup(self):
+        from joystick_diagrams.ui.stage_contract import STAGE_SETUP
+
+        main_window = self.appState.main_window
+        if main_window is not None:
+            main_window.go_to_stage(STAGE_SETUP)
 
     def _on_date_format_changed(self, index: int):
         fmt = self.date_format_combo.currentData()
@@ -251,29 +228,75 @@ class SettingsPage(QMainWindow):
             add_update_setting_value(DATE_FORMAT_SETTING_KEY, fmt)
 
     # Process-time settings (those that bake into the merged profile state)
-    # must call appState.reprocess_profiles_with_notice(...) after persisting.
-    # Export-time settings (date format, open-after-export) don't need this.
+    # call appState.reprocess_profiles_with_notice(...) after persisting.
     def _on_alias_strategy_changed(self, index: int):
         value = self.alias_strategy_combo.currentData()
         if value:
             add_update_setting_value(ALIAS_CONFLICT_STRATEGY_KEY, value)
-            self.appState.reprocess_profiles_with_notice(
-                "Alias merge strategy updated — profiles reprocessed"
-            )
+            self.appState.reprocess_profiles_with_notice(S.SAVED_BINDINGS_UPDATED)
 
-    def _on_inheritance_strategy_changed(self, index: int):
-        value = self.inheritance_strategy_combo.currentData()
-        if value:
-            add_update_setting_value(INHERITANCE_CONFLICT_STRATEGY_KEY, value)
-            self.appState.reprocess_profiles_with_notice(
-                "Inheritance merge strategy updated — profiles reprocessed"
-            )
+    # ── Other apps ──
 
-    # ── Shared Plugin Helpers ──
+    def _create_other_apps_tab(self) -> QWidget:
+        from joystick_diagrams.ui.widgets.drop_zone import DropZoneWidget
+
+        tab = QWidget()
+        tab_layout = QHBoxLayout(tab)
+        tab_layout.setContentsMargins(0, 0, 0, 0)
+        tab_layout.setSpacing(0)
+
+        left = QWidget()
+        layout = QVBoxLayout(left)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
+        layout.addWidget(_help(S.OTHER_APPS_INTRO))
+
+        self.apps_notice = _help("", "settingsSuccess")
+        self.apps_notice.hide()
+        layout.addWidget(self.apps_notice)
+        self.conflict_label = _help("", "settingsWarning")
+        self.conflict_label.hide()
+        layout.addWidget(self.conflict_label)
+
+        button_row = QHBoxLayout()
+        button_row.setSpacing(8)
+        for text, icon_name, handler in (
+            (S.ADD_APP_FROM_FILE, "fa5s.file-import", self._add_app_from_file),
+            (S.ADD_APP_FROM_WEB, "fa5s.link", self._add_app_from_web),
+            (S.OPEN_APPS_FOLDER, "fa5s.folder-open", self._open_apps_folder),
+        ):
+            button = QPushButton(text)
+            button.setIcon(qta.icon(icon_name, color="white"))
+            button.setProperty("class", "plugin-setup-button")
+            button.clicked.connect(lambda _checked=False, h=handler: h())
+            button_row.addWidget(button)
+        drop_zone = DropZoneWidget(S.DROP_APP_HERE, compact=True)
+        drop_zone.file_dropped.connect(self._add_app)
+        button_row.addWidget(drop_zone)
+        button_row.addStretch(1)
+        layout.addLayout(button_row)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        cards_container = QWidget()
+        self._app_cards_layout = QVBoxLayout(cards_container)
+        self._app_cards_layout.setSpacing(4)
+        self._app_cards_layout.setContentsMargins(0, 0, 0, 0)
+        scroll.setWidget(cards_container)
+        layout.addWidget(scroll, 1)
+        tab_layout.addWidget(left, 1)
+
+        self._side_panel = QVBoxLayout()
+        self._side_panel.setContentsMargins(0, 0, 0, 0)
+        tab_layout.addLayout(self._side_panel)
+
+        self._populate_app_cards()
+        return tab
 
     @staticmethod
-    def _get_trust_status(plugin_name: str, plugin_type: str) -> str:
-        """Look up the trust status for a user-installed plugin."""
+    def _trust_status(name: str) -> str:
         from joystick_diagrams.db.db_plugin_trust import get_trust_reason
         from joystick_diagrams.ui.widgets.plugin_card import (
             TRUST_SIGNED,
@@ -281,523 +304,126 @@ class SettingsPage(QMainWindow):
             TRUST_USER_ACCEPTED,
         )
 
-        reason = get_trust_reason(plugin_name, plugin_type)
+        reason = get_trust_reason(name, "output")
         if reason == "signature_valid":
             return TRUST_SIGNED
-        elif reason == "user_accepted":
+        if reason == "user_accepted":
             return TRUST_USER_ACCEPTED
         return TRUST_UNTRUSTED
 
-    # ── Shared Plugin Install Helpers ──
-
-    def _run_security_check(self, installed_path: Path, plugin_name: str) -> bool:
-        """Run the signing/trust security check after installing a plugin.
-
-        Returns True if the user accepted the plugin, False if they cancelled.
-        """
-        from joystick_diagrams.ui.plugin_install_flow import run_security_check
-
-        return run_security_check(installed_path, plugin_name, self)
-
-    def _record_trust(
-        self, plugin_name: str, plugin_type: str, installed_path: Path
-    ) -> None:
-        """Record trust for a plugin after successful security check."""
-        from joystick_diagrams.ui.plugin_install_flow import record_trust
-
-        record_trust(plugin_name, plugin_type, installed_path)
-
-    def _show_conflict_banner(self, layout: QVBoxLayout, conflicts: list) -> None:
-        """Add a yellow conflict warning banner if there are name conflicts."""
-        if not conflicts:
-            return
-
-        banner = QFrame()
-        banner.setStyleSheet(
-            "QFrame { background: #3D3520; border: 1px solid #F59E0B; "
-            "border-radius: 6px; padding: 8px 12px; }"
-        )
-        banner_layout = QHBoxLayout(banner)
-        banner_layout.setContentsMargins(8, 6, 8, 6)
-        banner_layout.setSpacing(8)
-
-        icon_label = QLabel()
-        icon_label.setPixmap(
-            qta.icon("fa5s.exclamation-triangle", color="#F59E0B").pixmap(16, 16)
-        )
-        icon_label.setFixedSize(16, 16)
-        icon_label.setStyleSheet("background: transparent;")
-        banner_layout.addWidget(icon_label)
-
-        names = ", ".join(f"'{name}'" for name, _ in conflicts)
-        text = QLabel(
-            f"Skipped: {names} - a bundled plugin with the same name already exists."
-        )
-        text.setWordWrap(True)
-        text.setStyleSheet("color: #F59E0B; background: transparent;")
-        banner_layout.addWidget(text, stretch=1)
-
-        layout.addWidget(banner)
-
-    # ── Side Panel Helpers ──
-
-    def _show_side_panel(self, panel_layout: QVBoxLayout, wrapper) -> None:
-        """Show the config panel for a plugin in the given side panel layout."""
-        from joystick_diagrams.ui.plugins_page import PluginConfigPanel
-
-        self._clear_side_panel(panel_layout)
-        panel = PluginConfigPanel(wrapper, self)
-        panel.settings_changed.connect(self._on_side_panel_settings_changed)
-        panel.close_requested.connect(lambda: self._clear_side_panel(panel_layout))
-        panel_layout.addWidget(panel)
-
-    def _clear_side_panel(self, panel_layout: QVBoxLayout) -> None:
-        """Remove all widgets from a side panel layout."""
-        while panel_layout.count():
-            item = panel_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-
-    def _on_side_panel_settings_changed(self):
-        """Refresh status labels on all visible plugin cards."""
-        for layout in (
-            self._parser_plugin_cards_layout,
-            self._output_plugin_cards_layout,
-        ):
-            for i in range(layout.count()):
-                item = layout.itemAt(i)
-                if item and item.widget() and hasattr(item.widget(), "refresh_status"):
-                    item.widget().refresh_status()
-
-    # ── Parser Plugins Tab ──
-
-    def _create_parser_plugins_tab(self) -> QWidget:
-        from joystick_diagrams.ui.widgets.drop_zone import DropZoneWidget
-
-        tab = QWidget()
-        tab_layout = QHBoxLayout(tab)
-        tab_layout.setContentsMargins(0, 0, 0, 0)
-        tab_layout.setSpacing(0)
-
-        # Left column: header, buttons, drop zone, cards
-        left = QWidget()
-        layout = QVBoxLayout(left)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(16)
-
-        header = SectionHeader("fa5s.puzzle-piece", "Parser Plugins")
-        layout.addWidget(header)
-
-        help_text = QLabel(
-            "Parser plugins import joystick bindings from games and applications. "
-            "Install additional parsers to support more games."
-        )
-        help_text.setObjectName("device_help_label")
-        help_text.setWordWrap(True)
-        layout.addWidget(help_text)
-
-        # Conflict warnings
-        self._parser_conflict_layout = QVBoxLayout()
-        self._parser_conflict_layout.setSpacing(4)
-        layout.addLayout(self._parser_conflict_layout)
-
-        # Action buttons
-        button_row = QHBoxLayout()
-        button_row.setSpacing(8)
-
-        install_btn = QPushButton("Install Plugin")
-        install_btn.setIcon(qta.icon("fa5s.file-import", color="white"))
-        install_btn.setProperty("class", "plugin-setup-button")
-        install_btn.clicked.connect(self._install_parser_plugin)
-        button_row.addWidget(install_btn)
-
-        url_btn = QPushButton("Install from URL")
-        url_btn.setIcon(qta.icon("fa5s.link", color="white"))
-        url_btn.setProperty("class", "plugin-setup-button")
-        url_btn.clicked.connect(self._install_parser_plugin_from_url)
-        button_row.addWidget(url_btn)
-
-        open_folder_btn = QPushButton("Open Plugins Folder")
-        open_folder_btn.setIcon(qta.icon("fa5s.folder-open", color="white"))
-        open_folder_btn.setProperty("class", "plugin-setup-button")
-        open_folder_btn.clicked.connect(
-            lambda: webbrowser.open(str(utils.user_parser_plugins_root()))
-        )
-        button_row.addWidget(open_folder_btn)
-
-        drop_zone = DropZoneWidget("Drop ZIP here", compact=True)
-        drop_zone.file_dropped.connect(self._do_parser_install)
-        button_row.addWidget(drop_zone)
-
-        button_row.addStretch(1)
-        layout.addLayout(button_row)
-
-        # Plugin cards (scrollable)
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-
-        cards_container = QWidget()
-        self._parser_plugin_cards_layout = QVBoxLayout(cards_container)
-        self._parser_plugin_cards_layout.setSpacing(4)
-        self._parser_plugin_cards_layout.setContentsMargins(0, 0, 0, 0)
-        self._populate_parser_plugin_cards()
-
-        scroll.setWidget(cards_container)
-        layout.addWidget(scroll, 1)
-
-        tab_layout.addWidget(left, 1)
-
-        # Right column: side panel for plugin config
-        self._parser_side_panel = QVBoxLayout()
-        self._parser_side_panel.setContentsMargins(0, 0, 0, 0)
-        tab_layout.addLayout(self._parser_side_panel)
-
-        return tab
-
-    def _populate_parser_plugin_cards(self):
+    def _populate_app_cards(self):
         from joystick_diagrams.ui.widgets.plugin_card import TRUST_BUNDLED, PluginCard
 
-        while self._parser_plugin_cards_layout.count():
-            item = self._parser_plugin_cards_layout.takeAt(0)
+        while self._app_cards_layout.count():
+            item = self._app_cards_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
 
-        # Clear and repopulate conflict banners
-        while self._parser_conflict_layout.count():
-            item = self._parser_conflict_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+        manager = self.appState.output_plugin_manager
+        conflicts = getattr(manager, "conflicts", None) if manager else None
+        if conflicts:
+            names = ", ".join(name for name, _ in conflicts)
+            self.conflict_label.setText(S.NAME_TAKEN.format(names=names))
+            self.conflict_label.show()
+        else:
+            self.conflict_label.hide()
 
-        if not self.appState.plugin_manager:
-            return
-
-        if self.appState.plugin_manager.conflicts:
-            self._show_conflict_banner(
-                self._parser_conflict_layout,
-                self.appState.plugin_manager.conflicts,
-            )
-
-        for wrapper in self.appState.plugin_manager.plugin_wrappers:
-            is_user = self.appState.plugin_manager.is_user_plugin(wrapper.name)
-            trust_status = (
-                self._get_trust_status(wrapper.name, "parser")
-                if is_user
-                else TRUST_BUNDLED
-            )
-            card = PluginCard(
-                wrapper, is_user_plugin=is_user, trust_status=trust_status
-            )
-            card.config_requested.connect(
-                lambda w: self._show_side_panel(self._parser_side_panel, w)
-            )
+        wrappers = list(getattr(manager, "plugin_wrappers", None) or [])
+        if not wrappers:
+            self._app_cards_layout.addWidget(_help(S.OTHER_APPS_EMPTY))
+        for wrapper in wrappers:
+            is_user = manager.is_user_plugin(wrapper.name)
+            trust = self._trust_status(wrapper.name) if is_user else TRUST_BUNDLED
+            card = PluginCard(wrapper, is_user_plugin=is_user, trust_status=trust)
+            card.config_requested.connect(self._show_side_panel)
             if is_user:
-                card.uninstall_requested.connect(self._uninstall_parser_plugin)
-            self._parser_plugin_cards_layout.addWidget(card)
+                card.uninstall_requested.connect(self._remove_app)
+            self._app_cards_layout.addWidget(card)
+        self._app_cards_layout.addStretch(1)
 
-        self._parser_plugin_cards_layout.addStretch(1)
+    def _show_side_panel(self, wrapper) -> None:
+        from joystick_diagrams.ui.setup_page import PAGE_QSS as SETUP_QSS
+        from joystick_diagrams.ui.setup_page import GameSettingsPanel
 
-    def _install_parser_plugin(self):
-        result = QFileDialog.getOpenFileName(
-            self,
-            "Select Parser Plugin (ZIP)",
-            str(Path.home()),
-            "Plugin Archives (*.zip)",
+        self._clear_side_panel()
+        panel = GameSettingsPanel(wrapper, self, for_app=True)
+        panel.setStyleSheet(SETUP_QSS)
+        panel.changed.connect(self._refresh_card_status)
+        panel.close_requested.connect(self._clear_side_panel)
+        self._side_panel.addWidget(panel)
+
+    def _clear_side_panel(self) -> None:
+        while self._side_panel.count():
+            item = self._side_panel.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+    def _refresh_card_status(self):
+        for i in range(self._app_cards_layout.count()):
+            item = self._app_cards_layout.itemAt(i)
+            widget = item.widget() if item else None
+            if widget is not None and hasattr(widget, "refresh_status"):
+                widget.refresh_status()
+
+    def _show_notice(self, text: str) -> None:
+        self.apps_notice.setText(text)
+        self.apps_notice.show()
+
+    def _add_app_from_file(self):
+        result, _ = QFileDialog.getOpenFileName(
+            self, S.ADD_APP_FROM_FILE_TITLE, str(Path.home()), S.ADD_APP_FILE_FILTER
         )
-        if not result[0]:
-            return
+        if result:
+            self._add_app(Path(result))
 
-        self._do_parser_install(Path(result[0]))
-
-    def _install_parser_plugin_from_url(self):
+    def _add_app_from_web(self):
         url, ok = QInputDialog.getText(
-            self,
-            "Install Plugin from URL",
-            "Enter the URL of a plugin ZIP file:",
+            self, S.ADD_APP_FROM_WEB_TITLE, S.ADD_APP_FROM_WEB_LABEL
         )
-        if not ok or not url.strip():
-            return
+        if ok and url.strip():
+            self._add_app(url.strip())
 
-        self._do_parser_install(url.strip())
-
-    def _do_parser_install(self, source: Path | str):
+    def _add_app(self, source: Path | str):
         from joystick_diagrams.ui.plugin_install_flow import install_from_local_source
 
-        name = install_from_local_source(source, self.appState, self, "parser")
+        name = install_from_local_source(source, self.appState, self, "output")
         if name is None:
             return
+        self._populate_app_cards()
+        self._show_notice(S.APP_ADDED.format(app=name))
 
-        QMessageBox.information(
-            self, "Plugin Installed", f"Parser plugin '{name}' installed successfully."
-        )
-        self._populate_parser_plugin_cards()
-
-    def _uninstall_parser_plugin(self, name: str):
-        reply = QMessageBox.question(
+    def _remove_app(self, name: str):
+        if not confirm(
             self,
-            "Confirm Uninstall",
-            f"Remove the plugin '{name}'? Plugin settings will be preserved.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if reply != QMessageBox.StandardButton.Yes:
-            return
-
-        from joystick_diagrams.plugins.plugin_installer import uninstall_plugin
-
-        path = self.appState.plugin_manager.get_user_plugin_path(name)
-        if path:
-            try:
-                uninstall_plugin(name, path, "parser")
-                self._reload_parser_plugins()
-            except Exception as e:
-                QMessageBox.warning(self, "Uninstall Failed", str(e))
-
-    def _reload_parser_plugins(self):
-        from joystick_diagrams.plugins.plugin_manager import ParserPluginManager
-
-        mgr = ParserPluginManager()
-        mgr.load_discovered_plugins()
-        mgr.create_plugin_wrappers()
-        self.appState.plugin_manager = mgr
-        self._populate_parser_plugin_cards()
-
-        # Refresh the Setup/PluginsPage if it exists
-        main_window = self.appState.main_window
-        if (
-            main_window
-            and hasattr(main_window, "_setup_page")
-            and main_window._setup_page
+            S.REMOVE_TITLE.format(app=name),
+            S.REMOVE_BODY,
+            S.REMOVE_CONFIRM.format(app=name),
+            S.CANCEL,
         ):
-            main_window._setup_page.populate_plugin_cards()
-
-    # ── Output Plugins Tab ──
-
-    def _create_output_plugins_tab(self) -> QWidget:
-        from joystick_diagrams.ui.widgets.drop_zone import DropZoneWidget
-
-        tab = QWidget()
-        tab_layout = QHBoxLayout(tab)
-        tab_layout.setContentsMargins(0, 0, 0, 0)
-        tab_layout.setSpacing(0)
-
-        # Left column: header, buttons, drop zone, cards
-        left = QWidget()
-        layout = QVBoxLayout(left)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(16)
-
-        header = SectionHeader("fa5s.plug", "Output Plugins")
-        layout.addWidget(header)
-
-        help_text = QLabel(
-            "Output plugins run automatically after export to deliver your diagrams "
-            "to other applications (e.g. OpenKneeboard)."
-        )
-        help_text.setObjectName("device_help_label")
-        help_text.setWordWrap(True)
-        layout.addWidget(help_text)
-
-        # Conflict warnings
-        self._output_conflict_layout = QVBoxLayout()
-        self._output_conflict_layout.setSpacing(4)
-        layout.addLayout(self._output_conflict_layout)
-
-        # Action buttons
-        button_row = QHBoxLayout()
-        button_row.setSpacing(8)
-
-        install_btn = QPushButton("Install Plugin")
-        install_btn.setIcon(qta.icon("fa5s.file-import", color="white"))
-        install_btn.setProperty("class", "plugin-setup-button")
-        install_btn.clicked.connect(self._install_output_plugin)
-        button_row.addWidget(install_btn)
-
-        url_btn = QPushButton("Install from URL")
-        url_btn.setIcon(qta.icon("fa5s.link", color="white"))
-        url_btn.setProperty("class", "plugin-setup-button")
-        url_btn.clicked.connect(self._install_output_plugin_from_url)
-        button_row.addWidget(url_btn)
-
-        open_folder_btn = QPushButton("Open Plugins Folder")
-        open_folder_btn.setIcon(qta.icon("fa5s.folder-open", color="white"))
-        open_folder_btn.setProperty("class", "plugin-setup-button")
-        open_folder_btn.clicked.connect(self._open_output_plugins_folder)
-        button_row.addWidget(open_folder_btn)
-
-        drop_zone = DropZoneWidget("Drop ZIP here", compact=True)
-        drop_zone.file_dropped.connect(self._do_output_install)
-        button_row.addWidget(drop_zone)
-
-        button_row.addStretch(1)
-        layout.addLayout(button_row)
-
-        # Plugin cards (scrollable)
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-
-        cards_container = QWidget()
-        self._output_plugin_cards_layout = QVBoxLayout(cards_container)
-        self._output_plugin_cards_layout.setSpacing(4)
-        self._output_plugin_cards_layout.setContentsMargins(0, 0, 0, 0)
-        self._populate_output_plugin_cards()
-
-        scroll.setWidget(cards_container)
-        layout.addWidget(scroll, 1)
-
-        tab_layout.addWidget(left, 1)
-
-        # Right column: side panel for plugin config
-        self._output_side_panel = QVBoxLayout()
-        self._output_side_panel.setContentsMargins(0, 0, 0, 0)
-        tab_layout.addLayout(self._output_side_panel)
-
-        return tab
-
-    def _populate_output_plugin_cards(self):
-        from joystick_diagrams.ui.widgets.plugin_card import TRUST_BUNDLED, PluginCard
-
-        while self._output_plugin_cards_layout.count():
-            item = self._output_plugin_cards_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-
-        # Clear and repopulate conflict banners
-        while self._output_conflict_layout.count():
-            item = self._output_conflict_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-
-        if not self.appState.output_plugin_manager:
-            return
-
-        if self.appState.output_plugin_manager.conflicts:
-            self._show_conflict_banner(
-                self._output_conflict_layout,
-                self.appState.output_plugin_manager.conflicts,
-            )
-
-        for wrapper in self.appState.output_plugin_manager.plugin_wrappers:
-            is_user = self.appState.output_plugin_manager.is_user_plugin(wrapper.name)
-            trust_status = (
-                self._get_trust_status(wrapper.name, "output")
-                if is_user
-                else TRUST_BUNDLED
-            )
-            card = PluginCard(
-                wrapper, is_user_plugin=is_user, trust_status=trust_status
-            )
-            card.config_requested.connect(
-                lambda w: self._show_side_panel(self._output_side_panel, w)
-            )
-            if is_user:
-                card.uninstall_requested.connect(self._uninstall_output_plugin)
-            self._output_plugin_cards_layout.addWidget(card)
-
-        self._output_plugin_cards_layout.addStretch(1)
-
-    def _install_output_plugin(self):
-        result = QFileDialog.getOpenFileName(
-            self,
-            "Select Output Plugin (ZIP)",
-            str(Path.home()),
-            "Plugin Archives (*.zip)",
-        )
-        if not result[0]:
-            return
-
-        self._do_output_install(Path(result[0]))
-
-    def _install_output_plugin_from_url(self):
-        url, ok = QInputDialog.getText(
-            self,
-            "Install Plugin from URL",
-            "Enter the URL of a plugin ZIP file:",
-        )
-        if not ok or not url.strip():
-            return
-
-        self._do_output_install(url.strip())
-
-    def _do_output_install(self, source: Path | str):
-        from joystick_diagrams.plugins.plugin_installer import (
-            install_plugin,
-            validate_plugin,
-        )
-
-        try:
-            installed_path = install_plugin(source, "output")
-        except Exception as e:
-            QMessageBox.warning(self, "Install Failed", str(e))
-            return
-
-        valid, msg = validate_plugin(installed_path, "output")
-        if not valid:
-            shutil.rmtree(installed_path, ignore_errors=True)
-            QMessageBox.warning(self, "Invalid Plugin", msg)
-            return
-
-        # Check name conflict with bundled plugins
-        if self.appState.output_plugin_manager:
-            bundled_names = {
-                w.name
-                for w in self.appState.output_plugin_manager.plugin_wrappers
-                if not self.appState.output_plugin_manager.is_user_plugin(w.name)
-            }
-            if msg in bundled_names:
-                shutil.rmtree(installed_path, ignore_errors=True)
-                QMessageBox.warning(
-                    self,
-                    "Name Conflict",
-                    f"A bundled plugin named '{msg}' already exists. "
-                    f"The user plugin cannot be installed.",
-                )
-                return
-
-        # Security check
-        if not self._run_security_check(installed_path, msg):
-            shutil.rmtree(installed_path, ignore_errors=True)
-            return
-
-        self._record_trust(msg, "output", installed_path)
-
-        QMessageBox.information(
-            self, "Plugin Installed", f"Output plugin '{msg}' installed successfully."
-        )
-        self._reload_output_plugins()
-
-    def _uninstall_output_plugin(self, name: str):
-        reply = QMessageBox.question(
-            self,
-            "Confirm Uninstall",
-            f"Remove the plugin '{name}'? Plugin settings will be preserved.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if reply != QMessageBox.StandardButton.Yes:
             return
 
         from joystick_diagrams.plugins.plugin_installer import uninstall_plugin
+        from joystick_diagrams.ui.plugin_install_flow import reload_plugin_manager
 
         path = self.appState.output_plugin_manager.get_user_plugin_path(name)
-        if path:
-            try:
-                uninstall_plugin(name, path, "output")
-                self._reload_output_plugins()
-            except Exception as e:
-                QMessageBox.warning(self, "Uninstall Failed", str(e))
+        if not path:
+            return
+        try:
+            uninstall_plugin(name, path, "output")
+        except Exception as error:  # noqa: BLE001 - shown behind Details
+            _logger.error(f"Removing {name} failed: {error}", exc_info=True)
+            show_problem(
+                self,
+                S.REMOVE_FAILED_TITLE.format(app=name),
+                S.REMOVE_FAILED_TEXT,
+                str(error),
+            )
+            return
+        reload_plugin_manager(self.appState, "output")
+        self._populate_app_cards()
+        self._show_notice(S.APP_REMOVED.format(app=name))
 
-    def _reload_output_plugins(self):
-        from joystick_diagrams.plugins.output_plugin_manager import OutputPluginManager
-
-        mgr = OutputPluginManager()
-        mgr.load_discovered_plugins()
-        mgr.create_plugin_wrappers()
-        self.appState.output_plugin_manager = mgr
-        self._populate_output_plugin_cards()
-
-    def _open_output_plugins_folder(self):
+    def _open_apps_folder(self):
         webbrowser.open(str(utils.user_output_plugins_root()))
 
 
