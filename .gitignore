@@ -55,3 +55,6 @@ play*.py
 
 # Local design/planning notes (not part of the project)
 docs/superpowers/
+
+# Exports written into the sample DCS folder while testing (OpenKneeboard etc.)
+tests/data/sample_profiles/DCS/KNEEBOARD/
