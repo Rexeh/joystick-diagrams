@@ -88,7 +88,7 @@ def test_layout_ops_select_dom_only_for_matching_template_key():
         profile_wrapper: object
         device: object
 
-    layouts = MappingProxyType({("bundled:a.svg", "dcs_p1"): ["move"]})
+    layouts = MappingProxyType({("bundled:a.svg", "", "dcs_p1"): ["move"]})
     ctx = RenderContext(layouts=layouts)
     ed = ED(
         KeyedTemplate("x", "bundled:a.svg"),

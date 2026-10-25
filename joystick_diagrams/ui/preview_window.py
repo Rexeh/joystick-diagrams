@@ -75,12 +75,12 @@ class _PreviewRunnable(QRunnable):
 def summarise_outcome(outcome: RenderOutcome) -> str:
     report = outcome.report
     if RenderNotice.FELL_BACK_TO_LEGACY in report.notices:
-        return S.PREVIEW_ENGINE_ORIGINAL + " " + S.NOTICE_UNSUPPORTED
+        return S.NOTICE_UNSUPPORTED
     if report.engine is Engine.LEGACY:
-        return S.PREVIEW_ENGINE_ORIGINAL
-    text = S.PREVIEW_ENGINE_STYLED
+        return ""
+    text = ""
     if Capability.SHAPE_STYLE not in report.capabilities:
-        text += " " + S.UNSUPPORTED_BANNER
+        text = S.UNSUPPORTED_BANNER
     extras = []
     if report.overflow:
         count = len(report.overflow)
@@ -91,7 +91,8 @@ def summarise_outcome(outcome: RenderOutcome) -> str:
     if RenderNotice.BOXES_UNPLACED in report.notices:
         extras.append(S.REASON_UNPLACED.format(count="some", es="es"))
     if extras:
-        text += " (" + "; ".join(extras) + ")"
+        joined = "; ".join(extras)
+        text = f"{text} ({joined})" if text else joined[:1].upper() + joined[1:]
     return text
 
 
@@ -109,7 +110,7 @@ class PreviewWindow(QDialog):
         super().__init__(parent)
         self.setWindowFlag(Qt.WindowType.Window, True)
         self.setWindowIcon(QIcon(ui_consts.JD_ICON))
-        self.setWindowTitle(S.PREVIEW_TITLE.format(device=current.device_name))
+        self.setWindowTitle(S.PREVIEW_TITLE.format(controller=current.device_name))
         self.resize(1100, 760)
         self._devices = export_devices
         self._generation = 0
@@ -133,7 +134,7 @@ class PreviewWindow(QDialog):
         for ed in export_devices:
             self.profile_combo.addItem(
                 S.PREVIEW_ENTRY.format(
-                    plugin=ed.profile_wrapper.profile_origin.name,
+                    game=ed.profile_wrapper.profile_origin.name,
                     profile=ed.profile_wrapper.profile_name,
                 )
             )
@@ -248,7 +249,7 @@ class PreviewWindow(QDialog):
     def _on_failed(self, generation: int, message: str) -> None:
         if generation != self._generation:
             return
-        self.status_label.setText(S.RENDER_FAILED.format(error=message))
+        self.status_label.setText(S.RENDER_FAILED)
 
     def _ensure_view(self):
         if self._view is not None:

@@ -1,5 +1,5 @@
-"""User-facing text for Customise → Layout, the Auto-add and Save-as-template
-dialogs, the Preview window and the export summary (plan §5.5.9: one module,
+"""User-facing text for 4. Diagrams › Layout, the Auto-add and Save-as-template
+dialogs and the Preview window (plan §5.5.9: one module,
 plain language, no jargon such as "op", "layer", "slot" or "uid").
 """
 
@@ -13,26 +13,29 @@ HEADER_SCOPE = "Changes apply to:"
 SCOPE_ALL_PROFILES = "All profiles on this diagram"
 SCOPE_ONLY_PROFILE = "Only {profile}"
 SAVED_AUTOMATICALLY = "Saved automatically"
-PREVIEW_ENTRY = "{plugin} / {profile}"
+PREVIEW_ENTRY = "{game} / {profile}"
+DIAGRAM_ENTRY = "{controller} · {template}"
 PAGE_HELP = (
     "Move, resize or hide boxes, add modifier boxes and notes. "
-    "Changes are saved as you go and used by every export of this diagram."
+    "Changes apply to every export of this controller's diagram."
 )
 
 # ── Empty and limited states ──
-EMPTY_MESSAGE = "Pick a template for a device to see your diagram here"
+EMPTY_MESSAGE = "None of your controllers has a template yet."
 EMPTY_ACTION = "Choose a template"
 UNSUPPORTED_BANNER = (
     "Moving boxes isn't available for this template; text styling still works."
 )
 RENDERING = "Updating…"
-RENDER_FAILED = "The diagram couldn't be drawn: {error}"
-WEBENGINE_UNAVAILABLE = "The diagram canvas needs QtWebEngine, which isn't available."
+RENDER_FAILED = "The diagram couldn't be drawn. Details are in Help › Open log folder."
+WEBENGINE_UNAVAILABLE = (
+    "The layout editor couldn't start on this computer. Details are in the log."
+)
 
 # ── Toolbar ──
 TOOL_SELECT = "Select"
 TOOL_ADD_MODIFIER_BOX = "+ Modifier box"
-TOOL_AUTO_ADD = "Auto-add…"
+TOOL_AUTO_ADD = "Add modifier boxes…"
 TOOL_ADD_NOTE = "+ Note"
 TOOL_HIDE = "Hide"
 TOOL_SHOW = "Show"
@@ -43,23 +46,26 @@ TOOL_ZOOM_IN = "Zoom in"
 TOOL_ZOOM_OUT = "Zoom out"
 TOOL_ZOOM_FIT = "Fit"
 TOOL_MORE = "More"
-MORE_UNDO_PROFILE = "Undo my changes for {profile}"
-MORE_RESET_ALL = "Reset all"
+MORE_UNDO_PROFILE = "Undo changes for {profile} only"
+MORE_RESET_ALL = "Reset layout…"
 MORE_SAVE_AS_TEMPLATE = "Save as new template…"
-TOOLTIP_SELECT = "Select and move (click a box, drag to move, drag a corner to resize)"
+TOOLTIP_SELECT = "Select and move boxes"
 TOOLTIP_ADD_MODIFIER_BOX = "Add a modifier box next to the selected control"
 TOOLTIP_AUTO_ADD = "Add modifier boxes for every control that needs them"
-TOOLTIP_ADD_NOTE = "Add a text note to the diagram"
 TOOLTIP_HIDE = "Hide the selected box (Delete)"
 TOOLTIP_UNDO = "Undo (Ctrl+Z)"
 TOOLTIP_REDO = "Redo (Ctrl+Y)"
 TOOLTIP_ZOOM_FIT = "Fit the whole diagram in the window"
-SELECT_A_CONTROL_FIRST = "Select a control on the diagram first."
+TOOLTIP_ZOOM_100 = "Zoom to 100%"
+SELECT_A_CONTROL_FIRST = "Click a control on the diagram first."
 NOTES_NEED_NO_PARENT = "Notes aren't controls, so they can't have modifier boxes."
 NO_ROOM_FOR_BOX = "There's no room for another box next to {name}."
 
 # ── Reset confirmations ──
-RESET_ALL_TITLE = "Reset all layout changes?"
+RESET_ALL_TITLE = "Reset this layout?"
+RESET_ALL_CONFIRM = "Reset layout"
+CANCEL = "Cancel"
+UNDO_PROFILE_CONFIRM = "Undo changes"
 RESET_ALL_TEXT = (
     "This removes every layout change on this diagram, for all profiles. "
     "You can undo it while you stay on this screen."
@@ -95,6 +101,11 @@ PANEL_X = "X"
 PANEL_Y = "Y"
 PANEL_W = "W"
 PANEL_H = "H"
+# Accessible names: screen readers say the word, not the letter
+PANEL_X_NAME = "Left"
+PANEL_Y_NAME = "Top"
+PANEL_W_NAME = "Width"
+PANEL_H_NAME = "Height"
 PANEL_NOT_RESIZABLE = "This box can't be resized (it isn't a plain rectangle)."
 PANEL_NOT_MOVABLE = "This box can't be moved on this template."
 PANEL_MODIFIER_BOXES = "Modifier boxes: {count} · filled in key order"
@@ -103,8 +114,8 @@ PANEL_HIDE_BOX = "Hide this box"
 PANEL_SHOW_BOX = "Show this box"
 PANEL_REMOVE_BOX = "Remove this box"
 PANEL_REMOVE_NOTE = "Remove this note"
-PANEL_EDIT_NOTE = "Edit text…"
-PANEL_UNDO_BOX = "Undo my changes to this box"
+PANEL_EDIT_NOTE = "Edit note…"
+PANEL_UNDO_BOX = "Undo changes to this box"
 PANEL_PROFILE_ONLY = "Changed only for {profile}"
 PANEL_NOTICES = "Notices"
 PANEL_NO_NOTICES = "Nothing to report."
@@ -112,8 +123,42 @@ PANEL_UNDO_NOTE = (
     "Undo history clears when you leave this screen. Your changes are already saved."
 )
 
+# ── Page panel (a page chosen in the Diagram picker) ──
+PAGE_PANEL_HEADING = "Page"
+PAGE_NAME = "Name"
+PAGE_CONTROLLERS = "Controllers on this page"
+PAGE_CONTROLLERS_HELP = "Click a controller to see what you can change for it."
+PAGE_CHANGE_CONTROLLERS = "Change controllers…"
+PAGE_CONTROLLER_PLACED = "Its place on the page comes from the arrangement."
+PAGE_EDIT_CONTROLLER_BOXES = "Edit this controller's boxes ›"
+PAGE_EDIT_CONTROLLER_BOXES_TIP = "Opens this controller's own diagram in Layout"
+PAGE_ARRANGEMENT = "Arrangement"
+PAGE_SIZE = "Page size"
+PAGE_ORIENTATION = "Orientation"
+PAGE_SCALE = "Scale"
+PAGE_SCALE_VALUE = "{percent}%"
+PAGE_SCALE_TIP = "100% fills the page; smaller leaves more space around the controllers"
+PAGE_GAP = "Gap (mm)"
+PAGE_GAP_TIP = "Space between the controllers on this page"
+PAGE_TITLE_AND_DATE = "Title and date"
+PAGE_SHOW_TITLE = "Show title"
+PAGE_SHOW_DATE = "Show date"
+PAGE_TITLE = "Title"
+PAGE_TITLE_PLACEHOLDER = "Leave empty for “{example}”"
+PAGE_TITLE_EXAMPLE_PROFILE = "Profile"
+PAGE_RESET = "Reset to defaults"
+PAGE_RESET_TIP = (
+    "Page size, arrangement, scale, gap, title and date go back to their defaults"
+)
+PAGE_TOOL_UNAVAILABLE = "Not available for pages"
+PAGE_FIX_SCALE = "Move Scale up to make the text larger."
+PAGE_FIX_AT_FULL_SCALE = (
+    "Scale is already 100%. A bigger page size, or Stacked or Grid, makes the "
+    "text larger."
+)
+
 # ── Notices (plain language) ──
-NOTICE_OVERFLOW = "{name} has {count} more modifier{s} than boxes. {tail}"
+NOTICE_OVERFLOW = "{name} has {count} more modifier binding{s} than boxes. {tail}"
 NOTICE_OVERFLOW_LISTED = "{they}'re still listed under the main text."
 NOTICE_OVERFLOW_HIDDEN = "{they} {dont} appear on this diagram."
 NOTICE_OVERFLOW_ACTION = "Add boxes"
@@ -121,7 +166,7 @@ NOTICE_TEMPLATE_UPDATED = (
     "This template was updated on {date}. {count} of your changes no longer "
     "fit and {was} skipped."
 )
-NOTICE_TEMPLATE_UPDATED_ACTION = "Show"
+NOTICE_TEMPLATE_UPDATED_ACTION = "Show which"
 NOTICE_SKIPPED_DETAIL = "Skipped: {items}"
 NOTICE_NO_ROOM = "No room for {count} box{es} next to {name}."
 NOTICE_UNSUPPORTED = UNSUPPORTED_BANNER
@@ -133,7 +178,7 @@ NOTICE_MISSING_SLOT = (
 )
 
 # ── Auto-add dialog ──
-AUTO_TITLE = "Add modifier boxes automatically"
+AUTO_TITLE = "Add modifier boxes"
 AUTO_WHICH = "Which controls?"
 AUTO_WHICH_THIS_PROFILE = "Controls with modifiers in {profile}"
 AUTO_WHICH_ANY_PROFILE = (
@@ -163,7 +208,7 @@ AUTO_SUMMARY_NO_ROOM_LISTED = (
 )
 AUTO_SUMMARY_NO_ROOM_NOTICE = "Those modifiers will be left off and a notice shown."
 AUTO_SUMMARY_DISPLAY_CHANGE = (
-    'Turns on "Add them under the main text" in Appearance → Style.'
+    'Turns on "Add them under the main text" in 4. Diagrams › Appearance.'
 )
 AUTO_SUMMARY_APPLIES = "Applies to: {scope} · Undo removes them in one step"
 AUTO_CANCEL = "Cancel"
@@ -176,82 +221,54 @@ SAVE_INTRO = "Makes a copy you can reuse or share. Your current template isn't c
 SAVE_NAME = "Name"
 SAVE_DEFAULT_NAME = "{template} – with modifier boxes"
 SAVE_LOCATION = "Saved to My templates. It appears at the top of every template picker."
-SAVE_INCLUDE = "Include my changes for"
+SAVE_INCLUDE = "Include changes for"
 SAVE_INCLUDE_ALL = "All profiles on this diagram ({count} change{s})"
 SAVE_INCLUDE_PROFILE = "All profiles + {profile} ({all} + {profile_count} change{s})"
 SAVE_EXTRAS = "Extras"
-SAVE_STORE_STYLE = "Store my current style as this template's look"
+SAVE_STORE_STYLE = "Save the current style with this template"
 SAVE_STORE_STYLE_HINT = (
     "Remembered inside the file so this app can offer it as the template's default."
 )
-SAVE_USE_NOW = "Use it for {device} now"
+SAVE_USE_NOW = "Use it for {controller} now"
 SAVE_INFO = (
-    "The result is a normal draw.io SVG: open it in draw.io to keep editing, or "
-    "share it. Placeholders stay in place, so it works with older versions of "
-    "Joystick Diagrams too."
+    "You can keep editing it in draw.io or share it. It works in older versions "
+    "of Joystick Diagrams too."
 )
 SAVE_OPEN_FOLDER = "Open My templates folder"
 SAVE_CANCEL = "Cancel"
 SAVE_SAVE = "Save template"
 SAVE_NAME_REQUIRED = "Give the template a name."
-SAVE_EXISTS_TITLE = "Replace existing template?"
-SAVE_EXISTS_TEXT = "A template named {name} already exists in My templates. Replace it?"
+SAVE_EXISTS_TITLE = "Replace {name}?"
+SAVE_EXISTS_CONFIRM = "Replace template"
+SAVE_EXISTS_TEXT = (
+    "A template named {name} is already in My templates. Saving replaces it."
+)
 SAVE_FAILED_TITLE = "Couldn't save the template"
-SAVE_DONE_TITLE = "Template saved"
-SAVE_DONE_TEXT = "Saved to {path}."
+SAVE_FAILED_TEXT = (
+    "The template couldn't be saved to My templates. Your layout changes are kept."
+)
+DETAILS = "Details"
+SAVE_DONE_TEXT = "✔ Saved to {path}."
 SAVE_DONE_SKIPPED = " {count} change{s} no longer fit the template and {was} left out."
-SAVE_DONE_USED = " {device} now uses it."
+SAVE_DONE_USED = " {controller} now uses it."
 SAVE_DONE_STYLE_SKIPPED = (
     " The style wasn't stored because Original (unchanged) has nothing to store."
 )
 
 # ── Preview window ──
-PREVIEW_TITLE = "Preview — {device}"
+PREVIEW_TITLE = "Preview — {controller}"
 PREVIEW_PROFILE = "Profile:"
 PREVIEW_HELP = "Exactly what Export will produce with your current style and layout."
-PREVIEW_RENDERING = "Rendering…"
-PREVIEW_ENGINE_ORIGINAL = "Shown with the template's original look."
-PREVIEW_ENGINE_STYLED = "Shown with your style and layout changes."
-PREVIEW_EDIT_LAYOUT = "Edit layout…"
+PREVIEW_RENDERING = "Updating preview…"
+PREVIEW_EDIT_LAYOUT = "Edit layout ›"
 PREVIEW_CLOSE = "Close"
 
-# ── Device menus ──
+# ── Controller menus ──
 MENU_PREVIEW = "Preview…"
-MENU_EDIT_LAYOUT = "Edit layout…"
-DEVICES_EDIT_LAYOUT = "Edit layout…"
+MENU_EDIT_LAYOUT = "Edit layout ›"
 
-# ── Export summary ──
-SUMMARY_TITLE = "Export Completed"
-SUMMARY_EXPORTED = "{count} item{s} exported to {location}"
-SUMMARY_ALL_GOOD = "Everything exported as expected."
-SUMMARY_STYLE_FAILED = (
-    "Your style couldn't be applied to {count} diagram{s}. "
-    "{they} exported with the original look."
-)
-SUMMARY_STYLE_LIMITED = (
-    "{count} diagram{s} only took text styling (boxes and lines kept their look)."
-)
-SUMMARY_OVERFLOW_LISTED = (
-    "{count} control{s} had more modifiers than boxes; nothing is missing, the "
-    "extra ones are listed under the main text."
-)
-SUMMARY_OVERFLOW_HIDDEN = (
-    "{count} control{s} had more modifiers than boxes; the extra modifiers "
-    "aren't shown. Add boxes under Customise → Layout."
-)
-SUMMARY_LAYOUT_SKIPPED = (
-    "{count} layout change{s} {was} skipped because the template changed."
-)
-SUMMARY_BOXES_UNPLACED = "{count} modifier box{es} had no room and {was} left out."
-SUMMARY_OPEN_FOLDER = "Open folder"
-SUMMARY_DONE = "Done"
-SUMMARY_DETAIL_LINE = "{device} · {profile}: {reason}"
-REASON_PARSE_ERROR = "this template isn't valid SVG/XML, so it can't be styled"
-REASON_NOT_DRAWIO = "this template wasn't made with draw.io, so it can't be styled"
-REASON_COVERAGE = "this template places placeholders somewhere unexpected"
-REASON_UNEXPECTED = "something went wrong while styling (see the log)"
-REASON_TEXT_ONLY = "boxes and lines couldn't be matched, so only text was styled"
-REASON_OVERFLOW = "{count} control{s} with more modifiers than boxes"
+# ── Preview notices (the per-diagram reasons) ──
+REASON_OVERFLOW = "{count} control{s} with more modifier bindings than boxes"
 REASON_SKIPPED = "{count} layout change{s} skipped"
 REASON_UNPLACED = "{count} modifier box{es} without room"
 

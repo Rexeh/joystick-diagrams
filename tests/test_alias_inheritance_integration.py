@@ -273,9 +273,9 @@ class TestAliasAndInheritanceCombined:
         # ...but inheritance rebuilds from original_profile, discarding aliasing
         bug_wrapper.inherit_parents_into_profile()
         # Bug: Device A is back under its original GUID (unaliased)
-        assert (
-            GUID_A in bug_wrapper.profile.devices
-        ), "Bug demo: inheritance rebuilt from original_profile, restoring unaliased GUID_A"
+        assert GUID_A in bug_wrapper.profile.devices, (
+            "Bug demo: inheritance rebuilt from original_profile, restoring unaliased GUID_A"
+        )
 
         # === CORRECT ORDER: inherit first, then alias ===
         child_wrapper.inherit_parents_into_profile()

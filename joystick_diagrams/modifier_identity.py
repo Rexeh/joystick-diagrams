@@ -723,7 +723,7 @@ class DiscoveredModifierKey:
 def _wrapper_plugin_name(wrapper: Any) -> str:
     origin = getattr(wrapper, "profile_origin", None)
     name = getattr(origin, "name", None)
-    return str(name) if name else "Unknown plugin"
+    return str(name) if name else "an unknown game"
 
 
 def _iter_modifiers(profile: Any) -> Iterable[Modifier]:

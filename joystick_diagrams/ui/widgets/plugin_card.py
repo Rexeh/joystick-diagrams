@@ -1,19 +1,22 @@
-"""Reusable plugin card widget for both parser and output plugins in the Settings page.
+"""One row per other app in Settings › Other apps (output plugins in code).
 
-Compact single-row design matching the Setup page's PluginCard pattern:
-[icon] [name+version / status+trust] <stretch> [enabled] [update] [uninstall]
+[icon] [name, version, trust chip / status] <stretch> [Send diagrams to this app]
+[Settings…] [remove]. Text comes from ``ui/strings_settings.py``.
 """
 
 import qtawesome as qta
 from PySide6.QtCore import QSize, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
+    QCheckBox,
     QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
     QVBoxLayout,
 )
+
+from joystick_diagrams.ui import strings_settings as S
 
 # Trust status constants
 TRUST_BUNDLED = "bundled"
@@ -22,15 +25,15 @@ TRUST_USER_ACCEPTED = "trusted"
 TRUST_UNTRUSTED = "untrusted"
 
 _TRUST_BADGE = {
-    TRUST_BUNDLED: ("fa5s.cube", "#9AA0A6", "Bundled plugin"),
-    TRUST_SIGNED: ("fa5s.shield-alt", "#34D399", "Signed by developer"),
-    TRUST_USER_ACCEPTED: ("fa5s.shield-alt", "#F59E0B", "Trusted by user"),
-    TRUST_UNTRUSTED: ("fa5s.shield-alt", "#EF4444", "Untrusted"),
+    TRUST_BUNDLED: ("fa5s.cube", "#9AA0A6", S.CARD_INCLUDED),
+    TRUST_SIGNED: ("fa5s.shield-alt", "#34D399", S.CARD_VERIFIED),
+    TRUST_USER_ACCEPTED: ("fa5s.shield-alt", "#F59E0B", S.CARD_TRUSTED),
+    TRUST_UNTRUSTED: ("fa5s.shield-alt", "#F59E0B", S.CARD_COMMUNITY),
 }
 
 
 class PluginCard(QFrame):
-    """A compact card showing a single plugin in a single row.
+    """A compact card showing one other app in a single row.
 
     Works for both PluginWrapper and OutputPluginWrapper since they share
     the same interface: .name, .version, .icon, .enabled, .ready, .has_settings()
@@ -82,12 +85,12 @@ class PluginCard(QFrame):
         name_label.setProperty("class", "plugin-card-name")
         name_row.addWidget(name_label)
 
-        version_label = QLabel(f"v{self._wrapper.version}")
+        version_label = QLabel(S.CARD_VERSION.format(version=self._wrapper.version))
         version_label.setProperty("class", "plugin-card-version")
         name_row.addWidget(version_label)
 
         if self._is_user_plugin:
-            badge = QLabel("User")
+            badge = QLabel(S.CARD_ADDED_BY_YOU)
             badge.setStyleSheet(
                 "color: #F59E0B; background: rgba(245, 158, 11, 0.15); "
                 "border-radius: 3px; padding: 1px 6px; font-size: 10px;"
@@ -124,6 +127,9 @@ class PluginCard(QFrame):
         trust_label.setToolTip(badge_tooltip)
         trust_label.setStyleSheet("background: transparent;")
         status_row.addWidget(trust_label)
+        trust_text = QLabel(badge_tooltip)
+        trust_text.setProperty("class", "plugin-card-status")
+        status_row.addWidget(trust_text)
 
         status_row.addStretch()
         center.addLayout(status_row)
@@ -135,19 +141,15 @@ class PluginCard(QFrame):
         right.setContentsMargins(0, 0, 0, 0)
         right.setSpacing(8)
 
-        # Enable/disable toggle
-        self._enable_btn = QPushButton(
-            "Enabled" if self._wrapper.enabled else "Disabled"
-        )
-        self._enable_btn.setCheckable(True)
+        # On/off: a checkbox, so its label reads as a state, not an action
+        self._enable_btn = QCheckBox(S.CARD_SEND_TO)
         self._enable_btn.setChecked(self._wrapper.enabled)
-        self._enable_btn.setProperty("class", "enabled-button")
-        self._enable_btn.clicked.connect(self._toggle_enabled)
+        self._enable_btn.toggled.connect(self._toggle_enabled)
         right.addWidget(self._enable_btn)
 
         # Setup/Update button
         if self._wrapper.has_settings():
-            self._setup_btn = QPushButton()
+            self._setup_btn = QPushButton(S.CARD_SETTINGS)
             self._setup_btn.setProperty("class", "plugin-setup-button")
             self._setup_btn.clicked.connect(
                 lambda: self.config_requested.emit(self._wrapper)
@@ -159,9 +161,12 @@ class PluginCard(QFrame):
         # Uninstall button (user plugins only)
         if self._is_user_plugin:
             uninstall_btn = QPushButton()
-            uninstall_btn.setIcon(qta.icon("fa5s.trash-alt", color="#EF4444"))
+            uninstall_btn.setIcon(qta.icon("fa5s.trash-alt", color="#F87171"))
             uninstall_btn.setIconSize(QSize(14, 14))
-            uninstall_btn.setToolTip(f"Uninstall {self._wrapper.name}")
+            uninstall_btn.setToolTip(S.CARD_REMOVE_TIP.format(app=self._wrapper.name))
+            uninstall_btn.setAccessibleName(
+                S.CARD_REMOVE_TIP.format(app=self._wrapper.name)
+            )
             uninstall_btn.setFixedSize(QSize(28, 28))
             uninstall_btn.setStyleSheet(
                 "QPushButton { background: transparent; border: none; }"
@@ -175,18 +180,15 @@ class PluginCard(QFrame):
         root.addLayout(right)
 
     def refresh_status(self):
-        """Update the status indicator and card accent based on current plugin state."""
+        """Update the status indicator and card accent from the app's state."""
         if self._wrapper.ready:
-            self._set_status("ready", "Ready", "fa5s.check-circle", "#34D399")
+            self._set_status("ready", S.CARD_READY, "fa5s.check-circle", "#34D399")
             self._update_card_class("ready")
         else:
             self._set_status(
-                "not-ready", "Not configured", "fa5s.exclamation-circle", "#F59E0B"
+                "not-ready", S.CARD_NEEDS_SETUP, "fa5s.exclamation-circle", "#F59E0B"
             )
             self._update_card_class("not-ready")
-
-        if self._setup_btn:
-            self._setup_btn.setText("Update" if self._wrapper.ready else "Setup")
 
     def _set_status(self, css_class: str, text: str, icon_name: str, color: str):
         self._status_icon.setPixmap(
@@ -204,4 +206,3 @@ class PluginCard(QFrame):
 
     def _toggle_enabled(self, checked: bool):
         self._wrapper.enabled = checked
-        self._enable_btn.setText("Enabled" if checked else "Disabled")

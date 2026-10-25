@@ -170,7 +170,7 @@ def render_samples(out_dir: Path) -> list[Path]:
             ctx = RenderContext(
                 colour_modifiers=True,
                 registry=ModifierRegistrySnapshot.default(colouring_enabled=True),
-                layouts={(key, ""): LayoutDocument(template_key=key, ops=ops)},
+                layouts={(key, "", ""): LayoutDocument(template_key=key, ops=ops)},
                 engine_override="dom",
                 now=NOW,
             )

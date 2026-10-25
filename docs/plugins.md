@@ -105,6 +105,18 @@ Called by the framework when it needs results from your plugin. Must return a `P
 
 Called after settings are restored from disk. Override this if you need to rebuild internal state from the loaded values, for example re-creating a parser instance with an updated file path.
 
+### suggested_paths() (optional)
+
+Return the folders (or files) where the game usually keeps its bindings, most likely first, such as `Path.home() / "Saved Games" / "DCS"`. In 1. Setup the app shows each candidate that exists for the player to confirm ("Found <path> · Last changed 24 Oct · Use this folder and read it", then "Also found…" for the rest); a suggestion is never used without the player seeing it. The default returns `[]`, which shows "Choose folder…" only. Keep it cheap: it runs on the UI thread and must not read the bindings.
+
+```python
+def suggested_paths(self) -> list[Path]:
+    saved_games = Path.home() / "Saved Games"
+    return [saved_games / "DCS", saved_games / "DCS.openbeta"]
+```
+
+This hook is only called by application versions that ship it; older versions ignore it, so no `min_app_version` change is needed.
+
 ### save_plugin_state() / load_settings()
 
 Both are handled by the framework. Don't call them yourself. Settings are persisted as `data.json` in the plugin's AppData directory.

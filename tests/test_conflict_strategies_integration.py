@@ -79,9 +79,9 @@ class TestGroupBInheritanceOnly:
 
         for strategy in InheritanceConflictStrategy:
             merged = child.merge_profiles(parent, strategy=strategy)
-            assert (
-                _btn_input(merged, GUID_D1, "BUTTON_1").command == "Aim"
-            ), f"gap-fill broke under {strategy}"
+            assert _btn_input(merged, GUID_D1, "BUTTON_1").command == "Aim", (
+                f"gap-fill broke under {strategy}"
+            )
 
     def test_b3a_conflict_keep_existing_drops_parent(self):
         child = _profile("P1", (GUID_D1, "D1", [(1, "Shoot")]))
@@ -207,9 +207,9 @@ class TestGroupCAliasOnly:
                 alias_service,
                 strategy=strategy,
             )
-            assert (
-                _btn_input(result, GUID_D1, "BUTTON_1").command == "Dodge"
-            ), f"alias gap-fill broke under {strategy}"
+            assert _btn_input(result, GUID_D1, "BUTTON_1").command == "Dodge", (
+                f"alias gap-fill broke under {strategy}"
+            )
             # original GUID should no longer be present
             assert GUID_D2 not in result.devices
 

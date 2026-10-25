@@ -1,7 +1,6 @@
 """Auto-add and Save-as-template dialogs, plus the note dialog (offscreen, no WebEngine)."""
 
 import os
-from unittest.mock import patch
 
 import pytest
 
@@ -146,11 +145,8 @@ def test_save_as_template_bakes_and_assigns(qapp, exports, tmp_path):
     assert not dialog.store_style.isEnabled()
     assert dialog.use_now.text() == "Use it for Gladiator NXT now"
     dialog.include_profile.setChecked(True)
-    with patch(
-        "joystick_diagrams.ui.layout_save_template_dialog.QMessageBox.information"
-    ) as info:
-        dialog.save()
-    assert info.call_count == 1
+    dialog.save()
+    assert dialog.result_text.startswith("✔ Saved to ")  # inline, no dialog
     path = dialog.saved_path
     assert path is not None and path.parent == tmp_path
     assert dialog.assigned and get_device_template_path(DEVICE_GUID) == str(path)

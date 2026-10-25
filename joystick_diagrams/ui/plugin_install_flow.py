@@ -1,7 +1,9 @@
-"""Shared plugin install + trust flow used by the Settings page and the Plugin Store.
+"""Adding a game or other app (a plugin, in code): one flow for 1. Setup, the
+game list dialog and Settings › Other apps.
 
-Wraps the post-install signing/trust check so both the manual "install from URL/ZIP"
-flow and the catalog-driven store apply identical security handling.
+Wraps the post-install signing/trust check so a file, a web address and the
+game list apply identical security handling. Problems are one plain sentence,
+with the system text behind Details (``show_problem``).
 """
 
 import logging
@@ -9,27 +11,35 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QWidget
 
+from joystick_diagrams.ui import strings_setup as S
+from joystick_diagrams.ui.widgets.confirm import show_problem
+
 _logger = logging.getLogger(__name__)
 
 
-def run_security_check(installed_path: Path, plugin_name: str, parent: QWidget) -> bool:
-    """Show the appropriate signing/trust dialog after installing a plugin.
+def _failed_title(plugin_type: str) -> str:
+    return S.ADD_FAILED_TITLE if plugin_type == "parser" else S.ADD_FAILED_TITLE_APP
 
-    Returns True if the plugin is signed (auto-accepted) or the user accepted an
-    unsigned plugin; False if the user cancelled.
-    """
+
+def _invalid_text(plugin_type: str) -> str:
+    return S.ADD_FAILED_INVALID if plugin_type == "parser" else S.ADD_FAILED_INVALID_APP
+
+
+def run_security_check(
+    installed_path: Path, plugin_name: str, parent: QWidget, for_app: bool = False
+) -> bool:
+    """True when the plugin is signed (Verified: added without a dialog) or the
+    player ticked "I trust where … came from"; False if they cancelled."""
     from joystick_diagrams.plugins.plugin_signing import verify_plugin_signature
     from joystick_diagrams.ui.plugin_security_dialog import (
         PluginSecurityWarningDialog,
-        PluginSignedDialog,
     )
 
     if verify_plugin_signature(installed_path):
-        PluginSignedDialog(plugin_name, parent).exec()
         return True
 
-    dialog = PluginSecurityWarningDialog(plugin_name, parent)
-    return dialog.exec() == PluginSecurityWarningDialog.Accepted
+    dialog = PluginSecurityWarningDialog(plugin_name, parent, for_app=for_app)
+    return dialog.exec() == PluginSecurityWarningDialog.DialogCode.Accepted
 
 
 def record_trust(plugin_name: str, plugin_type: str, installed_path: Path) -> None:
@@ -71,7 +81,7 @@ def reload_plugin_manager(app_state, plugin_type: str) -> None:
 def _refresh_setup_page(app_state) -> None:
     """Rebuild the Setup page's plugin cards, if that page has been created."""
     main_window = getattr(app_state, "main_window", None)
-    setup_page = getattr(main_window, "_setup_page", None)
+    setup_page = getattr(main_window, "setup_page", None)
     if setup_page is not None:
         setup_page.populate_plugin_cards()
 
@@ -164,25 +174,27 @@ def install_from_catalog(entry, app_state, parent: QWidget) -> str | None:
     """
     import shutil
 
-    from PySide6.QtWidgets import QMessageBox
-
     from joystick_diagrams.plugins.plugin_installer import (
         install_plugin,
         validate_plugin,
     )
 
+    title = _failed_title(entry.type)
     try:
         installed_path = install_plugin(
             entry.download_url, entry.type, expected_sha256=entry.sha256
         )
-    except Exception as e:
-        QMessageBox.warning(parent, "Install Failed", str(e))
+    except Exception as e:  # noqa: BLE001 - shown behind Details
+        _logger.error(f"Adding {entry.name} failed: {e}", exc_info=True)
+        show_problem(
+            parent, title, S.ADD_FAILED_DOWNLOAD.format(name=entry.name), str(e)
+        )
         return None
 
     valid, msg = validate_plugin(installed_path, entry.type)
     if not valid:
         shutil.rmtree(installed_path, ignore_errors=True)
-        QMessageBox.warning(parent, "Invalid Plugin", msg)
+        show_problem(parent, title, _invalid_text(entry.type), msg)
         return None
 
     manager = (
@@ -198,14 +210,12 @@ def install_from_catalog(entry, app_state, parent: QWidget) -> str | None:
         }
         if msg in bundled_names:
             shutil.rmtree(installed_path, ignore_errors=True)
-            QMessageBox.warning(
-                parent,
-                "Name Conflict",
-                f"A bundled plugin named '{msg}' already exists.",
-            )
+            show_problem(parent, title, S.ADD_NAME_TAKEN.format(name=msg))
             return None
 
-    if not run_security_check(installed_path, msg, parent):
+    if not run_security_check(
+        installed_path, msg, parent, for_app=entry.type != "parser"
+    ):
         shutil.rmtree(installed_path, ignore_errors=True)
         return None
 
@@ -237,30 +247,32 @@ def install_from_local_source(
     """
     import shutil
 
-    from PySide6.QtWidgets import QMessageBox
-
     from joystick_diagrams.plugins.plugin_installer import (
         install_plugin,
         validate_plugin,
     )
 
+    title = _failed_title(plugin_type)
     try:
         installed_path = install_plugin(source, plugin_type)
-    except Exception as e:
-        QMessageBox.warning(parent, "Install Failed", str(e))
+    except Exception as e:  # noqa: BLE001 - shown behind Details
+        _logger.error(f"Adding {source} failed: {e}", exc_info=True)
+        show_problem(parent, title, S.ADD_FAILED_FILE, str(e))
         return None
 
     valid, msg = validate_plugin(installed_path, plugin_type)
     if not valid:
         shutil.rmtree(installed_path, ignore_errors=True)
-        QMessageBox.warning(parent, "Invalid Plugin", msg)
+        show_problem(parent, title, _invalid_text(plugin_type), msg)
         return None
 
     # No bundled-name conflict check: every installed plugin is user-installed
     # since the plugins moved to their own repos, so there are no bundled names
     # to collide with.
 
-    if not run_security_check(installed_path, msg, parent):
+    if not run_security_check(
+        installed_path, msg, parent, for_app=plugin_type != "parser"
+    ):
         shutil.rmtree(installed_path, ignore_errors=True)
         return None
 

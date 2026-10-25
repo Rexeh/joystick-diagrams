@@ -116,6 +116,20 @@ class PluginInterface(ABC):
         pass
 
     # ------------------------------------------------------------------
+    # Optional hook — where the game usually keeps its bindings
+    # ------------------------------------------------------------------
+
+    def suggested_paths(self) -> list[Path]:
+        """Folders or files where this game's bindings are likely to be found.
+
+        Optional and additive. The Setup screen shows each existing candidate
+        for confirmation ("Found <path> · Use this folder and read it"); it never
+        uses one silently. Return the most likely candidate first. The default
+        returns ``[]``, which makes the screen fall back to "Choose folder…".
+        """
+        return []
+
+    # ------------------------------------------------------------------
     # Persistence
     # ------------------------------------------------------------------
 

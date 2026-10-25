@@ -87,7 +87,7 @@ def _labels(widget) -> set[str]:
 
 
 @pytest.mark.uitest
-def test_page_opens_with_original_selected_and_empty_preview(qapp, settings_store):
+def test_page_opens_with_original_selected_and_sample_preview(qapp, settings_store):
     _seed_app_state()
     page = CustomiseAppearance()
 
@@ -97,8 +97,16 @@ def test_page_opens_with_original_selected_and_empty_preview(qapp, settings_stor
     assert list(tab._cards)[0] == TEMPLATE_ORIGINAL_THEME_ID
     assert tab._cards[TEMPLATE_ORIGINAL_THEME_ID].badge.isVisibleTo(tab)
     assert not tab._editor_form_widget.isEnabled()
-    assert tab.empty_state.isVisibleTo(tab) and not tab.preview.isVisibleTo(tab)
+    # No controller has a template: the Starter Template with sample bindings
+    assert not tab.empty_state.isVisibleTo(tab) and tab.preview.isVisibleTo(tab)
+    assert tab.sample_note.isVisibleTo(tab) and not tab.preview_combo.isVisibleTo(tab)
+    assert tab._sample is not None and tab._sample.has_template
     assert tab.preview.web_view() is None  # WebEngine never started
+    # "Colour by modifier key" is a checkbox on the Style tab too
+    tab.colour_by_key.setChecked(True)
+    from joystick_diagrams.modifier_identity import modifier_colouring_enabled
+
+    assert modifier_colouring_enabled()
 
 
 @pytest.mark.uitest

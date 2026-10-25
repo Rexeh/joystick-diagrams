@@ -5,10 +5,13 @@ before an export batch starts; the worker never reads services or the database
 for anything the context carries: the resolved theme, the modifier key registry
 snapshot (with its colouring/sides/key-display flags), the "Showing modifiers"
 choice, the custom-label snapshot and the layout documents
-(``layouts[(template_key, profile_key)]`` with ``profile_key == ""`` for the
-template layer; see ``render/layout.py``). ``layers_for`` resolves the two
-layers one render needs; ``preview=True`` asks the layout stage to annotate the
-SVG with ``data-jd-*`` attributes for the editor overlay.
+(``layouts[(template_key, device_guid, profile_key)]`` with ``profile_key == ""``
+for the template layer and ``device_guid == ""`` for the layer shared by every
+controller on that template; see ``render/layout.py`` and
+``db/layout_service.py``). ``layers_for`` resolves the two layers one render
+needs, preferring the controller's own layer over the shared one;
+``preview=True`` asks the layout stage to annotate the SVG with ``data-jd-*``
+attributes for the editor overlay.
 
 ``choose_engine`` implements the decision-5 guarantee: the legacy regex engine
 runs unless the user has opted into something that needs the DOM engine (a
@@ -98,8 +101,8 @@ class RenderContext:
         None  # modifier key registry; None → seeds, colouring off
     )
     modifier_display: ModifierDisplay = ModifierDisplay.TEMPLATE_BOXES
-    layouts: Mapping[tuple[str, str], Any] = (
-        _EMPTY_MAP  # (template_key, profile_key) -> LayoutDocument; "" = template layer
+    layouts: Mapping[tuple[str, str, str], Any] = (
+        _EMPTY_MAP  # (template_key, device_guid, profile_key) -> LayoutDocument
     )
     labels: Mapping[str, str] | None = (
         None  # snapshot of custom labels; None → no resolution
@@ -116,32 +119,50 @@ class RenderContext:
             and self.registry.key_display is ModifierKeyDisplay.SIMPLIFIED
         )
 
-    def layers_for(self, template_key: str | None, profile_key: str | None):
+    def _layer(self, template_key: str, device_guid: str | None, profile_key: str):
+        """The controller's own row for one layer, else the shared (``""``) row."""
+        if device_guid:
+            value = self.layouts.get((template_key, device_guid, profile_key))
+            if value is not None:
+                return value
+        return self.layouts.get((template_key, "", profile_key))
+
+    def layers_for(
+        self,
+        template_key: str | None,
+        device_guid: str | None,
+        profile_key: str | None,
+    ):
         """``LayoutLayers`` (template layer then profile layer) for one render."""
         from joystick_diagrams.render.layout import LayoutDocument, LayoutLayers
 
         if template_key is None:
             return LayoutLayers()
-        template = self.layouts.get((template_key, ""))
-        profile = self.layouts.get((template_key, profile_key)) if profile_key else None
-        return (
-            LayoutLayers(
-                _as_document(template, template_key, ""),
-                _as_document(profile, template_key, profile_key or ""),
-            )
-            if (template is not None or profile is not None)
-            else LayoutLayers(
+        template = self._layer(template_key, device_guid, "")
+        profile = (
+            self._layer(template_key, device_guid, profile_key) if profile_key else None
+        )
+        if template is None and profile is None:
+            return LayoutLayers(
                 LayoutDocument(template_key=template_key),
                 LayoutDocument(template_key=template_key),
             )
+        return LayoutLayers(
+            _as_document(template, template_key, ""),
+            _as_document(profile, template_key, profile_key or ""),
         )
 
-    def has_layout_ops(self, template_key: str | None, profile_key: str | None) -> bool:
+    def has_layout_ops(
+        self,
+        template_key: str | None,
+        device_guid: str | None,
+        profile_key: str | None,
+    ) -> bool:
         """Whether either layer for this diagram holds ops (duck-typed for tests)."""
         if template_key is None:
             return False
-        for key in ((template_key, profile_key or ""), (template_key, "")):
-            value = self.layouts.get(key)
+        for layer in (profile_key or "", ""):
+            value = self._layer(template_key, device_guid, layer)
             if value is None:
                 continue
             if not (
@@ -182,12 +203,13 @@ def choose_engine(ctx: RenderContext, export_device: Any) -> Engine:
     profile_key = getattr(
         getattr(export_device, "profile_wrapper", None), "profile_key", None
     )
+    device_guid = getattr(export_device, "device_id", None)
     opted_in = (
         ctx.theme is not None
         or ctx.colour_modifiers
         or ctx.modifier_display is ModifierDisplay.UNDER_MAIN_TEXT
         or ctx.simplified_key_names
-        or ctx.has_layout_ops(template_key, profile_key)
+        or ctx.has_layout_ops(template_key, device_guid, profile_key)
     )
     return Engine.DOM if opted_in else Engine.LEGACY
 
@@ -214,7 +236,7 @@ def snapshot_registry() -> ModifierRegistrySnapshot:
     )
 
 
-def snapshot_layouts() -> Mapping[tuple[str, str], Any]:
+def snapshot_layouts() -> Mapping[tuple[str, str, str], Any]:
     """Every stored layout document; empty when no ``AppState`` exists."""
     from joystick_diagrams.app_state import AppState
 

@@ -87,6 +87,7 @@ def render_device(
         hooks=hooks if hooks is not None else default_hooks(),
         doc=document.copy() if document is not None else None,
         template_key=getattr(template, "template_key", None),
+        device_guid=getattr(export_device, "device_id", None),
         profile_key=getattr(export_device.profile_wrapper, "profile_key", None),
         content_hash=_safe_content_hash(template),
     )

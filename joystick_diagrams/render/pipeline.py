@@ -73,6 +73,7 @@ class RenderJob:
     output: str | None = None
     # Identity of what is rendered, for layout lookups (None when unknown/mocked).
     template_key: str | None = None
+    device_guid: str | None = None
     profile_key: str | None = None
     content_hash: str | None = None
     layers: Any = None  # explicit LayoutLayers; None → ctx.layers_for(...)
