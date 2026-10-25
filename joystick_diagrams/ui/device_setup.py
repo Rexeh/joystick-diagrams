@@ -20,7 +20,7 @@ from joystick_diagrams.db.db_device_management import (
     get_device_template_path,
 )
 from joystick_diagrams.export_device import ExportDevice
-from joystick_diagrams.ui import ui_consts
+from joystick_diagrams.ui import strings_layout, ui_consts
 from joystick_diagrams.ui.device_setup_controller import (
     get_export_devices,
 )
@@ -35,6 +35,8 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
     device_checkstate_changed = Signal()
     number_of_selected_profiles = Signal(int)
     template_set_requested = Signal()
+    preview_requested = Signal(object)  # ExportDevice
+    edit_layout_requested = Signal(str)  # device guid
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -113,10 +115,16 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         menu = QMenu(self)
         set_action = menu.addAction("Set Template...")
         clear_action = menu.addAction("Clear Template")
+        menu.addSeparator()
+        preview_action = menu.addAction(strings_layout.MENU_PREVIEW)
+        edit_layout_action = menu.addAction(strings_layout.MENU_EDIT_LAYOUT)
 
         guid = item.data(0, Qt.ItemDataRole.UserRole)
         has_template = bool(get_device_template_path(guid)) if guid else False
         clear_action.setEnabled(has_template)
+        first_profile = self.first_export_device(item)
+        preview_action.setEnabled(has_template and first_profile is not None)
+        edit_layout_action.setEnabled(has_template and first_profile is not None)
 
         action = menu.exec(self.treeWidget.viewport().mapToGlobal(position))
 
@@ -127,6 +135,31 @@ class DeviceSetup(QMainWindow, device_setup_ui.Ui_Form):
         elif action == clear_action and guid:
             add_update_device_template_path(guid, "")
             self.devices_updated.emit()
+        elif action == preview_action and first_profile is not None:
+            self.preview_requested.emit(first_profile)
+        elif action == edit_layout_action and guid:
+            self.edit_layout_requested.emit(guid)
+
+    @staticmethod
+    def first_export_device(root: QTreeWidgetItem) -> ExportDevice | None:
+        """The first profile's ``ExportDevice`` under a device row (None without template)."""
+        for index in range(root.childCount()):
+            data = root.child(index).data(0, Qt.ItemDataRole.UserRole)
+            if isinstance(data, ExportDevice) and data.has_template:
+                return data
+        return None
+
+    def export_devices_for(self, guid: str) -> list[ExportDevice]:
+        """Every profile's ``ExportDevice`` for the device ``guid``."""
+        for root in self.get_all_root_nodes():
+            if root.data(0, Qt.ItemDataRole.UserRole) != guid:
+                continue
+            return [
+                child.data(0, Qt.ItemDataRole.UserRole)
+                for child in self.get_children_for_root_node(root)
+                if isinstance(child.data(0, Qt.ItemDataRole.UserRole), ExportDevice)
+            ]
+        return []
 
     def initialise_ui(self):
         devices = get_export_devices()

@@ -2,6 +2,7 @@
 
 from joystick_diagrams.conflict_strategy import AliasConflictStrategy
 from joystick_diagrams.input.button import Button
+from joystick_diagrams.input.modifier import ModifierKind
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.input_routing import (
     RouteKey,
@@ -373,3 +374,156 @@ class TestUnionProfileRoutes:
 
         assert result[k1] == [RouteTarget(PHYS_GUID, "buttons", "BUTTON_1", "")]
         assert result[k2] == [RouteTarget(PHYS_GUID, "buttons", "BUTTON_2", "")]
+
+
+# ── Modifier preservation (plan 2.4) ──────────────────────────────────
+
+
+def _routes_to(*targets: RouteTarget, source_button: int = 108):
+    return {RouteKey(VJOY_GUID, "buttons", f"BUTTON_{source_button}"): list(targets)}
+
+
+class TestApplyRoutesModifiers:
+    def test_modifiers_survive_a_single_route(self):
+        """A DCS-style modifier bound on a routed vJoy input appears on the
+        physical destination (previously dropped)."""
+        profile = _profile_with_vjoy_button(108, "Fire Weapon")
+        vjoy = profile.get_device(VJOY_GUID)
+        vjoy.add_modifier_to_input(Button(108), {"LShift"}, "Fire Missile")
+        vjoy.add_modifier_to_input(Button(108), {"LCtrl", "LAlt"}, "Jettison")
+
+        apply_routes(
+            profile,
+            _routes_to(RouteTarget(PHYS_GUID, "buttons", "BUTTON_1", "")),
+            strategy=AliasConflictStrategy.CONCATENATE,
+            device_names={PHYS_GUID: "Physical Stick"},
+        )
+
+        input_ = profile.get_device(PHYS_GUID).get_input("buttons", "BUTTON_1")
+        assert input_.command == "Fire Weapon"
+        assert [(m.modifiers, m.command) for m in input_.modifiers] == [
+            ({"LShift"}, "Fire Missile"),
+            ({"LCtrl", "LAlt"}, "Jettison"),
+        ]
+        assert all(m.kind is ModifierKind.KEY for m in input_.modifiers)
+
+    def test_fan_out_targets_get_independent_modifier_objects(self):
+        """One source routed to two targets: mutating a modifier on one target
+        must not change the other (deepcopy per destination, not at capture)."""
+        profile = _profile_with_vjoy_button(108, "Fire Weapon")
+        profile.get_device(VJOY_GUID).add_modifier_to_input(
+            Button(108), {"LShift"}, "Fire Missile"
+        )
+
+        apply_routes(
+            profile,
+            _routes_to(
+                RouteTarget(PHYS_GUID, "buttons", "BUTTON_1", ""),
+                RouteTarget(OTHER_GUID, "buttons", "BUTTON_5", ""),
+            ),
+            strategy=AliasConflictStrategy.CONCATENATE,
+            device_names={},
+        )
+
+        first = profile.get_device(PHYS_GUID).get_input("buttons", "BUTTON_1")
+        second = profile.get_device(OTHER_GUID).get_input("buttons", "BUTTON_5")
+        assert first.modifiers[0] is not second.modifiers[0]
+        assert first.modifiers[0].modifiers is not second.modifiers[0].modifiers
+
+        first.add_modifier({"LShift"}, "Changed")
+        assert first.modifiers[0].command == "Changed"
+        assert second.modifiers[0].command == "Fire Missile"
+
+    def test_routed_modifiers_merge_into_existing_destination_winner_wins(self):
+        """Destination already bound with its own modifiers: routed modifiers
+        are appended via key-set dedup and the existing one wins a collision."""
+        profile = Profile_("test")
+        vjoy = profile.add_device(VJOY_GUID, "vJoy")
+        vjoy.create_input(Button(108), "Routed Cmd")
+        vjoy.add_modifier_to_input(Button(108), {"LShift"}, "Routed Shift")
+        vjoy.add_modifier_to_input(Button(108), {"LAlt"}, "Routed Alt")
+        phys = profile.add_device(PHYS_GUID, "Physical Stick")
+        phys.create_input(Button(1), "Existing Cmd")
+        phys.add_modifier_to_input(Button(1), {"LShift"}, "Existing Shift")
+
+        apply_routes(
+            profile,
+            _routes_to(RouteTarget(PHYS_GUID, "buttons", "BUTTON_1", "Long")),
+            strategy=AliasConflictStrategy.MODIFIER,
+            device_names={},
+        )
+
+        input_ = phys.get_input("buttons", "BUTTON_1")
+        assert input_.command == "Existing Cmd"
+        assert [(m.modifiers, m.command) for m in input_.modifiers] == [
+            ({"LShift"}, "Existing Shift"),
+            ({"Long"}, "Routed Cmd"),
+            ({"LAlt"}, "Routed Alt"),
+        ]
+
+    def test_route_qualifier_is_a_qualifier_modifier_with_route_source(self):
+        profile = Profile_("test")
+        vjoy = profile.add_device(VJOY_GUID, "vJoy")
+        vjoy.create_input(Button(108), "Fire Weapon")
+        vjoy.create_input(Button(109), "Target Lock")
+        vjoy.add_modifier_to_input(Button(109), {"LShift"}, "Target Unlock")
+
+        routes = {
+            RouteKey(VJOY_GUID, "buttons", "BUTTON_108"): [
+                RouteTarget(PHYS_GUID, "buttons", "BUTTON_1", "Short"),
+            ],
+            RouteKey(VJOY_GUID, "buttons", "BUTTON_109"): [
+                RouteTarget(PHYS_GUID, "buttons", "BUTTON_1", "Long"),
+            ],
+        }
+        apply_routes(
+            profile, routes, strategy=AliasConflictStrategy.MODIFIER, device_names={}
+        )
+
+        input_ = profile.get_device(PHYS_GUID).get_input("buttons", "BUTTON_1")
+        promoted, carried = input_.modifiers
+        assert promoted.modifiers == {"Long"}
+        assert promoted.kind is ModifierKind.QUALIFIER
+        assert promoted.source == "route"
+        # The loser's own real-key modifier is carried along, still a KEY
+        assert carried.modifiers == {"LShift"}
+        assert carried.command == "Target Unlock"
+        assert carried.kind is ModifierKind.KEY
+
+    def test_fallback_input_id_qualifier_has_input_source(self):
+        profile = Profile_("test")
+        vjoy = profile.add_device(VJOY_GUID, "vJoy")
+        vjoy.create_input(Button(108), "Routed Cmd")
+        phys = profile.add_device(PHYS_GUID, "Physical Stick")
+        phys.create_input(Button(1), "Existing Cmd")
+
+        apply_routes(
+            profile,
+            _routes_to(RouteTarget(PHYS_GUID, "buttons", "BUTTON_1", "")),
+            strategy=AliasConflictStrategy.MODIFIER,
+            device_names={},
+        )
+
+        promoted = phys.get_input("buttons", "BUTTON_1").modifiers[0]
+        assert promoted.modifiers == {"BUTTON_108"}
+        assert promoted.kind is ModifierKind.QUALIFIER
+        assert promoted.source == "input"
+
+    def test_modifier_only_source_input_is_routed(self):
+        """A vJoy input that only exists as a modifier shell (command "")
+        still carries its modifiers to the destination."""
+        profile = Profile_("test")
+        vjoy = profile.add_device(VJOY_GUID, "vJoy")
+        vjoy.add_modifier_to_input(Button(108), {"lalt"}, "Toggle Lights")
+
+        apply_routes(
+            profile,
+            _routes_to(RouteTarget(PHYS_GUID, "buttons", "BUTTON_1", "")),
+            strategy=AliasConflictStrategy.CONCATENATE,
+            device_names={},
+        )
+
+        input_ = profile.get_device(PHYS_GUID).get_input("buttons", "BUTTON_1")
+        assert input_.command == ""
+        assert input_.modifiers[0].modifiers == {"lalt"}
+        assert input_.modifiers[0].command == "Toggle Lights"

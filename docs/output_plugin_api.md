@@ -144,11 +144,22 @@ Each `input_control` is one of:
 Modifiers represent alternative bindings when modifier keys are held:
 
 ```python
+from joystick_diagrams.input.modifier import ModifierKind
+
 for mod in input_obj.modifiers:
-    mod.modifiers  # set[str] - e.g. {"Ctrl", "Shift"}
-    mod.command    # str - the command when these modifiers are active
-    str(mod)       # "Fire - Ctrl+Shift"
+    mod.modifiers    # set[str] - raw keys as the game names them, e.g. {"LShift", "LCtrl"}
+    mod.command      # str - the command when these modifiers are active
+    mod.sorted_keys  # tuple[str, ...] - keys in the built-in rank order: ("LCtrl", "LShift")
+    mod.kind         # ModifierKind.KEY (a real key) or ModifierKind.QUALIFIER (a label)
+    mod.source       # str | None - for qualifiers: "profile", "device", "route" or "input"
+    str(mod)         # "Fire - LCtrl+LShift"
 ```
+
+**Key order.** `str(mod)`, `mod.sorted_keys` and the `*_MODIFIER_N_KEY` template text use a fixed built-in rank — Ctrl, Alt, Shift, Win, then everything else alphabetically — on the side-stripped, case-folded name (`LShift` ranks as Shift). The raw spellings are kept; only the order is fixed. Never rely on the iteration order of `mod.modifiers` itself.
+
+**Kind.** `ModifierKind.QUALIFIER` marks a modifier the application synthesised while merging: a parent profile name (`source="profile"`), an aliased device name (`"device"`), a Joystick Gremlin route qualifier such as `Long` (`"route"`) or a fallback input id such as `BUTTON_108` (`"input"`). Qualifiers are labels, not keys the user holds, so don't treat them as keyboard keys. `kind` and `source` take no part in equality or `repr`; two modifiers with the same key set compare equal regardless.
+
+The ordering helpers `modifier_sort_key(token)` and `ordered_keys(keys)` are importable from `joystick_diagrams.input.modifier` if you need the same order for your own key lists.
 
 ## Plugin Settings
 
@@ -261,7 +272,7 @@ class OutputPlugin(OutputPluginInterface):
                 if input_obj.modifiers:
                     entry["modifiers"] = [
                         {
-                            "keys": sorted(m.modifiers),
+                            "keys": list(m.sorted_keys),
                             "command": m.command,
                         }
                         for m in input_obj.modifiers

@@ -10,11 +10,14 @@ from joystick_diagrams.db import (
     db_bind_text,
     db_device_aliases,
     db_device_management,
+    db_modifier_keys,
     db_plugin_data,
     db_plugin_trust,
     db_profile_parents,
     db_profiles,
     db_settings,
+    db_template_layouts,
+    db_themes,
 )
 
 _logger = logging.getLogger(__name__)
@@ -32,6 +35,9 @@ def init() -> None:
     db_plugin_trust.create_new_db_if_not_exist()
     db_profiles.create_new_db_if_not_exist()
     db_profile_parents.create_new_db_if_not_exist()
+    db_modifier_keys.create_new_db_if_not_exist()
+    db_themes.create_new_db_if_not_exist()
+    db_template_layouts.create_new_db_if_not_exist()
 
 
 if __name__ == "__main__":

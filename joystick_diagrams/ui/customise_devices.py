@@ -1,5 +1,4 @@
 import logging
-import os
 from collections import defaultdict
 from pathlib import Path
 
@@ -10,7 +9,6 @@ from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
     QComboBox,
-    QFileDialog,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -29,13 +27,15 @@ from joystick_diagrams.db.db_device_management import (
     get_device_template_path,
     remove_template_path_from_device,
 )
-from joystick_diagrams.utils import install_root
+from joystick_diagrams.ui import strings_layout
+from joystick_diagrams.ui.template_picker import pick_template
 
 _logger = logging.getLogger(__name__)
 
 
 class CustomiseDevices(QWidget):
     devices_changed = Signal()
+    edit_layout_requested = Signal(str)  # device guid
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -246,6 +246,13 @@ class CustomiseDevices(QWidget):
         self._clear_template_btn.setProperty("class", "plugin-setup-button")
         self._clear_template_btn.clicked.connect(self._on_template_clear)
         template_btn_row.addWidget(self._clear_template_btn)
+
+        self._edit_layout_btn = QPushButton(strings_layout.DEVICES_EDIT_LAYOUT)
+        self._edit_layout_btn.setIcon(qta.icon("fa5s.th-large", color="white"))
+        self._edit_layout_btn.setIconSize(QSize(14, 14))
+        self._edit_layout_btn.setProperty("class", "plugin-setup-button")
+        self._edit_layout_btn.clicked.connect(self._on_edit_layout)
+        template_btn_row.addWidget(self._edit_layout_btn)
 
         template_btn_row.addStretch()
         detail_content_layout.addLayout(template_btn_row)
@@ -559,6 +566,7 @@ class CustomiseDevices(QWidget):
             self._template_label.setToolTip(template_path)
             self._template_label.setStyleSheet("color: #E8EAED; font-size: 12px;")
             self._clear_template_btn.setEnabled(True)
+            self._edit_layout_btn.setEnabled(True)
         else:
             self._template_label.setText("Not assigned")
             self._template_label.setToolTip("")
@@ -566,6 +574,7 @@ class CustomiseDevices(QWidget):
                 "color: #6B7280; font-style: italic; font-size: 12px;"
             )
             self._clear_template_btn.setEnabled(False)
+            self._edit_layout_btn.setEnabled(False)
 
     # ── Actions ──
 
@@ -620,18 +629,16 @@ class CustomiseDevices(QWidget):
         if not self._selected_guid:
             return
 
-        default_dir = os.path.join(install_root(), "templates")
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Select SVG Template",
-            default_dir,
-            "SVG Files (*.svg)",
-        )
+        file_path = pick_template(self, "Select SVG Template")
 
         if file_path:
-            add_update_device_template_path(self._selected_guid, file_path)
+            add_update_device_template_path(self._selected_guid, str(file_path))
             self.devices_changed.emit()
             self.refresh()
+
+    def _on_edit_layout(self):
+        if self._selected_guid:
+            self.edit_layout_requested.emit(self._selected_guid)
 
     def _on_template_clear(self):
         if not self._selected_guid:

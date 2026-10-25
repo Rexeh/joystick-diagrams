@@ -51,6 +51,20 @@ def user_output_plugins_root() -> Path:
     return root
 
 
+USER_TEMPLATES_DIR_NAME = "My templates"
+
+
+def user_templates_root() -> Path:
+    """The user's own templates folder (``data_root()/templates/My templates``).
+
+    Created on demand because ``install_root()`` may be read-only (plan §5.7).
+    """
+    root = Path.joinpath(data_root(), "templates", USER_TEMPLATES_DIR_NAME)
+    if not root.is_dir():
+        create_directory(root)
+    return root
+
+
 def create_directory(directory) -> None:
     try:
         if not Path(directory).exists():

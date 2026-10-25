@@ -109,6 +109,24 @@ Called after settings are restored from disk. Override this if you need to rebui
 
 Both are handled by the framework. Don't call them yourself. Settings are persisted as `data.json` in the plugin's AppData directory.
 
+## Modifiers
+
+A modifier is an alternative binding that applies while one or more keys are held. Add one with `device.add_modifier_to_input(control, {"LCtrl", "LShift"}, "Command")` (or `input_.add_modifier(...)` on an `Input_`).
+
+**Vocabulary.** Put **one key per set element** and use the **game's own key names** exactly as the game writes them (`"LShift"`, `"RCtrl"`, `"lalt"`, `"JOY_BTN3"`, `"BMS DX Shift"`). Don't pre-normalise, merge left/right, change case or build `"Ctrl+Shift"` strings yourself: the application groups the keys (`LShift`/`lshift`/`RShift` → Shift), orders them deterministically (Ctrl, Alt, Shift, Win, then others alphabetically) and styles them at export time, and users can add their own aliases for keys it doesn't know. Keys that name a button on a device (`JOY_BTN3`, `BUTTON_5`, `POV_1_U`) are recognised as device inputs rather than keyboard keys.
+
+**Dedup.** Modifiers on one input are deduplicated by exact key-set equality; the last write wins for the command. `{"LCtrl"}` and `{"RCtrl"}` are two different modifiers.
+
+**Qualifiers (optional, `kind=`).** A modifier whose "keys" are not keys at all — a mode name, a sub-profile, a "long press" label — can be flagged so it is never aliased to a keyboard key or coloured:
+
+```python
+from joystick_diagrams.input.modifier import ModifierKind
+
+device.add_modifier_to_input(Button(1), {"Mode 2"}, "Command", kind=ModifierKind.QUALIFIER)
+```
+
+`kind` defaults to `ModifierKind.KEY`, so existing plugins need no change. The `kind=` keyword is only accepted by application versions that ship it: set `min_app_version` in the plugin catalog accordingly, otherwise older applications raise `TypeError`.
+
 ## Settings access
 
 | Method | Description |

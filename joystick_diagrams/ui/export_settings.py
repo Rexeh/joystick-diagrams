@@ -3,9 +3,21 @@ import os
 import sys
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
+from PySide6.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QFileDialog,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+)
 
 from joystick_diagrams.db.db_settings import add_update_setting_value, get_setting
+from joystick_diagrams.render.theme import (
+    ORIGINAL_THEME_NAME,
+    TEMPLATE_ORIGINAL_THEME_ID,
+)
+from joystick_diagrams.ui import strings_appearance
 from joystick_diagrams.ui.qt_designer import export_settings
 from joystick_diagrams.utils import install_root
 
@@ -17,6 +29,8 @@ EXPORT_FORMAT_SETTING_KEY = "export_format"
 
 class ExportSettings(QMainWindow, export_settings.Ui_Form):
     export_path_changed = Signal()
+    edit_style_requested = Signal()
+    style_changed = Signal(str)  # theme id
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +56,9 @@ class ExportSettings(QMainWindow, export_settings.Ui_Form):
             self.export_format.setCurrentIndex(index)
 
         self.export_format.currentIndexChanged.connect(self._on_format_changed)
+
+        # Style row (programmatic: the designer file is generated, plan §5.5.2)
+        self._build_style_row()
 
         # Setup
         self.setup_widget()
@@ -69,6 +86,71 @@ class ExportSettings(QMainWindow, export_settings.Ui_Form):
 
     def get_export_format(self) -> str:
         return self.export_format.currentData() or "SVG"
+
+    # ── Style row ──
+
+    def _build_style_row(self):
+        """ "Style: [combo] Edit…" next to Export Format, bound to the active style."""
+        self.export_format_container.addSpacing(16)
+        self.export_style_label = QLabel(strings_appearance.EXPORT_STYLE_LABEL)
+        font = self.export_format_label.font()
+        self.export_style_label.setFont(font)
+        self.export_format_container.addWidget(self.export_style_label)
+
+        self.export_style = QComboBox()
+        self.export_style.setProperty("class", "view-binds-list")
+        self.export_style.setMinimumWidth(180)
+        self.export_style.currentIndexChanged.connect(self._on_style_changed)
+        self.export_format_container.addWidget(self.export_style)
+
+        self.edit_style_button = QPushButton(strings_appearance.EXPORT_STYLE_EDIT)
+        self.edit_style_button.setProperty("class", "plugin-setup-button")
+        self.edit_style_button.clicked.connect(self.edit_style_requested.emit)
+        self.export_format_container.addWidget(self.edit_style_button)
+        self.export_format_container.addStretch(1)
+        self.refresh_style_combo()
+
+    @staticmethod
+    def _theme_service():
+        from joystick_diagrams.app_state import AppState
+
+        return AppState().theme_service if AppState._inst is not None else None
+
+    def refresh_style_combo(self):
+        """Rebuild the style list from the theme service and select the active style."""
+        service = self._theme_service()
+        self.export_style.blockSignals(True)
+        self.export_style.clear()
+        self.export_style.addItem(ORIGINAL_THEME_NAME, TEMPLATE_ORIGINAL_THEME_ID)
+        active = TEMPLATE_ORIGINAL_THEME_ID
+        if service is not None:
+            for theme in service.all_themes():
+                self.export_style.addItem(theme.name, theme.theme_id)
+            active = service.active_theme_id()
+        index = self.export_style.findData(active)
+        self.export_style.setCurrentIndex(max(index, 0))
+        self.export_style.blockSignals(False)
+        visible = service is not None
+        for widget in (
+            self.export_style_label,
+            self.export_style,
+            self.edit_style_button,
+        ):
+            widget.setVisible(visible)
+
+    def get_style_id(self) -> str:
+        return self.export_style.currentData() or TEMPLATE_ORIGINAL_THEME_ID
+
+    def get_style_name(self) -> str:
+        return self.export_style.currentText() or ORIGINAL_THEME_NAME
+
+    def _on_style_changed(self, index: int):
+        theme_id = self.export_style.itemData(index)
+        service = self._theme_service()
+        if theme_id is None or service is None:
+            return
+        service.set_active(theme_id)
+        self.style_changed.emit(theme_id)
 
     def _on_format_changed(self, index: int):
         fmt = self.export_format.currentData()

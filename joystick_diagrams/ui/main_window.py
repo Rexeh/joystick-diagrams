@@ -497,6 +497,9 @@ class MainWindow(QMainWindow, main_window.Ui_MainWindow):
             page = getattr(self, attr)
             if page is not None:
                 self._page_stack.removeWidget(page)
+                shutdown = getattr(page, "shutdown", None)
+                if callable(shutdown):
+                    shutdown()  # WebEngine pages go before anything else (plan §5.6)
                 page.deleteLater()
                 setattr(self, attr, None)
 

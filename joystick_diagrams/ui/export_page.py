@@ -1,5 +1,4 @@
 import logging
-import os
 import webbrowser
 from pathlib import Path
 
@@ -7,11 +6,11 @@ import qtawesome as qta
 from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
-    QFileDialog,
     QHBoxLayout,
     QLabel,
     QMainWindow,
     QMessageBox,
+    QPushButton,
     QSizePolicy,
     QTreeWidgetItem,
     QVBoxLayout,
@@ -19,21 +18,56 @@ from PySide6.QtWidgets import (
 )
 
 from joystick_diagrams.app_state import AppState
+from joystick_diagrams.db import db_settings
 from joystick_diagrams.db.db_device_management import (
     add_update_device_template_path,
 )
 from joystick_diagrams.db.db_settings import get_setting
-from joystick_diagrams.export import export
+from joystick_diagrams.export import export_with_report
 from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.modifier_identity import ModifierDisplay
 from joystick_diagrams.plugins.output_plugin_interface import ExportResult
-from joystick_diagrams.ui import main_window, ui_consts
+from joystick_diagrams.render import RenderContext, build_render_context
+from joystick_diagrams.render.theme import TEMPLATE_ORIGINAL_THEME_ID
+from joystick_diagrams.ui import (
+    main_window,
+    strings_appearance,
+    strings_layout,
+    ui_consts,
+)
 from joystick_diagrams.ui.device_setup import DeviceSetup
 from joystick_diagrams.ui.export_settings import ExportSettings
+from joystick_diagrams.ui.export_summary import (
+    ExportSummary,
+    build_summary,
+    entry_for,
+    styled_context,
+)
 from joystick_diagrams.ui.qt_designer import export_ui
+from joystick_diagrams.ui.template_picker import pick_template
 from joystick_diagrams.ui.widgets.section_header import SectionHeader
-from joystick_diagrams.utils import install_root
 
 _logger = logging.getLogger(__name__)
+
+WHATS_NEW_STYLES_DISMISSED_SETTING_KEY = "whats_new_styles_dismissed"
+
+
+def summary_message_box(parent, text: str, details: str):
+    """The "Export Completed" box: summary text, details and Open folder / Done."""
+    msg_box = QMessageBox(parent)
+    msg_box.setWindowIcon(QIcon(ui_consts.JD_ICON))
+    msg_box.setWindowTitle(strings_layout.SUMMARY_TITLE)
+    msg_box.setText(text)
+    if details:
+        msg_box.setDetailedText(details)
+    open_button = msg_box.addButton(
+        strings_layout.SUMMARY_OPEN_FOLDER, QMessageBox.ButtonRole.ActionRole
+    )
+    done_button = msg_box.addButton(
+        strings_layout.SUMMARY_DONE, QMessageBox.ButtonRole.AcceptRole
+    )
+    msg_box.setDefaultButton(done_button)
+    return msg_box, open_button
 
 
 class ExportPage(QMainWindow, export_ui.Ui_Form):
@@ -50,6 +84,11 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
             "Select devices, assign templates, and export your diagrams",
         )
         self.verticalLayout.insertWidget(0, self.section_header)
+
+        # One-time "New: styles" banner (plan §5.5.2); nothing changes until clicked
+        self._whats_new_banner = self._build_whats_new_banner()
+        if self._whats_new_banner is not None:
+            self.verticalLayout.insertWidget(1, self._whats_new_banner)
 
         self.ExportButton.clicked.connect(self.run_exporter)
 
@@ -80,6 +119,10 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         self.device_widget.number_of_selected_profiles.connect(
             self.update_export_button_state
         )
+        self.device_widget.preview_requested.connect(self.open_preview)
+        self.device_widget.edit_layout_requested.connect(self.open_layout_editor)
+        self._preview_window = None
+        self._last_summary: ExportSummary | None = None
 
         # Double-click to set template on device tree
         self.device_widget.treeWidget.doubleClicked.connect(self._on_tree_double_click)
@@ -91,6 +134,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
 
         ## Include Export Settings Panel
         self.export_settings_widget = ExportSettings()
+        self.export_settings_widget.edit_style_requested.connect(self.open_appearance)
         self.export_bottom_section.setProperty("class", "export-bottom-container")
         self.export_settings_container.setProperty("class", "export-settings-container")
 
@@ -123,9 +167,12 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         # Size distribution: device list absorbs extra vertical space; bottom
         # settings section stays at its natural size. The Qt Designer file
         # sets no stretch factors, so space was being split equally.
+        offset = 1 if self._whats_new_banner is not None else 0
         self.verticalLayout.setStretch(0, 0)  # heading
-        self.verticalLayout.setStretch(1, 1)  # devices_layout
-        self.verticalLayout.setStretch(2, 0)  # export_bottom_section
+        if offset:
+            self.verticalLayout.setStretch(1, 0)  # banner
+        self.verticalLayout.setStretch(1 + offset, 1)  # devices_layout
+        self.verticalLayout.setStretch(2 + offset, 0)  # export_bottom_section
 
         # The ExportSettings widget itself has inner stretches of (1, 1, 1)
         # from the generated Qt Designer file, plus vertically-Expanding size
@@ -197,6 +244,84 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
     def refresh(self):
         """Refresh dynamic state when navigating back to this page."""
         self._refresh_output_plugins_panel()
+        self.export_settings_widget.refresh_style_combo()
+
+    # ── Styles: banner and navigation ──
+
+    def _build_whats_new_banner(self) -> QWidget | None:
+        # Module lookup so the setting is read at call time (tests patch it)
+        if db_settings.get_setting(WHATS_NEW_STYLES_DISMISSED_SETTING_KEY) == "true":
+            return None
+        banner = QWidget()
+        banner.setProperty("class", "guidance-banner")
+        row = QHBoxLayout(banner)
+        row.setContentsMargins(12, 8, 12, 8)
+        row.setSpacing(10)
+        icon = QLabel()
+        icon.setPixmap(qta.icon("fa5s.palette", color="#4C8BF5").pixmap(QSize(18, 18)))
+        row.addWidget(icon)
+        text = QLabel(strings_appearance.WHATS_NEW_TEXT)
+        text.setWordWrap(True)
+        row.addWidget(text, 1)
+        try_button = QPushButton(strings_appearance.WHATS_NEW_TRY)
+        try_button.setProperty("class", "plugin-setup-button")
+        try_button.clicked.connect(self._on_try_styles)
+        row.addWidget(try_button)
+        dismiss = QPushButton(strings_appearance.WHATS_NEW_DISMISS)
+        dismiss.setProperty("class", "guidance-banner-close")
+        dismiss.setFlat(True)
+        dismiss.clicked.connect(self._dismiss_whats_new)
+        row.addWidget(dismiss)
+        return banner
+
+    def _dismiss_whats_new(self):
+        db_settings.add_update_setting_value(
+            WHATS_NEW_STYLES_DISMISSED_SETTING_KEY, "true"
+        )
+        if self._whats_new_banner is not None:
+            self.verticalLayout.removeWidget(self._whats_new_banner)
+            self._whats_new_banner.deleteLater()
+            self._whats_new_banner = None
+
+    def _on_try_styles(self):
+        self._dismiss_whats_new()
+        self.open_appearance()
+
+    def open_appearance(self):
+        """Navigate to Customise → Appearance → Style."""
+        main_window_inst = self.appState.main_window
+        if main_window_inst is None:
+            return
+        main_window_inst.load_customise_page()
+        main_window_inst._customise_page.show_appearance()
+
+    def shutdown(self):
+        """Close the Preview window (its WebEngine page) before this page is destroyed."""
+        if self._preview_window is not None:
+            self._preview_window.close()
+            self._preview_window = None
+
+    def open_layout_editor(self, device_id: str):
+        """Navigate to Customise → Layout with this device's diagram selected."""
+        main_window_inst = self.appState.main_window
+        if main_window_inst is None:
+            return
+        main_window_inst.load_customise_page()
+        main_window_inst._customise_page.show_layout(device_id)
+
+    def open_preview(self, export_device: ExportDevice):
+        """Open the read-only Preview window for a device (plan §5.5.6)."""
+        from joystick_diagrams.ui.preview_window import PreviewWindow
+
+        siblings = self.device_widget.export_devices_for(export_device.device_id) or [
+            export_device
+        ]
+        if self._preview_window is not None:
+            self._preview_window.close()
+        self._preview_window = PreviewWindow(siblings, export_device, self)
+        self._preview_window.edit_layout_requested.connect(self.open_layout_editor)
+        self._preview_window.show()
+        return self._preview_window
 
     def _on_tree_double_click(self, index):
         """Handle double-click on device tree — trigger template selection for root items."""
@@ -229,14 +354,10 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         if not current_item or current_item.parent() is not None:
             return
 
-        _file = QFileDialog.getOpenFileName(
-            self,
-            caption=f"Select an SVG file to use as a template - {current_item.text(0)}",
-            filter=("SVG Files (*.svg)"),
-            dir=os.path.join(install_root(), "templates"),
+        file_path = pick_template(
+            self, f"Select an SVG file to use as a template - {current_item.text(0)}"
         )
-        if _file[0]:
-            file_path = Path(_file[0])
+        if file_path:
             self.set_template_for_device(file_path)
 
     def set_template_for_device(self, template_path: Path):
@@ -265,19 +386,22 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         main_window_inst.progressBar.setValue(0)
         main_window_inst.statusLabel.setText("Waiting...")
 
-        msg_box = QMessageBox()
-        msg_box.setWindowIcon(QIcon(ui_consts.JD_ICON))
-        msg_box.setWindowTitle("Export Completed")
-        msg_box.setText(
-            f"{data} items were exported to {self.export_settings_widget.export_location}"
-        )
-        msg_box.setDefaultButton(QMessageBox.StandardButton.Ok)
-        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
-
-        msg_box.exec()
         export_loc = self.export_settings_widget.export_location
-        if get_setting("open_after_export") != "false" and export_loc is not None:
+        summary = self._last_summary or ExportSummary(count=data)
+        summary.count = data
+        text, details = build_summary(summary, str(export_loc))
+        self._last_summary = None
+
+        msg_box, open_button = summary_message_box(self, text, details)
+        msg_box.exec()
+        opened = msg_box.clickedButton() is open_button
+        if export_loc is not None and (
+            opened or get_setting("open_after_export") != "false"
+        ):
             webbrowser.open(export_loc)
+
+    def _on_export_summary(self, summary: ExportSummary):
+        self._last_summary = summary
 
     def update_export_progress(self, data):
         # TODO handle MW interaction better
@@ -373,6 +497,12 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
             f"as {export_format} to:\n\n{self.export_settings_widget.export_location}"
         )
 
+        # Mention the style when it isn't Original (unchanged)
+        if self.export_settings_widget.get_style_id() != TEMPLATE_ORIGINAL_THEME_ID:
+            confirm_text += "\n\n" + strings_appearance.EXPORT_CONFIRM_STYLE.format(
+                style=self.export_settings_widget.get_style_name()
+            )
+
         # Mention active output plugins
         mgr = self.appState.output_plugin_manager
         if mgr:
@@ -391,8 +521,13 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         if reply != QMessageBox.StandardButton.Yes:
             return
 
+        # Snapshot theme/modifier/label settings on the UI thread (plan §1.4)
+        ctx = build_render_context()
         worker = ExportDispatch(
-            items_to_export, self.export_settings_widget.export_location, export_format
+            items_to_export,
+            self.export_settings_widget.export_location,
+            export_format,
+            ctx=ctx,
         )
 
         worker.signals.started.connect(self.lock_export_button)
@@ -401,6 +536,7 @@ class ExportPage(QMainWindow, export_ui.Ui_Form):
         worker.signals.progress.connect(self.update_export_progress)
         worker.signals.status_update.connect(self._set_indeterminate_status)
         worker.signals.error.connect(self.show_export_error)
+        worker.signals.summary.connect(self._on_export_summary)
         worker.signals.png_conversion_needed.connect(self.start_png_conversion)
         self._pending_export_count = 0
         self.threadPool.start(worker)
@@ -412,6 +548,7 @@ class ExportSignals(QObject):
     progress = Signal(int)
     error = Signal(str)
     status_update = Signal(str)
+    summary = Signal(object)  # ExportSummary, emitted before finished
     png_conversion_needed = Signal(
         list
     )  # list of (svg_path, png_path, ExportResult) tuples
@@ -457,6 +594,7 @@ class ExportDispatch(QRunnable):
         export_items: list[ExportDevice],
         export_directory: str,
         export_format: str = "SVG",
+        ctx: RenderContext | None = None,
         **kwargs,
     ):
         super(ExportDispatch, self).__init__()
@@ -464,6 +602,7 @@ class ExportDispatch(QRunnable):
         self.export_items = export_items
         self.export_directory = export_directory
         self.export_format = export_format
+        self.ctx = ctx
         self.signals = ExportSignals()
 
     @Slot()  # QtCore.Slot
@@ -478,17 +617,25 @@ class ExportDispatch(QRunnable):
         exported_count = 0
         png_conversions = []
         export_results = []
+        summary = ExportSummary(
+            styled=styled_context(self.ctx),
+            modifiers_listed=self.ctx is not None
+            and self.ctx.modifier_display is not ModifierDisplay.TEMPLATE_BOXES,
+        )
 
         for count, item in enumerate(self.export_items, 1):
             _logger.info(
                 f"Exporting {count}/{item_count} which has profile {item.profile_wrapper.profile_name}"
             )
             try:
-                result = export(item, self.export_directory, self.export_format)
+                output = export_with_report(
+                    item, self.export_directory, self.export_format, ctx=self.ctx
+                )
                 exported_count += 1
 
-                if result is not None:
-                    svg_path, png_path = result
+                if output is not None:
+                    summary.entries.append(entry_for(item, output.report))
+                    svg_path, png_path = output.paths
                     is_png = png_path is not None
 
                     export_result = ExportResult(
@@ -528,6 +675,8 @@ class ExportDispatch(QRunnable):
 
         # After SVG export, call plugin export methods if they exist
         self._call_plugin_exports()
+        summary.count = exported_count
+        self.signals.summary.emit(summary)
 
         # If PNG format, signal main thread to do the conversion + output plugins after
         if png_conversions:

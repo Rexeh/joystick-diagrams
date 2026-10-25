@@ -4,6 +4,7 @@ from copy import deepcopy
 from PySide6.QtCore import QTimer
 
 from joystick_diagrams.conflict_strategy import (
+    QUALIFIER_SOURCE_DEVICE,
     AliasConflictStrategy,
     apply_input_conflict,
     get_alias_strategy,
@@ -11,6 +12,9 @@ from joystick_diagrams.conflict_strategy import (
 from joystick_diagrams.db.device_alias_service import DeviceAliasService
 from joystick_diagrams.db.device_service import DeviceService
 from joystick_diagrams.db.label_service import LabelService
+from joystick_diagrams.db.layout_service import LayoutService
+from joystick_diagrams.db.modifier_key_service import ModifierKeyService
+from joystick_diagrams.db.theme_service import ThemeService
 from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.profile import Profile_
 from joystick_diagrams.input.profile_collection import ProfileCollection
@@ -50,6 +54,9 @@ class AppState:
         self.label_service = LabelService()
         self.device_service = DeviceService()
         self.device_alias_service = DeviceAliasService()
+        self.modifier_key_service = ModifierKeyService()
+        self.theme_service = ThemeService()
+        self.layout_service = LayoutService()
         # Profile map for Plugin Profiles for lookups
         self.plugin_profile_map: dict[str, Profile_] = {}
 
@@ -322,6 +329,7 @@ def _merge_alias_loser_into_winner(
                     loser=loser_input,
                     loser_qualifier=loser.name,
                     strategy=strategy,
+                    qualifier_source=QUALIFIER_SOURCE_DEVICE,
                 )
 
 
