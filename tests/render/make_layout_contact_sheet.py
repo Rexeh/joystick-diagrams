@@ -171,7 +171,7 @@ def stats_for(
 
 def render_with_ops(template: Template, device: Device_, result: AutoAddResult) -> str:
     key = template.template_key
-    layouts = {(key, ""): LayoutDocument(template_key=key, ops=list(result.ops))}
+    layouts = {(key, "", ""): LayoutDocument(template_key=key, ops=list(result.ops))}
     ctx = RenderContext(
         colour_modifiers=True,
         registry=ModifierRegistrySnapshot.default(colouring_enabled=True),

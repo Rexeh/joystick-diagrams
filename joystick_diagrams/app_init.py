@@ -49,16 +49,20 @@ def init():
 
     register_scheme()
 
+    # Qt's own warnings go to the log; harmless thumbnail noise only at debug level
+    from joystick_diagrams.qt_messages import install_qt_message_filter
+
+    install_qt_message_filter()
+
     app = QtWidgets.QApplication(sys.argv)
 
-    window = MainWindow()
     resources_rc.qInitResources()
-    window.show()
-
     extra = {
         "font_family": "Roboto",
     }
 
+    # Styled before the first show: the four-stage shell starts reading the games
+    # in the background right after it appears (MainWindow.showEvent).
     apply_stylesheet(
         app,
         theme="dark_blue.xml",
@@ -66,6 +70,9 @@ def init():
         extra=extra,
         css_file=os.path.join(utils.install_root(), "./theme/custom.css"),
     )
+
+    window = MainWindow()
+    window.show()
     _logger.info(f"Starting up... Install root: {utils.install_root()}")
     app.exec()
 

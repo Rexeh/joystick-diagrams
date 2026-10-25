@@ -1,6 +1,8 @@
-"""Customise → Layout: the hybrid layout editor screen (plan §5.5.5, §5.6).
+"""4. Diagrams › Layout: the hybrid layout editor screen (plan §5.5.5, §5.6, J11).
 
-Header: the **Diagram** (a device with a template), **Preview with** (which
+Header: the **Diagram** picker lists the controllers with a template, then the
+controllers that still need one (greyed, "needs a template · Choose template…"
+in place), then the combined pages ("▣ <page>"), and **Preview with** (which
 profile's bindings are shown) and **Changes apply to** (which layer new changes
 go to: all profiles on this diagram, or only the previewed profile). Toolbar:
 select, add a modifier box, auto-add, add a note, hide, undo/redo, zoom and
@@ -9,12 +11,26 @@ showing ``render_for_editor``'s SVG with an overlay for dragging. Right panel:
 the selected box (name, origin, X/Y/W/H spin boxes as the keyboard
 alternative to dragging), modifier-box actions, and plain-language notices.
 
+Page mode (a page chosen in the picker): the canvas shows the page composed by
+``render/compose.py`` on the thread pool (debounced, zoom kept between
+renders) and the right panel is ``layout_page_panel.PagePanel``: name, the
+controllers on the page, which profiles it is made for, arrangement, page size,
+orientation, scale, gap, title and date. Each change is saved at once through
+``PageService`` and is one undo step (``PageHistory``); Preview with lists only
+the page's profiles. The box tools (modifier box, auto-add, note, hide) are
+disabled, and a controller chosen in the panel offers "Edit this controller's
+boxes ›". Free placement of panels and page notes come in v2.
+
 Every gesture becomes layout ops persisted at once through
 ``LayoutEditSession`` → ``LayoutService`` (so they survive the page being
 destroyed on reprocess and are picked up by the next export); the render runs
 on the global ``QThreadPool`` with a generation counter so the UI thread never
 blocks and stale results are dropped. ``refresh()`` is cheap: it only reloads
 the device list and re-renders when something changed.
+
+Layouts belong to a controller: the session is created with
+``device_guid=export_device.device_id`` so every read and write is keyed by
+(template, controller, profile).
 """
 
 from __future__ import annotations
@@ -38,6 +54,7 @@ from PySide6.QtCore import (
     Signal,
     Slot,
 )
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QButtonGroup,
     QComboBox,
@@ -49,12 +66,12 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMenu,
-    QMessageBox,
     QPushButton,
     QRadioButton,
     QScrollArea,
     QSpinBox,
     QStackedLayout,
+    QStackedWidget,
     QToolButton,
     QVBoxLayout,
     QWidget,
@@ -76,8 +93,19 @@ from joystick_diagrams.render.editor import (
 )
 from joystick_diagrams.render.layout import TEMPLATE_LAYER, LayoutLayers
 from joystick_diagrams.render.layout_apply import LayoutSlotInfo
+from joystick_diagrams.ui import strings_diagrams as D
 from joystick_diagrams.ui import strings_layout as S
 from joystick_diagrams.ui.layout_editor.bridge import EditorBridge
+from joystick_diagrams.ui.layout_editor.panel_style import (
+    LABEL_STYLE,
+    MUTED_STYLE,
+    NOTICE_STYLE,
+    PROFILE_STYLE,
+)
+from joystick_diagrams.ui.layout_editor.panel_style import heading_label as _heading
+from joystick_diagrams.ui.layout_editor.panel_style import help_label as _help
+from joystick_diagrams.ui.layout_editor.panel_style import panel_button as _panel_button
+from joystick_diagrams.ui.layout_editor.panel_style import tool_button as _tool
 from joystick_diagrams.ui.layout_editor.planning import (
     SceneCache,
     box_count,
@@ -85,6 +113,13 @@ from joystick_diagrams.ui.layout_editor.planning import (
     plan_one_box,
 )
 from joystick_diagrams.ui.layout_editor.session import LayoutEditSession
+from joystick_diagrams.ui.layout_page_panel import (
+    PageHistory,
+    PagePanel,
+    default_update,
+    same_page,
+)
+from joystick_diagrams.ui.widgets.confirm import confirm, show_list
 from joystick_diagrams.ui.widgets.empty_state import EmptyState
 
 _logger = logging.getLogger(__name__)
@@ -93,83 +128,18 @@ LAYOUT_EDITOR_LAST_DEVICE_SETTING_KEY = "layout_editor_last_device"
 LAYOUT_EDITOR_LAST_PROFILE_SETTING_KEY = "layout_editor_last_profile"
 LAYOUT_EDITOR_LAST_SCOPE_SETTING_KEY = "layout_editor_last_scope"
 LAYOUT_EDITOR_ZOOM_SETTING_KEY = "layout_editor_zoom"
+ENTRY_PREFIX_NEEDS = "needs:"
+ENTRY_PREFIX_PAGE = "page:"
 SCOPE_ALL = "all"
 SCOPE_PROFILE = "profile"
 RENDER_DEBOUNCE_MS = 40
+PAGE_RENDER_DEBOUNCE_MS = 120
+PAGE_ZOOM_STEP = 1.25
 PANEL_WIDTH = 320
 NOTE_WIDTH = 220.0
 NOTE_HEIGHT = 26.0
 NOTE_MARGIN = 20.0
 DEFAULT_BOX_SCALE = 0.85
-
-HELP_STYLE = "color: #9AA0A6; font-size: 12px; background: transparent;"
-HEADING_STYLE = (
-    "color: #E8EAED; font-size: 14px; font-weight: bold; background: transparent;"
-)
-LABEL_STYLE = "color: #E8EAED; font-size: 12px; background: transparent;"
-MUTED_STYLE = "color: #9AA0A6; font-size: 11px; background: transparent;"
-PROFILE_STYLE = "color: #F59E0B; font-size: 11px; background: transparent;"
-TOOL_STYLE = """
-QToolButton {
-    background: #2c2f38; color: #E8EAED; border: 1px solid #3C4043; border-radius: 4px;
-    margin: 0px; padding: 4px 10px; min-height: 24px;
-}
-QToolButton:hover { background: #3C4043; border-color: #5F6368; }
-QToolButton:pressed, QToolButton:checked { background: #4C8BF5; border-color: #4C8BF5; color: white; }
-QToolButton:disabled { color: #5F6368; border-color: #2c2f38; }
-QToolButton::menu-indicator { subcontrol-position: right center; subcontrol-origin: padding; left: -2px; }
-"""
-PANEL_BUTTON_STYLE = """
-QPushButton {
-    background: #2c2f38; color: #E8EAED; border: 1px solid #3C4043; border-radius: 4px;
-    padding: 4px 10px; min-height: 22px; text-align: left;
-}
-QPushButton:hover { background: #3C4043; border-color: #5F6368; }
-QPushButton:disabled { color: #5F6368; border-color: #2c2f38; }
-"""
-NOTICE_STYLE = (
-    "QFrame#notice_frame { background: #2c2f38; border: 1px solid #3C4043; "
-    "border-radius: 6px; }"
-)
-
-
-def _help(text: str) -> QLabel:
-    label = QLabel(text)
-    label.setWordWrap(True)
-    label.setStyleSheet(HELP_STYLE)
-    return label
-
-
-def _heading(text: str) -> QLabel:
-    label = QLabel(text)
-    label.setStyleSheet(HEADING_STYLE)
-    return label
-
-
-def _tool(text: str, tooltip: str, icon: str | None = None) -> QToolButton:
-    button = QToolButton()
-    button.setText(text)
-    button.setToolTip(tooltip)
-    button.setAccessibleName(text)
-    button.setStyleSheet(TOOL_STYLE)
-    button.setCursor(Qt.CursorShape.PointingHandCursor)
-    if icon:
-        button.setIcon(qta.icon(icon, color="#E8EAED"))
-        button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
-    return button
-
-
-def _panel_button(text: str) -> QPushButton:
-    button = QPushButton(text)
-    button.setStyleSheet(PANEL_BUTTON_STYLE)
-    button.setCursor(Qt.CursorShape.PointingHandCursor)
-    return button
-
-
-def _open_export_page() -> None:
-    main_window = AppState().main_window
-    if main_window is not None:
-        main_window.load_export_page()
 
 
 # ── Data ──
@@ -192,7 +162,7 @@ class DiagramEntry:
         return [
             (
                 S.PREVIEW_ENTRY.format(
-                    plugin=ed.profile_wrapper.profile_origin.name,
+                    game=ed.profile_wrapper.profile_origin.name,
                     profile=ed.profile_wrapper.profile_name,
                 ),
                 ed,
@@ -201,15 +171,49 @@ class DiagramEntry:
         ]
 
 
-def load_diagrams() -> list[DiagramEntry]:
-    """Devices with a template, grouped from ``get_export_devices()``."""
+def load_export_devices() -> list[Any]:
     from joystick_diagrams.ui.device_setup_controller import get_export_devices
 
     try:
-        devices = [ed for ed in get_export_devices() if ed.has_template]
+        return list(get_export_devices())
     except Exception as e:  # noqa: BLE001 - never let the screen fail to open
         _logger.warning(f"Could not load devices for the layout editor: {e}")
         return []
+
+
+def controllers_needing_template() -> list[tuple[str, str]]:
+    """``(guid, name)`` of controllers that get a diagram once they have a template."""
+    try:
+        from joystick_diagrams.device_status import DeviceStatus, all_device_statuses
+
+        statuses = all_device_statuses(
+            list(AppState().profile_wrappers), include_unseen=False
+        )
+    except Exception as e:  # noqa: BLE001
+        _logger.warning(f"Could not work out controller statuses: {e}")
+        return []
+    waiting = (DeviceStatus.NEEDS_TEMPLATE, DeviceStatus.TEMPLATE_MISSING)
+    found = [
+        (guid, info.name or guid)
+        for guid, info in statuses.items()
+        if info.state in waiting
+    ]
+    return sorted(found, key=lambda item: item[1].casefold())
+
+
+def load_pages() -> list[Any]:
+    try:
+        return list(AppState().page_service.pages())
+    except Exception as e:  # noqa: BLE001
+        _logger.warning(f"Could not load pages: {e}")
+        return []
+
+
+def load_diagrams(export_devices: list[Any] | None = None) -> list[DiagramEntry]:
+    """Devices with a template, grouped from ``get_export_devices()``."""
+    if export_devices is None:
+        export_devices = load_export_devices()
+    devices = [ed for ed in export_devices if ed.has_template]
     service = AppState().device_service
     grouped: dict[str, DiagramEntry] = {}
     for ed in devices:
@@ -298,6 +302,48 @@ class LayoutRenderRunnable(QRunnable):
         self.signals.done.emit(self.generation, render)
 
 
+class _PageSignals(QObject):
+    done = Signal(int, object)  # generation, ComposeResult
+    failed = Signal(int, str)
+
+
+class PageRenderRunnable(QRunnable):
+    """Composes a page for one profile off the UI thread (the page preview)."""
+
+    def __init__(self, generation: int, page: Any, wrapper: Any, devices: list[Any]):
+        super().__init__()
+        self.generation = generation
+        self.page = page
+        self.wrapper = wrapper
+        self.devices = devices
+        self.ctx = build_render_context()
+        self.signals = _PageSignals()
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            result = compose_page_result(
+                self.page, self.wrapper, self.devices, self.ctx
+            )
+        except Exception as e:  # noqa: BLE001 - reported to the screen
+            _logger.warning(f"Page preview failed: {e}")
+            self.signals.failed.emit(self.generation, str(e))
+            return
+        self.signals.done.emit(self.generation, result)
+
+
+def compose_page_result(page: Any, wrapper: Any, devices: list[Any], ctx=None) -> Any:
+    """``compose_page`` for one profile (the ``ComposeResult``: SVG, warnings and
+    the smallest printed font size)."""
+    from joystick_diagrams.render.compose import (
+        compose_page,
+        member_devices_for_profile,
+    )
+
+    members = member_devices_for_profile(page, wrapper, devices)
+    return compose_page(page, wrapper, members, ctx)
+
+
 # ── Note dialog ──
 
 
@@ -345,12 +391,29 @@ class NoteDialog(QDialog):
 
 class CustomiseLayout(QWidget):
     devices_changed = Signal()
+    go_to_controllers_requested = Signal()
+    pages_changed = Signal()  # a page was changed in page mode
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.appState = AppState()
         self.service = self.appState.layout_service
         self._diagrams: list[DiagramEntry] = []
+        self._needs_template: list[tuple[str, str]] = []
+        self._pages: list[Any] = []
+        self._all_devices: list[Any] = []
+        self._page_profiles: list[Any] = []
+        self._page_generation = 0
+        self._page_view = None
+        self.page_preview_svg: str | None = None
+        self.page_compose_result: Any = None
+        self._page_history: PageHistory | None = None
+        self._page_zoom: float | None = None
+        self._page_mode = False
+        self._page_render_timer = QTimer(self)
+        self._page_render_timer.setSingleShot(True)
+        self._page_render_timer.setInterval(PAGE_RENDER_DEBOUNCE_MS)
+        self._page_render_timer.timeout.connect(self._render_page)
         self._signature: list | None = None
         self._session: LayoutEditSession | None = None
         self._render: EditorRender | None = None
@@ -381,6 +444,17 @@ class CustomiseLayout(QWidget):
         self.bridge.zoom_changed.connect(self._on_zoom_changed)
 
         self._build_ui()
+        self._page_shortcuts = []
+        for keys, slot in (
+            (QKeySequence.StandardKey.Undo, self.undo),
+            (QKeySequence.StandardKey.Redo, self.redo),
+            (QKeySequence("Ctrl+Y"), self.redo),
+        ):
+            shortcut = QShortcut(keys, self)
+            shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            shortcut.activated.connect(slot)
+            shortcut.setEnabled(False)  # the canvas handles its own keys
+            self._page_shortcuts.append(shortcut)
 
     # ── UI construction ──
 
@@ -389,9 +463,9 @@ class CustomiseLayout(QWidget):
         root.setContentsMargins(16, 16, 16, 16)
         root.setSpacing(12)
 
-        help_label = _help(S.PAGE_HELP)
-        help_label.setObjectName("device_help_label")
-        root.addWidget(help_label)
+        self.help_label = _help(S.PAGE_HELP)
+        self.help_label.setObjectName("device_help_label")
+        root.addWidget(self.help_label)
         root.addLayout(self._build_header())
 
         self.banner = QWidget()
@@ -416,8 +490,23 @@ class CustomiseLayout(QWidget):
         self.canvas_stack_widget = QWidget()
         self.canvas_stack = QStackedLayout(self.canvas_stack_widget)
         self.canvas_stack.setContentsMargins(0, 0, 0, 0)
-        self.empty_state = EmptyState(S.EMPTY_MESSAGE, "fa5s.file-code", S.EMPTY_ACTION)
-        self.empty_state.action_requested.connect(_open_export_page)
+        self.empty_state = EmptyState(
+            D.LAYOUT_NONE_READY, "fa5s.file-code", D.GO_TO_CONTROLLERS_NEXT
+        )
+        self.empty_state.action_requested.connect(self.go_to_controllers_requested.emit)
+        self.needs_state = EmptyState("", "fa5s.file-code", D.CHOOSE_TEMPLATE)
+        self.needs_state.action_requested.connect(self.choose_template_for_selected)
+        self.page_host = QWidget()
+        page_layout = QVBoxLayout(self.page_host)
+        page_layout.setContentsMargins(0, 0, 0, 0)
+        page_layout.setSpacing(6)
+        self.page_placeholder = QLabel(D.PAGE_PREVIEW_UPDATING)
+        self.page_placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.page_placeholder.setStyleSheet(
+            "color: #9AA0A6; font-style: italic; background: #252830; "
+            "border: 1px solid #3C4043; border-radius: 6px;"
+        )
+        page_layout.addWidget(self.page_placeholder, 1)
         self.canvas_host = QWidget()
         self.canvas_host.setMinimumSize(320, 240)
         host_layout = QVBoxLayout(self.canvas_host)
@@ -431,17 +520,25 @@ class CustomiseLayout(QWidget):
         host_layout.addWidget(self.canvas_placeholder)
         self.canvas_stack.addWidget(self.empty_state)
         self.canvas_stack.addWidget(self.canvas_host)
+        self.canvas_stack.addWidget(self.needs_state)
+        self.canvas_stack.addWidget(self.page_host)
         body.addWidget(self.canvas_stack_widget, 1)
-        body.addWidget(self._build_panel())
+        self.panel_stack = QStackedWidget()
+        self.panel_stack.setFixedWidth(PANEL_WIDTH)
+        self.box_panel = self._build_panel()
+        self.panel_stack.addWidget(self.box_panel)
+        self.page_panel_scroll = self._build_page_panel()
+        self.panel_stack.addWidget(self.page_panel_scroll)
+        body.addWidget(self.panel_stack)
         root.addLayout(body, 1)
 
-    def _build_header(self) -> QHBoxLayout:
+    def _build_header(self) -> QVBoxLayout:
         header = QHBoxLayout()
         header.setSpacing(10)
         header.addWidget(_heading(S.HEADER_DIAGRAM))
         self.diagram_combo = QComboBox()
         self.diagram_combo.setProperty("class", "view-binds-list")
-        self.diagram_combo.setMinimumWidth(220)
+        self.diagram_combo.setMinimumWidth(320)  # "<controller> · <template>"
         self.diagram_combo.setAccessibleName(S.HEADER_DIAGRAM)
         self.diagram_combo.currentIndexChanged.connect(
             lambda _i: self._on_diagram_changed()
@@ -457,8 +554,15 @@ class CustomiseLayout(QWidget):
             lambda _i: self._on_profile_changed()
         )
         header.addWidget(self.profile_combo)
-        header.addSpacing(12)
-        header.addWidget(_heading(S.HEADER_SCOPE))
+        header.addStretch(1)
+        outer = QVBoxLayout()
+        outer.setSpacing(8)
+        outer.addLayout(header)
+        header = QHBoxLayout()  # second row: Changes apply to · Saved automatically
+        header.setSpacing(10)
+        outer.addLayout(header)
+        self.scope_heading = _heading(S.HEADER_SCOPE)
+        header.addWidget(self.scope_heading)
         self.scope_group = QButtonGroup(self)
         self.scope_all = QRadioButton(S.SCOPE_ALL_PROFILES)
         self.scope_profile = QRadioButton(S.SCOPE_ONLY_PROFILE.format(profile="…"))
@@ -477,7 +581,7 @@ class CustomiseLayout(QWidget):
         )
         header.addWidget(saved_icon)
         header.addWidget(self.saved_label)
-        return header
+        return outer
 
     def _build_toolbar(self) -> QHBoxLayout:
         bar = QHBoxLayout()
@@ -490,7 +594,7 @@ class CustomiseLayout(QWidget):
         self.add_box_button.clicked.connect(self.add_modifier_box)
         self.auto_add_button = _tool(S.TOOL_AUTO_ADD, S.TOOLTIP_AUTO_ADD, "fa5s.magic")
         self.auto_add_button.clicked.connect(self.open_auto_add)
-        self.add_note_button = _tool(S.TOOL_ADD_NOTE, S.TOOLTIP_ADD_NOTE)
+        self.add_note_button = _tool(S.TOOL_ADD_NOTE, "")
         self.add_note_button.clicked.connect(self.add_note)
         self.hide_button = _tool(S.TOOL_HIDE, S.TOOLTIP_HIDE, "fa5s.eye-slash")
         self.hide_button.clicked.connect(self.hide_selected)
@@ -500,19 +604,19 @@ class CustomiseLayout(QWidget):
         self.redo_button.clicked.connect(self.redo)
         self.zoom_out_button = _tool("−", S.TOOL_ZOOM_OUT)
         self.zoom_out_button.setAccessibleName(S.TOOL_ZOOM_OUT)
-        self.zoom_out_button.clicked.connect(lambda: self.bridge.request_zoom("out"))
+        self.zoom_out_button.clicked.connect(lambda: self._zoom("out"))
         self.zoom_label = QPushButton("100%")
         self.zoom_label.setFlat(True)
         self.zoom_label.setStyleSheet(
             "QPushButton { color: #E8EAED; background: transparent; border: none; min-width: 44px; }"
         )
-        self.zoom_label.setToolTip("Zoom to 100%")
-        self.zoom_label.clicked.connect(lambda: self.bridge.request_zoom("100"))
+        self.zoom_label.setToolTip(S.TOOLTIP_ZOOM_100)
+        self.zoom_label.clicked.connect(lambda: self._zoom("100"))
         self.zoom_in_button = _tool("+", S.TOOL_ZOOM_IN)
         self.zoom_in_button.setAccessibleName(S.TOOL_ZOOM_IN)
-        self.zoom_in_button.clicked.connect(lambda: self.bridge.request_zoom("in"))
+        self.zoom_in_button.clicked.connect(lambda: self._zoom("in"))
         self.fit_button = _tool(S.TOOL_ZOOM_FIT, S.TOOLTIP_ZOOM_FIT)
-        self.fit_button.clicked.connect(lambda: self.bridge.request_zoom("fit"))
+        self.fit_button.clicked.connect(lambda: self._zoom("fit"))
         self.more_button = _tool(S.TOOL_MORE + " ▾", S.TOOL_MORE)
         self.more_menu = QMenu(self)
         self.undo_profile_action = self.more_menu.addAction(
@@ -560,6 +664,15 @@ class CustomiseLayout(QWidget):
             self.fit_button,
             self.more_button,
         ]
+        # Box tools that don't apply to a page (page mode disables them)
+        self.box_only_tools = [
+            self.select_button,
+            self.add_box_button,
+            self.auto_add_button,
+            self.add_note_button,
+            self.hide_button,
+        ]
+        self._box_tool_tips = {id(b): b.toolTip() for b in self.box_only_tools}
         return bar
 
     @staticmethod
@@ -602,10 +715,10 @@ class CustomiseLayout(QWidget):
         grid = QGridLayout()
         grid.setHorizontalSpacing(8)
         grid.setVerticalSpacing(4)
-        self.spin_x = self._spin(S.PANEL_X)
-        self.spin_y = self._spin(S.PANEL_Y)
-        self.spin_w = self._spin(S.PANEL_W)
-        self.spin_h = self._spin(S.PANEL_H)
+        self.spin_x = self._spin(S.PANEL_X_NAME)
+        self.spin_y = self._spin(S.PANEL_Y_NAME)
+        self.spin_w = self._spin(S.PANEL_W_NAME)
+        self.spin_h = self._spin(S.PANEL_H_NAME)
         for column, (text, spin) in enumerate(
             (
                 (S.PANEL_X, self.spin_x),
@@ -661,6 +774,28 @@ class CustomiseLayout(QWidget):
         scroll.setWidget(panel)
         return scroll
 
+    def _build_page_panel(self) -> QWidget:
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFixedWidth(PANEL_WIDTH)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        card = QWidget()
+        card.setProperty("class", "surface-card")
+        card.setMaximumWidth(PANEL_WIDTH - 4)
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(12, 12, 12, 12)
+        self.page_panel = PagePanel(card)
+        self.page_panel.edited.connect(self._on_page_edited)
+        self.page_panel.change_controllers_requested.connect(
+            self.change_page_controllers
+        )
+        self.page_panel.edit_controller_requested.connect(self.show_device)
+        self.page_panel.reset_requested.connect(self.reset_page)
+        layout.addWidget(self.page_panel)
+        scroll.setWidget(card)
+        return scroll
+
     @staticmethod
     def _spin(name: str) -> QSpinBox:
         spin = QSpinBox()
@@ -683,6 +818,9 @@ class CustomiseLayout(QWidget):
 
     def showEvent(self, event):  # noqa: N802
         super().showEvent(event)
+        if self.current_page() is not None and self.page_preview_svg:
+            self._show_page_svg(self.page_preview_svg)
+            return
         if self._dirty:
             self._render_timer.start()
         elif self._canvas_pending and self._render is not None:
@@ -690,7 +828,13 @@ class CustomiseLayout(QWidget):
 
     def shutdown(self) -> None:
         self._render_timer.stop()
+        self._page_render_timer.stop()
         self._generation += 1
+        self._page_generation += 1
+        if self._page_view is not None:
+            self._page_view.shutdown()
+            self._page_view.setParent(None)
+            self._page_view = None
         if self._canvas is not None:
             self._canvas.shutdown()
             self._canvas.setParent(None)
@@ -703,45 +847,99 @@ class CustomiseLayout(QWidget):
     # ── Diagrams, profiles and scope ──
 
     def _reload_diagrams(self) -> None:
-        diagrams = load_diagrams()
+        devices = load_export_devices()
+        diagrams = load_diagrams(devices)
+        needs = controllers_needing_template()
+        pages = load_pages()
         signature = [
-            (
-                d.device_id,
-                d.template_key,
-                [ed.profile_wrapper.profile_key for ed in d.export_devices],
-            )
-            for d in diagrams
+            [
+                (
+                    d.device_id,
+                    d.template_key,
+                    [ed.profile_wrapper.profile_key for ed in d.export_devices],
+                )
+                for d in diagrams
+            ],
+            needs,
+            [(p.page_id, p.name, p.updated_at) for p in pages],
         ]
+        self._all_devices = devices
         if signature == self._signature:
             return
         self._signature = signature
         self._diagrams = diagrams
+        self._needs_template = needs
+        self._pages = pages
+        current = self.diagram_combo.currentData()
         self._loading = True
         try:
             self.diagram_combo.clear()
             for entry in diagrams:
                 self.diagram_combo.addItem(
-                    f"{entry.device_name} · {entry.template.template_file_name}",
+                    S.DIAGRAM_ENTRY.format(
+                        controller=entry.device_name,
+                        template=Path(entry.template.template_file_name).stem,
+                    ),
                     entry.device_id,
                 )
-            wanted = db_settings.get_setting(LAYOUT_EDITOR_LAST_DEVICE_SETTING_KEY)
+            model = self.diagram_combo.model()
+            for guid, name in needs:
+                self.diagram_combo.addItem(
+                    D.LAYOUT_PICKER_NEEDS_TEMPLATE.format(controller=name)
+                    + f" · {D.CHOOSE_TEMPLATE}",
+                    ENTRY_PREFIX_NEEDS + guid,
+                )
+                item = model.item(self.diagram_combo.count() - 1)
+                if item is not None:
+                    item.setForeground(Qt.GlobalColor.gray)
+            for page in pages:
+                self.diagram_combo.addItem(
+                    D.LAYOUT_PICKER_PAGE.format(page=page.name),
+                    ENTRY_PREFIX_PAGE + page.page_id,
+                )
+            wanted = current or db_settings.get_setting(
+                LAYOUT_EDITOR_LAST_DEVICE_SETTING_KEY
+            )
             index = self.diagram_combo.findData(wanted) if wanted else -1
             self.diagram_combo.setCurrentIndex(max(index, 0))
         finally:
             self._loading = False
-        has_diagrams = bool(diagrams)
-        self.canvas_stack.setCurrentWidget(
-            self.canvas_host if has_diagrams else self.empty_state
-        )
+        has_entries = self.diagram_combo.count() > 0
+        if not has_entries:
+            self.canvas_stack.setCurrentWidget(self.empty_state)
         for widget in self.tool_buttons:
-            widget.setEnabled(has_diagrams)
+            widget.setEnabled(bool(diagrams))
         self._on_diagram_changed()
 
+    def current_entry_data(self) -> str | None:
+        data = self.diagram_combo.currentData()
+        return data if isinstance(data, str) else None
+
     def current_diagram(self) -> DiagramEntry | None:
-        index = self.diagram_combo.currentIndex()
-        if 0 <= index < len(self._diagrams):
-            return self._diagrams[index]
-        return None
+        data = self.current_entry_data()
+        if not data:
+            return None
+        return next((d for d in self._diagrams if d.device_id == data), None)
+
+    def current_page(self) -> Any:
+        data = self.current_entry_data() or ""
+        if not data.startswith(ENTRY_PREFIX_PAGE):
+            return None
+        page_id = data[len(ENTRY_PREFIX_PAGE) :]
+        return next((p for p in self._pages if p.page_id == page_id), None)
+
+    def current_needs_template(self) -> tuple[str, str] | None:
+        data = self.current_entry_data() or ""
+        if not data.startswith(ENTRY_PREFIX_NEEDS):
+            return None
+        guid = data[len(ENTRY_PREFIX_NEEDS) :]
+        return next((n for n in self._needs_template if n[0] == guid), None)
+
+    def _set_editing_enabled(self, enabled: bool) -> None:
+        for widget in self.tool_buttons:
+            widget.setEnabled(enabled)
+        for widget in (self.scope_all, self.scope_profile):
+            widget.setEnabled(enabled)
 
     def _on_diagram_changed(self) -> None:
         if self._loading:
@@ -752,9 +950,17 @@ class CustomiseLayout(QWidget):
         if entry is None:
             self._session = None
             self._export_device = None
-            self.profile_combo.clear()
+            self._loading = True
+            try:
+                self.profile_combo.clear()
+            finally:
+                self._loading = False
+            self._show_non_diagram()
             self._update_panel()
             return
+        self.canvas_stack.setCurrentWidget(self.canvas_host)
+        self._set_page_mode(False)
+        self._set_editing_enabled(True)
         db_settings.add_update_setting_value(
             LAYOUT_EDITOR_LAST_DEVICE_SETTING_KEY, entry.device_id
         )
@@ -774,12 +980,396 @@ class CustomiseLayout(QWidget):
         except OSError:
             pass
         self._session = LayoutEditSession(
-            self.service, entry.template_key, content_hash
+            self.service,
+            entry.template_key,
+            content_hash,
+            device_guid=entry.device_id,
         )
         self._on_profile_changed()
 
+    def _show_non_diagram(self) -> None:
+        """A greyed controller (needs a template) or a page (the Page panel)."""
+        self._set_editing_enabled(False)
+        needs = self.current_needs_template()
+        page = self.current_page()
+        if page is None:
+            self._set_page_mode(False)
+        if needs is not None:
+            self.needs_state.set_message(
+                D.LAYOUT_NEEDS_TEMPLATE_EMPTY.format(controller=needs[1])
+            )
+            self.canvas_stack.setCurrentWidget(self.needs_state)
+        elif page is not None:
+            self._show_page(page)
+        else:
+            self.canvas_stack.setCurrentWidget(self.empty_state)
+
+    def choose_template_for_selected(self) -> None:
+        needs = self.current_needs_template()
+        if needs is None:
+            return
+        from joystick_diagrams.ui.export_page import choose_template_for
+
+        guid, name = needs
+        if choose_template_for(self, guid, name):
+            self._signature = None
+            self.devices_changed.emit()
+            self.refresh()
+            self.show_device(guid)
+
+    # ── Pages (the Page panel) ──
+
+    @property
+    def page_service(self):
+        return self.appState.page_service
+
+    @property
+    def page_history(self) -> PageHistory | None:
+        return self._page_history
+
+    def _set_page_mode(self, on: bool) -> None:
+        """Page mode: the Page panel, page undo and zoom; box tools are disabled."""
+        self._page_mode = on
+        self.panel_stack.setCurrentWidget(
+            self.page_panel_scroll if on else self.box_panel
+        )
+        self.help_label.setText(D.LAYOUT_PAGE_PREVIEW_HELP if on else S.PAGE_HELP)
+        for button in self.box_only_tools:
+            button.setToolTip(
+                S.PAGE_TOOL_UNAVAILABLE if on else self._box_tool_tips[id(button)]
+            )
+            if on:
+                button.setEnabled(False)
+        self.more_button.setVisible(not on)
+        for widget in (self.scope_heading, self.scope_all, self.scope_profile):
+            widget.setVisible(not on)
+        for shortcut in self._page_shortcuts:
+            shortcut.setEnabled(on)
+        if on:
+            for button in (
+                self.zoom_out_button,
+                self.zoom_in_button,
+                self.fit_button,
+            ):
+                button.setEnabled(True)
+            self._update_history_buttons()
+
+    def _show_page(self, page: Any) -> None:
+        self.canvas_stack.setCurrentWidget(self.page_host)
+        if self._page_history is None or self._page_history.page_id != page.page_id:
+            self._page_history = PageHistory(page.page_id)
+            self._page_zoom = None
+            self.page_panel.select_controller(None)
+            self.page_panel.set_problem("")
+        self._set_page_mode(True)
+        self._reload_page_profiles(page)
+        self._load_page_panel(page)
+        self._render_page()
+
+    def _reload_page_profiles(self, page: Any) -> None:
+        """The Preview with list: only the profiles this page is made for."""
+        from joystick_diagrams.export import page_profiles
+
+        try:
+            self._page_profiles = page_profiles(page, self._all_devices)
+        except Exception as e:  # noqa: BLE001
+            _logger.warning(f"Could not list the profiles for {page.name}: {e}")
+            self._page_profiles = []
+        current = self.profile_combo.currentData()
+        self._loading = True
+        try:
+            self.profile_combo.clear()
+            for wrapper in self._page_profiles:
+                self.profile_combo.addItem(
+                    S.PREVIEW_ENTRY.format(
+                        game=wrapper.profile_origin.name,
+                        profile=wrapper.profile_name,
+                    ),
+                    wrapper.profile_key,
+                )
+            index = self.profile_combo.findData(current) if current else -1
+            self.profile_combo.setCurrentIndex(max(index, 0))
+        finally:
+            self._loading = False
+
+    def _page_rule_counts(self, page: Any) -> dict:
+        from joystick_diagrams.render.compose import page_profile_plan
+        from joystick_diagrams.render.page import ProfileRule
+
+        counts = {}
+        for rule in ProfileRule:
+            try:
+                counts[rule] = len(page_profile_plan(page, self._all_devices, rule))
+            except Exception as e:  # noqa: BLE001
+                _logger.debug(f"No profile plan for {page.name}: {e}")
+                counts[rule] = 0
+        return counts
+
+    def _controller_names(self) -> dict[str, str]:
+        service = self.appState.device_service
+        names: dict[str, str] = {}
+        for ed in self._all_devices:
+            if ed.device_id not in names:
+                names[ed.device_id] = service.resolve_name(ed.device_id, ed.device_name)
+        return names
+
+    def _load_page_panel(self, page: Any) -> None:
+        wrapper = self._current_page_wrapper()
+        self.page_panel.load(
+            page,
+            self._controller_names(),
+            self._page_rule_counts(page),
+            wrapper.profile_name if wrapper is not None else "",
+        )
+        if self.page_compose_result is not None:
+            self.page_panel.set_compose_result(self.page_compose_result)
+
+    def _current_page_wrapper(self) -> Any:
+        index = self.profile_combo.currentIndex()
+        if 0 <= index < len(self._page_profiles):
+            return self._page_profiles[index]
+        return None
+
+    # Edits: every change saves at once through PageService (one undo step)
+
+    def _on_page_edited(self, update: dict) -> None:
+        page = self.current_page()
+        if page is None:
+            return
+        from joystick_diagrams.render.page import Arrangement
+
+        if "arrangement" in update and set(update) == {"arrangement"}:
+            candidate = page.model_copy(
+                update={
+                    "arrangement": Arrangement(update["arrangement"]),
+                    "placements": [
+                        p.model_copy(update={"x_mm": None, "y_mm": None})
+                        for p in page.placements
+                    ],
+                }
+            )
+            if same_page(candidate, page):
+                return
+            self._save_page(
+                page,
+                lambda: self.page_service.arrange(
+                    page.page_id, Arrangement(update["arrangement"])
+                ),
+            )
+            return
+        try:
+            candidate = type(page).model_validate({**page.model_dump(), **update})
+        except ValueError as error:
+            _logger.warning(f"Page change not applied to {page.name}: {error}")
+            self._load_page_panel(page)
+            return
+        if same_page(candidate, page):
+            return
+        self._save_page(page, lambda: self.page_service.save(candidate))
+
+    def reset_page(self) -> None:
+        """Reset to defaults: page size, arrangement, scale, gap, title and date."""
+        page = self.current_page()
+        if page is None:
+            return
+        candidate = page.model_copy(update=default_update(page))
+        if same_page(candidate, page):
+            return
+        self._save_page(page, lambda: self.page_service.save(candidate))
+
+    def _save_page(self, before: Any, save: Callable[[], Any], record=True) -> Any:
+        try:
+            saved = save()
+        except ValueError as error:
+            self.page_panel.set_problem(str(error))
+            self._load_page_panel(before)
+            return None
+        self.page_panel.set_problem("")
+        if record and self._page_history is not None:
+            self._page_history.record(before, saved)
+        self._page_saved(before, saved)
+        return saved
+
+    def _page_saved(self, before: Any, saved: Any) -> None:
+        """Keep the picker, Preview with, the panel and the preview in step."""
+        self._pages = [saved if p.page_id == saved.page_id else p for p in self._pages]
+        index = self.diagram_combo.findData(ENTRY_PREFIX_PAGE + saved.page_id)
+        if index >= 0:
+            self.diagram_combo.setItemText(
+                index, D.LAYOUT_PICKER_PAGE.format(page=saved.name)
+            )
+        if self._signature is not None:
+            self._signature[2] = [
+                (p.page_id, p.name, p.updated_at) for p in self._pages
+            ]
+        if (
+            before.profile_rule != saved.profile_rule
+            or before.member_guids != saved.member_guids
+        ):
+            self._reload_page_profiles(saved)
+        self._load_page_panel(saved)
+        self._update_history_buttons()
+        self._page_render_timer.start()
+        self.pages_changed.emit()
+
+    def undo_page_change(self) -> None:
+        self._step_page_history(undo=True)
+
+    def redo_page_change(self) -> None:
+        self._step_page_history(undo=False)
+
+    def _step_page_history(self, undo: bool) -> None:
+        page = self.current_page()
+        history = self._page_history
+        if page is None or history is None:
+            return
+        target = history.undo() if undo else history.redo()
+        if target is None:
+            return
+        restored = target.model_copy(update={"updated_at": page.updated_at})
+        self._save_page(page, lambda: self.page_service.save(restored), record=False)
+
+    def change_page_controllers(self) -> None:
+        """Change controllers…: the Combine dialog for this page (one undo step)."""
+        page = self.current_page()
+        if page is None:
+            return
+        saved = self.open_page_dialog(page)
+        if saved is None or same_page(saved, page):
+            return
+        if self._page_history is not None:
+            self._page_history.record(page, saved)
+        self._page_saved(page, saved)
+
+    def open_page_dialog(self, page: Any) -> Any:
+        from joystick_diagrams.ui.pages_dialog import PagesDialog
+
+        dialog = PagesDialog(self, page, export_devices=list(self._all_devices))
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return None
+        return dialog.page
+
+    # Rendering: compose_page on the thread pool; stale results are dropped
+
+    def _render_page(self, synchronous: bool = False) -> Any:
+        self._page_render_timer.stop()
+        page = self.current_page()
+        wrapper = self._current_page_wrapper()
+        self._page_generation += 1
+        if page is None or wrapper is None:
+            self.page_placeholder.setText(D.PAGE_PREVIEW_UNAVAILABLE)
+            return None
+        self.page_placeholder.setText(D.PAGE_PREVIEW_UPDATING)
+        self._set_status(S.RENDERING)
+        if synchronous:
+            try:
+                result = compose_page_result(
+                    page, wrapper, self._all_devices, build_render_context()
+                )
+            except Exception as e:  # noqa: BLE001
+                self._on_page_failed(self._page_generation, str(e))
+                return None
+            self._on_page_rendered(self._page_generation, result)
+            return result
+        runnable = PageRenderRunnable(
+            self._page_generation, page, wrapper, list(self._all_devices)
+        )
+        runnable.signals.done.connect(self._on_page_rendered)
+        runnable.signals.failed.connect(self._on_page_failed)
+        self._pool.start(runnable)
+        return None
+
+    def render_page_synchronously(self) -> str | None:
+        result = self._render_page(synchronous=True)
+        return result.svg_text if result is not None else None
+
+    def _on_page_rendered(self, generation: int, result: Any) -> None:
+        if generation != self._page_generation:
+            return
+        self.page_compose_result = result
+        self.page_preview_svg = result.svg_text
+        self._set_status("")
+        self.page_panel.set_compose_result(result)
+        if self.isVisible():
+            self._show_page_svg(result.svg_text)
+
+    def _show_page_svg(self, svg: str) -> None:
+        view = self._ensure_page_view()
+        if view is not None:
+            view.show_svg(svg)
+
+    def _on_page_failed(self, generation: int, message: str) -> None:
+        if generation != self._page_generation:
+            return
+        self._set_status("")
+        self.page_placeholder.setText(S.RENDER_FAILED)
+
+    def _ensure_page_view(self):
+        if self._page_view is not None:
+            return self._page_view
+        try:
+            from joystick_diagrams.ui.layout_editor.view import SvgDocumentView
+        except ImportError as e:  # pragma: no cover - WebEngine is a hard dependency
+            _logger.error(f"QtWebEngine unavailable for the page preview: {e}")
+            return None
+        self._page_view = SvgDocumentView(self.page_host)
+        self._page_view.loadFinished.connect(self._on_page_view_loaded)
+        layout = self.page_host.layout()
+        layout.removeWidget(self.page_placeholder)
+        self.page_placeholder.hide()
+        layout.addWidget(self._page_view, 1)
+        return self._page_view
+
+    def _on_page_view_loaded(self, _ok: bool) -> None:
+        """Fit the first time a page is shown; afterwards keep the player's zoom."""
+        view = self._page_view
+        if view is None:
+            return
+        if self._page_zoom is None:
+            self._page_zoom = view.fit_page()
+        else:
+            view.set_zoom(self._page_zoom)
+        if self._page_zoom:
+            self.zoom_label.setText(f"{round(self._page_zoom * 100)}%")
+
+    def _zoom(self, mode: str) -> None:
+        if not self._page_mode:
+            self.bridge.request_zoom(mode)
+            return
+        view = self._page_view
+        if view is None:
+            return
+        current = view.zoom()
+        if mode == "in":
+            factor = current * PAGE_ZOOM_STEP
+        elif mode == "out":
+            factor = current / PAGE_ZOOM_STEP
+        elif mode == "100":
+            factor = 1.0
+        else:
+            factor = view.fit_page() or current
+        factor = max(0.1, min(5.0, factor))
+        view.set_zoom(factor)
+        self._page_zoom = factor
+        self.zoom_label.setText(f"{round(factor * 100)}%")
+
+    def show_page(self, page_id: str) -> None:
+        """Select a page in the Diagram picker (Pages › Edit in Layout ›)."""
+        self._reload_diagrams()
+        index = self.diagram_combo.findData(ENTRY_PREFIX_PAGE + page_id)
+        if index >= 0 and index != self.diagram_combo.currentIndex():
+            self.diagram_combo.setCurrentIndex(index)
+
     def _on_profile_changed(self) -> None:
         if self._loading:
+            return
+        page = self.current_page()
+        if page is not None:
+            wrapper = self._current_page_wrapper()
+            self.page_panel.set_profile_name(
+                wrapper.profile_name if wrapper is not None else ""
+            )
+            self._render_page()
             return
         entry = self.current_diagram()
         index = self.profile_combo.currentIndex()
@@ -898,7 +1488,7 @@ class CustomiseLayout(QWidget):
     def _on_render_failed(self, generation: int, message: str) -> None:
         if generation != self._generation:
             return
-        self._set_status(S.RENDER_FAILED.format(error=message))
+        self._set_status(S.RENDER_FAILED)
 
     def _push_to_canvas(self, render: EditorRender) -> None:
         if self._canvas is None and not self.isVisible():
@@ -952,7 +1542,8 @@ class CustomiseLayout(QWidget):
         self._update_panel()
 
     def _on_zoom_changed(self, percent: int) -> None:
-        self.zoom_label.setText(f"{percent}%")
+        if not self._page_mode:
+            self.zoom_label.setText(f"{percent}%")
 
     def _update_panel(self) -> None:
         info = self._slot_info(self._selected)
@@ -1031,6 +1622,11 @@ class CustomiseLayout(QWidget):
         )
 
     def _update_history_buttons(self) -> None:
+        if self._page_mode:
+            history = self._page_history
+            self.undo_button.setEnabled(history is not None and history.can_undo)
+            self.redo_button.setEnabled(history is not None and history.can_redo)
+            return
         session = self._session
         self.undo_button.setEnabled(session is not None and session.can_undo)
         self.redo_button.setEnabled(session is not None and session.can_redo)
@@ -1146,7 +1742,7 @@ class CustomiseLayout(QWidget):
                         " ·"
                     )
                 )
-        QMessageBox.information(
+        show_list(
             self,
             S.NOTICE_TEMPLATE_UPDATED_ACTION,
             S.NOTICE_SKIPPED_DETAIL.format(items="\n".join(lines) or "—"),
@@ -1326,10 +1922,16 @@ class CustomiseLayout(QWidget):
             self._after_edit()
 
     def undo(self) -> None:
+        if self._page_mode:
+            self.undo_page_change()
+            return
         if self._session is not None and self._session.undo() is not None:
             self._after_edit()
 
     def redo(self) -> None:
+        if self._page_mode:
+            self.redo_page_change()
+            return
         if self._session is not None and self._session.redo() is not None:
             self._after_edit()
 
@@ -1339,21 +1941,16 @@ class CustomiseLayout(QWidget):
         profile_key = self._export_device.profile_wrapper.profile_key
         name = self.profile_name
         if self._session.change_count(profile_key) == 0:
-            QMessageBox.information(
-                self,
-                S.MORE_UNDO_PROFILE.format(profile=name),
-                S.NOTHING_FOR_PROFILE.format(profile=name),
-            )
+            self._set_status(S.NOTHING_FOR_PROFILE.format(profile=name))
             return
-        reply = QMessageBox.question(
-            self,
-            S.UNDO_PROFILE_TITLE.format(profile=name),
-            S.UNDO_PROFILE_TEXT.format(profile=name),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.Yes,
-        )
         if (
-            reply == QMessageBox.StandardButton.Yes
+            confirm(
+                self,
+                S.UNDO_PROFILE_TITLE.format(profile=name),
+                S.UNDO_PROFILE_TEXT.format(profile=name),
+                S.UNDO_PROFILE_CONFIRM,
+                S.CANCEL,
+            )
             and self._session.clear_layer(profile_key) is not None
         ):
             self._after_edit()
@@ -1361,18 +1958,17 @@ class CustomiseLayout(QWidget):
     def reset_all(self) -> None:
         if self._session is None:
             return
-        if not self.service.layers_of_template(self._session.template_key):
-            QMessageBox.information(self, S.MORE_RESET_ALL, S.NOTHING_TO_RESET)
+        if not self._session.has_changes():
+            self._set_status(S.NOTHING_TO_RESET)
             return
-        reply = QMessageBox.question(
-            self,
-            S.RESET_ALL_TITLE,
-            S.RESET_ALL_TEXT,
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        )
         if (
-            reply == QMessageBox.StandardButton.Yes
+            confirm(
+                self,
+                S.RESET_ALL_TITLE,
+                S.RESET_ALL_TEXT,
+                S.RESET_ALL_CONFIRM,
+                S.CANCEL,
+            )
             and self._session.reset_all() is not None
         ):
             self._after_edit()
@@ -1431,18 +2027,25 @@ class CustomiseLayout(QWidget):
             theme=self.appState.theme_service.resolved_active(),
             parent=self,
         )
-        if dialog.exec() == QDialog.DialogCode.Accepted and dialog.assigned:
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        if dialog.assigned:
             self._signature = None
             self.devices_changed.emit()
             self.refresh()
+        if dialog.result_text:
+            self._set_status(dialog.result_text)
 
     # ── Navigation from other screens ──
 
     def show_device(self, device_id: str | None) -> None:
-        """Select ``device_id``'s diagram (used by "Edit layout…")."""
+        """Select ``device_id``'s diagram (used by "Edit layout ›"); a controller
+        without a template is selected greyed, with Choose template…."""
         self._reload_diagrams()
         if device_id:
             index = self.diagram_combo.findData(device_id)
+            if index < 0:
+                index = self.diagram_combo.findData(ENTRY_PREFIX_NEEDS + device_id)
             if index >= 0 and index != self.diagram_combo.currentIndex():
                 self.diagram_combo.setCurrentIndex(index)
         self._invalidate()

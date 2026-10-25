@@ -29,12 +29,34 @@ from joystick_diagrams.ui.layout_editor.scheme import EDITOR_URL, document_url
 _logger = logging.getLogger(__name__)
 
 CANVAS_BACKGROUND = "#1a1d23"
-_WIDTH_RE = re.compile(r'\bwidth="(\d+(?:\.\d+)?)(?:px)?"')
+_UNIT = r'(px|mm|cm|in|pt)?"'
+_WIDTH_RE = re.compile(r'\bwidth="(\d+(?:\.\d+)?)' + _UNIT)
+_HEIGHT_RE = re.compile(r'\bheight="(\d+(?:\.\d+)?)' + _UNIT)
+# CSS px per unit (96 dpi), so a page sized in mm fits like one sized in px
+_PX_PER_UNIT = {
+    "": 1.0,
+    "px": 1.0,
+    "mm": 96 / 25.4,
+    "cm": 96 / 2.54,
+    "in": 96.0,
+    "pt": 96 / 72,
+}
+
+
+def _svg_length(pattern: re.Pattern, svg_text: str) -> float | None:
+    match = pattern.search(svg_text[:4000])
+    if not match:
+        return None
+    return float(match.group(1)) * _PX_PER_UNIT[match.group(2) or ""]
 
 
 def svg_width(svg_text: str) -> float | None:
-    match = _WIDTH_RE.search(svg_text[:4000])
-    return float(match.group(1)) if match else None
+    """The root width in CSS px (units such as ``mm`` converted at 96 dpi)."""
+    return _svg_length(_WIDTH_RE, svg_text)
+
+
+def svg_height(svg_text: str) -> float | None:
+    return _svg_length(_HEIGHT_RE, svg_text)
 
 
 class _WebHost(QWidget):
@@ -184,6 +206,20 @@ class SvgDocumentView(_WebHost):
         if not width:
             return None
         factor = max(0.1, min(5.0, (self._view.width() - 24) / width))
+        self.set_zoom(factor)
+        return factor
+
+    def fit_page(self) -> float | None:
+        """Zoom so the whole SVG (width and height) fits the view."""
+        if self._shut_down or not self._last_svg:
+            return None
+        width, height = svg_width(self._last_svg), svg_height(self._last_svg)
+        if not width or not height:
+            return self.fit_width()
+        factor = min(
+            (self._view.width() - 24) / width, (self._view.height() - 24) / height
+        )
+        factor = max(0.1, min(5.0, factor))
         self.set_zoom(factor)
         return factor
 

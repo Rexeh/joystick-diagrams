@@ -7,18 +7,11 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtWidgets import QPushButton  # noqa: E402
-
 from joystick_diagrams.render.theme import (  # noqa: E402
-    ACTIVE_THEME_SETTING_KEY,
     ORIGINAL_THEME_NAME,
     TEMPLATE_ORIGINAL_THEME_ID,
 )
-from joystick_diagrams.ui import strings_appearance as S  # noqa: E402
-from joystick_diagrams.ui.export_page import (  # noqa: E402
-    WHATS_NEW_STYLES_DISMISSED_SETTING_KEY,
-    ExportPage,
-)
+from joystick_diagrams.ui import strings_diagrams as S  # noqa: E402
 from joystick_diagrams.ui.export_settings import ExportSettings  # noqa: E402
 
 
@@ -44,56 +37,57 @@ def settings_store():
         yield values
 
 
-def _seed_app_state():
+def _seed_app_state(output_wrappers=()):
     from joystick_diagrams.app_state import AppState
 
     manager = MagicMock()
     manager.plugin_wrappers = []
     manager.get_enabled_plugin_wrappers.return_value = []
     output = MagicMock()
-    output.get_enabled_plugin_wrappers.return_value = []
+    output.get_enabled_plugin_wrappers.return_value = list(output_wrappers)
     return AppState(plugin_manager=manager, output_plugin_manager=output)
 
 
 @pytest.mark.uitest
-def test_style_combo_lists_styles_and_sets_active(qapp, settings_store):
+def test_style_row_names_the_active_style_and_change_opens_appearance(
+    qapp, settings_store
+):
     state = _seed_app_state()
     widget = ExportSettings()
-
-    names = [
-        widget.export_style.itemText(i) for i in range(widget.export_style.count())
-    ]
-    assert names[:4] == [
-        ORIGINAL_THEME_NAME,
-        "Clean",
-        "Print friendly",
-        "High contrast",
-    ]
+    assert widget.style_label.text() == ORIGINAL_THEME_NAME
     assert widget.get_style_id() == TEMPLATE_ORIGINAL_THEME_ID
-    assert widget.edit_style_button.text() == S.EXPORT_STYLE_EDIT
-
-    widget.export_style.setCurrentIndex(widget.export_style.findData("high_contrast"))
-    assert settings_store[ACTIVE_THEME_SETTING_KEY] == "high_contrast"
-    assert state.theme_service.active_theme_id() == "high_contrast"
+    assert widget.change_style_button.text() == S.CHANGE_ELLIPSIS
+    requested = []
+    widget.style_change_requested.connect(lambda: requested.append(True))
+    widget.change_style_button.click()
+    assert requested == [True]
 
     state.theme_service.set_active("clean")
-    widget.refresh_style_combo()
+    widget.refresh_style()
     assert widget.get_style_id() == "clean"
+    assert widget.style_label.text() == "Clean"
 
 
 @pytest.mark.uitest
-def test_whats_new_banner_shows_once(qapp, settings_store):
-    _seed_app_state()
-    page = ExportPage()
-    assert page._whats_new_banner is not None
-    dismiss = next(
-        b
-        for b in page._whats_new_banner.findChildren(QPushButton)
-        if b.text() == S.WHATS_NEW_DISMISS
-    )
-    dismiss.click()
-    assert settings_store[WHATS_NEW_STYLES_DISMISSED_SETTING_KEY] == "true"
-    assert page._whats_new_banner is None
-
-    again = ExportPage()
-    assert again._whats_new_banner is None
+def test_format_save_to_and_other_apps_rows(qapp, settings_store, tmp_path):
+    app = MagicMock()
+    app.name = "OpenKneeboard"
+    app.ready = True
+    _seed_app_state([app])
+    widget = ExportSettings()
+    formats = [
+        widget.export_format.itemText(i) for i in range(widget.export_format.count())
+    ]
+    assert formats == ["SVG", "PNG", "PDF"]
+    widget.set_export_format("PDF")
+    assert settings_store["export_format"] == "PDF"
+    assert widget.folder_label.text() == S.SAVE_TO_UNSET
+    assert not widget.change_folder_button.isVisibleTo(widget)
+    assert widget.apps_label.text() == "OpenKneeboard · On"
+    with patch(
+        "joystick_diagrams.ui.export_settings.QFileDialog.getExistingDirectory",
+        return_value=str(tmp_path),
+    ):
+        assert widget.choose_folder() == tmp_path
+    assert widget.folder_label.text() == str(tmp_path)
+    assert widget.folder_hint.text() == S.SAVE_TO_HINT

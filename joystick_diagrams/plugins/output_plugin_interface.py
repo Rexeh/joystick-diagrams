@@ -14,6 +14,9 @@ from joystick_diagrams.plugins.plugin_settings import PluginMeta, PluginSettings
 
 _logger = logging.getLogger(__name__)
 
+KIND_CONTROLLER = "controller"
+KIND_PAGE = "page"
+
 
 @dataclass(frozen=True)
 class ExportResult:
@@ -21,6 +24,15 @@ class ExportResult:
 
     Provides both export context (paths, format) and the full device input model
     so output plugins can work with binding data directly without needing images.
+
+    A batch holds one result per controller diagram (``kind="controller"``) and
+    one per combined page file (``kind="page"``, one per profile). For a page,
+    ``device`` is the first controller on the page (so consumers that only read
+    ``.device`` keep working), ``devices`` lists every controller on the page in
+    placement order, ``device_name``/``page_name`` are the page name,
+    ``device_guid`` is the page id and ``template_name`` is ``None``. The trailing
+    fields have defaults, so positional construction of the first nine stays
+    valid.
     """
 
     profile_name: str
@@ -28,10 +40,17 @@ class ExportResult:
     device_guid: str
     source_plugin: str
     template_name: str | None
-    export_format: str  # "SVG" or "PNG"
-    file_path: Path  # the primary output file (SVG or PNG)
+    export_format: str  # "SVG", "PNG" or "PDF"
+    file_path: Path  # the primary output file (PNG/PDF when converted, else SVG)
     export_directory: Path
     device: Device_  # full device model with all inputs, axes, hats, modifiers
+    kind: str = KIND_CONTROLLER  # "controller" | "page"
+    page_name: str | None = None  # the page's name when kind == "page"
+    devices: tuple[Device_, ...] = ()  # every controller on a page, in order
+
+    @property
+    def is_page(self) -> bool:
+        return self.kind == KIND_PAGE
 
 
 class OutputPluginInterface(ABC):

@@ -16,6 +16,7 @@ from xml.sax.saxutils import escape, unescape
 from joystick_diagrams import utils
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.export_device import ExportDevice
+from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.modifier import Modifier
 from joystick_diagrams.modifier_identity import (
     LEGACY_MERGE_MODIFIERS_SETTING_KEY,
@@ -35,6 +36,13 @@ from joystick_diagrams.render import (
     choose_engine,
     render_device,
 )
+from joystick_diagrams.render.compose import (
+    ComposeResult,
+    compose_page,
+    member_devices_for_profile,
+    profiles_for_page,
+)
+from joystick_diagrams.render.page import Page
 from joystick_diagrams.template import Template
 
 _logger = logging.getLogger(__name__)
@@ -81,15 +89,26 @@ def _join_input_parts(parts: list[str]) -> str:
 @dataclass(frozen=True)
 class ExportOutput:
     """What one export produced: the SVG path, the PNG path to convert to (or
-    ``None``) and the render report (``None`` when the template was missing)."""
+    ``None``) and the render report (``None`` when the template was missing).
+
+    ``pdf_path`` is set instead of ``png_path`` for the PDF format (pages);
+    ``compose`` carries the ``ComposeResult`` when the output is a combined page.
+    """
 
     svg_path: str
     png_path: str | None
     report: RenderReport | None
+    pdf_path: str | None = None
+    compose: ComposeResult | None = None
 
     @property
     def paths(self) -> tuple[str, str | None]:
         return (self.svg_path, self.png_path)
+
+    @property
+    def conversion_target(self) -> str | None:
+        """The PNG or PDF path the converter should write, or ``None`` for SVG."""
+        return self.png_path or self.pdf_path
 
 
 def export(
@@ -176,6 +195,98 @@ def _export_device(
         return ExportOutput(svg_path, png_path, outcome.report)
 
     return ExportOutput(svg_path, None, outcome.report)
+
+
+# ── Pages ──
+
+_INVALID_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+
+
+def safe_file_name(name: str, fallback: str = "Page") -> str:
+    """A file-name-safe version of a page or profile name."""
+    cleaned = " ".join(_INVALID_FILENAME_CHARS.sub("", name).split()).strip(" .")
+    return cleaned or fallback
+
+
+def page_profiles(page: Page, export_devices: list[ExportDevice]) -> list:
+    """The profile wrappers a page is exported for, by its ``profile_rule``
+    (default: profiles in which every controller on the page has bindings)."""
+    return profiles_for_page(page, export_devices)
+
+
+def page_member_devices(
+    page: Page, profile_wrapper, export_devices: list[ExportDevice]
+) -> tuple[Device_, ...]:
+    """Every controller on ``page`` as a ``Device_``, in placement order, with
+    this profile's bindings (``ExportResult.devices`` for other apps). A
+    controller with no bindings in the profile comes back empty, as it is drawn."""
+    members = member_devices_for_profile(page, profile_wrapper, export_devices)
+    wanted = getattr(profile_wrapper, "profile_key", None)
+    devices = []
+    for guid in page.member_guids:
+        export_device = members.get(guid)
+        if export_device is None:
+            continue
+        device = export_device.device
+        same_profile = (
+            export_device.profile_wrapper is profile_wrapper
+            or getattr(export_device.profile_wrapper, "profile_key", None) == wanted
+        )
+        devices.append(device if same_profile else Device_(device.guid, device.name))
+    return tuple(devices)
+
+
+@dataclass(frozen=True)
+class ExportDestination:
+    """Where an export run writes: the folder and the format ("SVG" | "PNG" | "PDF")."""
+
+    location: Path
+    export_format: str = "SVG"
+
+    @property
+    def format(self) -> str:
+        return self.export_format.upper()
+
+
+def export_page(
+    page: Page,
+    profile_wrapper,
+    export_devices: list[ExportDevice],
+    ctx: RenderContext | None,
+    destination: ExportDestination,
+) -> ExportOutput:
+    """Export one combined page for one profile.
+
+    Writes ``<page name> - <profile>.svg`` into ``destination.location`` and, like
+    ``export()``, returns the conversion target for the caller to queue:
+    ``png_path`` for ``"PNG"``, ``pdf_path`` for ``"PDF"`` (``PngConverter`` writes
+    either from the SVG). ``export_devices`` is the full export list (every
+    profile); the member for this profile is used when present, otherwise the
+    member is drawn empty and dimmed. Raises ``ComposeError`` when a member has
+    no template.
+    """
+    location = Path(destination.location)
+    members = member_devices_for_profile(page, profile_wrapper, export_devices)
+    result = compose_page(page, profile_wrapper, members, ctx)
+
+    base_name = (
+        f"{safe_file_name(page.name)} - "
+        f"{safe_file_name(profile_wrapper.profile_name, 'Profile')}"
+    )
+    svg_file = f"{base_name}.svg"
+    save_template(result.svg_text, svg_file, location)
+    svg_path = str(location / svg_file)
+
+    fmt = destination.format
+    if fmt == "PNG":
+        return ExportOutput(
+            svg_path, str(location / f"{base_name}.png"), None, None, result
+        )
+    if fmt == "PDF":
+        return ExportOutput(
+            svg_path, None, None, str(location / f"{base_name}.pdf"), result
+        )
+    return ExportOutput(svg_path, None, None, None, result)
 
 
 def save_template(template_data, file_name, export_path):

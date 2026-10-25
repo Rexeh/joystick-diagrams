@@ -867,7 +867,7 @@ class LayoutApplier:
 def resolve_layers(job: RenderJob) -> LayoutLayers:
     if job.layers is not None:
         return job.layers
-    return job.ctx.layers_for(job.template_key, job.profile_key)
+    return job.ctx.layers_for(job.template_key, job.device_guid, job.profile_key)
 
 
 def apply_layout(job: RenderJob) -> None:

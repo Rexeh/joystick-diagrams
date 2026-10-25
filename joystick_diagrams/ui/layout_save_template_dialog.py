@@ -18,7 +18,6 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QMessageBox,
     QPushButton,
     QRadioButton,
     QVBoxLayout,
@@ -35,6 +34,7 @@ from joystick_diagrams.render.template_writer import (
     write_template,
 )
 from joystick_diagrams.ui import strings_layout as S
+from joystick_diagrams.ui.widgets.confirm import confirm, show_problem
 from joystick_diagrams.utils import user_templates_root
 
 _logger = logging.getLogger(__name__)
@@ -89,6 +89,7 @@ class SaveTemplateDialog(QDialog):
         self.saved_path: Path | None = None
         self.bake_result: BakeResult | None = None
         self.assigned = False
+        self.result_text = ""
         self._build()
 
     def _profile_key(self) -> str | None:
@@ -112,6 +113,10 @@ class SaveTemplateDialog(QDialog):
         )
         self.name_edit.setAccessibleName(S.SAVE_NAME)
         layout.addWidget(self.name_edit)
+        self.problem_label = QLabel()
+        self.problem_label.setStyleSheet("color: #F87171;")
+        self.problem_label.hide()
+        layout.addWidget(self.problem_label)
         layout.addWidget(_help(S.SAVE_LOCATION))
 
         layout.addWidget(_heading(S.SAVE_INCLUDE))
@@ -149,7 +154,7 @@ class SaveTemplateDialog(QDialog):
                 else S.SAVE_DONE_STYLE_SKIPPED.strip()
             )
         )
-        self.use_now = QCheckBox(S.SAVE_USE_NOW.format(device=self._device_name))
+        self.use_now = QCheckBox(S.SAVE_USE_NOW.format(controller=self._device_name))
         self.use_now.setChecked(True)
         layout.addWidget(self.use_now)
         layout.addWidget(_help(S.SAVE_INFO))
@@ -181,34 +186,45 @@ class SaveTemplateDialog(QDialog):
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(self.folder())))
 
     def layers_to_bake(self) -> LayoutLayers:
-        template_doc = self._session.service.get_document(
-            self._session.template_key, TEMPLATE_LAYER
+        """This controller's layout (``device_guid``-keyed, via the session)."""
+        session = self._session
+        device_guid = getattr(session, "device_guid", "") or ""
+        template_doc = LayoutDocument(
+            template_key=session.template_key,
+            device_guid=device_guid,
+            ops=session.ops_in(TEMPLATE_LAYER),
         )
         profile_key = self._profile_key()
         if self.include_profile.isChecked() and profile_key:
-            profile_doc = self._session.service.get_document(
-                self._session.template_key, profile_key
+            profile_doc = LayoutDocument(
+                template_key=session.template_key,
+                device_guid=device_guid,
+                profile_key=profile_key,
+                ops=session.ops_in(profile_key),
             )
         else:
-            profile_doc = LayoutDocument(template_key=self._session.template_key)
+            profile_doc = LayoutDocument(
+                template_key=session.template_key, device_guid=device_guid
+            )
         return LayoutLayers(template_doc, profile_doc)
 
     def save(self) -> None:
         name = self.name_edit.text().strip()
         if not name:
-            QMessageBox.warning(self, S.SAVE_TITLE, S.SAVE_NAME_REQUIRED)
+            self.problem_label.setText(S.SAVE_NAME_REQUIRED)
+            self.problem_label.show()
+            self.name_edit.setFocus()
             return
         folder = self.folder()
         target = folder / safe_template_filename(name)
         if target.exists():
-            reply = QMessageBox.question(
+            if not confirm(
                 self,
-                S.SAVE_EXISTS_TITLE,
+                S.SAVE_EXISTS_TITLE.format(name=target.name),
                 S.SAVE_EXISTS_TEXT.format(name=target.name),
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No,
-            )
-            if reply != QMessageBox.StandardButton.Yes:
+                S.SAVE_EXISTS_CONFIRM,
+                S.SAVE_CANCEL,
+            ):
                 return
         store_style = self.store_style.isChecked() and self._theme is not None
         try:
@@ -224,7 +240,7 @@ class SaveTemplateDialog(QDialog):
             path = write_template(result.svg_text, folder, name)
         except (TemplateBakeError, OSError) as error:
             _logger.error(f"Saving template failed: {error}", exc_info=True)
-            QMessageBox.warning(self, S.SAVE_FAILED_TITLE, str(error))
+            show_problem(self, S.SAVE_FAILED_TITLE, S.SAVE_FAILED_TEXT, str(error))
             return
         self.bake_result = result
         self.saved_path = path
@@ -239,10 +255,11 @@ class SaveTemplateDialog(QDialog):
                 count=skipped, s=S.plural(skipped), was=S.plural(skipped, "was", "were")
             )
         if self.assigned:
-            text += S.SAVE_DONE_USED.format(device=self._device_name)
+            text += S.SAVE_DONE_USED.format(controller=self._device_name)
         if self.store_style.isChecked() and not store_style:
             text += S.SAVE_DONE_STYLE_SKIPPED
-        QMessageBox.information(self, S.SAVE_DONE_TITLE, text)
+        # Success is one inline line on the Layout screen, never a dialog
+        self.result_text = text
         self.accept()
 
 

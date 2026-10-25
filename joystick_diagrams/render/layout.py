@@ -390,6 +390,7 @@ class LayoutDocument(BaseModel):
 
     schema_version: int = SCHEMA_VERSION
     template_key: str | None = None
+    device_guid: str = ""  # controller the ops belong to; "" = every controller
     profile_key: str = TEMPLATE_LAYER
     content_hash: str | None = None  # of the template the ops were made on
     ops: list[LayoutOp] = Field(default_factory=list)

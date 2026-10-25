@@ -1,4 +1,4 @@
-"""Drag-and-drop widget for plugin ZIP file installation."""
+"""Drag-and-drop target for a game or app .zip file."""
 
 from pathlib import Path
 
@@ -37,7 +37,7 @@ class DropZoneWidget(QWidget):
 
     def __init__(
         self,
-        label_text: str = "Drag & drop a plugin ZIP here",
+        label_text: str = "Drop a .zip file here",
         parent=None,
         compact: bool = False,
     ):

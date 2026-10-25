@@ -96,7 +96,7 @@ class AppearancePreview(QWidget):
 
         self._stack = QStackedLayout(self)
         self._stack.setContentsMargins(0, 0, 0, 0)
-        self._placeholder = QLabel(S.PREVIEW_EMPTY)
+        self._placeholder = QLabel(S.PREVIEW_RENDERING)
         self._placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._placeholder.setWordWrap(True)
         self._placeholder.setStyleSheet(
@@ -147,6 +147,8 @@ class AppearancePreview(QWidget):
             return
         self._dirty = False
         self._generation += 1
+        if self._stack.currentWidget() is self._placeholder:
+            self._placeholder.setText(S.PREVIEW_RENDERING)
         self.render_started.emit()
         runnable = _RenderRunnable(
             self._generation, self._export_device, self._context_factory()
@@ -165,7 +167,8 @@ class AppearancePreview(QWidget):
     def _on_failed(self, generation: int, message: str) -> None:
         if generation != self._generation:
             return
-        self._placeholder.setText(message)
+        _logger.warning(f"Appearance preview failed: {message}")
+        self._placeholder.setText(S.PREVIEW_FAILED)
         self._stack.setCurrentWidget(self._placeholder)
 
     def _ensure_view(self):

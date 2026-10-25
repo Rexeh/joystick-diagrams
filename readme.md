@@ -47,7 +47,7 @@ We have a fully documented API to build your own support for games and tools as 
 - **Falcon BMS**
 - **OpenKneeboard**
 
-More games can be added through the open plugin system, which is documented at https://www.joystick-diagrams.com/developers
+More games can be added through the open plugin system (in the app, games are added in 1. Setup), which is documented at https://www.joystick-diagrams.com/developers
 
 ## Hardware Templates
 
@@ -67,13 +67,18 @@ Example of what we have!
 | **CH Products** | Fighterstick, Pro Throttle |
 | **Total Controls** | Apache MPD, Multi-Function Button Box |
 
-A starter template is included for creating custom device layouts using [draw.io](https://www.drawio.com/).
+A Starter Template is included for creating your own templates using [draw.io](https://www.drawio.com/); the template picker can copy it for any controller.
 
 ## How It Works
 
-1. **Setup.** Install the app, add your game plugins, point each at the game's config folder. Profiles and devices are discovered automatically.
-2. **Customise.** Browse profiles by game and aircraft. Rename actions with custom labels. Hide devices you don't need.
-3. **Export.** Pick your profiles, choose a template for each device, select SVG or PNG, hit Export. Diagrams land in your chosen folder.
+The app is four stages, left to right along the top. Nothing is locked: you can open any stage at any time, and the button at the bottom right always says what to do next.
+
+1. **Setup.** Tick the games you play. For each one, confirm the folder where it keeps your bindings (the app suggests the usual places, such as DCS World's Saved Games folder). The app reads your bindings and shows what it found: how many controllers and profiles, and which controllers need a template.
+2. **Controllers.** Choose a template for each controller: a picture of it with a box for each control. The template picker shows how many of the controls you use are on each template, so you can see a good fit at a glance. If yours isn't there, start from the Starter Template or use a template file of your own. A controller with nothing bound (or one the game lists as a keyboard or mouse) is set to **No diagram**; you can change that.
+3. **Bindings.** Optional. Check which action is on each control, give long actions a shorter **label** for your diagrams (your game isn't changed), and let one profile use another's bindings (**Shared bindings**, such as a Common profile).
+4. **Diagrams.** Lands on **Export**, with every ready profile ticked. Choose PNG, PDF or SVG and press Export. The first time, the app asks where to save your diagrams and remembers the folder. The result shows inline, with anything worth checking before you print. **Make changes** holds **Appearance** (fonts, colours, modifier colours), **Layout** (move, resize or add boxes, per controller) and **Pages** (two or more controllers on one sheet, such as stick and throttle on one A4 or kneeboard page; one file per profile, by default for the profiles that use all of them).
+
+After the first run the app opens on the stage you last used and reads your games again in the background, so changed bindings show up on their own (turn this off in Settings). Exporting while it reads waits for the read to finish.
 
 ## Installation
 

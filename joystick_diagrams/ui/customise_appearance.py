@@ -30,7 +30,6 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QLabel,
-    QMessageBox,
     QPushButton,
     QRadioButton,
     QScrollArea,
@@ -84,10 +83,22 @@ from joystick_diagrams.render.theme import (
 from joystick_diagrams.ui import strings_appearance as S
 from joystick_diagrams.ui.appearance_preview import AppearancePreview
 from joystick_diagrams.ui.widgets.colour_button import ColourButton
+from joystick_diagrams.ui.widgets.confirm import confirm
 from joystick_diagrams.ui.widgets.empty_state import EmptyState
 from joystick_diagrams.ui.widgets.surface_card import SurfaceCard
 
 _logger = logging.getLogger(__name__)
+
+
+def group_display_name(info) -> str:
+    """The group's name in the player's words ("Device buttons" is the stored
+    key of the group for buttons on a controller)."""
+    if info.display_label:
+        return info.display_label
+    if info.canonical == DEVICE_INPUT_CANONICAL:
+        return S.CONTROLLER_BUTTONS_GROUP
+    return info.canonical
+
 
 TEXT_ROLES = (ThemeRole.BOUND, ThemeRole.UNBOUND, ThemeRole.MODIFIER)
 ALL_ROLES = tuple(ThemeRole)
@@ -118,7 +129,7 @@ QToolButton {
     margin: 0px; padding: 2px; min-width: 28px; min-height: 24px;
 }
 QToolButton:hover { background: #3C4043; border-color: #5F6368; }
-QToolButton:pressed { background: #4C8BF5; border-color: #4C8BF5; }
+QToolButton:pressed { background: #2F6FDB; border-color: #2F6FDB; }
 QToolButton:disabled { background: transparent; border-color: #2c2f38; }
 """
 
@@ -136,10 +147,61 @@ def _heading(text: str) -> QLabel:
     return label
 
 
-def _open_export_page() -> None:
+def _open_controllers() -> None:
+    """ "Choose a template" from the sample preview: 2. Controllers."""
     main_window = AppState().main_window
-    if main_window is not None:
-        main_window.load_export_page()
+    go = getattr(main_window, "go_to_stage", None)
+    if callable(go):
+        go(1)
+
+
+SAMPLE_GUID = "5a3b1e00-0000-11ee-8000-000000000001"
+SAMPLE_BINDINGS: tuple[tuple[int, str, tuple[tuple[str, str], ...]], ...] = (
+    (
+        1,
+        "Gun fire",
+        (("LShift", "Gun arm"), ("LCtrl", "Laser arm"), ("LAlt", "Camera")),
+    ),
+    (2, "TMS Up", (("LShift", "Target designate"),)),
+    (3, "Weapon release", ()),
+    (4, "Countermeasures", (("LCtrl", "Flares only"),)),
+)
+
+
+class _SampleOrigin:
+    name = "Sample"
+    icon = ""
+
+
+class _SampleWrapper:
+    """Just enough of a ``ProfileWrapper`` for the render pipeline."""
+
+    profile_name = "Sample"
+    profile_key = "sample_sample"
+    profile_origin = _SampleOrigin()
+    parents: list = []
+
+
+def sample_export_device():
+    """The Starter Template with sample bindings, for the preview before any
+    controller has a template (``None`` when the template can't be read)."""
+    from joystick_diagrams.export_device import ExportDevice
+    from joystick_diagrams.input.button import Button
+    from joystick_diagrams.input.device import Device_
+    from joystick_diagrams.template import Template
+    from joystick_diagrams.template_catalog import starter_template
+
+    try:
+        template = Template(str(starter_template().path))
+    except Exception as e:  # noqa: BLE001
+        _logger.warning(f"Sample preview unavailable: {e}")
+        return None
+    device = Device_(SAMPLE_GUID, "Sample controller")
+    for number, command, modifiers in SAMPLE_BINDINGS:
+        device.create_input(Button(number), command)
+        for key, modified in modifiers:
+            device.add_modifier_to_input(Button(number), {key}, modified)
+    return ExportDevice(device, template, _SampleWrapper())
 
 
 # ── Style tab ──
@@ -186,6 +248,7 @@ class StyleCard(QFrame):
 
 class StyleTab(QWidget):
     settings_changed = Signal()
+    modifier_keys_requested = Signal()
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
@@ -209,6 +272,7 @@ class StyleTab(QWidget):
         self._left.setContentsMargins(0, 0, 8, 0)
         self._left.setSpacing(16)
         self._build_gallery()
+        self._build_colour_by_key()
         self._build_showing_modifiers()
         self._build_editor()
         self._left.addStretch(1)
@@ -227,6 +291,45 @@ class StyleTab(QWidget):
         self._gallery = QVBoxLayout()
         self._gallery.setSpacing(8)
         self._left.addLayout(self._gallery)
+
+    def _build_colour_by_key(self) -> None:
+        self.colour_by_key = QCheckBox(S.COLOUR_BY_KEY_HEADING)
+        self.colour_by_key.setToolTip(S.COLOUR_BY_KEY_HELP)
+        self.colour_by_key.toggled.connect(self._on_colour_by_key_toggled)
+        self._left.addWidget(self.colour_by_key)
+        row = QHBoxLayout()
+        row.setContentsMargins(24, 0, 0, 0)
+        row.setSpacing(4)
+        for key, colour in (
+            ("Shift", "#0072B2"),
+            ("Ctrl", "#D55E00"),
+            ("Alt", "#009E73"),
+        ):
+            chip = QLabel(key)
+            chip.setStyleSheet(
+                f"background: {colour}; color: #000000; font-size: 11px; "
+                "font-weight: bold; border-radius: 4px; padding: 1px 6px;"
+            )
+            row.addWidget(chip)
+        self.modifier_keys_link = QPushButton(S.COLOUR_BY_KEY_CHANGE)
+        self.modifier_keys_link.setFlat(True)
+        self.modifier_keys_link.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.modifier_keys_link.setStyleSheet(
+            "QPushButton { color: #8AB4F8; border: none; background: transparent; "
+            "padding: 0 4px; text-transform: none; } "
+            "QPushButton:hover { text-decoration: underline; }"
+        )
+        self.modifier_keys_link.clicked.connect(self.modifier_keys_requested.emit)
+        row.addWidget(self.modifier_keys_link)
+        row.addStretch(1)
+        self._left.addLayout(row)
+
+    def _on_colour_by_key_toggled(self, checked: bool) -> None:
+        if self._loading:
+            return
+        set_modifier_colouring_enabled(checked)
+        self.settings_changed.emit()
+        self.mark_preview_dirty()
 
     def _build_showing_modifiers(self) -> None:
         card = SurfaceCard(S.SHOWING_MODIFIERS_HEADING)
@@ -301,9 +404,7 @@ class StyleTab(QWidget):
 
         self.radius_spin = QSpinBox()
         self.radius_spin.setRange(-1, 24)
-        self.radius_spin.setSpecialValueText(
-            S.FIELD_FONT_TEMPLATE.replace("font", "corners")
-        )
+        self.radius_spin.setSpecialValueText(S.FIELD_RADIUS_TEMPLATE)
         self.radius_spin.setSuffix(" px")
         self.radius_spin.valueChanged.connect(
             lambda v: self._edit(lambda t: self._set_radius(t, v))
@@ -328,9 +429,7 @@ class StyleTab(QWidget):
         self.leader_width = QDoubleSpinBox()
         self.leader_width.setRange(0, 10)
         self.leader_width.setSingleStep(0.5)
-        self.leader_width.setSpecialValueText(
-            S.FIELD_FONT_TEMPLATE.replace("font", "width")
-        )
+        self.leader_width.setSpecialValueText(S.FIELD_WIDTH_TEMPLATE)
         self.leader_width.setSuffix(" px")
         self.leader_width.valueChanged.connect(
             lambda v: self._edit(
@@ -367,7 +466,7 @@ class StyleTab(QWidget):
         header.addWidget(_heading(S.PREVIEW_HEADING))
         self.preview_combo = QComboBox()
         self.preview_combo.setProperty("class", "view-binds-list")
-        self.preview_combo.setMinimumWidth(260)
+        self.preview_combo.setMinimumWidth(160)
         self.preview_combo.currentIndexChanged.connect(
             lambda _i: self._on_preview_source_changed()
         )
@@ -387,8 +486,11 @@ class StyleTab(QWidget):
         self.empty_state = EmptyState(
             S.PREVIEW_EMPTY, "fa5s.file-code", S.PREVIEW_EMPTY_ACTION
         )
-        self.empty_state.action_requested.connect(_open_export_page)
+        self.empty_state.action_requested.connect(_open_controllers)
         self.empty_state.hide()
+        self.sample_note = _help(S.PREVIEW_EMPTY)
+        self.sample_note.hide()
+        layout.addWidget(self.sample_note)
         layout.addWidget(self.preview, 1)
         layout.addWidget(self.empty_state, 1)
 
@@ -453,6 +555,7 @@ class StyleTab(QWidget):
         self._loading = True
         try:
             self._display_buttons[get_modifier_display()].setChecked(True)
+            self.colour_by_key.setChecked(modifier_colouring_enabled())
         finally:
             self._loading = False
 
@@ -523,14 +626,16 @@ class StyleTab(QWidget):
         for ed in devices:
             self.preview_combo.addItem(
                 S.PREVIEW_DEVICE_PROFILE.format(
-                    device=ed.device_name, profile=ed.profile_wrapper.profile_name
+                    controller=ed.device_name, profile=ed.profile_wrapper.profile_name
                 )
             )
         self.preview_combo.blockSignals(False)
         has_devices = bool(devices)
+        self._sample = None if has_devices else sample_export_device()
         self.preview_combo.setVisible(has_devices)
-        self.preview.setVisible(has_devices)
-        self.empty_state.setVisible(not has_devices)
+        self.preview.setVisible(has_devices or self._sample is not None)
+        self.sample_note.setVisible(not has_devices and self._sample is not None)
+        self.empty_state.setVisible(not has_devices and self._sample is None)
         self._on_preview_source_changed()
 
     # ── Preview ──
@@ -546,28 +651,30 @@ class StyleTab(QWidget):
         if 0 <= index < len(self._export_devices):
             self.preview.set_source(self._export_devices[index], self._preview_context)
         else:
-            self.preview.set_source(None, self._preview_context)
+            self.preview.set_source(
+                getattr(self, "_sample", None), self._preview_context
+            )
 
     def mark_preview_dirty(self) -> None:
         self.preview.mark_dirty()
 
     def _on_preview_rendered(self, outcome: RenderOutcome) -> None:
         report = outcome.report
+        text = ""
         if RenderNotice.FELL_BACK_TO_LEGACY in report.notices:
             text = S.PREVIEW_FELL_BACK
         elif (
-            report.engine is Engine.LEGACY
-            or self._selected_id == TEMPLATE_ORIGINAL_THEME_ID
+            report.engine is not Engine.LEGACY
+            and self._selected_id != TEMPLATE_ORIGINAL_THEME_ID
+            and Capability.SHAPE_STYLE not in report.capabilities
         ):
-            text = S.PREVIEW_ORIGINAL
-        elif Capability.SHAPE_STYLE not in report.capabilities:
             text = S.PREVIEW_LIMITED
-        else:
-            text = S.PREVIEW_STYLED.format(
-                style=theme_display_name(self._selected_id, self.themes.all_themes())
-            )
         if report.overflow:
-            text += " " + S.PREVIEW_OVERFLOW.format(count=len(report.overflow))
+            count = len(report.overflow)
+            overflow = S.PREVIEW_OVERFLOW.format(
+                count=count, controls=S.CONTROLS[0] if count == 1 else S.CONTROLS[1]
+            )
+            text = f"{text} {overflow}".strip()
         self.status_label.setText(text)
 
     # ── Handlers ──
@@ -823,7 +930,7 @@ class ModifierKeysTab(QWidget):
         plugins = ", ".join(sorted(found.plugins)) or "your profiles"
         return S.KEY_CHIP.format(
             key=found.raw,
-            plugin=plugins,
+            games=plugins,
             count=found.count,
             s="" if found.count == 1 else "s",
         )
@@ -835,7 +942,7 @@ class ModifierKeysTab(QWidget):
         for row, info in enumerate(groups):
             self.table.setCellWidget(row, 0, self._order_widget(info, row, len(groups)))
             self.table.setCellWidget(row, 1, self._colour_widget(info))
-            name = QTableWidgetItem(info.display_label or info.canonical)
+            name = QTableWidgetItem(group_display_name(info))
             if info.canonical == DEVICE_INPUT_CANONICAL:
                 name.setToolTip(S.DEVICE_BUTTONS_HINT)
             self.table.setItem(row, 2, name)
@@ -878,7 +985,7 @@ class ModifierKeysTab(QWidget):
         layout.setContentsMargins(8, 0, 8, 0)
         layout.setSpacing(4)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        name = info.display_label or info.canonical
+        name = group_display_name(info)
         up = self._order_button(
             "fa5s.chevron-up", S.MOVE_UP_NAMED.format(name=name), row > 0
         )
@@ -983,14 +1090,13 @@ class ModifierKeysTab(QWidget):
         self._emit()
 
     def _on_restore_defaults(self) -> None:
-        reply = QMessageBox.question(
+        if not confirm(
             self,
-            S.BUTTON_RESTORE_DEFAULTS,
+            S.RESTORE_DEFAULTS_TITLE,
             S.RESTORE_DEFAULTS_CONFIRM,
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.Yes,
-        )
-        if reply != QMessageBox.StandardButton.Yes:
+            S.BUTTON_RESTORE_DEFAULTS,
+            S.CANCEL,
+        ):
             return
         self.keys.restore_defaults()
         self.refresh()
@@ -1001,7 +1107,7 @@ class ModifierKeysTab(QWidget):
 
 
 class CustomiseAppearance(QWidget):
-    """Customise → Appearance with the Style and Modifier keys tabs."""
+    """4. Diagrams › Appearance with the Style and Modifier keys tabs (J10)."""
 
     TAB_STYLE = 0
     TAB_MODIFIER_KEYS = 1
@@ -1019,6 +1125,9 @@ class CustomiseAppearance(QWidget):
         layout.addWidget(self.tabs)
         self.modifier_keys_tab.settings_changed.connect(
             self.style_tab.mark_preview_dirty
+        )
+        self.style_tab.modifier_keys_requested.connect(
+            lambda: self.show_tab(self.TAB_MODIFIER_KEYS)
         )
         self.tabs.currentChanged.connect(lambda _i: self.refresh())
 

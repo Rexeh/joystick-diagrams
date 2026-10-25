@@ -10,7 +10,7 @@ attributes (see ``layout_apply``), and returns an ``EditorRender``.
 How E2 uses it::
 
     layers = AppState().layout_service.get_layers(
-        template.template_key, wrapper.profile_key
+        template.template_key, wrapper.profile_key, device_guid=export_device.device_id
     )
     render = render_for_editor(template, export_device, layers=layers)
     # or, template only (no device bound yet): tokens stay visible as placeholders
@@ -207,6 +207,7 @@ def render_for_editor(
         resolver=resolver,
         hooks=_hooks(),
         template_key=getattr(template, "template_key", None),
+        device_guid=getattr(export_device, "device_id", None),
         profile_key=getattr(wrapper, "profile_key", None),
         content_hash=_content_hash(template),
         layers=layers,

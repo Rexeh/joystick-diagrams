@@ -12,6 +12,13 @@ Layers: ``TEMPLATE_LAYER`` (``""``, "All profiles on this diagram") or a
 ``ProfileWrapper.profile_key`` ("Only <profile>"). ``scope`` is the layer new
 ops go to; ``profile_key`` is the "Preview with" profile whose layer is shown
 on top of the template layer.
+
+Layout edits belong to one controller: every read and write carries
+``device_guid`` (``export_device.device_id``), so two controllers sharing a
+template (a Starter Template copy, say) keep independent layouts. A controller
+with no rows of its own yet reads the shared rows (``device_guid == ""``,
+layouts made before edits were per controller); its first edit copies that
+layer into its own row, so nothing it showed is lost.
 """
 
 from __future__ import annotations
@@ -56,12 +63,14 @@ class LayoutEditSession:
         *,
         profile_key: str | None = None,
         scope: str = TEMPLATE_LAYER,
+        device_guid: str = "",
     ) -> None:
         self.service = service
         self.template_key = template_key
         self.content_hash = content_hash
         self.profile_key = profile_key
         self.scope = scope
+        self.device_guid = device_guid or ""
         self._undo: list[UndoEntry] = []
         self._redo: list[UndoEntry] = []
 
@@ -76,10 +85,36 @@ class LayoutEditSession:
             self.scope = profile_key or TEMPLATE_LAYER
 
     def layers(self) -> LayoutLayers:
-        return self.service.get_layers(self.template_key, self.profile_key)
+        return self.service.get_layers(
+            self.template_key, self.profile_key, device_guid=self.device_guid
+        )
+
+    def _own_layers(self) -> list[str]:
+        return self.service.layers_of_template(self.template_key, self.device_guid)
 
     def ops_in(self, layer: str) -> list[LayoutOp]:
-        return list(self.service.get_document(self.template_key, layer).ops)
+        """The ops this controller's diagram uses for ``layer`` (its own row, else
+        the shared row it falls back to)."""
+        document = self.service.get_document(self.template_key, layer, self.device_guid)
+        if self.device_guid and not document.ops and layer not in self._own_layers():
+            document = self.service.get_document(self.template_key, layer, "")
+        return list(document.ops)
+
+    def _clear(self, layer: str) -> None:
+        """Remove this controller's row for ``layer`` and the shared row it would fall
+        back to (an empty layer can't be stored, so a shared row would reappear)."""
+        self.service.clear(self.template_key, layer, device_guid=self.device_guid)
+        if self.device_guid:
+            self.service.clear(self.template_key, layer, device_guid="")
+
+    def _set_ops(self, layer: str, ops: list[LayoutOp]) -> None:
+        self.service.set_ops(
+            self.template_key,
+            layer,
+            list(ops),
+            self.content_hash,
+            device_guid=self.device_guid,
+        )
 
     def change_count(self, layer: str) -> int:
         return len(self.ops_in(layer))
@@ -103,7 +138,7 @@ class LayoutEditSession:
 
     def _restore(self, snapshot: dict[str, list[LayoutOp]]) -> None:
         for layer, ops in snapshot.items():
-            self.service.set_ops(self.template_key, layer, list(ops), self.content_hash)
+            self._set_ops(layer, ops)
 
     def _record(self, entry: UndoEntry) -> UndoEntry:
         self._undo.append(entry)
@@ -142,8 +177,7 @@ class LayoutEditSession:
             return None
         layer = self.scope if layer is None else layer
         before = self._snapshot([layer])
-        for op in ops:
-            self.service.append_op(self.template_key, layer, op, self.content_hash)
+        self._set_ops(layer, [*before[layer], *ops])
         after = self._snapshot([layer])
         entry = UndoEntry(label, before, after, coalesce_key, [op.uid for op in ops])
         return self._record(entry)
@@ -168,9 +202,7 @@ class LayoutEditSession:
                     merged = True
                     break
             if merged:
-                self.service.set_ops(
-                    self.template_key, self.scope, previous, self.content_hash
-                )
+                self._set_ops(self.scope, previous)
                 last.after = self._snapshot([self.scope])
                 self._redo.clear()
                 return last
@@ -238,7 +270,7 @@ class LayoutEditSession:
         kept = [op for op in before[self.scope] if not _touches(op, wanted)]
         if len(kept) == len(before[self.scope]):
             return None
-        self.service.set_ops(self.template_key, self.scope, kept, self.content_hash)
+        self._set_ops(self.scope, kept)
         return self._record(
             UndoEntry("undo changes to box", before, self._snapshot([self.scope]))
         )
@@ -248,16 +280,27 @@ class LayoutEditSession:
         before = self._snapshot([layer])
         if not before[layer]:
             return None
-        self.service.clear(self.template_key, layer)
+        self._clear(layer)
         return self._record(UndoEntry("clear layer", before, {layer: []}))
 
+    def has_changes(self) -> bool:
+        """Whether this controller's diagram has any layout change (own or shared)."""
+        layers = set(self._own_layers())
+        if self.device_guid:
+            layers.update(self.service.layers_of_template(self.template_key, ""))
+        return any(self.ops_in(layer) for layer in layers)
+
     def reset_all(self) -> UndoEntry | None:
-        """ "Reset all": every layer of this template (one undo step)."""
-        layers = self.service.layers_of_template(self.template_key)
+        """ "Reset layout": every layer of this controller's diagram (one undo step)."""
+        layers = set(self._own_layers())
+        if self.device_guid:
+            layers.update(self.service.layers_of_template(self.template_key, ""))
+        layers = sorted(layer for layer in layers if self.ops_in(layer))
         if not layers:
             return None
         before = self._snapshot(layers)
-        self.service.clear_template(self.template_key)
+        for layer in layers:
+            self._clear(layer)
         return self._record(
             UndoEntry("reset all", before, {layer: [] for layer in layers})
         )

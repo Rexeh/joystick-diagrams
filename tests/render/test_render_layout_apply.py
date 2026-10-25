@@ -62,9 +62,9 @@ def render(text, ops, *, preview=False, profile_ops=(), content_hash="hash-1"):
     template = KeyedTemplate(text)
     template.content_hash = content_hash
     ed.template = template
-    layouts = {(KEY, ""): LayoutDocument(ops=list(ops), content_hash="hash-1")}
+    layouts = {(KEY, "", ""): LayoutDocument(ops=list(ops), content_hash="hash-1")}
     if profile_ops:
-        layouts[(KEY, "profile_1")] = LayoutDocument(ops=list(profile_ops))
+        layouts[(KEY, "", "profile_1")] = LayoutDocument(ops=list(profile_ops))
         ed.profile_wrapper.profile_key = "profile_1"
     ctx = RenderContext(
         now=NOW, layouts=layouts, preview=preview, engine_override="dom"

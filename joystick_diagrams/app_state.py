@@ -10,10 +10,15 @@ from joystick_diagrams.conflict_strategy import (
     get_alias_strategy,
 )
 from joystick_diagrams.db.device_alias_service import DeviceAliasService
+from joystick_diagrams.db.device_inventory_service import (
+    DeviceInventoryService,
+    ReadResult,
+)
 from joystick_diagrams.db.device_service import DeviceService
 from joystick_diagrams.db.label_service import LabelService
 from joystick_diagrams.db.layout_service import LayoutService
 from joystick_diagrams.db.modifier_key_service import ModifierKeyService
+from joystick_diagrams.db.page_service import PageService
 from joystick_diagrams.db.theme_service import ThemeService
 from joystick_diagrams.input.device import Device_
 from joystick_diagrams.input.profile import Profile_
@@ -57,6 +62,10 @@ class AppState:
         self.modifier_key_service = ModifierKeyService()
         self.theme_service = ThemeService()
         self.layout_service = LayoutService()
+        self.device_inventory_service = DeviceInventoryService(
+            self.device_service, self.layout_service
+        )
+        self.page_service = PageService()
         # Profile map for Plugin Profiles for lookups
         self.plugin_profile_map: dict[str, Profile_] = {}
 
@@ -92,8 +101,17 @@ class AppState:
         # Apply GUID alias resolution on fully inherited profiles
         self._apply_guid_aliases()
 
+    def record_device_read(self) -> ReadResult:
+        """Snapshot the controllers of the current profiles into the inventory.
+
+        Call once after a game read has produced new profile collections (not
+        on every reprocess), so "new since last read" and the auto "No diagram"
+        values reflect reads, not setting changes.
+        """
+        return self.device_inventory_service.record_read(self.profile_wrappers)
+
     def reprocess_profiles_with_notice(
-        self, message: str = "Settings applied — profiles reprocessed"
+        self, message: str = "Saved · bindings updated"
     ) -> None:
         """Rebuild profile wrappers + surface a status-bar toast + invalidate
         cached data pages so they rebuild on next visit.

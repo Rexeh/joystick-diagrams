@@ -62,26 +62,54 @@ def test_layers_for_and_has_layout_ops_use_template_and_profile_layers():
     template_doc = LayoutDocument(ops=[MoveOp(target="button_1", dx=1, dy=1)])
     profile_doc = LayoutDocument(ops=[HideOp(target="button_2")])
     ctx = RenderContext(
-        layouts=MappingProxyType({("k", ""): template_doc, ("k", "p1"): profile_doc})
+        layouts=MappingProxyType(
+            {("k", "", ""): template_doc, ("k", "", "p1"): profile_doc}
+        )
     )
-    layers = ctx.layers_for("k", "p1")
+    layers = ctx.layers_for("k", None, "p1")
     assert isinstance(layers, LayoutLayers)
     assert [type(op).__name__ for op in layers.all_ops()] == ["MoveOp", "HideOp"]
-    assert ctx.layers_for("k", "other").profile.is_empty
-    assert ctx.layers_for("missing", "p1").is_empty
-    assert ctx.has_layout_ops("k", None) and ctx.has_layout_ops("k", "p1")
-    assert not ctx.has_layout_ops("missing", "p1") and not ctx.has_layout_ops(
-        None, "p1"
+    assert ctx.layers_for("k", None, "other").profile.is_empty
+    assert ctx.layers_for("missing", None, "p1").is_empty
+    assert ctx.has_layout_ops("k", None, None) and ctx.has_layout_ops("k", None, "p1")
+    assert not ctx.has_layout_ops("missing", None, "p1") and not ctx.has_layout_ops(
+        None, None, "p1"
     )
-    empty = RenderContext(layouts=MappingProxyType({("k", ""): LayoutDocument()}))
-    assert not empty.has_layout_ops("k", "p1")
+    empty = RenderContext(layouts=MappingProxyType({("k", "", ""): LayoutDocument()}))
+    assert not empty.has_layout_ops("k", None, "p1")
+
+
+def test_layers_for_prefers_the_controllers_own_layer_over_the_shared_one():
+    shared = LayoutDocument(ops=[MoveOp(target="button_1", dx=1, dy=1)])
+    own = LayoutDocument(ops=[HideOp(target="button_1")])
+    profile_shared = LayoutDocument(ops=[HideOp(target="button_2")])
+    ctx = RenderContext(
+        layouts=MappingProxyType(
+            {
+                ("k", "", ""): shared,
+                ("k", "guid-a", ""): own,
+                ("k", "", "p1"): profile_shared,
+            }
+        )
+    )
+    # Controller A has its own template layer; the profile layer falls back to shared.
+    layers = ctx.layers_for("k", "guid-a", "p1")
+    assert [type(op).__name__ for op in layers.all_ops()] == ["HideOp", "HideOp"]
+    # Controller B has nothing of its own: both layers come from the shared rows.
+    layers_b = ctx.layers_for("k", "guid-b", "p1")
+    assert [type(op).__name__ for op in layers_b.all_ops()] == ["MoveOp", "HideOp"]
+    assert ctx.has_layout_ops("k", "guid-b", None)
+    only_own = RenderContext(layouts=MappingProxyType({("k", "guid-a", ""): own}))
+    assert only_own.has_layout_ops("k", "guid-a", None)
+    assert not only_own.has_layout_ops("k", "guid-b", None)
+    assert not only_own.has_layout_ops("k", None, None)
 
 
 def test_engine_selection_with_and_without_layout_ops():
     ed = ED(KeyedTemplate("BUTTON_1"), KeyedWrapper("p1", "dcs_p1"), device())
     assert choose_engine(RenderContext(), ed) is Engine.LEGACY
     doc = LayoutDocument(ops=[MoveOp(target="button_1", dx=1, dy=1)])
-    ctx = RenderContext(layouts=MappingProxyType({("bundled:a.svg", ""): doc}))
+    ctx = RenderContext(layouts=MappingProxyType({("bundled:a.svg", "", ""): doc}))
     assert choose_engine(ctx, ed) is Engine.DOM
     other = ED(
         KeyedTemplate("BUTTON_1", template_key="bundled:b.svg"),
@@ -90,7 +118,7 @@ def test_engine_selection_with_and_without_layout_ops():
     )
     assert choose_engine(ctx, other) is Engine.LEGACY
     profile_ctx = RenderContext(
-        layouts=MappingProxyType({("bundled:a.svg", "dcs_p2"): doc})
+        layouts=MappingProxyType({("bundled:a.svg", "", "dcs_p2"): doc})
     )
     assert choose_engine(profile_ctx, ed) is Engine.LEGACY  # another profile's layer
 
@@ -101,7 +129,11 @@ def test_render_template_legacy_is_byte_identical_without_layout_ops():
     ctx = RenderContext(
         now=NOW,
         layouts=MappingProxyType(
-            {("bundled:other.svg", ""): LayoutDocument(ops=[HideOp(target="button_1")])}
+            {
+                ("bundled:other.svg", "", ""): LayoutDocument(
+                    ops=[HideOp(target="button_1")]
+                )
+            }
         ),
     )
     outcome = render_template(ed, ctx)
@@ -114,7 +146,7 @@ def test_render_template_applies_layout_ops_through_dom_engine():
     ed = ED(KeyedTemplate(text), KeyedWrapper("p1", "dcs_p1"), device())
     doc = LayoutDocument(ops=[HideOp(target="button_2")])
     ctx = RenderContext(
-        now=NOW, layouts=MappingProxyType({("bundled:a.svg", "dcs_p1"): doc})
+        now=NOW, layouts=MappingProxyType({("bundled:a.svg", "", "dcs_p1"): doc})
     )
     outcome = render_template(ed, ctx)
     assert outcome.report.engine is Engine.DOM
@@ -127,7 +159,7 @@ def test_build_render_context_snapshots_layouts_from_app_state():
     class FakeService:
         def snapshot(self):
             return MappingProxyType(
-                {("k", ""): LayoutDocument(ops=[HideOp(target="b")])}
+                {("k", "", ""): LayoutDocument(ops=[HideOp(target="b")])}
             )
 
     class FakeState:
@@ -146,7 +178,7 @@ def test_build_render_context_snapshots_layouts_from_app_state():
         app_state._inst = object()
         app_state.return_value = FakeState()
         ctx = build_render_context(now=NOW)
-    assert ctx.has_layout_ops("k", None)
+    assert ctx.has_layout_ops("k", None, None)
 
 
 def test_placeholder_resolver_keeps_tokens_and_reports_no_modifiers():
@@ -161,7 +193,9 @@ def test_render_for_editor_with_device_uses_bindings_and_default_layers_from_con
     text = build_svg(basic_fixture())
     ed = ED(KeyedTemplate(text), KeyedWrapper("p1", "dcs_p1"), device())
     doc = LayoutDocument(ops=[HideOp(target="button_2")])
-    ctx = RenderContext(now=NOW, layouts=MappingProxyType({("bundled:a.svg", ""): doc}))
+    ctx = RenderContext(
+        now=NOW, layouts=MappingProxyType({("bundled:a.svg", "", ""): doc})
+    )
     render = render_for_editor(ed.template, ed, options=EditorOptions(ctx=ctx))
     assert "Fire" in render.svg_text and 'data-jd-op="hide"' in render.svg_text
     assert next(s for s in render.slots if s.key == "button_2").hidden

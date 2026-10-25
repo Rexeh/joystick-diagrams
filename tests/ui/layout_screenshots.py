@@ -8,7 +8,7 @@ database with one device/two profiles on the Starter Template, and writes PNGs::
 
 Outputs: 01_layout_page.png (selected slot, added box, note, hidden slot,
 profile-only outline, +N badge, notices), 02_auto_add.png, 03_save_as.png,
-04_preview.png, 05_export_summary.png.
+04_preview.png.
 """
 
 from __future__ import annotations
@@ -88,7 +88,7 @@ def main(out_dir: Path) -> int:
         MoveOp,
     )
     from joystick_diagrams.ui import strings_layout as S
-    from joystick_diagrams.ui.configure_page import configurePage
+    from joystick_diagrams.ui.diagrams_page import DiagramsPage
     from joystick_diagrams.ui.layout_auto_add_dialog import AutoAddDialog
     from joystick_diagrams.ui.layout_editor import web_profile
     from joystick_diagrams.ui.layout_editor.planning import SceneCache
@@ -118,7 +118,7 @@ def main(out_dir: Path) -> int:
         key, "dcs world_f-16c", [MoveOp(target="button_11", dx=18, dy=0)], None
     )
 
-    page = configurePage()
+    page = DiagramsPage()
     page.resize(1500, 920)
     page.show()
     page.show_layout(DEVICE_GUID)
@@ -176,46 +176,6 @@ def main(out_dir: Path) -> int:
     pump(800)
     grab(preview, out_dir / "04_preview.png")
     preview.close()
-
-    from types import MappingProxyType
-
-    from joystick_diagrams.render import Engine, RenderNotice, RenderReport
-    from joystick_diagrams.ui.export_page import summary_message_box
-    from joystick_diagrams.ui.export_summary import (
-        ExportEntry,
-        ExportSummary,
-        build_summary,
-    )
-
-    summary = ExportSummary(
-        count=3,
-        styled=True,
-        entries=[
-            ExportEntry(
-                "X56 Throttle",
-                "F-16C",
-                RenderReport(
-                    Engine.LEGACY,
-                    notices=(RenderNotice.NOT_DRAWIO, RenderNotice.FELL_BACK_TO_LEGACY),
-                ),
-            ),
-            ExportEntry(
-                "Gladiator NXT",
-                "F-16C",
-                RenderReport(
-                    Engine.DOM,
-                    overflow=MappingProxyType({"BUTTON_1": 2}),
-                    skipped_ops=("a",),
-                ),
-            ),
-            ExportEntry("Gladiator NXT", "Mirage", RenderReport(Engine.DOM)),
-        ],
-    )
-    text, details = build_summary(summary, "/home/rob/Diagrams")
-    box, _open = summary_message_box(page, text, details)
-    box.show()
-    grab(box, out_dir / "05_export_summary.png")
-    box.close()
 
     page.shutdown()
     page.close()

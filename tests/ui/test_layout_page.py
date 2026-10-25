@@ -59,7 +59,8 @@ def page(settings_store):
 
 
 def stored(layer=TEMPLATE_LAYER):
-    return LayoutService().get_document(STARTER_KEY, layer).ops
+    """The controller's own layer (layouts are keyed by device_guid)."""
+    return LayoutService().get_document(STARTER_KEY, layer, DEVICE_GUID).ops
 
 
 @pytest.mark.uitest
@@ -67,7 +68,10 @@ def test_empty_state_without_templates(qapp, settings_store):
     seed_layout_state(assign_template=False)
     page = CustomiseLayout()
     page.refresh()
-    assert page.canvas_stack.currentWidget() is page.empty_state
+    # The controller is listed greyed, with Choose template… in place
+    assert page.canvas_stack.currentWidget() is page.needs_state
+    assert page.current_needs_template() == (DEVICE_GUID, DEVICE_NAME)
+    assert "needs a template" in page.diagram_combo.currentText()
     assert not page.add_box_button.isEnabled()
     assert page.render_synchronously() is None
     assert page._canvas is None  # WebEngine never started
@@ -203,7 +207,9 @@ def test_notices_report_overflow_and_template_updates(qapp, page):
     notices = page.build_notices()
     texts = [n.text for n in notices]
     # F-16C: Pickle has 3 modifiers, the Starter template gives BUTTON_1 one box
-    assert any(t.startswith("Pickle has 2 more modifiers than boxes.") for t in texts)
+    assert any(
+        t.startswith("Pickle has 2 more modifier bindings than boxes.") for t in texts
+    )
     assert any("don't appear" in t for t in texts)
     assert notices[0].action_text == S.NOTICE_OVERFLOW_ACTION
 
@@ -225,28 +231,11 @@ def test_reset_all_and_show_device(qapp, page):
     page.bridge.applyGesture(
         json.dumps({"gesture": "move", "target": "button_1#1", "dx": 2, "dy": 2})
     )
-    with patch(
-        "joystick_diagrams.ui.customise_layout.QMessageBox.question",
-        return_value=16384,  # QMessageBox.StandardButton.Yes
-    ):
+    with patch("joystick_diagrams.ui.customise_layout.confirm", return_value=True):
         page.reset_all()
     assert page.service.layers_of_template(STARTER_KEY) == []
     page.undo()
     assert len(stored()) == 1
     page.show_device(DEVICE_GUID)
     assert page.diagram_combo.currentData() == DEVICE_GUID
-
-
-@pytest.mark.uitest
-def test_configure_page_has_layout_nav_and_navigation(qapp, settings_store):
-    from joystick_diagrams.ui.configure_page import configurePage
-
-    seed_layout_state()
-    page = configurePage()
-    labels = [page.nav_list.item(i).text() for i in range(page.nav_list.count())]
-    assert labels[-1] == S.NAV_LAYOUT
-    page.show_layout(DEVICE_GUID)
-    assert page.stack.currentWidget() is page.layout_screen
-    assert page.layout_screen.diagram_combo.currentData() == DEVICE_GUID
-    page.shutdown()
     assert STARTER_TEMPLATE.exists()

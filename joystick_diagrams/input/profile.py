@@ -22,6 +22,7 @@ class Profile_:  # noqa: N801
         return f"(Profile Object: {self.name})"
 
     def add_device(self, guid: str, name: str) -> Device_:
+        """Add a device to the profile (or return the existing one for ``guid``)."""
         guid = Device_.validate_guid(guid)
 
         if self.get_device(guid) is None:
