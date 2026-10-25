@@ -101,8 +101,11 @@ class RenderContext:
         None  # modifier key registry; None → seeds, colouring off
     )
     modifier_display: ModifierDisplay = ModifierDisplay.TEMPLATE_BOXES
-    layouts: Mapping[tuple[str, str, str], Any] = (
-        _EMPTY_MAP  # (template_key, device_guid, profile_key) -> LayoutDocument
+    # (template_key, device_guid, profile_key) -> LayoutDocument. A factory, not
+    # a shared MappingProxyType default: Python 3.11's dataclasses reject an
+    # unhashable default value (3.12 only rejects list/dict/set).
+    layouts: Mapping[tuple[str, str, str], Any] = field(
+        default_factory=lambda: MappingProxyType({})
     )
     labels: Mapping[str, str] | None = (
         None  # snapshot of custom labels; None → no resolution
