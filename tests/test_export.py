@@ -139,7 +139,7 @@ def test_replace_specific_modifier_identifier():
                 f"{control}_modifier_{mod_id}",
                 str(modifier),
             ),
-            (f"{control}_modifier_{mod_id}_key", "+".join(modifier.modifiers)),
+            (f"{control}_modifier_{mod_id}_key", "+".join(modifier.sorted_keys)),
             (f"{control}_modifier_{mod_id}_action", f"{modifier.command}"),
         ]
 
@@ -163,7 +163,7 @@ def test_replace_specific_modifier_identifier_joystick_button():
                 f"{control}_modifier_{mod_id}",
                 str(modifier),
             ),
-            (f"{control}_modifier_{mod_id}_key", "+".join(modifier.modifiers)),
+            (f"{control}_modifier_{mod_id}_key", "+".join(modifier.sorted_keys)),
             (f"{control}_modifier_{mod_id}_action", f"{modifier.command}"),
         ]
 
@@ -344,7 +344,8 @@ def test_merge_modifiers_enabled_default_off():
         "joystick_diagrams.db.db_settings.get_setting", return_value="true"
     ) as mock_get:
         assert merge_modifiers_enabled() is True
-        mock_get.assert_called_once_with(MERGE_MODIFIERS_SETTING_KEY)
+        # The new "Showing modifiers" key is read first, then the legacy checkbox key
+        mock_get.assert_any_call(MERGE_MODIFIERS_SETTING_KEY)
 
 
 def test_template_populate_merged_modifiers(mock_export_device):
@@ -419,3 +420,48 @@ def test_merged_modifiers_are_sanitized():
             populate_template(export_device)
             == "Fire &quot;Primary&quot; | Fire &amp; Forget - ctrl"
         )
+
+
+# Modifier identity through the legacy engine
+
+
+def test_modifier_key_text_uses_built_in_rank_order():
+    """`_KEY` text is Ctrl < Alt < Shift < Win < others, never hash order."""
+    modifier = Modifier({"LShift", "JOY_BTN3", "LCtrl", "LAlt"}, "Alt Fire")
+    data = "BUTTON_1_Modifier_1_Key"
+    assert (
+        replace_input_modifier_id_key("BUTTON_1", 1, modifier, data)
+        == "LCtrl+LAlt+LShift+JOY_BTN3"
+    )
+    assert str(modifier) == "Alt Fire - LCtrl+LAlt+LShift+JOY_BTN3"
+
+
+def test_populate_template_keeps_modifier_kind_and_source():
+    """Resolving labels rebuilds modifiers with dataclasses.replace, so the
+    QUALIFIER kind and its source survive into the export (plan 2.2E)."""
+    from joystick_diagrams.input.modifier import ModifierKind
+
+    device = Device_("12345678-1234-5678-1234-567812345678", "Test Device")
+    device.create_input(Button(1), "Fire")
+    input_ = device.get_input("buttons", "BUTTON_1")
+    input_.modifiers.append(
+        Modifier({"Long"}, "Lock", kind=ModifierKind.QUALIFIER, source="route")
+    )
+
+    seen: list[Modifier] = []
+
+    def capture(input_key, modifiers, data):
+        seen.extend(modifiers)
+        return data
+
+    with patch(
+        "joystick_diagrams.export.replace_input_modifiers_string", side_effect=capture
+    ):
+        populate_template(build_export_device("BUTTON_1_Modifiers", device))
+
+    assert len(seen) == 1
+    assert seen[0].kind is ModifierKind.QUALIFIER
+    assert seen[0].source == "route"
+    assert seen[0].command == "Lock"
+    # The device's own modifier object is untouched
+    assert input_.modifiers[0] is not seen[0]

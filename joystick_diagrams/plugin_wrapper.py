@@ -1,4 +1,4 @@
-""" Wrapper functionality for Plugins for the UI
+"""Wrapper functionality for Plugins for the UI
 
 Primarily handles passthrough plugin_interface concrete implementations.
 """

@@ -117,12 +117,15 @@ def test_returns_none_when_installer_raises(qapp):
             "joystick_diagrams.plugins.plugin_installer.install_plugin",
             side_effect=OSError("bad zip"),
         ),
-        patch("PySide6.QtWidgets.QMessageBox.warning") as mock_warning,
+        patch.object(flow, "show_problem", autospec=True) as mock_problem,
     ):
         result = flow.install_from_local_source(Path("plugin.zip"), _app_state(), None)
 
     assert result is None
-    mock_warning.assert_called_once_with(None, "Install Failed", "bad zip")
+    # One plain sentence; the system text goes behind Details
+    mock_problem.assert_called_once_with(
+        None, "Couldn't add this game", flow.S.ADD_FAILED_FILE, "bad zip"
+    )
 
 
 @pytest.mark.uitest

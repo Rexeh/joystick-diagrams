@@ -68,7 +68,7 @@ The plugin is automatically discovered and appears in **Settings > Output Plugin
 
 ## ExportResult
 
-Every exported device produces one `ExportResult`. This is a frozen dataclass with the following fields:
+Every exported file produces one `ExportResult`: one for each controller diagram, and one for each combined page file (a page is exported once per profile). This is a frozen dataclass with the following fields:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -80,7 +80,32 @@ Every exported device produces one `ExportResult`. This is a frozen dataclass wi
 | `export_format` | `str` | `"SVG"` or `"PNG"` |
 | `file_path` | `Path` | Absolute path to the exported file (SVG or PNG depending on format) |
 | `export_directory` | `Path` | Root export directory for this run |
-| `device` | `Device_` | The full device model containing all inputs and bindings |
+| `device` | `Device_` | The full device model containing all inputs and bindings. For a page, the first controller on the page |
+| `kind` | `str` | `"controller"` (one controller's diagram, the default) or `"page"` (a combined page) |
+| `page_name` | `str \| None` | The page's name for a page result, else `None` |
+| `devices` | `tuple[Device_, ...]` | Every controller on a page, in placement order, with this profile's bindings (a controller without bindings in the profile is an empty `Device_`). Empty for controller results |
+
+`export_format` is `"SVG"`, `"PNG"` or `"PDF"`; `file_path` is the PNG or PDF when the export was converted, otherwise the SVG.
+
+### Page results
+
+A batch may contain page results alongside controller results. For a page result:
+
+- `kind` is `"page"` and `page_name` is the page's name.
+- `device` is the first controller on the page, so a plugin that only reads `result.device` keeps working; use `devices` for all of them.
+- `device_name` is the page name, `device_guid` is the page's id (`page_…`) and `template_name` is `None`.
+- `profile_name`, `source_plugin`, `export_format`, `file_path` and `export_directory` mean the same as for a controller result.
+
+Pages follow the same "Also send to" choice as controller diagrams. The new fields are trailing with defaults, so existing plugins (and code that builds `ExportResult` with the first nine fields) need no change. The OpenKneeboard plugin needs no change: it keeps results by `export_format` and copies `file_path` into a folder chosen from `profile_name`, so page PNGs land next to the controller diagrams for the same profile.
+
+To handle only one kind:
+
+```python
+for result in results:
+    if result.kind == "page":
+        names = [d.name for d in result.devices]
+        ...
+```
 
 ## Device Model
 
@@ -144,11 +169,22 @@ Each `input_control` is one of:
 Modifiers represent alternative bindings when modifier keys are held:
 
 ```python
+from joystick_diagrams.input.modifier import ModifierKind
+
 for mod in input_obj.modifiers:
-    mod.modifiers  # set[str] - e.g. {"Ctrl", "Shift"}
-    mod.command    # str - the command when these modifiers are active
-    str(mod)       # "Fire - Ctrl+Shift"
+    mod.modifiers    # set[str] - raw keys as the game names them, e.g. {"LShift", "LCtrl"}
+    mod.command      # str - the command when these modifiers are active
+    mod.sorted_keys  # tuple[str, ...] - keys in the built-in rank order: ("LCtrl", "LShift")
+    mod.kind         # ModifierKind.KEY (a real key) or ModifierKind.QUALIFIER (a label)
+    mod.source       # str | None - for qualifiers: "profile", "device", "route" or "input"
+    str(mod)         # "Fire - LCtrl+LShift"
 ```
+
+**Key order.** `str(mod)`, `mod.sorted_keys` and the `*_MODIFIER_N_KEY` template text use a fixed built-in rank — Ctrl, Alt, Shift, Win, then everything else alphabetically — on the side-stripped, case-folded name (`LShift` ranks as Shift). The raw spellings are kept; only the order is fixed. Never rely on the iteration order of `mod.modifiers` itself.
+
+**Kind.** `ModifierKind.QUALIFIER` marks a modifier the application synthesised while merging: a parent profile name (`source="profile"`), an aliased device name (`"device"`), a Joystick Gremlin route qualifier such as `Long` (`"route"`) or a fallback input id such as `BUTTON_108` (`"input"`). Qualifiers are labels, not keys the user holds, so don't treat them as keyboard keys. `kind` and `source` take no part in equality or `repr`; two modifiers with the same key set compare equal regardless.
+
+The ordering helpers `modifier_sort_key(token)` and `ordered_keys(keys)` are importable from `joystick_diagrams.input.modifier` if you need the same order for your own key lists.
 
 ## Plugin Settings
 
@@ -261,7 +297,7 @@ class OutputPlugin(OutputPluginInterface):
                 if input_obj.modifiers:
                     entry["modifiers"] = [
                         {
-                            "keys": sorted(m.modifiers),
+                            "keys": list(m.sorted_keys),
                             "command": m.command,
                         }
                         for m in input_obj.modifiers

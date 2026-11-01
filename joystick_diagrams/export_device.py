@@ -14,6 +14,8 @@ class ExportDevice:
     _template: Template | None
     profile_wrapper: ProfileWrapper
     errors: set = field(default_factory=set, init=False)
+    # True when a template was chosen but its file can't be found (kept, not deleted).
+    template_missing: bool = field(default=False, init=False)
 
     @property
     def template_file_name(self) -> str | None:

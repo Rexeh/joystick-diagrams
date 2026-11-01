@@ -72,7 +72,7 @@ def test_reprocess_with_default_message():
         state.reprocess_profiles_with_notice()
 
     args, _ = state.main_window.statusLabel.setText.call_args
-    assert "reprocessed" in args[0].lower()
+    assert args[0] == "Saved · bindings updated"
 
 
 def test_reprocess_without_main_window_is_silent():

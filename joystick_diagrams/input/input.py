@@ -10,7 +10,7 @@ import logging
 from joystick_diagrams.input.axis import Axis, AxisSlider
 from joystick_diagrams.input.button import Button
 from joystick_diagrams.input.hat import Hat
-from joystick_diagrams.input.modifier import Modifier
+from joystick_diagrams.input.modifier import Modifier, ModifierKind
 
 _logger = logging.getLogger(__name__)
 
@@ -40,8 +40,20 @@ class Input_:  # noqa: N801
         "Returns the child control identifier"
         return self.input_control.identifier
 
-    def add_modifier(self, modifier: set, command: str) -> None:
-        """Adds a modifier to an existing input, or amends an existing modifier"""
+    def add_modifier(
+        self,
+        modifier: set,
+        command: str,
+        *,
+        kind: ModifierKind = ModifierKind.KEY,
+    ) -> None:
+        """Adds a modifier to an existing input, or amends an existing modifier.
+
+        Modifiers are deduplicated by exact key-set equality; the last write wins
+        for both ``command`` and ``kind``. ``kind`` defaults to ``ModifierKind.KEY``
+        (a real key the user holds); pass ``ModifierKind.QUALIFIER`` for a label
+        that is not a key, such as a mode or profile name.
+        """
         existing = self._check_existing_modifier(modifier)
 
         _logger.debug(f"Existing modifier check is {existing}")
@@ -50,12 +62,13 @@ class Input_:  # noqa: N801
             _logger.debug(
                 f"Modifier {modifier} for input {self.input_control} not found so adding"
             )
-            self.modifiers.append(Modifier(modifier, command))
+            self.modifiers.append(Modifier(modifier, command, kind=kind))
         else:
             _logger.debug(
                 f"Modifier {modifier} already exists for {self.input_control} and command has been overidden"
             )
             existing.command = command
+            existing.kind = ModifierKind(kind)
 
     def _check_existing_modifier(self, modifier: set) -> Modifier | None:
         _logger.debug(f"Existing modifiers: {self.modifiers}")

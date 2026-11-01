@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QAbstractItemView, QListWidgetItem, QMainWindow
 
 from joystick_diagrams.app_state import AppState
 from joystick_diagrams.profile_wrapper import ProfileWrapper
+from joystick_diagrams.ui import strings_bindings as SB
 from joystick_diagrams.ui.qt_designer import parent_profile_management_ui
 
 _logger = logging.getLogger(__name__)
@@ -28,10 +29,12 @@ class parent_profile_ui(QMainWindow, parent_profile_management_ui.Ui_Form):
         self.parentProfileChange.connect(self.save_profile_parent_maps)
         self.listWidget.clicked.connect(self.update_allowed_controls)
 
-        # Updated terminology
-        self.label.setText("Inherited Profiles")
-        self.label_2.setText("Drag to reorder. Higher in list = higher priority.")
-        self.addParentItem.setText("Add Inherited Profile")
+        # Shared bindings wording (docs/superpowers/specs/2026-10-25-ux-language.md)
+        self.label.setText(SB.USES_BINDINGS_FROM)
+        self.label_2.setText(SB.USES_BINDINGS_FROM_HELP)
+        self.addParentItem.setText(SB.ADD_SHARED_PROFILE)
+        self.deleteParent.setText(SB.REMOVE)
+        self.deleteParent.setToolTip(SB.REMOVE_SHARED_PROFILE)
 
         # Hide up/down buttons — replaced by drag-and-drop reordering
         self.parentUp.hide()
@@ -125,7 +128,7 @@ class parent_profile_ui(QMainWindow, parent_profile_management_ui.Ui_Form):
         available_items = self.filter_available_parents()
 
         if not available_items:
-            self.availableParentsComboBox.setPlaceholderText("No items available")
+            self.availableParentsComboBox.setPlaceholderText(SB.NO_PROFILES_TO_ADD)
             self.addParentItem.setDisabled(True)
             return
 

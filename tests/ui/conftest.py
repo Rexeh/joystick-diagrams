@@ -15,6 +15,15 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from joystick_diagrams.db import db_handler  # noqa: E402
 
+# As app_init does: jdeditor:// (the layout canvas) must be registered before the
+# QApplication exists, which pytest-qt creates on the first qapp use.
+try:
+    from joystick_diagrams.ui.layout_editor.scheme import register_scheme
+
+    register_scheme()
+except ImportError:  # pragma: no cover - QtWebEngine missing
+    pass
+
 
 @pytest.fixture(autouse=True)
 def temp_database(tmp_path):
