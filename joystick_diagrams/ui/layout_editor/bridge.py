@@ -21,9 +21,11 @@ Called from JS (slots)::
 Sent to JS (signals)::
 
     documentChanged(url, payload_json)   load a new SVG; payload = EditorRender.as_dict()
-                                         plus "selected", "profileLabel"
+                                         plus "selected", "profileLabel" and,
+                                         when a diagram is (re)opened, "zoom":
+                                         a factor to restore or "fitWidth"
     selectRequested(target)              select from the Qt side
-    zoomRequested(command)               "in" | "out" | "fit" | "100"
+    zoomRequested(command)               "in" | "out" | "fit" | "fitWidth" | "100"
 """
 
 from __future__ import annotations

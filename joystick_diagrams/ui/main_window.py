@@ -31,8 +31,15 @@ from collections.abc import Callable, Iterable
 from typing import Any
 
 import qtawesome as qta
-from PySide6.QtCore import QCoreApplication, QSize, Qt, QTimer, QUrl, Signal
-from PySide6.QtGui import QAction, QCloseEvent, QDesktopServices, QIcon, QShowEvent
+from PySide6.QtCore import QCoreApplication, QRect, QSize, Qt, QTimer, QUrl, Signal
+from PySide6.QtGui import (
+    QAction,
+    QCloseEvent,
+    QDesktopServices,
+    QGuiApplication,
+    QIcon,
+    QShowEvent,
+)
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -85,6 +92,8 @@ PageFactory = Callable[[], QWidget]
 BANNER_KEY_READ_FAILED = "read-failed"
 BANNER_KEY_UPGRADE = "upgrade"
 POPOVER_HIDE_DELAY_MS = 6000
+DEFAULT_WINDOW_SIZE = QSize(1100, 900)
+MINIMUM_WINDOW_SIZE = QSize(800, 600)
 
 
 class MainWindow(QMainWindow):
@@ -120,8 +129,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(
             S.WINDOW_TITLE.format(version=version.get_current_version())
         )
-        self.resize(1100, 900)
-        self.setMinimumSize(QSize(800, 600))
+        self.resize(DEFAULT_WINDOW_SIZE)
+        self.setMinimumSize(MINIMUM_WINDOW_SIZE)
+        self._restore_window_geometry()
 
         self._build_shell()
         self._build_status_bar()
@@ -740,10 +750,53 @@ class MainWindow(QMainWindow):
         self._launch_auto_read()
 
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802
+        self._save_window_geometry()
         self.read_popover.hide()
         for page in self.pages:
             self._safe_call(page, "shutdown")
         super().closeEvent(event)
+
+    # ── Window geometry ──
+
+    def _restore_window_geometry(self) -> None:
+        """Put the window back where it was last time.
+
+        The saved rect is used only when it overlaps a screen that is there now
+        (a monitor may have been unplugged); otherwise the default size stays. It
+        is never smaller than the minimum size.
+        """
+        saved = workflow_settings.get_window_geometry()
+        if saved is None:
+            return
+        rect = QRect(
+            saved.x,
+            saved.y,
+            max(saved.width, MINIMUM_WINDOW_SIZE.width()),
+            max(saved.height, MINIMUM_WINDOW_SIZE.height()),
+        )
+        screens = QGuiApplication.screens()
+        if any(screen.availableGeometry().intersects(rect) for screen in screens):
+            self.setGeometry(rect)
+        else:
+            _logger.info(f"Saved window position {rect} is off every screen; ignoring")
+        if saved.maximized:
+            self.setWindowState(self.windowState() | Qt.WindowState.WindowMaximized)
+
+    def _save_window_geometry(self) -> None:
+        maximized = self.isMaximized()
+        rect = self.normalGeometry() if maximized else self.geometry()
+        if not rect.isValid() or rect.isEmpty():
+            rect = self.geometry()
+        if not rect.isValid() or rect.isEmpty():
+            return
+        try:
+            workflow_settings.set_window_geometry(
+                workflow_settings.WindowGeometry(
+                    rect.x(), rect.y(), rect.width(), rect.height(), maximized
+                )
+            )
+        except Exception:  # noqa: BLE001 - closing must never fail over a setting
+            _logger.exception("Could not save the window geometry")
 
     # ── Help menu actions ──
 

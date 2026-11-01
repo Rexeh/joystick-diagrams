@@ -5,7 +5,8 @@
 line on the Export screen and ``check_notices`` the sentences of its "Check
 before you print" block (journey board J09): bindings that won't show, styles
 that couldn't be applied, modifier overflow, skipped layout changes and page
-warnings. Pure Python so the wording can be unit-tested.
+warnings, and labels too long for their boxes even at the smallest text size
+("Auto" never shortens a binding). Pure Python so the wording can be unit-tested.
 """
 
 from __future__ import annotations
@@ -155,8 +156,44 @@ def check_notices(summary: ExportSummary) -> list[str]:
                 count=n, boxes=D.plural(n, *D.BOXES), were=D.plural(n, "was", "were")
             )
         )
+    too_long = text_too_long_notice(summary.entries)
+    if too_long:
+        lines.append(too_long)
     lines.extend(dict.fromkeys(summary.page_warnings))
     return lines
+
+
+def text_too_long_notice(entries: list[ExportEntry]) -> str | None:
+    """ "3 labels are too long for their boxes even at the smallest size: Button 12,
+    Button 4 and Hat 1 Up." Each box counts once, whatever the profile."""
+    from joystick_diagrams.template_catalog import control_label
+
+    boxes: dict[tuple[str, str], None] = {}
+    for entry in entries:
+        report = entry.report
+        for key, _text in report.text_overflow if report is not None else ():
+            boxes[(entry.device_name, key)] = None
+    if not boxes:
+        return None
+    controllers = {device for device, _ in boxes}
+    names = [
+        D.NOTICE_TEXT_TOO_LONG_ON.format(control=control_label(key), controller=device)
+        if len(controllers) > 1
+        else control_label(key)
+        for device, key in boxes
+    ]
+    shown = D.NOTICE_NAMES_SHOWN
+    if len(names) > shown + 1:
+        names = [*names[:shown], D.NOTICE_NAMES_MORE.format(count=len(names) - shown)]
+    n = len(boxes)
+    return D.NOTICE_TEXT_TOO_LONG.format(
+        count=n,
+        labels=D.plural(n, *D.LABELS),
+        are=D.plural(n, "is", "are"),
+        their=D.plural(n, "its", "their"),
+        boxes=D.plural(n, *D.BOXES),
+        controls=D.join_and(names),
+    )
 
 
 def entry_for(export_device: Any, report: RenderReport | None) -> ExportEntry:

@@ -420,7 +420,7 @@ class PagePanel(QWidget):
         self.no_notices = help_label(S.PANEL_NO_NOTICES)
         layout.addWidget(self.no_notices)
         layout.addStretch(1)
-        layout.addWidget(help_label(S.PANEL_UNDO_NOTE))
+        layout.addWidget(help_label(S.PAGE_PANEL_UNDO_NOTE))
 
     @staticmethod
     def _mm_spin(name: str, maximum: float) -> QDoubleSpinBox:

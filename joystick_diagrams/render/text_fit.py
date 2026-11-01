@@ -20,18 +20,30 @@ Qt. The findings are recorded in ``docs/superpowers/specs/2026-10-20-s5-text-fit
 
 Fitting
 -------
-``fit_rich`` takes a ``RichText`` (main line plus modifier lines), the box the
-label sits in and the font the template/theme decided, then:
+``fit_rich`` takes a ``RichText`` (main line plus modifier lines, or plain
+lines), the box the label sits in and the font the template/theme decided,
+then:
 
-1. tries font sizes from the base size down to ``min_size`` in ``SIZE_STEP``
-   steps; a size *fits* when every unbreakable word fits the width (words wrap
-   at spaces, as Chromium does with ``white-space: normal``) and the wrapped
-   block is no taller than the box;
-2. at each size, tries draw.io's ``LINE_HEIGHT`` first and then
-   ``COMPACT_LINE_HEIGHT`` (tighter leading keeps the glyphs larger, which
-   reads better than a smaller font with airy lines);
+1. tries font sizes from ``max_size`` (default: the font's own size, so the
+   label only shrinks; "Auto" passes a larger ceiling so text can grow into a
+   roomy box) down to ``min_size`` in ``SIZE_STEP`` steps and keeps the first,
+   i.e. the largest, that *fits*: every unbreakable word fits the width
+   (words wrap at spaces, never between the coloured runs of one word, as
+   Chromium does with ``white-space: normal``) and the wrapped block is no
+   taller than the box plus ``HEIGHT_TOLERANCE_PX``;
+2. at each size up to the font's own size, tries draw.io's ``LINE_HEIGHT``
+   first and then ``COMPACT_LINE_HEIGHT`` (tighter leading keeps the glyphs
+   larger, which reads better than a smaller font with airy lines); above it
+   only ``LINE_HEIGHT``, so grown text never sits on compact lines;
 3. if nothing fits at ``min_size``, drops lines from the end (never the
-   protected leading lines) and appends ``+N more`` until the block fits.
+   ``protected`` leading lines) and appends ``+N more`` until the block fits;
+   when even ``+N more`` has no room the protected lines alone are tried.
+   Plain text protects every line: it is never shortened, and a label that
+   does not fit at the minimum comes back with ``fits=False``.
+
+Widths are linear in the font size, so each fragment is measured once at 1 px
+and the size search is arithmetic (``_Prepared``); necessary bounds (the
+widest word, one row per line) skip sizes that cannot fit.
 
 Each line is written as its own block (``<div>``) carrying the line's size, so
 a line is ``line_height`` × its own size tall (``line_em``: 0.85 for modifier
@@ -201,6 +213,20 @@ def line_width(line: Line, font: FontSpec) -> float:
 
 
 # ── Wrapping ──
+#
+# A width is linear in the font size, so every fragment is measured once at
+# 1 px (``_Piece.per_px``) and wrapping at any size is arithmetic. Words are
+# runs of non-space fragments: ``L Ctrl`` ``+`` ``L Shift`` breaks only at the
+# spaces, never between the coloured runs, as Chromium does.
+
+
+@dataclass(frozen=True)
+class _Piece:
+    run: Run
+    text: str
+    is_space: bool
+    per_px: float  # width at a 1 px block size
+    em: float  # the run's relative size (1.0 when inherited)
 
 
 def _fragments(line: Line) -> list[tuple[Run, str, bool]]:
@@ -211,6 +237,25 @@ def _fragments(line: Line) -> list[tuple[Run, str, bool]]:
             if part:
                 pieces.append((run, part, part.isspace()))
     return pieces
+
+
+def _prepare(line: Line, font: FontSpec) -> list[list[_Piece]]:
+    """The line as alternating word and space groups, measured at 1 px."""
+    unit = font.with_size(1.0)
+    groups: list[list[_Piece]] = []
+    for run, text, is_space in _fragments(line):
+        piece = _Piece(
+            run,
+            text,
+            is_space,
+            run_width(Run(text, run.colour, run.bold, run.size_em), unit),
+            run.size_em if run.size_em is not None else 1.0,
+        )
+        if groups and groups[-1][0].is_space == is_space:
+            groups[-1].append(piece)
+        else:
+            groups.append([piece])
+    return groups
 
 
 def _join_fragments(pieces: list[tuple[Run, str]]) -> Line:
@@ -226,34 +271,70 @@ def _join_fragments(pieces: list[tuple[Run, str]]) -> Line:
     return tuple(runs)
 
 
+@dataclass(frozen=True)
+class _Wrapped:
+    pieces: tuple[_Piece, ...]
+    per_px: float  # width of the line (trailing spaces excluded) at 1 px
+
+    @property
+    def em(self) -> float:
+        ems = {piece.em for piece in self.pieces}
+        return ems.pop() if len(ems) == 1 else 1.0
+
+    def line(self) -> Line:
+        return _join_fragments([(p.run, p.text) for p in self.pieces])
+
+
+def _strip_spaces(pieces: list[_Piece]) -> tuple[_Piece, ...]:
+    start, end = 0, len(pieces)
+    while start < end and pieces[start].is_space:
+        start += 1
+    while end > start and pieces[end - 1].is_space:
+        end -= 1
+    return tuple(pieces[start:end])
+
+
+def _wrapped(pieces: list[_Piece]) -> _Wrapped:
+    kept = _strip_spaces(pieces)
+    return _Wrapped(kept, sum(p.per_px for p in kept))
+
+
+def _wrap_groups(
+    groups: list[list[_Piece]], max_width: float | None, size: float
+) -> list[_Wrapped]:
+    """Greedy wrap at spaces; a word wider than the box stays whole."""
+    if max_width is None:
+        line = _wrapped([piece for group in groups for piece in group])
+        return [line] if line.pieces else []
+    limit = max_width / size
+    lines: list[_Wrapped] = []
+    current: list[_Piece] = []
+    width = 0.0  # including trailing spaces
+    for group in groups:
+        group_px = sum(piece.per_px for piece in group)
+        if group[0].is_space:
+            if current:
+                current.extend(group)
+                width += group_px
+            continue
+        if current and width + group_px > limit:
+            lines.append(_wrapped(current))
+            current, width = [], 0.0
+        current.extend(group)
+        width += group_px
+    if current:
+        lines.append(_wrapped(current))
+    return lines
+
+
 def wrap_line(line: Line, max_width: float | None, font: FontSpec) -> list[Line]:
     """Greedy word wrap at whitespace; a word wider than the box stays whole."""
     if max_width is None:
         return [line] if any(run.text for run in line) else []
-    lines: list[Line] = []
-    current: list[tuple[Run, str]] = []
-    width = 0.0
-    for run, text, is_space in _fragments(line):
-        piece_width = run_width(Run(text, run.colour, run.bold, run.size_em), font)
-        if is_space:
-            if current:
-                current.append((run, text))
-                width += piece_width
-            continue
-        if current and width + piece_width > max_width:
-            lines.append(_join_fragments(_rstrip(current)))
-            current, width = [], 0.0
-        current.append((run, text))
-        width += piece_width
-    if current:
-        lines.append(_join_fragments(_rstrip(current)))
-    return lines
-
-
-def _rstrip(pieces: list[tuple[Run, str]]) -> list[tuple[Run, str]]:
-    while pieces and pieces[-1][1].isspace():
-        pieces.pop()
-    return pieces
+    return [
+        wrapped.line()
+        for wrapped in _wrap_groups(_prepare(line, font), max_width, font.size)
+    ]
 
 
 def line_em(line: Line) -> float:
@@ -279,6 +360,16 @@ class FitBox:
     width: float | None  # None → unconstrained
     height: float | None
 
+    def inset(self, padding: float) -> FitBox:
+        """The box less ``padding`` left and right (never below 1 px).
+
+        Only the width: the block is centred vertically and its line boxes
+        already carry the leading above and below the glyphs.
+        """
+        if self.width is None:
+            return self
+        return FitBox(max(self.width - 2 * padding, 1.0), self.height)
+
 
 @dataclass(frozen=True)
 class FitResult:
@@ -293,6 +384,10 @@ class FitResult:
     @property
     def shrunk(self) -> bool:
         return self.font_size < self.base_size
+
+    @property
+    def grown(self) -> bool:
+        return self.font_size > self.base_size
 
     @property
     def compact(self) -> bool:
@@ -310,27 +405,72 @@ def _sizes(base: float, minimum: float) -> list[float]:
     return sizes
 
 
-def _layout(
-    lines: tuple[Line, ...], box: FitBox, font: FontSpec, line_height: float
-) -> tuple[tuple[Line, ...], bool]:
-    wrapped: list[Line] = []
-    for line in lines:
-        wrapped.extend(wrap_line(line, box.width, font))
-    height = sum(line_height * font.size * line_em(line) for line in wrapped)
-    fits = fits_width(wrapped, box.width, font) and (
-        box.height is None or height <= box.height + HEIGHT_TOLERANCE_PX
-    )
-    return tuple(wrapped), fits
+def _search_sizes(ceiling: float, base: float, minimum: float) -> list[float]:
+    """Candidate sizes, largest first: a 0.5 px grid from ``ceiling`` plus ``base``."""
+    sizes = _sizes(ceiling, minimum)
+    if minimum <= base <= ceiling and base not in sizes:
+        sizes.append(base)
+        sizes.sort(reverse=True)
+    return sizes
+
+
+class _Prepared:
+    """The lines of a label measured once, laid out at any size."""
+
+    def __init__(self, lines: tuple[Line, ...], font: FontSpec) -> None:
+        self.lines = lines
+        self.groups = [_prepare(line, font) for line in lines]
+
+    def max_size(self, box: FitBox) -> float:
+        """No size above this can fit (widest word; one row per line)."""
+        bound = float("inf")
+        if box.width is not None:
+            words = [
+                sum(p.per_px for p in group)
+                for groups in self.groups
+                for group in groups
+                if not group[0].is_space
+            ]
+            if words and max(words) > 0:
+                bound = box.width / max(words)
+        if box.height is not None:
+            rows = sum(
+                min((p.em for g in groups for p in g), default=1.0)
+                for groups in self.groups
+            )
+            if rows > 0:
+                limit = (box.height + HEIGHT_TOLERANCE_PX) / (
+                    rows * COMPACT_LINE_HEIGHT
+                )
+                bound = min(bound, limit)
+        return bound
+
+    def layout(
+        self, box: FitBox, size: float, line_height: float
+    ) -> tuple[list[_Wrapped], bool]:
+        wrapped: list[_Wrapped] = []
+        for groups in self.groups:
+            wrapped.extend(_wrap_groups(groups, box.width, size))
+        fits = box.width is None or all(
+            line.per_px * size <= box.width for line in wrapped
+        )
+        if fits and box.height is not None:
+            height = sum(line_height * size * line.em for line in wrapped)
+            fits = height <= box.height + HEIGHT_TOLERANCE_PX
+        return wrapped, fits
 
 
 def _try(
-    lines: tuple[Line, ...], box: FitBox, font: FontSpec
+    prepared: _Prepared,
+    box: FitBox,
+    size: float,
+    line_heights: tuple[float, ...] = LINE_HEIGHTS,
 ) -> tuple[tuple[Line, ...], float] | None:
-    """The wrapped lines and line height at which ``lines`` fit, else ``None``."""
-    for line_height in LINE_HEIGHTS:
-        wrapped, fits = _layout(lines, box, font, line_height)
+    """The wrapped lines and line height at which the lines fit, else ``None``."""
+    for line_height in line_heights:
+        wrapped, fits = prepared.layout(box, size, line_height)
         if fits:
-            return wrapped, line_height
+            return tuple(line.line() for line in wrapped), line_height
     return None
 
 
@@ -342,41 +482,65 @@ def more_line(count: int) -> Line:
     )
 
 
-def fit_rich(
+def fit_rich(  # noqa: PLR0913 (text, box, font; the limits are keyword-only)
     rich: RichText,
     box: FitBox,
     font: FontSpec,
     *,
     min_size: float = DEFAULT_MIN_FONT_SIZE,
     protected: int = 1,
+    max_size: float | None = None,
 ) -> FitResult:
-    """Shrink, then truncate, ``rich`` so it fits ``box`` (see the module docstring).
+    """The largest size at which ``rich`` fits ``box``, then truncation (module docstring).
 
-    ``protected`` leading lines (the main binding text) are never dropped; at
-    least one line always stays.
+    Sizes are tried from ``max_size`` (default: the font's own size, so the
+    label only shrinks) down to ``min_size`` in 0.5 px steps. Above the font's
+    own size only the normal leading is used, so grown text never sits on
+    compact lines. ``protected`` leading lines (the main binding text) are
+    never dropped; at least one line always stays.
     """
     lines = rich.lines
-    minimum = min(min_size, font.size)
-    for size in _sizes(font.size, minimum):
-        found = _try(lines, box, font.with_size(size))
+    base = font.size
+    minimum = min(min_size, base)
+    ceiling = max(max_size if max_size is not None else base, base)
+    prepared = _Prepared(lines, font)
+    bound = prepared.max_size(box)
+    for size in _search_sizes(ceiling, base, minimum):
+        if size > bound and size > minimum:
+            continue
+        heights = LINE_HEIGHTS if size <= base else (LINE_HEIGHT,)
+        found = _try(prepared, box, size, heights)
         if found is not None:
-            return FitResult(size, font.size, lines, found[0], 0, True, found[1])
-    small = font.with_size(minimum)
+            return FitResult(size, base, lines, found[0], 0, True, found[1])
     keep_at_least = max(1, min(protected, len(lines)))
     candidate = lines
     for keep in range(len(lines) - 1, keep_at_least - 1, -1):
         dropped = len(lines) - keep
         candidate = (*lines[:keep], more_line(dropped))
-        found = _try(candidate, box, small)
+        found = _try(_Prepared(candidate, font), box, minimum)
         if found is not None:
             return FitResult(
-                minimum, font.size, candidate, found[0], dropped, True, found[1]
+                minimum, base, candidate, found[0], dropped, True, found[1]
             )
+    if keep_at_least < len(lines):
+        # No room even for "+N more": the main text alone, rather than a hint
+        # that spills over the box (the dropped lines are still counted).
+        alone = lines[:keep_at_least]
+        found = _try(_Prepared(alone, font), box, minimum)
+        if found is not None:
+            dropped = len(lines) - keep_at_least
+            return FitResult(minimum, base, alone, found[0], dropped, True, found[1])
     # Nothing fits: write the shortest candidate at the smallest size, compact.
-    wrapped, _ = _layout(candidate, box, small, COMPACT_LINE_HEIGHT)
+    wrapped, _ = _Prepared(candidate, font).layout(box, minimum, COMPACT_LINE_HEIGHT)
     truncated = 0 if candidate is lines else len(lines) - keep_at_least
     return FitResult(
-        minimum, font.size, candidate, wrapped, truncated, False, COMPACT_LINE_HEIGHT
+        minimum,
+        base,
+        candidate,
+        tuple(line.line() for line in wrapped),
+        truncated,
+        False,
+        COMPACT_LINE_HEIGHT,
     )
 
 

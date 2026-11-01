@@ -11,8 +11,10 @@ HEADER_DIAGRAM = "Diagram"
 HEADER_PREVIEW_WITH = "Preview with:"
 HEADER_SCOPE = "Changes apply to:"
 SCOPE_ALL_PROFILES = "All profiles on this diagram"
+SCOPE_ALL_PROFILES_SHORT = "All profiles"  # the narrow toolbar
 SCOPE_ONLY_PROFILE = "Only {profile}"
 SAVED_AUTOMATICALLY = "Saved automatically"
+SAVED_SHORT = "Saved"
 PREVIEW_ENTRY = "{game} / {profile}"
 DIAGRAM_ENTRY = "{controller} · {template}"
 PAGE_HELP = (
@@ -52,11 +54,14 @@ MORE_SAVE_AS_TEMPLATE = "Save as new template…"
 TOOLTIP_SELECT = "Select and move boxes"
 TOOLTIP_ADD_MODIFIER_BOX = "Add a modifier box next to the selected control"
 TOOLTIP_AUTO_ADD = "Add modifier boxes for every control that needs them"
+TOOLTIP_ADD_NOTE = "Add a note to the diagram"
 TOOLTIP_HIDE = "Hide the selected box (Delete)"
 TOOLTIP_UNDO = "Undo (Ctrl+Z)"
 TOOLTIP_REDO = "Redo (Ctrl+Y)"
 TOOLTIP_ZOOM_FIT = "Fit the whole diagram in the window"
 TOOLTIP_ZOOM_100 = "Zoom to 100%"
+TOOLTIP_ZOOM_MENU = "Zoom"
+TOOLTIP_SCOPE = "Changes apply to all profiles, or only to the profile you preview"
 SELECT_A_CONTROL_FIRST = "Click a control on the diagram first."
 NOTES_NEED_NO_PARENT = "Notes aren't controls, so they can't have modifier boxes."
 NO_ROOM_FOR_BOX = "There's no room for another box next to {name}."
@@ -68,7 +73,7 @@ CANCEL = "Cancel"
 UNDO_PROFILE_CONFIRM = "Undo changes"
 RESET_ALL_TEXT = (
     "This removes every layout change on this diagram, for all profiles. "
-    "You can undo it while you stay on this screen."
+    "You can undo it until you close the app."
 )
 UNDO_PROFILE_TITLE = "Undo your changes for {profile}?"
 UNDO_PROFILE_TEXT = (
@@ -120,7 +125,11 @@ PANEL_PROFILE_ONLY = "Changed only for {profile}"
 PANEL_NOTICES = "Notices"
 PANEL_NO_NOTICES = "Nothing to report."
 PANEL_UNDO_NOTE = (
-    "Undo history clears when you leave this screen. Your changes are already saved."
+    "Undo works for this diagram until you close the app. "
+    "Your changes are already saved."
+)
+PAGE_PANEL_UNDO_NOTE = (
+    "Undo works for this page until you close the app. Your changes are already saved."
 )
 
 # ── Page panel (a page chosen in the Diagram picker) ──
@@ -169,6 +178,7 @@ NOTICE_TEMPLATE_UPDATED = (
 NOTICE_TEMPLATE_UPDATED_ACTION = "Show which"
 NOTICE_SKIPPED_DETAIL = "Skipped: {items}"
 NOTICE_NO_ROOM = "No room for {count} box{es} next to {name}."
+NOTICE_TEXT_TOO_LONG = "{name}: too long for its box even at the smallest size."
 NOTICE_UNSUPPORTED = UNSUPPORTED_BANNER
 NOTICE_CANT_RESIZE = (
     "{name} can't be resized on this template, so that change was skipped."

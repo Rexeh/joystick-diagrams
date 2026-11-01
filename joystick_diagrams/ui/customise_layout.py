@@ -45,6 +45,7 @@ from typing import Any
 
 import qtawesome as qta
 from PySide6.QtCore import (
+    QEvent,
     QObject,
     QRunnable,
     QSize,
@@ -54,9 +55,8 @@ from PySide6.QtCore import (
     Signal,
     Slot,
 )
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtGui import QIcon, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
-    QButtonGroup,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -67,8 +67,8 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMenu,
     QPushButton,
-    QRadioButton,
     QScrollArea,
+    QSizePolicy,
     QSpinBox,
     QStackedLayout,
     QStackedWidget,
@@ -136,6 +136,19 @@ RENDER_DEBOUNCE_MS = 40
 PAGE_RENDER_DEBOUNCE_MS = 120
 PAGE_ZOOM_STEP = 1.25
 PANEL_WIDTH = 320
+# Below this editor width the right panel is a drawer over the canvas's right edge
+DRAWER_THRESHOLD = 1000
+DRAWER_WIDTH = 240
+ROOT_MARGIN = 16
+ROOT_SPACING = 12
+COMPACT_MARGIN = 12
+COMPACT_SPACING = 8
+DIAGRAM_COMBO_WIDTH = 320
+DIAGRAM_COMBO_COMPACT_WIDTH = 200
+PROFILE_COMBO_WIDTH = 200
+PROFILE_COMBO_COMPACT_WIDTH = 150
+ZOOM_FIT_WIDTH = "fitWidth"  # the editor page's fit-to-width request
+ZOOM_SAVE_DELAY_MS = 600
 NOTE_WIDTH = 220.0
 NOTE_HEIGHT = 26.0
 NOTE_MARGIN = 20.0
@@ -386,6 +399,68 @@ class NoteDialog(QDialog):
         return self.edit.text()
 
 
+# ── A row that wraps ──
+
+
+class WrapRow(QWidget):
+    """Two groups side by side, or the second under the first when the row is
+    narrower than both need (the header pickers, the toolbar and its scope)."""
+
+    def __init__(self, first: QWidget, second: QWidget, spacing: int = 10):
+        super().__init__()
+        self.first = first
+        self.second = second
+        self._spacing = spacing
+        self._grid = QGridLayout(self)
+        self._grid.setContentsMargins(0, 0, 0, 0)
+        self._grid.setHorizontalSpacing(spacing)
+        self._grid.setVerticalSpacing(6)
+        self.wrapped: bool | None = None
+        self.set_wrapped(False)
+
+    def needed_width(self) -> int:
+        """The narrowest the row can be with both groups on one line."""
+        return (
+            self.first.minimumSizeHint().width()
+            + self._spacing
+            + self.second.minimumSizeHint().width()
+        )
+
+    def set_wrapped(self, wrapped: bool) -> None:
+        if wrapped == self.wrapped:
+            return
+        self.wrapped = wrapped
+        self._grid.removeWidget(self.first)
+        self._grid.removeWidget(self.second)
+        self._grid.addWidget(self.first, 0, 0)
+        if wrapped:
+            self._grid.addWidget(self.second, 1, 0)
+            self._grid.setColumnStretch(0, 1)
+            self._grid.setColumnStretch(1, 0)
+        else:
+            self._grid.addWidget(self.second, 0, 1)
+            self._grid.setColumnStretch(0, 0)
+            self._grid.setColumnStretch(1, 1)
+
+
+def _fit_popup(combo: QComboBox) -> None:
+    """The picker can be narrower than its entries; its list shows them whole."""
+    view = combo.view()
+    view.setMinimumWidth(view.sizeHintForColumn(0) + 32 if combo.count() else 0)
+
+
+def _group(*widgets: QWidget, stretch: bool = False, spacing: int = 10) -> QWidget:
+    group = QWidget()
+    row = QHBoxLayout(group)
+    row.setContentsMargins(0, 0, 0, 0)
+    row.setSpacing(spacing)
+    for widget in widgets:
+        row.addWidget(widget)
+    if stretch:
+        row.addStretch(1)
+    return group
+
+
 # ── The screen ──
 
 
@@ -416,6 +491,18 @@ class CustomiseLayout(QWidget):
         self._page_render_timer.timeout.connect(self._render_page)
         self._signature: list | None = None
         self._session: LayoutEditSession | None = None
+        # One edit session (its undo history) per diagram for the screen's life
+        self._sessions: dict[str, LayoutEditSession] = {}
+        self._page_histories: dict[str, PageHistory] = {}
+        self._page_zooms: dict[str, float] = {}
+        # Zoom per diagram: the first showing fits the width, later ones restore
+        self._zooms: dict[str, float] = {}
+        self._canvas_key: str | None = None
+        self._edited = False
+        self._zoom_save_timer = QTimer(self)
+        self._zoom_save_timer.setSingleShot(True)
+        self._zoom_save_timer.setInterval(ZOOM_SAVE_DELAY_MS)
+        self._zoom_save_timer.timeout.connect(self._save_zoom)
         self._render: EditorRender | None = None
         self._export_device: Any = None
         self._selected: str | None = None
@@ -459,14 +546,18 @@ class CustomiseLayout(QWidget):
     # ── UI construction ──
 
     def _build_ui(self) -> None:
+        self._drawer_mode: bool | None = None
+        self._compact_tools = False
+        self._tool_widths: dict[tuple[bool, str], int] = {}
         root = QVBoxLayout(self)
-        root.setContentsMargins(16, 16, 16, 16)
-        root.setSpacing(12)
+        root.setContentsMargins(ROOT_MARGIN, ROOT_MARGIN, ROOT_MARGIN, ROOT_MARGIN)
+        root.setSpacing(ROOT_SPACING)
+        self._root = root
 
         self.help_label = _help(S.PAGE_HELP)
         self.help_label.setObjectName("device_help_label")
         root.addWidget(self.help_label)
-        root.addLayout(self._build_header())
+        root.addWidget(self._build_header())
 
         self.banner = QWidget()
         self.banner.setProperty("class", "guidance-banner")
@@ -483,10 +574,11 @@ class CustomiseLayout(QWidget):
         self.banner.hide()
         root.addWidget(self.banner)
 
-        root.addLayout(self._build_toolbar())
+        root.addWidget(self._build_toolbar())
 
         body = QHBoxLayout()
-        body.setSpacing(12)
+        body.setSpacing(ROOT_SPACING)
+        self.body_layout = body
         self.canvas_stack_widget = QWidget()
         self.canvas_stack = QStackedLayout(self.canvas_stack_widget)
         self.canvas_stack.setContentsMargins(0, 0, 0, 0)
@@ -532,60 +624,58 @@ class CustomiseLayout(QWidget):
         body.addWidget(self.panel_stack)
         root.addLayout(body, 1)
 
-    def _build_header(self) -> QVBoxLayout:
-        header = QHBoxLayout()
-        header.setSpacing(10)
-        header.addWidget(_heading(S.HEADER_DIAGRAM))
+        # Narrow: the panel is a drawer over the canvas's right edge (it covers
+        # the box canvas and the page preview alike, so it lives on the stack)
+        self.drawer = QWidget(self.canvas_stack_widget)
+        self.drawer.setObjectName("layout_drawer")
+        self.drawer.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.drawer.setStyleSheet(
+            "QWidget#layout_drawer { background: #1F2229; "
+            "border-left: 1px solid #3C4043; }"
+        )
+        drawer_layout = QVBoxLayout(self.drawer)
+        drawer_layout.setContentsMargins(1, 0, 0, 0)
+        self.drawer.hide()
+        self.canvas_stack_widget.installEventFilter(self)
+        self.canvas_stack.currentChanged.connect(lambda _i: self._update_drawer())
+
+    def _build_header(self) -> QWidget:
+        self.layout_heading = _heading(S.NAV_LAYOUT)
+        self.layout_heading.setStyleSheet(
+            self.layout_heading.styleSheet() + " font-size: 16px;"
+        )
         self.diagram_combo = QComboBox()
         self.diagram_combo.setProperty("class", "view-binds-list")
-        self.diagram_combo.setMinimumWidth(320)  # "<controller> · <template>"
+        # "<controller> · <template>": the width doesn't follow the longest entry,
+        # so the header can wrap and shrink on a small window
+        self.diagram_combo.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+        )
+        self.diagram_combo.setMinimumContentsLength(12)
+        self.diagram_combo.setMinimumWidth(DIAGRAM_COMBO_WIDTH)
         self.diagram_combo.setAccessibleName(S.HEADER_DIAGRAM)
         self.diagram_combo.currentIndexChanged.connect(
             lambda _i: self._on_diagram_changed()
         )
-        header.addWidget(self.diagram_combo)
-        header.addSpacing(12)
-        header.addWidget(_heading(S.HEADER_PREVIEW_WITH))
         self.profile_combo = QComboBox()
         self.profile_combo.setProperty("class", "view-binds-list")
-        self.profile_combo.setMinimumWidth(200)
+        self.profile_combo.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+        )
+        self.profile_combo.setMinimumContentsLength(10)
+        self.profile_combo.setMinimumWidth(PROFILE_COMBO_WIDTH)
         self.profile_combo.setAccessibleName(S.HEADER_PREVIEW_WITH)
         self.profile_combo.currentIndexChanged.connect(
             lambda _i: self._on_profile_changed()
         )
-        header.addWidget(self.profile_combo)
-        header.addStretch(1)
-        outer = QVBoxLayout()
-        outer.setSpacing(8)
-        outer.addLayout(header)
-        header = QHBoxLayout()  # second row: Changes apply to · Saved automatically
-        header.setSpacing(10)
-        outer.addLayout(header)
-        self.scope_heading = _heading(S.HEADER_SCOPE)
-        header.addWidget(self.scope_heading)
-        self.scope_group = QButtonGroup(self)
-        self.scope_all = QRadioButton(S.SCOPE_ALL_PROFILES)
-        self.scope_profile = QRadioButton(S.SCOPE_ONLY_PROFILE.format(profile="…"))
-        self.scope_all.setChecked(True)
-        self.scope_group.addButton(self.scope_all, 0)
-        self.scope_group.addButton(self.scope_profile, 1)
-        self.scope_group.idToggled.connect(self._on_scope_toggled)
-        header.addWidget(self.scope_all)
-        header.addWidget(self.scope_profile)
-        header.addStretch(1)
-        self.saved_label = QLabel(S.SAVED_AUTOMATICALLY)
-        self.saved_label.setStyleSheet(MUTED_STYLE)
-        saved_icon = QLabel()
-        saved_icon.setPixmap(
-            qta.icon("fa5s.check-circle", color="#34D399").pixmap(QSize(14, 14))
+        self.header_row = WrapRow(
+            _group(self.layout_heading, _heading(S.HEADER_DIAGRAM), self.diagram_combo),
+            _group(_heading(S.HEADER_PREVIEW_WITH), self.profile_combo, stretch=True),
+            spacing=22,
         )
-        header.addWidget(saved_icon)
-        header.addWidget(self.saved_label)
-        return outer
+        return self.header_row
 
-    def _build_toolbar(self) -> QHBoxLayout:
-        bar = QHBoxLayout()
-        bar.setSpacing(6)
+    def _build_toolbar(self) -> QWidget:
         self.select_button = _tool(
             S.TOOL_SELECT, S.TOOLTIP_SELECT, "fa5s.mouse-pointer"
         )
@@ -594,7 +684,7 @@ class CustomiseLayout(QWidget):
         self.add_box_button.clicked.connect(self.add_modifier_box)
         self.auto_add_button = _tool(S.TOOL_AUTO_ADD, S.TOOLTIP_AUTO_ADD, "fa5s.magic")
         self.auto_add_button.clicked.connect(self.open_auto_add)
-        self.add_note_button = _tool(S.TOOL_ADD_NOTE, "")
+        self.add_note_button = _tool(S.TOOL_ADD_NOTE, S.TOOLTIP_ADD_NOTE)
         self.add_note_button.clicked.connect(self.add_note)
         self.hide_button = _tool(S.TOOL_HIDE, S.TOOLTIP_HIDE, "fa5s.eye-slash")
         self.hide_button.clicked.connect(self.hide_selected)
@@ -630,7 +720,39 @@ class CustomiseLayout(QWidget):
         self.save_as_action.triggered.connect(self.save_as_template)
         self.more_button.setMenu(self.more_menu)
         self.more_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        # Narrow: zoom out / 100% / zoom in / Fit fold into one "100% ▾" menu
+        self.zoom_menu_button = _tool("100% ▾", S.TOOLTIP_ZOOM_MENU)
+        self.zoom_menu_button.setAccessibleName(S.TOOLTIP_ZOOM_MENU)
+        zoom_menu = QMenu(self)
+        for text, mode in (
+            (S.TOOL_ZOOM_IN, "in"),
+            (S.TOOL_ZOOM_OUT, "out"),
+            (S.TOOLTIP_ZOOM_100, "100"),
+            (S.TOOLTIP_ZOOM_FIT, "fit"),
+        ):
+            zoom_menu.addAction(text).triggered.connect(
+                lambda _c=False, m=mode: self._zoom(m)
+            )
+        self.zoom_menu_button.setMenu(zoom_menu)
+        self.zoom_menu_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.zoom_menu_button.hide()
+        # Narrow: the tools show only their icons (tooltips and names say what)
+        self._icon_tools = {
+            self.select_button: None,
+            self.add_box_button: "fa5s.plus-square",
+            self.auto_add_button: None,
+            self.add_note_button: "fa5s.sticky-note",
+            self.hide_button: None,
+            self.undo_button: None,
+            self.redo_button: None,
+            self.fit_button: "fa5s.expand",
+            self.more_button: "fa5s.ellipsis-h",
+        }
 
+        tools = QWidget()
+        bar = QHBoxLayout(tools)
+        bar.setContentsMargins(0, 0, 0, 0)
+        bar.setSpacing(6)
         for widget in (
             self.select_button,
             self.add_box_button,
@@ -647,11 +769,48 @@ class CustomiseLayout(QWidget):
         bar.addWidget(self.zoom_label)
         bar.addWidget(self.zoom_in_button)
         bar.addWidget(self.fit_button)
-        bar.addStretch(1)
+        bar.addWidget(self.zoom_menu_button)
+        bar.addWidget(self._separator())
+        bar.addWidget(self.more_button)
+        self._tools_bar = bar
+
+        # Changes apply to · (status) · Saved automatically
+        self.scope_heading = QLabel(S.HEADER_SCOPE)
+        self.scope_heading.setStyleSheet(LABEL_STYLE)
+        self.scope_combo = QComboBox()
+        self.scope_combo.setProperty("class", "view-binds-list")
+        self.scope_combo.setAccessibleName(S.HEADER_SCOPE.rstrip(":"))
+        self.scope_combo.setToolTip(S.TOOLTIP_SCOPE)
+        self.scope_combo.setMinimumContentsLength(len(S.SCOPE_ALL_PROFILES_SHORT))
+        self.scope_combo.addItem(S.SCOPE_ALL_PROFILES, SCOPE_ALL)
+        self.scope_combo.addItem(
+            S.SCOPE_ONLY_PROFILE.format(profile="…"), SCOPE_PROFILE
+        )
+        self.scope_combo.currentIndexChanged.connect(self._on_scope_changed)
         self.status_label = QLabel("")
         self.status_label.setStyleSheet(MUTED_STYLE)
-        bar.addWidget(self.status_label)
-        bar.addWidget(self.more_button)
+        self.status_label.setSizePolicy(
+            QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred
+        )
+        self.saved_icon = QLabel()
+        self.saved_icon.setPixmap(
+            qta.icon("fa5s.check-circle", color="#34D399").pixmap(QSize(14, 14))
+        )
+        self.saved_label = QLabel(S.SAVED_AUTOMATICALLY)
+        self.saved_label.setStyleSheet(MUTED_STYLE)
+        self.saved_label.setToolTip(S.SAVED_AUTOMATICALLY)
+        scope = QWidget()
+        row = QHBoxLayout(scope)
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(6)
+        row.addWidget(self.scope_heading)
+        row.addWidget(self.scope_combo)
+        row.addSpacing(6)
+        row.addWidget(self.status_label, 1)
+        row.addWidget(self.saved_icon)
+        row.addWidget(self.saved_label)
+        self.toolbar_row = WrapRow(tools, scope, spacing=14)
+
         self.tool_buttons = [
             self.add_box_button,
             self.auto_add_button,
@@ -662,6 +821,7 @@ class CustomiseLayout(QWidget):
             self.zoom_out_button,
             self.zoom_in_button,
             self.fit_button,
+            self.zoom_menu_button,
             self.more_button,
         ]
         # Box tools that don't apply to a page (page mode disables them)
@@ -673,7 +833,7 @@ class CustomiseLayout(QWidget):
             self.hide_button,
         ]
         self._box_tool_tips = {id(b): b.toolTip() for b in self.box_only_tools}
-        return bar
+        return self.toolbar_row
 
     @staticmethod
     def _separator() -> QFrame:
@@ -719,18 +879,19 @@ class CustomiseLayout(QWidget):
         self.spin_y = self._spin(S.PANEL_Y_NAME)
         self.spin_w = self._spin(S.PANEL_W_NAME)
         self.spin_h = self._spin(S.PANEL_H_NAME)
-        for column, (text, spin) in enumerate(
-            (
-                (S.PANEL_X, self.spin_x),
-                (S.PANEL_Y, self.spin_y),
-                (S.PANEL_W, self.spin_w),
-                (S.PANEL_H, self.spin_h),
-            )
+        self._xywh_grid = grid
+        self._xywh_cells: list[tuple[QLabel, QSpinBox]] = []
+        for text, spin in (
+            (S.PANEL_X, self.spin_x),
+            (S.PANEL_Y, self.spin_y),
+            (S.PANEL_W, self.spin_w),
+            (S.PANEL_H, self.spin_h),
         ):
             label = QLabel(text)
             label.setStyleSheet(LABEL_STYLE)
-            grid.addWidget(label, 0, column)
-            grid.addWidget(spin, 1, column)
+            self._xywh_cells.append((label, spin))
+        self._xywh_columns = 0
+        self._set_xywh_columns(4)
         sel.addLayout(grid)
         self.spin_x.editingFinished.connect(self._on_position_edited)
         self.spin_y.editingFinished.connect(self._on_position_edited)
@@ -808,6 +969,149 @@ class CustomiseLayout(QWidget):
         spin.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
         return spin
 
+    # ── Fitting the window: drawer, wrapping rows and compact tools ──
+
+    @property
+    def drawer_mode(self) -> bool:
+        return bool(self._drawer_mode)
+
+    def resizeEvent(self, event):  # noqa: N802
+        super().resizeEvent(event)
+        self._reflow()
+
+    def eventFilter(self, watched, event):  # noqa: N802
+        if watched is self.canvas_stack_widget and event.type() == QEvent.Type.Resize:
+            self._place_drawer()
+        return super().eventFilter(watched, event)
+
+    def _reflow(self) -> None:
+        """Lay the screen out for its width: the panel beside the canvas or as a
+        drawer, the tools with or without words, rows on one line or two."""
+        self._set_drawer_mode(self.width() - 2 * ROOT_MARGIN < DRAWER_THRESHOLD)
+        margins = self._root.contentsMargins()
+        available = self.width() - margins.left() - margins.right()
+        scope_width = self.toolbar_row.second.minimumSizeHint().width()
+        spacing = self.toolbar_row.needed_width() - scope_width
+        spacing -= self.toolbar_row.first.minimumSizeHint().width()
+        compact = self._tools_width(False) + spacing + scope_width > available
+        self._set_compact_tools(compact)
+        self.toolbar_row.set_wrapped(self.toolbar_row.needed_width() > available)
+        self.header_row.set_wrapped(self.header_row.needed_width() > available)
+
+    def _tools_width(self, compact: bool) -> int:
+        """The tools' narrowest width with (or without) their words, measured once."""
+        key = (compact, self.hide_button.text())
+        if key not in self._tool_widths:
+            current = self._compact_tools
+            self._set_compact_tools(compact)
+            self._tool_widths[key] = self.toolbar_row.first.minimumSizeHint().width()
+            self._set_compact_tools(current)
+        return self._tool_widths[key]
+
+    def _set_compact_tools(self, compact: bool) -> None:
+        if compact == self._compact_tools:
+            return
+        self._compact_tools = compact
+        self._tools_bar.setSpacing(4 if compact else 6)
+        for widget in (self.zoom_out_button, self.zoom_label, self.zoom_in_button):
+            widget.setVisible(not compact)
+        self.fit_button.setVisible(not compact)
+        self.zoom_menu_button.setVisible(compact)
+        self.more_button.setText(S.TOOL_MORE if compact else S.TOOL_MORE + " ▾")
+        for button, icon in self._icon_tools.items():
+            if icon is not None:
+                button.setIcon(qta.icon(icon, color="#E8EAED") if compact else QIcon())
+            button.setToolButtonStyle(
+                Qt.ToolButtonStyle.ToolButtonIconOnly
+                if compact
+                else (
+                    Qt.ToolButtonStyle.ToolButtonTextBesideIcon
+                    if icon is None
+                    else Qt.ToolButtonStyle.ToolButtonTextOnly
+                )
+            )
+
+    def _set_drawer_mode(self, on: bool) -> None:
+        if on == self._drawer_mode:
+            return
+        self._drawer_mode = on
+        margin = COMPACT_MARGIN if on else ROOT_MARGIN
+        self._root.setContentsMargins(margin, margin, margin, margin)
+        self._root.setSpacing(COMPACT_SPACING if on else ROOT_SPACING)
+        drawer_layout = self.drawer.layout()
+        if on:
+            self.body_layout.removeWidget(self.panel_stack)
+            drawer_layout.addWidget(self.panel_stack)
+            self._set_panel_width(DRAWER_WIDTH - 1)
+        else:
+            drawer_layout.removeWidget(self.panel_stack)
+            self.body_layout.addWidget(self.panel_stack)
+            self._set_panel_width(PANEL_WIDTH)
+            self.panel_stack.show()
+        self._set_xywh_columns(2 if on else 4)
+        self.diagram_combo.setMinimumWidth(
+            DIAGRAM_COMBO_COMPACT_WIDTH if on else DIAGRAM_COMBO_WIDTH
+        )
+        self.profile_combo.setMinimumWidth(
+            PROFILE_COMBO_COMPACT_WIDTH if on else PROFILE_COMBO_WIDTH
+        )
+        self.scope_combo.setItemText(
+            0, S.SCOPE_ALL_PROFILES_SHORT if on else S.SCOPE_ALL_PROFILES
+        )
+        self.scope_combo.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+            if on
+            else QComboBox.SizeAdjustPolicy.AdjustToContents
+        )
+        self.saved_label.setText(S.SAVED_SHORT if on else S.SAVED_AUTOMATICALLY)
+        self._update_saved_visibility()
+        self._update_scope_visibility()
+        self._update_drawer()
+
+    def _set_panel_width(self, width: int) -> None:
+        self.panel_stack.setFixedWidth(width)
+        for scroll in (self.box_panel, self.page_panel_scroll):
+            scroll.setFixedWidth(width)
+            scroll.widget().setMaximumWidth(width - 4)
+
+    def _set_xywh_columns(self, columns: int) -> None:
+        """X/Y/W/H in one row of four (side panel) or two rows of two (drawer)."""
+        if columns == self._xywh_columns:
+            return
+        self._xywh_columns = columns
+        grid = self._xywh_grid
+        for label, spin in self._xywh_cells:
+            grid.removeWidget(label)
+            grid.removeWidget(spin)
+        for index, (label, spin) in enumerate(self._xywh_cells):
+            row, column = divmod(index, columns)
+            grid.addWidget(label, row * 2, column)
+            grid.addWidget(spin, row * 2 + 1, column)
+
+    def _drawer_wanted(self) -> bool:
+        return self._page_mode or self._slot_info(self._selected) is not None
+
+    def _update_drawer(self) -> None:
+        """The drawer shows while a box is selected (or a page is open)."""
+        if not self._drawer_mode:
+            self.drawer.hide()
+            return
+        if self._drawer_wanted():
+            self._place_drawer()
+            self.drawer.show()
+            self.drawer.raise_()
+        else:
+            self.drawer.hide()
+
+    def _place_drawer(self) -> None:
+        host = self.canvas_stack_widget
+        width = min(DRAWER_WIDTH, host.width())
+        self.drawer.setGeometry(host.width() - width, 0, width, host.height())
+
+    def _update_scope_visibility(self) -> None:
+        self.scope_heading.setVisible(not self._page_mode and not self._drawer_mode)
+        self.scope_combo.setVisible(not self._page_mode)
+
     # ── Lifecycle ──
 
     def refresh(self) -> None:
@@ -839,6 +1143,8 @@ class CustomiseLayout(QWidget):
             self._canvas.shutdown()
             self._canvas.setParent(None)
             self._canvas = None
+        self._canvas_key = None
+        self._zoom_save_timer.stop()
 
     def closeEvent(self, event):  # noqa: N802
         self.shutdown()
@@ -904,6 +1210,7 @@ class CustomiseLayout(QWidget):
             self.diagram_combo.setCurrentIndex(max(index, 0))
         finally:
             self._loading = False
+        _fit_popup(self.diagram_combo)
         has_entries = self.diagram_combo.count() > 0
         if not has_entries:
             self.canvas_stack.setCurrentWidget(self.empty_state)
@@ -938,8 +1245,7 @@ class CustomiseLayout(QWidget):
     def _set_editing_enabled(self, enabled: bool) -> None:
         for widget in self.tool_buttons:
             widget.setEnabled(enabled)
-        for widget in (self.scope_all, self.scope_profile):
-            widget.setEnabled(enabled)
+        self.scope_combo.setEnabled(enabled)
 
     def _on_diagram_changed(self) -> None:
         if self._loading:
@@ -974,18 +1280,34 @@ class CustomiseLayout(QWidget):
             self.profile_combo.setCurrentIndex(max(index, 0))
         finally:
             self._loading = False
+        _fit_popup(self.profile_combo)
+        self._session = self._session_for(entry)
+        self._update_history_buttons()
+        self._on_profile_changed()
+
+    def _session_for(self, entry: DiagramEntry) -> LayoutEditSession:
+        """This diagram's session, kept while the screen lives so switching
+        diagrams and back keeps its undo history. A new one only when the
+        controller's template (or the template file) changed."""
         content_hash = None
         try:
             content_hash = entry.template.content_hash
         except OSError:
             pass
-        self._session = LayoutEditSession(
-            self.service,
-            entry.template_key,
-            content_hash,
-            device_guid=entry.device_id,
-        )
-        self._on_profile_changed()
+        session = self._sessions.get(entry.device_id)
+        if (
+            session is None
+            or session.template_key != entry.template_key
+            or session.content_hash != content_hash
+        ):
+            session = LayoutEditSession(
+                self.service,
+                entry.template_key,
+                content_hash,
+                device_guid=entry.device_id,
+            )
+            self._sessions[entry.device_id] = session
+        return session
 
     def _show_non_diagram(self) -> None:
         """A greyed controller (needs a template) or a page (the Page panel)."""
@@ -1041,8 +1363,8 @@ class CustomiseLayout(QWidget):
             if on:
                 button.setEnabled(False)
         self.more_button.setVisible(not on)
-        for widget in (self.scope_heading, self.scope_all, self.scope_profile):
-            widget.setVisible(not on)
+        self._update_scope_visibility()
+        self._update_drawer()
         for shortcut in self._page_shortcuts:
             shortcut.setEnabled(on)
         if on:
@@ -1057,8 +1379,12 @@ class CustomiseLayout(QWidget):
     def _show_page(self, page: Any) -> None:
         self.canvas_stack.setCurrentWidget(self.page_host)
         if self._page_history is None or self._page_history.page_id != page.page_id:
-            self._page_history = PageHistory(page.page_id)
-            self._page_zoom = None
+            history = self._page_histories.get(page.page_id)
+            if history is None:
+                history = PageHistory(page.page_id)
+                self._page_histories[page.page_id] = history
+            self._page_history = history
+            self._page_zoom = self._page_zooms.get(page.page_id)
             self.page_panel.select_controller(None)
             self.page_panel.set_problem("")
         self._set_page_mode(True)
@@ -1091,6 +1417,7 @@ class CustomiseLayout(QWidget):
             self.profile_combo.setCurrentIndex(max(index, 0))
         finally:
             self._loading = False
+        _fit_popup(self.profile_combo)
 
     def _page_rule_counts(self, page: Any) -> dict:
         from joystick_diagrams.render.compose import page_profile_plan
@@ -1185,6 +1512,7 @@ class CustomiseLayout(QWidget):
             self._load_page_panel(before)
             return None
         self.page_panel.set_problem("")
+        self._mark_edited()
         if record and self._page_history is not None:
             self._page_history.record(before, saved)
         self._page_saved(before, saved)
@@ -1318,6 +1646,7 @@ class CustomiseLayout(QWidget):
         layout.removeWidget(self.page_placeholder)
         self.page_placeholder.hide()
         layout.addWidget(self._page_view, 1)
+        self._update_drawer()
         return self._page_view
 
     def _on_page_view_loaded(self, _ok: bool) -> None:
@@ -1326,11 +1655,16 @@ class CustomiseLayout(QWidget):
         if view is None:
             return
         if self._page_zoom is None:
-            self._page_zoom = view.fit_page()
+            self._set_page_zoom(view.fit_page())
         else:
             view.set_zoom(self._page_zoom)
         if self._page_zoom:
-            self.zoom_label.setText(f"{round(self._page_zoom * 100)}%")
+            self._set_zoom_text(round(self._page_zoom * 100))
+
+    def _set_page_zoom(self, factor: float | None) -> None:
+        self._page_zoom = factor
+        if factor and self._page_history is not None:
+            self._page_zooms[self._page_history.page_id] = factor
 
     def _zoom(self, mode: str) -> None:
         if not self._page_mode:
@@ -1350,8 +1684,8 @@ class CustomiseLayout(QWidget):
             factor = view.fit_page() or current
         factor = max(0.1, min(5.0, factor))
         view.set_zoom(factor)
-        self._page_zoom = factor
-        self.zoom_label.setText(f"{round(factor * 100)}%")
+        self._set_page_zoom(factor)
+        self._set_zoom_text(round(factor * 100))
 
     def show_page(self, page_id: str) -> None:
         """Select a page in the Diagram picker (Pages › Edit in Layout ›)."""
@@ -1384,35 +1718,36 @@ class CustomiseLayout(QWidget):
         if self._session is not None:
             self._session.set_profile(profile_key)
         name = self._export_device.profile_wrapper.profile_name
-        self.scope_profile.setText(S.SCOPE_ONLY_PROFILE.format(profile=name))
         self.undo_profile_action.setText(S.MORE_UNDO_PROFILE.format(profile=name))
         self._loading = True
         try:
+            self.scope_combo.setItemText(1, S.SCOPE_ONLY_PROFILE.format(profile=name))
             scope = (
                 db_settings.get_setting(LAYOUT_EDITOR_LAST_SCOPE_SETTING_KEY)
                 or SCOPE_ALL
             )
-            (
-                self.scope_profile if scope == SCOPE_PROFILE else self.scope_all
-            ).setChecked(True)
+            self.scope_combo.setCurrentIndex(max(self.scope_combo.findData(scope), 0))
         finally:
             self._loading = False
         self._apply_scope()
         self._invalidate()
 
-    def _on_scope_toggled(self, button_id: int, checked: bool) -> None:
-        if not checked or self._loading:
+    def _on_scope_changed(self, _index: int) -> None:
+        """Changes apply to: all profiles on this diagram, or only the previewed one."""
+        if self._loading:
             return
         db_settings.add_update_setting_value(
-            LAYOUT_EDITOR_LAST_SCOPE_SETTING_KEY,
-            SCOPE_PROFILE if button_id == 1 else SCOPE_ALL,
+            LAYOUT_EDITOR_LAST_SCOPE_SETTING_KEY, self.scope_combo.currentData()
         )
         self._apply_scope()
 
     def _apply_scope(self) -> None:
         if self._session is None:
             return
-        if self.scope_profile.isChecked() and self._export_device is not None:
+        if (
+            self.scope_combo.currentData() == SCOPE_PROFILE
+            and self._export_device is not None
+        ):
             self._session.set_scope(self._export_device.profile_wrapper.profile_key)
         else:
             self._session.set_scope(TEMPLATE_LAYER)
@@ -1498,10 +1833,20 @@ class CustomiseLayout(QWidget):
         canvas = self._ensure_canvas()
         if canvas is None:
             return
+        canvas.show_document(render.svg_text, self._document_payload(render))
+
+    def _document_payload(self, render: EditorRender) -> dict:
+        """The canvas state; a diagram shown for the first time fits its width,
+        one shown before gets back the zoom it had."""
         payload = render.as_dict()
         payload["selected"] = self._selected or ""
         payload["profileLabel"] = self.profile_name
-        canvas.show_document(render.svg_text, payload)
+        entry = self.current_diagram()
+        key = entry.device_id if entry is not None else None
+        if key is not None and key != self._canvas_key:
+            payload["zoom"] = self._zooms.get(key, ZOOM_FIT_WIDTH)
+            self._canvas_key = key
+        return payload
 
     def _ensure_canvas(self):
         if self._canvas is not None:
@@ -1517,10 +1862,19 @@ class CustomiseLayout(QWidget):
         layout.removeWidget(self.canvas_placeholder)
         self.canvas_placeholder.hide()
         layout.addWidget(self._canvas)
+        self._update_drawer()  # the drawer stays above the new view
         return self._canvas
 
     def _set_status(self, text: str) -> None:
+        """In drawer mode the row has no room for a message beside "Saved", so
+        the message takes the "Saved" slot while it is showing."""
         self.status_label.setText(text)
+        self._update_saved_visibility()
+
+    def _update_saved_visibility(self) -> None:
+        show = not (self._drawer_mode and self.status_label.text())
+        self.saved_icon.setVisible(show)
+        self.saved_label.setVisible(show)
 
     # ── Selection and panel ──
 
@@ -1542,13 +1896,34 @@ class CustomiseLayout(QWidget):
         self._update_panel()
 
     def _on_zoom_changed(self, percent: int) -> None:
-        if not self._page_mode:
-            self.zoom_label.setText(f"{percent}%")
+        if self._page_mode:
+            return
+        self._set_zoom_text(percent)
+        if self._canvas_key is not None and percent > 0:
+            self._zooms[self._canvas_key] = percent / 100
+            self._zoom_save_timer.start()
+
+    def _set_zoom_text(self, percent: int) -> None:
+        self.zoom_label.setText(f"{percent}%")
+        self.zoom_menu_button.setText(f"{percent}% ▾")
+
+    def _save_zoom(self) -> None:
+        """The last zoom used, kept between launches."""
+        if self._canvas_key in self._zooms:
+            db_settings.add_update_setting_value(
+                LAYOUT_EDITOR_ZOOM_SETTING_KEY,
+                str(round(self._zooms[self._canvas_key], 3)),
+            )
+
+    @property
+    def diagram_zooms(self) -> dict[str, float]:
+        return dict(self._zooms)
 
     def _update_panel(self) -> None:
         info = self._slot_info(self._selected)
         self.panel_empty.setVisible(info is None)
         self.panel_selection.setVisible(info is not None)
+        self._update_drawer()
         if info is None:
             return
         is_note = info.role == "note"
@@ -1617,9 +1992,11 @@ class CustomiseLayout(QWidget):
         self.panel_hide.setEnabled(self._render is not None and self._render.supported)
         self.panel_edit_note.setVisible(is_note)
         self.panel_undo_box.setVisible(not is_added and info.layer is not None)
-        self.hide_button.setText(
+        hide_text = (
             S.TOOL_REMOVE if is_added else (S.TOOL_SHOW if info.hidden else S.TOOL_HIDE)
         )
+        self.hide_button.setText(hide_text)
+        self.hide_button.setAccessibleName(hide_text)
 
     def _update_history_buttons(self) -> None:
         if self._page_mode:
@@ -1671,6 +2048,11 @@ class CustomiseLayout(QWidget):
                     S.NOTICE_OVERFLOW_ACTION if render.supported else None,
                     self.open_auto_add if render.supported else None,
                 )
+            )
+        report = render.report
+        for key, _text in report.text_overflow if report is not None else ():
+            notices.append(
+                Notice(S.NOTICE_TEXT_TOO_LONG.format(name=S.pretty_key(key)))
             )
         skipped = list(render.skipped_ops)
         if any(n.code == "template_updated" for n in render.notices):
@@ -1753,8 +2135,15 @@ class CustomiseLayout(QWidget):
     def _after_edit(self, select: str | None = None) -> None:
         if select is not None:
             self._pending_select = select
+        self._mark_edited()
         self._update_history_buttons()
         self._invalidate()
+
+    def _mark_edited(self) -> None:
+        """The help line has done its job once the first change is made."""
+        if not self._edited:
+            self._edited = True
+            self.help_label.hide()
 
     def _on_gesture(self, gesture: dict) -> None:
         if self._session is None:

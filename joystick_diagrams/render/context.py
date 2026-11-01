@@ -186,6 +186,10 @@ class RenderReport:
     details: tuple[str, ...] = ()
     overflow: Mapping[str, int] = field(default_factory=lambda: MappingProxyType({}))
     skipped_ops: tuple[str, ...] = ()  # uids of layout ops that could not be applied
+    # (slot key, text) of labels too long for their box even at the smallest
+    # size ("Auto" never shortens a binding); modifier lines dropped for room
+    # are counted in ``overflow`` instead.
+    text_overflow: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)

@@ -76,6 +76,51 @@ def test_overflow_skipped_and_unplaced_wording():
     assert any("the extra ones aren't shown" in line for line in check_notices(summary))
 
 
+def test_labels_too_long_even_at_the_smallest_size():
+    def report(*keys):
+        return RenderReport(
+            Engine.DOM,
+            capabilities=frozenset(Capability),
+            text_overflow=tuple((key, "long text") for key in keys),
+        )
+
+    one = ExportSummary(1, [entry("VKB", "F-16", report("button_12"))])
+    assert check_notices(one) == [
+        "1 label is too long for its box even at the smallest size: Button 12."
+    ]
+    # Each box counts once, whatever the profile.
+    three = ExportSummary(
+        2,
+        [
+            entry("VKB", "F-16", report("button_12", "button_4")),
+            entry("VKB", "F-18", report("button_12", "pov_1_u")),
+        ],
+    )
+    assert check_notices(three) == [
+        "3 labels are too long for their boxes even at the smallest size: "
+        "Button 12, Button 4 and Hat 1 Up."
+    ]
+    # Two controllers: each name says which.
+    two = ExportSummary(
+        2,
+        [
+            entry("VKB", "F-16", report("button_12")),
+            entry("Throttle", "F-16", report("button_1")),
+        ],
+    )
+    assert check_notices(two) == [
+        "2 labels are too long for their boxes even at the smallest size: "
+        "Button 12 on VKB and Button 1 on Throttle."
+    ]
+    many = ExportSummary(
+        1, [entry("VKB", "F-16", report(*(f"button_{n}" for n in range(1, 10))))]
+    )
+    (line,) = check_notices(many)
+    assert line.startswith("9 labels are too long") and line.endswith(
+        "Button 4, Button 5 and 4 more."
+    )
+
+
 def test_styled_context_detection():
     assert not styled_context(None)
     assert not styled_context(RenderContext())

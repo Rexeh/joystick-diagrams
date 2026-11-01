@@ -76,7 +76,7 @@ def test_choosing_a_page_shows_the_page_panel_and_disables_box_tools(layout):
         assert button.toolTip() == S.PAGE_TOOL_UNAVAILABLE
     assert screen.zoom_in_button.isEnabled() and screen.fit_button.isEnabled()
     assert not screen.more_button.isVisibleTo(screen)
-    assert not screen.scope_all.isVisibleTo(screen)
+    assert not screen.scope_combo.isVisibleTo(screen)
     # Preview with: only the profiles this page is made for
     texts = [
         screen.profile_combo.itemText(i) for i in range(screen.profile_combo.count())

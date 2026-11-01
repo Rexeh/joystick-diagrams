@@ -70,6 +70,8 @@ class RenderJob:
     notices: list[RenderNotice] = field(default_factory=list)
     details: list[str] = field(default_factory=list)
     overflow: dict[str, int] = field(default_factory=dict)
+    # (slot key, text) of labels too long for their box even at the smallest size
+    text_overflow: list[tuple[str, str]] = field(default_factory=list)
     output: str | None = None
     # Identity of what is rendered, for layout lookups (None when unknown/mocked).
     template_key: str | None = None
@@ -94,6 +96,7 @@ class RenderJob:
             notices=tuple(self.notices),
             details=tuple(self.details),
             overflow=MappingProxyType(dict(self.overflow)),
+            text_overflow=tuple(self.text_overflow),
             skipped_ops=tuple(self.skipped_ops),
         )
 

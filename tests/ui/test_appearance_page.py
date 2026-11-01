@@ -116,7 +116,9 @@ def test_editing_a_builtin_creates_a_copy_and_activates_it(qapp, settings_store)
 
     tab._on_card_clicked("clean")
     assert tab._editor_form_widget.isEnabled()
-    tab.size_spin.setValue(11)
+    tab.size_combo.setCurrentIndex(
+        tab.size_combo.findText(S.FIELD_FONT_SIZE_PX.format(size=11))
+    )
 
     copies = state.theme_service.user_themes()
     assert len(copies) == 1
@@ -133,6 +135,70 @@ def test_editing_a_builtin_creates_a_copy_and_activates_it(qapp, settings_store)
         state.theme_service.get(copy.theme_id).text(ThemeRole.BOUND).colour == "#123456"
     )
     assert len(state.theme_service.user_themes()) == 1  # edits stay on the copy
+
+
+@pytest.mark.uitest
+def test_text_size_combo_switches_between_auto_and_a_number(qapp, settings_store):
+    state = _seed_app_state()
+    tab = StyleTab()
+
+    tab._on_card_clicked("clean")  # Clean ships with Auto
+    assert tab.size_combo.currentIndex() == 0
+    assert tab.size_combo.currentText() == S.FIELD_FONT_SIZE_AUTO
+    assert tab.size_combo.itemText(1) == S.FIELD_FONT_SIZE_TEMPLATE
+    assert tab.size_combo.itemText(2) == "7 px · shrinks modifier lines to fit"
+    assert tab.size_combo.count() == 2 + len(S.FONT_SIZES)
+    assert tab.size_hint.text() == S.FIELD_FONT_SIZE_HINT
+
+    tab.size_combo.setCurrentIndex(
+        tab.size_combo.findText("10 px · shrinks modifier lines to fit")
+    )
+    (copy,) = state.theme_service.user_themes()
+    for role in (ThemeRole.BOUND, ThemeRole.UNBOUND, ThemeRole.MODIFIER):
+        text = state.theme_service.get(copy.theme_id).text(role)
+        assert (text.fit, text.font_size) == ("shrink", 10)
+    assert tab.preview.is_dirty
+
+    tab.size_combo.setCurrentIndex(0)
+    stored = state.theme_service.get(copy.theme_id)
+    assert (
+        stored.text(ThemeRole.BOUND).fit,
+        stored.text(ThemeRole.BOUND).font_size,
+    ) == (
+        "auto",
+        None,
+    )
+
+    tab.size_combo.setCurrentIndex(1)  # the template's own size
+    stored = state.theme_service.get(copy.theme_id)
+    assert (
+        stored.text(ThemeRole.BOUND).fit,
+        stored.text(ThemeRole.BOUND).font_size,
+    ) == (
+        "shrink",
+        None,
+    )
+
+    # A stored size the list doesn't offer is shown as its own entry.
+    edited = stored.model_copy(deep=True)
+    edited.roles[ThemeRole.BOUND].text.font_size = 9.5
+    state.theme_service.save(edited)
+    tab._load_editor()
+    assert tab.size_combo.currentText() == "9.5 px · shrinks modifier lines to fit"
+
+    # Reopening the screen shows what was stored.
+    tab.size_combo.setCurrentIndex(0)
+    reopened = StyleTab()
+    reopened._on_card_clicked(copy.theme_id)
+    assert reopened.size_combo.currentIndex() == 0
+
+
+@pytest.mark.uitest
+def test_print_friendly_shows_the_template_size(qapp, settings_store):
+    _seed_app_state()
+    tab = StyleTab()
+    tab._on_card_clicked("print_friendly")
+    assert tab.size_combo.currentText() == S.FIELD_FONT_SIZE_TEMPLATE
 
 
 @pytest.mark.uitest

@@ -10,6 +10,10 @@ A settings-style nav: **Export**, then under "Make changes" **Appearance**,
   ones that need a template, and pages); layouts are keyed by controller.
 - Pages: ``PagesPage`` + the Combine dialog (``PagesDialog``).
 
+While Layout shows, the 200px nav collapses to a 48px icon rail (same four
+sections, tooltips and accessible names) so the canvas gets the width; the
+other sections keep the full nav. Layout draws its own heading in its header.
+
 Shell contract (``ui/stage_contract.py``): ``refresh()``; ``stage_status()`` →
 ("ok", "33 diagrams ready") / ("none", "Choose templates first") /
 ("busy", "Exporting 12 of 33…") / ("ok", "Exported 33 at 09:52") /
@@ -30,6 +34,7 @@ import qtawesome as qta
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
+    QButtonGroup,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -37,6 +42,7 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QScrollArea,
     QStackedWidget,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -63,6 +69,23 @@ PAYLOAD_TAB = "tab"
 SECTIONS = (SECTION_EXPORT, SECTION_APPEARANCE, SECTION_LAYOUT, SECTION_PAGES)
 # Nav rows: Export, the "Make changes" heading, Appearance, Layout, Pages
 NAV_ROWS = (SECTION_EXPORT, None, SECTION_APPEARANCE, SECTION_LAYOUT, SECTION_PAGES)
+NAV_WIDTH = 200
+RAIL_WIDTH = 48
+NAV_ICONS = {
+    SECTION_EXPORT: ("fa5s.file-export", S.NAV_EXPORT),
+    SECTION_APPEARANCE: ("fa5s.palette", S.NAV_APPEARANCE),
+    SECTION_LAYOUT: ("fa5s.th-large", S.NAV_LAYOUT),
+    SECTION_PAGES: ("fa5s.object-group", S.NAV_PAGES),
+}
+RAIL_BUTTON_STYLE = """
+QToolButton {
+    background: transparent; border: none; border-radius: 6px;
+    min-width: 36px; max-width: 36px; min-height: 36px; max-height: 36px;
+    padding: 0px; margin: 0px;
+}
+QToolButton:hover { background: #2c2f38; }
+QToolButton:checked { background: rgba(76, 139, 245, 0.25); }
+"""
 HEADING_STYLE = (
     "color: #6B7280; font-size: 10px; font-weight: bold; text-transform: uppercase;"
 )
@@ -82,7 +105,6 @@ class DiagramsPage(QWidget):
         root.setSpacing(0)
 
         self.nav_list = QListWidget()
-        self.nav_list.setFixedWidth(200)
         self.nav_list.setProperty("class", "settings-nav")
         self.nav_list.setAccessibleName(S.TITLE)
         for section in NAV_ROWS:
@@ -96,16 +118,16 @@ class DiagramsPage(QWidget):
                 font.setBold(True)
                 item.setFont(font)
             else:
-                icon, label = {
-                    SECTION_EXPORT: ("fa5s.file-export", S.NAV_EXPORT),
-                    SECTION_APPEARANCE: ("fa5s.palette", S.NAV_APPEARANCE),
-                    SECTION_LAYOUT: ("fa5s.th-large", S.NAV_LAYOUT),
-                    SECTION_PAGES: ("fa5s.object-group", S.NAV_PAGES),
-                }[section]
+                icon, label = NAV_ICONS[section]
                 item = QListWidgetItem(qta.icon(icon, color="#9AA0A6"), label)
                 item.setSizeHint(QSize(0, 44))
             self.nav_list.addItem(item)
-        root.addWidget(self.nav_list)
+        self.nav_rail = self._build_rail()
+        self.nav_stack = QStackedWidget()
+        self.nav_stack.addWidget(self.nav_list)
+        self.nav_stack.addWidget(self.nav_rail)
+        self.nav_stack.setFixedWidth(NAV_WIDTH)
+        root.addWidget(self.nav_stack)
 
         content = QWidget()
         content_layout = QVBoxLayout(content)
@@ -147,6 +169,43 @@ class DiagramsPage(QWidget):
 
         self.nav_list.currentRowChanged.connect(self._on_nav_changed)
         self.nav_list.setCurrentRow(0)
+
+    def _build_rail(self) -> QWidget:
+        """The narrow nav shown while Layout is open: one icon per section."""
+        rail = QWidget()
+        rail.setProperty("class", "settings-nav")
+        rail.setAccessibleName(S.TITLE)
+        column = QVBoxLayout(rail)
+        column.setContentsMargins(6, 12, 6, 12)
+        column.setSpacing(8)
+        self.rail_group = QButtonGroup(self)
+        self.rail_group.setExclusive(True)
+        self.rail_buttons: dict[str, QToolButton] = {}
+        for section in SECTIONS:
+            icon, label = NAV_ICONS[section]
+            button = QToolButton()
+            button.setIcon(qta.icon(icon, color="#9AA0A6", color_on="#E8EAED"))
+            button.setIconSize(QSize(18, 18))
+            button.setCheckable(True)
+            button.setToolTip(label)
+            button.setAccessibleName(label)
+            button.setStyleSheet(RAIL_BUTTON_STYLE)
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            button.clicked.connect(lambda _c=False, s=section: self.show_section(s))
+            self.rail_group.addButton(button)
+            self.rail_buttons[section] = button
+            column.addWidget(button, 0, Qt.AlignmentFlag.AlignHCenter)
+        column.addStretch(1)
+        return rail
+
+    @property
+    def rail_shown(self) -> bool:
+        return self.nav_stack.currentWidget() is self.nav_rail
+
+    def _set_rail(self, on: bool) -> None:
+        """Layout gets the width: the nav becomes a 48px rail while it shows."""
+        self.nav_stack.setCurrentWidget(self.nav_rail if on else self.nav_list)
+        self.nav_stack.setFixedWidth(RAIL_WIDTH if on else NAV_WIDTH)
 
     # ── Screens (built on first use: Appearance and Layout start WebEngine views) ──
 
@@ -210,10 +269,12 @@ class DiagramsPage(QWidget):
         self.stack.setCurrentWidget(
             self.export_scroll if widget is self.export_screen else widget
         )
-        titles = {
-            SECTION_APPEARANCE: S.NAV_APPEARANCE,
-            SECTION_LAYOUT: S.NAV_LAYOUT,
-        }
+        self._set_rail(section == SECTION_LAYOUT)
+        button = self.rail_buttons.get(section)
+        if button is not None:
+            button.setChecked(True)
+        # Layout shows its heading in its own header (the canvas gets the height)
+        titles = {SECTION_APPEARANCE: S.NAV_APPEARANCE}
         title = titles.get(section)
         self.section_heading.setVisible(title is not None)
         self.section_heading.setText(title or "")

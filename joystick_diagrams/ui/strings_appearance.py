@@ -20,7 +20,7 @@ STYLE_GALLERY_HELP = (
 ORIGINAL_CARD_TITLE = ORIGINAL_THEME_NAME
 ORIGINAL_CARD_BLURB = "Exactly as the template was drawn."
 BUILTIN_BLURBS = {
-    "clean": "Tidy dark-grey text, softer borders, faded empty boxes.",
+    "clean": "Dark-grey text sized to fit each box, softer borders, faded empty boxes.",
     "print_friendly": "Black on white for printing; empty boxes stay quiet.",
     "high_contrast": "Bold text, heavy borders and shaded empty boxes for kneeboards.",
 }
@@ -52,7 +52,14 @@ FIELD_FONT_TEMPLATE = "Template font"
 FIELD_RADIUS_TEMPLATE = "Template corners"
 FIELD_WIDTH_TEMPLATE = "Template width"
 FIELD_FONT_SIZE = "Text size"
-FIELD_FONT_SIZE_TEMPLATE = "Template size"
+FIELD_FONT_SIZE_AUTO = "Auto — largest size that fits each box"
+FIELD_FONT_SIZE_TEMPLATE = "Template size · shrinks modifier lines to fit"
+FIELD_FONT_SIZE_PX = "{size} px · shrinks modifier lines to fit"
+FIELD_FONT_SIZE_HINT = (
+    "Auto grows text into roomy boxes and shrinks it in small ones, "
+    "without ever shortening a binding."
+)
+FONT_SIZES = (7, 8, 9, 10, 11, 12, 13, 14)
 FIELD_TEXT_COLOUR = "Text colour"
 FIELD_BOX_COLOUR = "Box border"
 FIELD_BOX_RADIUS = "Corner radius"
@@ -84,6 +91,10 @@ PREVIEW_OVERFLOW = (
     "still listed under the main text."
 )
 CONTROLS = ("control", "controls")
+PREVIEW_TOO_LONG = (
+    "{count} {labels} {are} too long for {their} {boxes} even at the smallest size."
+)
+LABELS = ("label", "labels")
 
 # ── Modifier keys tab ──
 COLOUR_BY_KEY_HEADING = "Colour by modifier key"

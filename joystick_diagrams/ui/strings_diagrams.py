@@ -174,6 +174,14 @@ NOTICE_LAYOUT_SKIPPED = (
     "{count} layout {changes} {were} skipped because the template changed."
 )
 NOTICE_BOXES_UNPLACED = "{count} modifier {boxes} had no room and {were} left out."
+NOTICE_TEXT_TOO_LONG = (
+    "{count} {labels} {are} too long for {their} {boxes} even at the smallest "
+    "size: {controls}."
+)
+NOTICE_TEXT_TOO_LONG_ON = "{control} on {controller}"
+NOTICE_NAMES_MORE = "{count} more"
+NOTICE_NAMES_SHOWN = 5
+LABELS = ("label", "labels")
 CONTROLS = ("control", "controls")
 CHANGES = ("change", "changes")
 BOXES = ("box", "boxes")

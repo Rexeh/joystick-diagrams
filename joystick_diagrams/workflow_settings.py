@@ -11,12 +11,17 @@
   sessions as JSON ``{"<row key>": true|false}``; rows without an entry use the
   caller's default (every ready profile ticked).
 - ``last_stage``: the stage index (0–3) the user was on, for the returning launch.
+- ``window_geometry``: the main window's size, position and maximised state,
+  remembered between launches as JSON
+  ``{"x": .., "y": .., "w": .., "h": .., "maximized": true|false}``; missing or
+  invalid is ``None`` and the window keeps its default size.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 
 from joystick_diagrams.db import db_settings
@@ -27,6 +32,7 @@ AUTO_READ_ON_LAUNCH_SETTING_KEY = "auto_read_on_launch"
 EXPORT_FOLDER_SETTING_KEY = "export_path"  # shared with ui/export_settings.py
 EXPORT_TICKS_SETTING_KEY = "export_ticks"
 LAST_STAGE_SETTING_KEY = "last_stage"
+WINDOW_GEOMETRY_SETTING_KEY = "window_geometry"
 
 DEFAULT_AUTO_READ_ON_LAUNCH = True
 STAGE_COUNT = 4
@@ -159,6 +165,60 @@ def get_last_stage() -> int | None:
 def set_last_stage(stage: int) -> None:
     db_settings.add_update_setting_value(
         LAST_STAGE_SETTING_KEY, str(min(max(int(stage), FIRST_STAGE), LAST_STAGE_INDEX))
+    )
+
+
+# ── Main window geometry ──
+
+
+@dataclass(frozen=True)
+class WindowGeometry:
+    """The main window's normal (not maximised) rect and whether it was maximised."""
+
+    x: int
+    y: int
+    width: int
+    height: int
+    maximized: bool = False
+
+
+def _is_int(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def get_window_geometry() -> WindowGeometry | None:
+    """The remembered window geometry, or ``None`` when never saved or invalid."""
+    raw = db_settings.get_setting(WINDOW_GEOMETRY_SETTING_KEY)
+    if not raw or not raw.strip():
+        return None
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        _logger.warning(f"Invalid window geometry in settings: {raw!r}")
+        return None
+    if not isinstance(data, dict):
+        _logger.warning(f"Invalid window geometry in settings: {raw!r}")
+        return None
+    values = [data.get(key) for key in ("x", "y", "w", "h")]
+    if not all(_is_int(value) for value in values) or values[2] <= 0 or values[3] <= 0:
+        _logger.warning(f"Invalid window geometry in settings: {raw!r}")
+        return None
+    x, y, width, height = values
+    return WindowGeometry(x, y, width, height, data.get("maximized") is True)
+
+
+def set_window_geometry(geometry: WindowGeometry) -> None:
+    db_settings.add_update_setting_value(
+        WINDOW_GEOMETRY_SETTING_KEY,
+        json.dumps(
+            {
+                "x": int(geometry.x),
+                "y": int(geometry.y),
+                "w": int(geometry.width),
+                "h": int(geometry.height),
+                "maximized": bool(geometry.maximized),
+            }
+        ),
     )
 
 

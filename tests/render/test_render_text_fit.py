@@ -192,7 +192,7 @@ def test_fit_truncates_modifier_lines_and_adds_more_line():
 
 def test_fit_never_drops_the_protected_main_line_and_reports_overflow():
     result = fit_rich(
-        rich("Weapon release", "a", "b"), FitBox(78, 6), FontSpec("Helvetica", 8)
+        rich("Weapon release", "a", "b"), FitBox(78, 4), FontSpec("Helvetica", 8)
     )
     assert not result.fits and result.truncated == 2
     assert "".join(r.text for r in result.lines[0]) == "Weapon release"
@@ -203,6 +203,15 @@ def test_fit_never_drops_the_protected_main_line_and_reports_overflow():
         and single.truncated == 0
         and single.lines == rich("One line only").lines
     )
+
+
+def test_fit_keeps_the_main_text_alone_when_even_more_line_has_no_room():
+    # 6.5px compact main line fits a 6px box (+1px tolerance); "+2 more" doesn't.
+    result = fit_rich(
+        rich("Weapon release", "a", "b"), FitBox(78, 6), FontSpec("Helvetica", 8)
+    )
+    assert result.fits and result.truncated == 2
+    assert ["".join(r.text for r in ln) for ln in result.lines] == ["Weapon release"]
 
 
 def test_fit_respects_min_size_and_unconstrained_boxes():

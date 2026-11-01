@@ -101,6 +101,8 @@ def group_display_name(info) -> str:
 
 
 TEXT_ROLES = (ThemeRole.BOUND, ThemeRole.UNBOUND, ThemeRole.MODIFIER)
+FIT_AUTO = "auto"
+FIT_SHRINK = "shrink"
 ALL_ROLES = tuple(ThemeRole)
 UNBOUND_FADED = {"text": "#9CA3AF", "stroke": "#D1D5DB"}
 UNBOUND_FILL = "#F3F4F6"
@@ -381,14 +383,18 @@ class StyleTab(QWidget):
         self.font_combo.currentIndexChanged.connect(lambda _i: self._on_font_changed())
         form.addRow(S.FIELD_FONT, self.font_combo)
 
-        self.size_spin = QSpinBox()
-        self.size_spin.setRange(0, 48)
-        self.size_spin.setSpecialValueText(S.FIELD_FONT_SIZE_TEMPLATE)
-        self.size_spin.setSuffix(" px")
-        self.size_spin.valueChanged.connect(
-            lambda v: self._edit(lambda t: self._set_size(t, v))
-        )
-        form.addRow(S.FIELD_FONT_SIZE, self.size_spin)
+        self.size_combo = QComboBox()
+        self.size_combo.setProperty("class", "view-binds-list")
+        self.size_combo.addItem(S.FIELD_FONT_SIZE_AUTO, (FIT_AUTO, None))
+        self.size_combo.addItem(S.FIELD_FONT_SIZE_TEMPLATE, (FIT_SHRINK, None))
+        for size in S.FONT_SIZES:
+            self.size_combo.addItem(
+                S.FIELD_FONT_SIZE_PX.format(size=size), (FIT_SHRINK, float(size))
+            )
+        self.size_combo.currentIndexChanged.connect(lambda _i: self._on_size_changed())
+        form.addRow(S.FIELD_FONT_SIZE, self.size_combo)
+        self.size_hint = _help(S.FIELD_FONT_SIZE_HINT)
+        form.addRow("", self.size_hint)
 
         self.text_colour = ColourButton(allow_none=True)
         self.text_colour.colour_changed.connect(
@@ -589,7 +595,7 @@ class StyleTab(QWidget):
             self.font_combo.addItem(family, family)
             index = self.font_combo.count() - 1
         self.font_combo.setCurrentIndex(max(index, 0))
-        self.size_spin.setValue(int(bound.text.font_size or 0))
+        self.size_combo.setCurrentIndex(self._size_index(bound.text))
         self.text_colour.set_colour(bound.text.colour)
         self.box_colour.set_colour(bound.box.stroke)
         radius = bound.box.corner_radius
@@ -675,6 +681,16 @@ class StyleTab(QWidget):
                 count=count, controls=S.CONTROLS[0] if count == 1 else S.CONTROLS[1]
             )
             text = f"{text} {overflow}".strip()
+        if report.text_overflow:
+            count = len(report.text_overflow)
+            too_long = S.PREVIEW_TOO_LONG.format(
+                count=count,
+                labels=S.LABELS[0] if count == 1 else S.LABELS[1],
+                are="is" if count == 1 else "are",
+                their="its" if count == 1 else "their",
+                boxes="box" if count == 1 else "boxes",
+            )
+            text = f"{text} {too_long}".strip()
         self.status_label.setText(text)
 
     # ── Handlers ──
@@ -730,6 +746,25 @@ class StyleTab(QWidget):
         self.mark_preview_dirty()
         self.settings_changed.emit()
 
+    def _size_index(self, text: TextStyle) -> int:
+        """The Text size entry for a style's text (a stored size not offered is added)."""
+        if text.fit == FIT_AUTO:
+            return 0
+        if text.font_size is None:
+            return 1
+        for index in range(2, self.size_combo.count()):
+            if self.size_combo.itemData(index)[1] == text.font_size:
+                return index
+        self.size_combo.addItem(
+            S.FIELD_FONT_SIZE_PX.format(size=f"{text.font_size:g}"),
+            (FIT_SHRINK, text.font_size),
+        )
+        return self.size_combo.count() - 1
+
+    def _on_size_changed(self) -> None:
+        fit, size = self.size_combo.currentData() or (FIT_SHRINK, None)
+        self._edit(lambda t: self._set_size(t, size, fit))
+
     def _on_font_changed(self) -> None:
         family = self.font_combo.currentData()
         self._edit(lambda t: self._set_font(t, family))
@@ -765,9 +800,13 @@ class StyleTab(QWidget):
             cls._role(theme, role).text.font_family = family
 
     @classmethod
-    def _set_size(cls, theme: Theme, size: int) -> None:
+    def _set_size(cls, theme: Theme, size: float | None, fit: str = FIT_SHRINK) -> None:
+        """Auto: ``fit="auto"`` and no fixed size; a number (or the template's
+        size): that size, and only modifier lines shrink (``fit="shrink"``)."""
         for role in TEXT_ROLES:
-            cls._role(theme, role).text.font_size = size or None
+            text = cls._role(theme, role).text
+            text.font_size = (size or None) if fit != FIT_AUTO else None
+            text.fit = fit
 
     @classmethod
     def _set_text_colour(cls, theme: Theme, colour: str | None) -> None:
@@ -793,6 +832,9 @@ class StyleTab(QWidget):
             colour=UNBOUND_FADED["text"],
             font_family=role.text.font_family,
             font_size=role.text.font_size,
+            fit=role.text.fit,
+            min_font_size=role.text.min_font_size,
+            max_font_size=role.text.max_font_size,
         )
         role.box = BoxStyle(
             stroke=UNBOUND_FADED["stroke"],

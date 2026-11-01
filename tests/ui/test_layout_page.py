@@ -86,8 +86,12 @@ def test_header_lists_diagram_profiles_and_scope(qapp, page, settings_store):
         "DCS World / F-16C",
         "DCS World / Mirage",
     ]
-    assert page.scope_profile.text() == "Only F-16C"
-    assert page.scope_all.isChecked() and page.scope_layer == TEMPLATE_LAYER
+    assert [page.scope_combo.itemText(i) for i in range(2)] == [
+        "All profiles on this diagram",
+        "Only F-16C",
+    ]
+    assert page.scope_combo.currentIndex() == 0
+    assert page.scope_layer == TEMPLATE_LAYER
     assert page._render is not None and page._render.supported
     assert not page.banner.isVisibleTo(page)
     assert page.panel_empty.isVisibleTo(page)
@@ -134,7 +138,7 @@ def test_gesture_from_the_canvas_persists_a_move_and_undo_redo(qapp, page):
 
 @pytest.mark.uitest
 def test_scope_switch_writes_to_the_profile_layer(qapp, page, settings_store):
-    page.scope_profile.setChecked(True)
+    page.scope_combo.setCurrentIndex(1)
     assert page.scope_layer == "dcs world_f-16c"
     assert settings_store["layout_editor_last_scope"] == "profile"
     page.bridge.applyGesture(
@@ -150,7 +154,7 @@ def test_scope_switch_writes_to_the_profile_layer(qapp, page, settings_store):
 
     # Switching the previewed profile hides that change (other layer) and keeps scope
     page.profile_combo.setCurrentIndex(1)
-    assert page.scope_profile.text() == "Only Mirage"
+    assert page.scope_combo.currentText() == "Only Mirage"
     assert page.scope_layer == "dcs world_mirage"
     render = page.render_synchronously()
     slot = next(s for s in render.slots if s.target == "button_3#1")
@@ -224,6 +228,20 @@ def test_notices_report_overflow_and_template_updates(qapp, page):
         "This template was updated on" in t and "1 of your changes no longer fit" in t
         for t in texts
     )
+
+
+@pytest.mark.uitest
+def test_notices_list_labels_too_long_for_their_box(qapp, page):
+    import dataclasses
+
+    render = page.render_synchronously()
+    report = dataclasses.replace(
+        render.report,
+        text_overflow=(("button_12", "Communications Command Switch - Down"),),
+    )
+    page._render = dataclasses.replace(render, report=report)
+    texts = [n.text for n in page.build_notices()]
+    assert "Button 12: too long for its box even at the smallest size." in texts
 
 
 @pytest.mark.uitest

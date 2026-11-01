@@ -63,10 +63,18 @@ class TextStyle(_Sparse):
     font_weight: Literal["normal", "bold"] | None = None
     font_style: Literal["normal", "italic"] | None = None
     colour: Colour | None = None
-    # Shrink-to-fit of multi-line labels (render/text_fit.py, spike S5).
-    # ``None`` means "shrink" down to ``min_font_size`` (default 6.5px).
-    fit: Literal["none", "shrink"] | None = None
+    # Text fit (render/text_fit.py, render/slot_fit.py):
+    # - "shrink" (also ``None``): labels that get modifier lines shrink down to
+    #   ``min_font_size`` (default 6.5px) to fit their box; plain labels keep
+    #   the template's layout;
+    # - "auto": every label takes the largest size at which it fits its box,
+    #   from ``min_font_size`` up to the role's ``font_size`` when set, else
+    #   up to twice the template's size capped at ``max_font_size`` (default
+    #   18px) and never below the template's own size;
+    # - "none": nothing is fitted.
+    fit: Literal["none", "shrink", "auto"] | None = None
     min_font_size: float | None = None  # px
+    max_font_size: float | None = None  # px, the "auto" growth cap
 
 
 class BoxStyle(_Sparse):
@@ -251,15 +259,15 @@ CLEAN_THEME = Theme(
     name="Clean",
     roles={
         ThemeRole.BOUND: _role(
-            {"colour": "#111827"},
+            {"colour": "#111827", "fit": "auto"},
             {"stroke": "#374151", "stroke_width": 1.5, "corner_radius": 4},
         ),
         ThemeRole.UNBOUND: _role(
-            {"colour": "#9CA3AF"},
+            {"colour": "#9CA3AF", "fit": "auto"},
             {"stroke": "#D1D5DB", "stroke_width": 1, "corner_radius": 4},
         ),
         ThemeRole.MODIFIER: _role(
-            {"colour": "#374151"},
+            {"colour": "#374151", "fit": "auto"},
             {"stroke": "#6B7280", "stroke_width": 1.5, "corner_radius": 4},
         ),
         ThemeRole.TITLE: _role({"colour": "#111827", "font_weight": "bold"}),

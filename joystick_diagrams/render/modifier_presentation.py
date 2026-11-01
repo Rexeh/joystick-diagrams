@@ -17,8 +17,8 @@ Modifier boxes (``*_MODIFIER_N``, ``_KEY``, ``_ACTION``) also take the stroke
 colour of their binding's highest-priority key when "Colour by modifier key" is
 on. Key text is always printed, so colour never carries meaning alone.
 
-Text fit (spike S5, ``render/text_fit.py``)
--------------------------------------------
+Text fit (spike S5, ``render/text_fit.py``, ``render/slot_fit.py``)
+-----------------------------------------------------------------
 Before a rich label is written it is fitted to its box: the font the template
 or theme decided (read back from the innermost div, after the theme writer ran)
 is shrunk down to the role's ``min_font_size`` until the wrapped block fits the
@@ -26,26 +26,44 @@ box, and when even that is not enough the trailing modifier lines are replaced
 by ``+N more``. The chosen size is written to all three surfaces (the host
 div's ``font-size``, the ``<text>`` attribute, the cell's ``fontSize``) so the
 SVG, Inkscape and draw.io agree; dropped lines are reported through
-``RenderReport.overflow`` and ``details``. Only slots that receive rich text
-are fitted, so plain labels keep the template's own layout.
+``RenderReport.overflow`` and ``details``.
+
+Under "Auto" (``TextStyle.fit == "auto"``) the same fit also runs for every
+other label (``write_plain_fit``): plain bindings, merged text and
+multi-token labels take the largest size that fits their box, up to the
+role's ceiling (``slot_fit.auto_ceiling``). Their foreignObject markup is kept
+and only takes the size; the ``<text>`` fallback gets the wrapped lines; the
+cell gets ``fontSize``. A label too long even at the minimum is written at the
+minimum, never shortened, and listed in ``RenderReport.text_overflow``.
+Original (unchanged) never gets here (the legacy engine renders) and the
+other fit modes leave plain labels as the template drew them.
 """
 
 from __future__ import annotations
 
 import html
+import re
 from typing import TYPE_CHECKING, Any
 
 from lxml import etree
 
-from joystick_diagrams.render.adapters._common import (
-    SVG,
-    XHTML,
-    localname,
-    offset_rect,
-    rect_of,
-)
+from joystick_diagrams.render.adapters._common import SVG, XHTML
 from joystick_diagrams.render.binding import Line, RichText, Run
 from joystick_diagrams.render.drawio_model import MxCell
+from joystick_diagrams.render.slot_fit import (
+    apply_fit_to_div,
+    content_host,
+    css_px,
+    fit_for_slot,
+    foreign_box_width,
+    foreign_font,
+    is_auto,
+    label_centre,
+    painted_frames,
+    slot_fit_box,
+    slot_plain_text,
+    visible_frame,
+)
 from joystick_diagrams.render.slots import (
     Capability,
     Rect,
@@ -56,21 +74,11 @@ from joystick_diagrams.render.slots import (
 )
 from joystick_diagrams.render.style_writer import (
     format_declarations,
-    parse_declarations,
     style_cell_box,
     style_shape,
-    theme_role_for,
 )
-from joystick_diagrams.render.text_fit import (
-    DEFAULT_FONT_SIZE,
-    DEFAULT_MIN_FONT_SIZE,
-    FitBox,
-    FitResult,
-    FontSpec,
-    fit_rich,
-    line_em,
-)
-from joystick_diagrams.render.theme import BoxStyle, TextStyle
+from joystick_diagrams.render.text_fit import FitResult, line_em
+from joystick_diagrams.render.theme import BoxStyle
 
 if TYPE_CHECKING:
     from joystick_diagrams.render.pipeline import RenderJob
@@ -78,59 +86,19 @@ if TYPE_CHECKING:
 BOX_SLOT_ROLES = frozenset(
     {SlotRole.MODIFIER, SlotRole.MODIFIER_KEY, SlotRole.MODIFIER_ACTION}
 )
-_WRAPPER_TAGS = frozenset({"font", "span", "b", "i", "strong", "em", "div"})
 LINE_HEIGHT_EM = 1.2
-LABEL_SPACING_PX = 2.0  # draw.io's default label spacing inside a box
-_HTML_FONT_SIZES = {
-    "1": 10.0,
-    "2": 13.0,
-    "3": 16.0,
-    "4": 18.0,
-    "5": 24.0,
-    "6": 32.0,
-    "7": 48.0,
-}
-_BOLD_WEIGHTS = frozenset({"bold", "bolder", "600", "700", "800", "900"})
-_BOLD_TAGS = frozenset({"b", "strong"})
-_FRAME_TAGS = frozenset({"rect", "ellipse", "circle", "path", "polygon"})
-FRAME_AREA_RATIO = 4.0  # a frame may be at most this many times the label's area
+_LABEL_FONT_SIZE_RE = re.compile(r"font-size:\s*[^;\"']*;?\s*", re.IGNORECASE)
+_LABEL_FONT_ATTR_RE = re.compile(
+    r"(<font\b[^>]*?)\s+size=(\"[^\"]*\"|'[^']*'|\S+)", re.IGNORECASE
+)
+_EMPTY_STYLE_RE = re.compile(r"\s+style=(\"\s*\"|'\s*')")
 
 
-def css_px(value: str | None) -> float | None:
-    """``"8px"`` / ``"6pt"`` / ``"9"`` → px; ``None`` for anything else."""
-    if value is None:
-        return None
-    text = value.strip().lower()
-    try:
-        if text.endswith("px"):
-            return float(text[:-2])
-        if text.endswith("pt"):
-            return float(text[:-2]) * 4 / 3
-        return float(text)
-    except ValueError:
-        return None
-
-
-def _font_size_px(value: float | None) -> str:
+def _font_size_px(value: float) -> str:
     return f"{value:g}px"
 
 
 # ── foreignObject ──
-
-
-def content_host(div: Any) -> Any:
-    """The deepest element that alone wraps the text (keeps ``<font size>`` wrappers)."""
-    host = div
-    while True:
-        children = [child for child in host if isinstance(child.tag, str)]
-        if (
-            len(children) != 1
-            or (host.text or "").strip()
-            or (children[0].tail or "").strip()
-            or localname(children[0]) not in _WRAPPER_TAGS
-        ):
-            return host
-        host = children[0]
 
 
 def _clear(element: Any) -> None:
@@ -200,227 +168,6 @@ def write_foreign_object(
         apply_fit_to_div(div, fit)
 
 
-def _strip_font_size(element: Any) -> None:
-    declarations = parse_declarations(element.get("style"))
-    if "font-size" in declarations:
-        del declarations["font-size"]
-        if declarations:
-            element.set("style", format_declarations(declarations))
-        else:
-            del element.attrib["style"]
-    if localname(element) == "font" and element.get("size") is not None:
-        del element.attrib["size"]
-
-
-def apply_fit_to_div(div: Any, fit: FitResult) -> None:
-    """Put the fitted size (and leading) on the block so the CSS strut follows.
-
-    Wrappers between the block and the text (``<font style="font-size: 9px">``)
-    lose their own size: the block's line boxes are ``line-height × block
-    size`` tall whatever the inline size, so the size must live on the block.
-    """
-    declarations = parse_declarations(div.get("style"))
-    block_size = css_px(declarations.get("font-size"))
-    if fit.shrunk or block_size != fit.font_size:
-        declarations["font-size"] = _font_size_px(fit.font_size)
-        for element in _lineage(div):
-            if element is not div:
-                _strip_font_size(element)
-    if fit.compact:
-        declarations["line-height"] = f"{fit.line_height:g}"
-    div.set("style", format_declarations(declarations))
-
-
-# ── Fonts and boxes read back from the document ──
-
-
-def _lineage(div: Any) -> list[Any]:
-    """``content_host(div)`` up to and including ``div``."""
-    host = content_host(div)
-    chain = [host]
-    while host is not div and host.getparent() is not None:
-        host = host.getparent()
-        chain.append(host)
-    return chain
-
-
-def foreign_font(div: Any) -> FontSpec:
-    """The font the label's text is set in: nearest declaration wins, bold anywhere."""
-    size: float | None = None
-    family: str | None = None
-    bold = False
-    for element in _lineage(div):
-        declarations = parse_declarations(element.get("style"))
-        is_font = localname(element) == "font"
-        if size is None:
-            size = css_px(declarations.get("font-size"))
-            if size is None and is_font:
-                size = _HTML_FONT_SIZES.get((element.get("size") or "").strip())
-        if family is None:
-            family = declarations.get("font-family") or (
-                element.get("face") if is_font else None
-            )
-        if declarations.get("font-weight", "").lower() in _BOLD_WEIGHTS or (
-            localname(element) in _BOLD_TAGS
-        ):
-            bold = True
-    return FontSpec(family or "Helvetica", size or DEFAULT_FONT_SIZE, bold)
-
-
-def text_element_font(text_element: Any) -> FontSpec:
-    size = css_px(text_element.get("font-size"))
-    weight = (text_element.get("font-weight") or "").lower()
-    return FontSpec(
-        text_element.get("font-family") or "Helvetica",
-        size or DEFAULT_FONT_SIZE,
-        weight in _BOLD_WEIGHTS,
-    )
-
-
-def _flex_declarations(div: Any) -> dict[str, str] | None:
-    """The style of draw.io's outer flex div (``width``/``margin-left``/``padding-top``)."""
-    for ancestor in div.iterancestors():
-        declarations = parse_declarations(ancestor.get("style"))
-        if "width" in declarations:
-            return declarations
-        if localname(ancestor) == "foreignObject":
-            break
-    return None
-
-
-def foreign_box_width(div: Any) -> float | None:
-    """The wrapping width draw.io gave the label (the flex div's ``width``)."""
-    declarations = _flex_declarations(div)
-    width = css_px(declarations.get("width")) if declarations else None
-    return width or None
-
-
-def label_centre(div: Any) -> tuple[float, float] | None:
-    """Where draw.io centred the label, in rendered coordinates."""
-    declarations = _flex_declarations(div)
-    if not declarations:
-        return None
-    left = css_px(declarations.get("margin-left"))
-    width = css_px(declarations.get("width"))
-    top = css_px(declarations.get("padding-top"))
-    if left is None or width is None or top is None:
-        return None
-    return left + width / 2, top
-
-
-def _paints(element: Any, attribute: str) -> bool:
-    value = element.get(attribute)
-    return value is not None and value.strip().lower() != "none"
-
-
-def painted_frames(root: Any) -> list[Rect]:
-    """Bounding boxes of every shape that draws something (rendered coordinates)."""
-    frames: list[Rect] = []
-    for element in root.iter():
-        if localname(element) not in _FRAME_TAGS:
-            continue
-        if not (_paints(element, "stroke") or _paints(element, "fill")):
-            continue
-        rect = rect_of(element)
-        if rect is not None and rect.width > 0 and rect.height > 0:
-            frames.append(rect)
-    return frames
-
-
-def visible_frame(rect: Rect, frames: list[Rect]) -> Rect | None:
-    """The smallest painted shape around a label (centre inside, area capped).
-
-    Some templates put an invisible text cell over a separately drawn frame;
-    the frame is what the reader sees, so it bounds the text. (A frame that is
-    part of a background image is invisible to this lookup.)
-    """
-    cx, cy = rect.x + rect.width / 2, rect.y + rect.height / 2
-    best: Rect | None = None
-    for frame in frames:
-        inside = (
-            frame.x <= cx <= frame.x + frame.width
-            and frame.y <= cy <= frame.y + frame.height
-        )
-        if not inside or frame.area > FRAME_AREA_RATIO * rect.area:
-            continue
-        if best is None or frame.area < best.area:
-            best = frame
-    return best
-
-
-def _own_shape_paints(slot: Slot) -> bool:
-    shape = slot.shape.element if slot.shape is not None else None
-    if shape is None:
-        return False
-    return any(
-        _paints(el, "stroke") or _paints(el, "fill")
-        for el in shape.iter()
-        if localname(el) in _FRAME_TAGS or localname(el) == "image"
-    )
-
-
-def _rendered_rect(slot: Slot, offset, div: Any | None) -> Rect | None:
-    """The label's box in rendered coordinates: its shape, else its cell geometry
-    placed where the foreignObject centres the label, else geometry + offset."""
-    if slot.bbox is not None:
-        return slot.bbox
-    geometry = slot.cell.geometry if slot.cell is not None else None
-    if geometry is None:
-        return None
-    centre = label_centre(div) if div is not None else None
-    if centre is not None:
-        return Rect(
-            centre[0] - geometry.width / 2,
-            centre[1] - geometry.height / 2,
-            geometry.width,
-            geometry.height,
-        )
-    return offset_rect(geometry, offset)
-
-
-def _slot_rect(
-    slot: Slot, frames: list[Rect] = (), offset=None, div: Any | None = None
-) -> Rect | None:
-    """The label's box: its cell geometry, clamped to a visible frame around it."""
-    rect = None
-    if slot.cell is not None and slot.cell.geometry is not None:
-        rect = slot.cell.geometry
-    elif slot.bbox is not None:
-        rect = slot.bbox
-    elif slot.shape is not None:
-        rect = slot.shape.bbox
-    if rect is None or not frames or _own_shape_paints(slot):
-        return rect
-    rendered = _rendered_rect(slot, offset, div)
-    frame = visible_frame(rendered, frames) if rendered is not None else None
-    if frame is None:
-        return rect
-    return Rect(
-        rect.x, rect.y, min(rect.width, frame.width), min(rect.height, frame.height)
-    )
-
-
-def slot_fit_box(
-    slot: Slot, div: Any | None, frames: list[Rect] = (), offset=None
-) -> FitBox:
-    """Width from the foreignObject (else the box less spacing), height from the box.
-
-    The text block is centred vertically, so the whole box height is usable;
-    rotated labels keep only the width (their box is in rotated coordinates).
-    ``frames`` (``painted_frames``) lets an invisible text cell take the size of
-    the visible frame drawn around it.
-    """
-    width = foreign_box_width(div) if div is not None else None
-    rect = _slot_rect(slot, frames, offset, div)
-    height = None
-    if rect is not None:
-        inner = max(rect.width - LABEL_SPACING_PX, 0) or None
-        width = inner if width is None or (inner and inner < width) else width
-        if not slot.rotated:
-            height = rect.height or None
-    return FitBox(width, height)
-
-
 # ── <text> fallback ──
 
 
@@ -468,7 +215,7 @@ def write_text_element(
     _clear(text_element)
     lines = fit.wrapped if fit is not None else rich.lines
     line_height = fit.line_height if fit is not None else LINE_HEIGHT_EM
-    if fit is not None and fit.shrunk:
+    if fit is not None and css_px(text_element.get("font-size")) != fit.font_size:
         text_element.set("font-size", _font_size_px(fit.font_size))
     if len(lines) == 1:
         for run in lines[0]:
@@ -532,6 +279,28 @@ def write_cell_label(
     cell.set_label(label)
 
 
+def strip_label_font_sizes(label: str) -> str:
+    """An ``html=1`` label without its own font sizes, so the cell's ``fontSize`` rules."""
+    label = _LABEL_FONT_SIZE_RE.sub("", label)
+    label = _LABEL_FONT_ATTR_RE.sub(r"\1", label)
+    return _EMPTY_STYLE_RE.sub("", label)
+
+
+def fit_cell_label(cell: MxCell, fit: FitResult) -> None:
+    """Write a plain label's fitted size to the model, keeping the template's markup."""
+    style = cell.style_dict
+    if style.get("fontSize") != f"{fit.font_size:g}":
+        style["fontSize"] = f"{fit.font_size:g}"
+        cell.set_style_dict(style)
+    if not cell.is_html:
+        return
+    label = strip_label_font_sizes(cell.label)
+    if fit.compact:
+        label = f'<div style="line-height: {fit.line_height:g}">{label}</div>'
+    if label != cell.label:
+        cell.set_label(label)
+
+
 # ── Hook ──
 
 
@@ -541,53 +310,18 @@ def _overflow_for(job: RenderJob, slot: Slot) -> int:
     return job.overflow.get(slot.input_key.upper(), 0)
 
 
-def _text_style_for(job: RenderJob, slot: Slot) -> TextStyle | None:
-    theme = job.ctx.theme
-    role = theme_role_for(slot, bound=True)
-    return theme.text(role) if theme is not None and role is not None else None
-
-
-def _first_target(slot: Slot, kind: TextTargetKind) -> Any | None:
-    return next((t.element for t in slot.text_targets if t.kind is kind), None)
-
-
-def fit_for_slot(
-    job: RenderJob, slot: Slot, rich: RichText, frames: list[Rect] | None = None
-) -> FitResult | None:
-    """Shrink/truncate ``rich`` for ``slot``; ``None`` when nothing is known to fit to.
-
-    ``frames`` is ``painted_frames(job.doc.root)``, computed once per render by
-    the caller; ``None`` computes it here.
-    """
-    assert job.slots is not None
-    style = _text_style_for(job, slot)
-    if style is not None and style.fit == "none":
-        return None
-    div = _first_target(slot, TextTargetKind.FOREIGN_OBJECT)
-    text_element = _first_target(slot, TextTargetKind.TEXT)
-    if div is not None:
-        font = foreign_font(div)
-    elif text_element is not None:
-        font = text_element_font(text_element)
-    else:
-        return None
-    if frames is None:
-        frames = painted_frames(job.doc.root) if job.doc is not None else []
-    box = slot_fit_box(slot, div, frames, job.slots.offset)
-    if box.width is None and box.height is None:
-        return None
-    min_size = (
-        style.min_font_size
-        if style is not None and style.min_font_size
-        else DEFAULT_MIN_FONT_SIZE
+def record_text_overflow(job: RenderJob, slot: Slot, text: str) -> None:
+    """Note a label that is too long for its box even at the smallest size."""
+    if all(key != slot.key for key, _ in job.text_overflow):
+        job.text_overflow.append((slot.key, text))
+    job.details.append(
+        f"{slot.key.upper()}: text overflows its box at the smallest size"
     )
-    protected = 1 if slot.role is SlotRole.ACTION else 0
-    return fit_rich(rich, box, font, min_size=min_size, protected=protected)
 
 
-def _record_truncation(job: RenderJob, slot: Slot, fit: FitResult) -> None:
-    if not fit.truncated and fit.fits:
-        return
+def _record_truncation(
+    job: RenderJob, slot: Slot, fit: FitResult, rich: RichText
+) -> None:
     if fit.truncated and slot.input_key is not None:
         key = slot.input_key.upper()
         job.overflow[key] = max(job.overflow.get(key, 0), fit.truncated)
@@ -596,25 +330,79 @@ def _record_truncation(job: RenderJob, slot: Slot, fit: FitResult) -> None:
             f"{slot.key.upper()}: {fit.truncated} modifier line(s) hidden "
             f"(box too small at {fit.font_size:g}px)"
         )
-    else:
-        job.details.append(
-            f"{slot.key.upper()}: text overflows its box at {fit.font_size:g}px"
-        )
+    if not fit.fits:
+        record_text_overflow(job, slot, rich.plain(" "))
+
+
+def _writes_text(job: RenderJob) -> bool:
+    assert job.slots is not None
+    capabilities = job.slots.capabilities
+    return Capability.TEXT_STYLE in capabilities or Capability.TEXT in capabilities
+
+
+def full_size_single_line(rich: RichText) -> RichText:
+    """A label with one line shows it at the label's size.
+
+    A modifier-only control's only line is a modifier line (0.85em); written
+    inline, that relative size would be lost when the fitted size moves onto
+    the block, so the label would render larger than it was measured.
+    """
+    if len(rich.lines) != 1 or all(run.size_em is None for run in rich.lines[0]):
+        return rich
+    return RichText((tuple(Run(r.text, r.colour, r.bold) for r in rich.lines[0]),))
 
 
 def _write_rich(job: RenderJob, slot: Slot, rich: RichText, frames: list[Rect]) -> None:
-    assert job.slots is not None
+    rich = full_size_single_line(rich)
     fit = fit_for_slot(job, slot, rich, frames)
     if fit is not None:
-        _record_truncation(job, slot, fit)
+        _record_truncation(job, slot, fit, rich)
         rich = RichText(fit.lines)
-    if Capability.TEXT_STYLE in job.slots.capabilities or Capability.TEXT in (
-        job.slots.capabilities
-    ):
+    if _writes_text(job):
         for target in slot.text_targets:
             write_text_target(target, rich, fit)
     if slot.cell is not None:
         write_cell_label(slot.cell, rich, fit)
+
+
+def _unchanged(fit: FitResult) -> bool:
+    """The template's own size and leading on one line per line: nothing to write."""
+    return (
+        fit.fits
+        and fit.font_size == fit.base_size
+        and not fit.compact
+        and len(fit.wrapped) == len(fit.lines)
+    )
+
+
+def write_plain_fit(job: RenderJob, slot: Slot, frames: list[Rect]) -> FitResult | None:
+    """ "Auto" for a label without modifier lines: size it, keep its text and markup.
+
+    The foreignObject keeps its markup and only takes the size (Chromium wraps
+    it at the same width the fit measured); the ``<text>`` fallback gets the
+    wrapped lines as tspans; the model cell gets ``fontSize``. Plain text is
+    never shortened: a label that is too long even at the minimum is written
+    at the minimum and reported in ``RenderReport.text_overflow``.
+    """
+    rich = slot_plain_text(slot)
+    if rich is None:
+        return None
+    fit = fit_for_slot(job, slot, rich, frames, plain=True)
+    if fit is None:
+        return None
+    if not fit.fits:
+        record_text_overflow(job, slot, rich.plain(" "))
+    if _unchanged(fit):
+        return fit
+    if _writes_text(job):
+        for target in slot.text_targets:
+            if target.kind is TextTargetKind.FOREIGN_OBJECT:
+                apply_fit_to_div(target.element, fit, every_descendant=True)
+            else:
+                write_text_element(target.element, RichText(fit.lines), fit)
+    if slot.cell is not None:
+        fit_cell_label(slot.cell, fit)
+    return fit
 
 
 def _colour_modifier_box(job: RenderJob, slot: Slot) -> None:
@@ -635,19 +423,32 @@ def _colour_modifier_box(job: RenderJob, slot: Slot) -> None:
 
 
 def apply_modifier_presentation(job: RenderJob) -> None:
-    """Style hook: rich modifier text and modifier-box colours for single-token slots."""
+    """Style hook: rich modifier text, text fit and modifier-box colours.
+
+    Single-token slots with modifier lines get rich text (fitted unless the
+    role says ``fit="none"``); under "Auto" every other label is fitted too.
+    """
     if job.slots is None:
         return
     frames: list[Rect] | None = None  # painted shapes, scanned on first use
+    auto = job.ctx.theme is not None
     for slot in job.slots.slots:
-        if len(slot.tokens) != 1:
-            continue  # multi-token labels keep the plain fill
-        rich = job.resolver.rich_for(slot.key, _overflow_for(job, slot))
+        single = len(slot.tokens) == 1
+        rich = (
+            job.resolver.rich_for(slot.key, _overflow_for(job, slot))
+            if single
+            else None
+        )
         if rich is not None and not rich.is_plain:
             if frames is None:
                 frames = painted_frames(job.doc.root) if job.doc is not None else []
             _write_rich(job, slot, rich, frames)
-        _colour_modifier_box(job, slot)
+        elif auto and is_auto(job, slot):
+            if frames is None:
+                frames = painted_frames(job.doc.root) if job.doc is not None else []
+            write_plain_fit(job, slot, frames)
+        if single:
+            _colour_modifier_box(job, slot)
     job.write_model()
 
 
@@ -656,16 +457,20 @@ __all__ = [
     "apply_modifier_presentation",
     "content_host",
     "css_px",
+    "fit_cell_label",
     "fit_for_slot",
     "foreign_box_width",
     "foreign_font",
     "label_centre",
     "painted_frames",
+    "record_text_overflow",
     "rich_html",
     "slot_fit_box",
+    "strip_label_font_sizes",
     "visible_frame",
     "write_cell_label",
     "write_foreign_object",
+    "write_plain_fit",
     "write_text_element",
 ]
 

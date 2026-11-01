@@ -15,7 +15,9 @@ Public entry points
   ``default_hooks()`` installs the theme writer (``style_writer.py``), the
   modifier presentation (``modifier_presentation.py``) and the light
   ``color-scheme`` pin that every DOM render gets.
-- ``Theme``/``ThemeRole``/built-ins: the style model (``theme.py``).
+- ``Theme``/``ThemeRole``/built-ins: the style model (``theme.py``); text
+  fit ("Auto" text size, shrink-to-fit) in ``text_fit.py`` (measurement) and
+  ``slot_fit.py`` (box, font and size per slot).
 - Layout: ``render/layout.py`` (op model), ``layout_apply.py`` (the layout
   stage: move/resize/hide/add boxes/notes, leader-line follow, editor
   annotations), ``auto_layout.py`` (automatic modifier-box placement) and

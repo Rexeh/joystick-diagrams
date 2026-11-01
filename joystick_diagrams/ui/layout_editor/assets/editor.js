@@ -93,7 +93,11 @@
       svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
       overlay.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
       canvas.appendChild(svg);
-      if (fitPending) { fitPending = false; zoomFit(); } else { setZoom(zoom); }
+      // payload.zoom: a factor to restore, or 'fitWidth' for a diagram's first showing
+      const wanted = next.zoom;
+      if (typeof wanted === 'number' && wanted > 0) { fitPending = false; setZoom(wanted); }
+      else if (wanted === 'fitWidth') { fitPending = false; zoomFitWidth(); }
+      else if (fitPending) { fitPending = false; zoomFit(); } else { setZoom(zoom); }
 
       buildItems();
       buildHandles();
@@ -429,10 +433,16 @@
     if (!vb.w || !vb.h || r.width < 60) { setZoom(1); return; }
     setZoom(Math.min((r.width - 48) / vb.w, (r.height - 48) / vb.h));
   }
+  function zoomFitWidth() {
+    const r = viewport.getBoundingClientRect();
+    if (!vb.w || r.width < 60) { setZoom(1); return; }
+    setZoom((r.width - 48) / vb.w);
+  }
   function onZoomRequested(cmd) {
     if (cmd === 'in') zoomStep(1);
     else if (cmd === 'out') zoomStep(-1);
     else if (cmd === 'fit') zoomFit();
+    else if (cmd === 'fitWidth') zoomFitWidth();
     else if (cmd === '100') setZoom(1);
   }
 
@@ -485,7 +495,7 @@
     get payload() { return payload; },
     get zoom() { return zoom; },
     get selected() { return selectedKey; },
-    select, setZoom, zoomFit, zoomStep, nudge, simulateDrag,
+    select, setZoom, zoomFit, zoomFitWidth, zoomStep, nudge, simulateDrag,
     keys: () => [...items.keys()],
     currentBox: (key) => (items.has(key) ? currentBox(items.get(key)) : null),
     handleClasses: (key) => (items.has(key) ? items.get(key).handle.getAttribute('class') : null),
